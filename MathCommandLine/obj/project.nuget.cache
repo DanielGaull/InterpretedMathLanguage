@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "XvFWqkp6WFBH6KsUqDDNp1BYw/UpU8CDUm3PGCfFXL0IML7aUcbereLlpnbXQcvLpoPQ1zReK1GDIUs895bJBg==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\gaulldj\\Documents\\C# Projects\\Revamped Math Command Line\\MathCommandLine\\MathCommandLine\\MathCommandLine.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\gaulldj\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\3.1.25\\microsoft.netcore.app.host.win-x64.3.1.25.nupkg.sha512"
+  ],
+  "logs": []
+}
