@@ -6,7 +6,8 @@ namespace MathCommandLine.Structure
 {
     struct MVariable
     {
-        MDataType type;
-
+        public MDataType Type;
+        public MValue Value;
+        public string Name;
     }
 }
