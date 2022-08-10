@@ -17,10 +17,12 @@ namespace MathCommandLine.Structure
         public long BigIntValue; // For the big_int type
         public MDataType TypeValue; // For the type type (that represents an actual data type)
         public Dictionary<string, MValue> DataValues; // The Data Values for composite types (maps name => value)
+        public MDataType DataType;
 
-        public MValue(double numberValue, MList listValue, MLambda lambdaValue, decimal bigDecimalValue, 
+        public MValue(MDataType dataType, double numberValue, MList listValue, MLambda lambdaValue, decimal bigDecimalValue, 
             long bigIntValue, MDataType typeValue, Dictionary<string, MValue> dataValues)
         {
+            DataType = dataType;
             NumberValue = numberValue;
             ListValue = listValue;
             LambdaValue = lambdaValue;
@@ -32,31 +34,31 @@ namespace MathCommandLine.Structure
 
         public static MValue Number(double numberValue)
         {
-            return new MValue(numberValue, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, null);
+            return new MValue(MDataType.Number, numberValue, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, null);
         }
         public static MValue List(MList list)
         {
-            return new MValue(0, list, MLambda.Empty, 0, 0, MDataType.Empty, null);
+            return new MValue(MDataType.List, 0, list, MLambda.Empty, 0, 0, MDataType.Empty, null);
         }
         public static MValue Lambda(MLambda lambda)
         {
-            return new MValue(0, MList.Empty, lambda, 0, 0, MDataType.Empty, null);
+            return new MValue(MDataType.Lambda, 0, MList.Empty, lambda, 0, 0, MDataType.Empty, null);
         }
         public static MValue BigDecimal(decimal bigDecimal)
         {
-            return new MValue(0, MList.Empty, MLambda.Empty, bigDecimal, 0, MDataType.Empty, null);
+            return new MValue(MDataType.BigDecimal, 0, MList.Empty, MLambda.Empty, bigDecimal, 0, MDataType.Empty, null);
         }
         public static MValue BigInt(long bigInt)
         {
-            return new MValue(0, MList.Empty, MLambda.Empty, 0, bigInt, MDataType.Empty, null);
+            return new MValue(MDataType.BigInt, 0, MList.Empty, MLambda.Empty, 0, bigInt, MDataType.Empty, null);
         }
         public static MValue Type(MDataType type)
         {
-            return new MValue(0, MList.Empty, MLambda.Empty, 0, 0, type, null);
+            return new MValue(MDataType.Type, 0, MList.Empty, MLambda.Empty, 0, 0, type, null);
         }
-        public static MValue Composite(Dictionary<string, MValue> values)
+        public static MValue Composite(MDataType type, Dictionary<string, MValue> values)
         {
-            return new MValue(0, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, values);
+            return new MValue(type, 0, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, values);
         }
 
         // Errors are a core composite type, so they are not primitive but still exist in core code
@@ -68,7 +70,7 @@ namespace MathCommandLine.Structure
                 { "message", List(Utilities.StringToMList(message)) },
                 { "data", List(data) }
             };
-            return Composite(values);
+            return Composite(MDataType.Error, values);
         }
         public static MValue Error(ErrorCodes code)
         {
@@ -78,7 +80,7 @@ namespace MathCommandLine.Structure
                 { "message", List(MList.Empty) },
                 { "data", List(MList.Empty) }
             };
-            return Composite(values);
+            return Composite(MDataType.Error, values);
         }
 
         public MValue GetValueByName(string name)
