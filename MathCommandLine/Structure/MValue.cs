@@ -97,5 +97,59 @@ namespace MathCommandLine.Structure
             }
             return Error(ErrorCodes.NOT_COMPOSITE);
         }
+
+        public override string ToString()
+        {
+            if (DataType == MDataType.Number)
+            {
+                return NumberValue.ToString();
+            }
+            else if (DataType == MDataType.List)
+            {
+                return ListValue.ToString();
+            }
+            else if (DataType == MDataType.Lambda)
+            {
+                return LambdaValue.ToString();
+            }
+            else if (DataType == MDataType.BigDecimal)
+            {
+                return BigDecimalValue.ToString();
+            }
+            else if (DataType == MDataType.BigInt)
+            {
+                return BigIntValue.ToString();
+            }
+            else if (DataType == MDataType.Type)
+            {
+                return TypeValue.ToString();
+            }
+            else if (DataType == MDataType.Error)
+            {
+                StringBuilder builder = new StringBuilder("Error: #");
+                builder.Append(GetValueByName("code"));
+                builder.Append(" \"").Append(Utilities.MListToString(GetValueByName("message").ListValue)).Append("\" Data: ");
+                builder.Append(GetValueByName("data").ListValue.ToString());
+                return builder.ToString();
+            }
+            else
+            {
+                // Some sort of composite type
+                StringBuilder builder = new StringBuilder("( ");
+                bool first = true;
+                foreach (KeyValuePair<string, MValue> kv in DataValues)
+                {
+                    if (!first)
+                    {
+                        builder.Append(", ");
+                        first = false;
+                    }
+                    builder.Append(kv.Key).Append(": ");
+                    builder.Append(kv.Value.ToString());
+                }
+                builder.Append(" )");
+                return builder.ToString();
+            }
+        }
     }
 }

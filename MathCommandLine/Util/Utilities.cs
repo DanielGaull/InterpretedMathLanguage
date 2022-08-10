@@ -11,5 +11,9 @@ namespace MathCommandLine
         {
             return MList.Empty;
         }
+        public static string MListToString(MList list)
+        {
+            return "";
+        }
     }
 }

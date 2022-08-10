@@ -57,5 +57,12 @@ namespace MathCommandLine.Structure
         {
             return dt1.internalId != dt2.internalId;
         }
+
+        public override string ToString()
+        {
+            StringBuilder builder = new StringBuilder("#");
+            builder.Append(Name);
+            return builder.ToString();
+        }
     }
 }

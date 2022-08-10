@@ -1,10 +1,11 @@
-﻿using System;
+﻿using MathCommandLine.Structure.FunctionTypes;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace MathCommandLine.Structure
 {
-    public delegate MValue NativeEvaluator(MValue[] args);
+    public delegate MValue NativeEvaluator(MArgument[] args);
     public class MExpression
     {
         public string Expression { get; private set; }

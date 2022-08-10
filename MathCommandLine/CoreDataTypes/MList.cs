@@ -25,5 +25,20 @@ namespace MathCommandLine.CoreDataTypes
         {
             return FromArray(new MValue[] { value });
         }
+
+        public override string ToString()
+        {
+            StringBuilder builder = new StringBuilder("{ ");
+            for (int i = 0; i < list.Count; i++)
+            {
+                builder.Append(list[i].ToString());
+                if (i + 1 < list.Count)
+                {
+                    builder.Append(", ");
+                }
+            }
+            builder.Append(" }");
+            return builder.ToString();
+        }
     }
 }
