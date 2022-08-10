@@ -8,7 +8,7 @@ namespace MathCommandLine.Structure
 {
     // Class for a math data value
     // Can represent a primitive data type or a composite data type
-    struct MValue
+    public struct MValue
     {
         public double NumberValue; // For the number type, a 64-bit floating-pt number
         public MList ListValue; // For the list type

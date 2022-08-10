@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MathCommandLine.CoreDataTypes
 {
-    struct MLambda
+    public struct MLambda
     {
         public static MLambda Empty = new MLambda();
     }

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace MathCommandLine.Structure
 {
-    struct MDataType
+    public struct MDataType
     {
         // The name of this data type. This is the name that is used in-code to refer to this type
         public string Name;

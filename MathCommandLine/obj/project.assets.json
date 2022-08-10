@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\gaulldj\\Documents\\C# Projects\\Revamped Math Command Line\\MathCommandLine\\MathCommandLine\\MathCommandLine.csproj",
+      "projectUniqueName": "C:\\Users\\gaulldj\\Documents\\MTool\\InterpretedMathLanguage\\MathCommandLine\\MathCommandLine.csproj",
       "projectName": "MathCommandLine",
-      "projectPath": "C:\\Users\\gaulldj\\Documents\\C# Projects\\Revamped Math Command Line\\MathCommandLine\\MathCommandLine\\MathCommandLine.csproj",
+      "projectPath": "C:\\Users\\gaulldj\\Documents\\MTool\\InterpretedMathLanguage\\MathCommandLine\\MathCommandLine.csproj",
       "packagesPath": "C:\\Users\\gaulldj\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\gaulldj\\Documents\\C# Projects\\Revamped Math Command Line\\MathCommandLine\\MathCommandLine\\obj\\",
+      "outputPath": "C:\\Users\\gaulldj\\Documents\\MTool\\InterpretedMathLanguage\\MathCommandLine\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\gaulldj\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -55,18 +55,12 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
-        "downloadDependencies": [
-          {
-            "name": "Microsoft.NETCore.App.Host.win-x64",
-            "version": "[3.1.25, 3.1.25]"
-          }
-        ],
         "frameworkReferences": {
           "Microsoft.NETCore.App": {
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.408\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.404\\RuntimeIdentifierGraph.json"
       }
     }
   }
