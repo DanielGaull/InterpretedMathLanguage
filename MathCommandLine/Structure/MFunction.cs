@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MathCommandLine.Structure
 {
-    class Function
+    public class MFunction
     {
 
     }
