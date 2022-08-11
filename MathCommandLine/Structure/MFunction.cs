@@ -11,34 +11,34 @@ namespace MathCommandLine.Structure
 {
     public class MFunction
     {
-        public List<MParameter> Parameters { get; private set; }
+        public MParameters Parameters { get; private set; }
         public MExpression Expression { get; private set; }
         public MDataType ReturnType { get; private set; } 
         public string Name { get; set; }
 
-        public MFunction(string name, MDataType returnType, string expression, params MParameter[] parameters)
+        public MFunction(string name, MDataType returnType, string expression, MParameters parameters)
         {
-            Parameters = parameters.ToList();
+            Parameters = parameters;
             Expression = new MExpression(expression);
             ReturnType = returnType;
             Name = name;
         }
 
-        public MValue Evaluate(IEvaluator evaluator, MArguments args)
+        public MValue Evaluate(MArguments args, IEvaluator evaluator)
         {
             // Need to check that we've been provided the right number of arguments
-            if (args.Length != Parameters.Count)
+            if (args.Length != Parameters.Length)
             {
-                return MValue.Error(ErrorCodes.WRONG_ARG_COUNT, "Expected " + Parameters.Count + " arguments but received " + args.Length + ".", MList.Empty);
+                return MValue.Error(ErrorCodes.WRONG_ARG_COUNT, "Expected " + Parameters.Length + " arguments but received " + args.Length + ".", MList.Empty);
             }
             // Now check the types of the arguments to ensure they match. If any errors appear in the arguments, return that immediately
             for (int i = 0; i < args.Length; i++)
             {
-                if (args.Get(i).Value.DataType != Parameters[i].DataType)
+                if (args.Get(i).Value.DataType != Parameters.Get(i).DataType)
                 {
                     // Improper data type!
                     return MValue.Error(ErrorCodes.INVALID_TYPE, 
-                        "Expected argument \"" +  Parameters[i].Name + "\" to be of type '" + Parameters[i].DataType + "' but received type '" + args.Get(i).Value.DataType + "'.", 
+                        "Expected argument \"" +  Parameters.Get(i).Name + "\" to be of type '" + Parameters.Get(i).DataType + "' but received type '" + args.Get(i).Value.DataType + "'.", 
                         MList.FromOne(MValue.Number(i)));
                 }
                 else if (args.Get(i).Value.DataType == MDataType.Error)

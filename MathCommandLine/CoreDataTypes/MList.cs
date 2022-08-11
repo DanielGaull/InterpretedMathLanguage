@@ -1,4 +1,5 @@
-﻿using MathCommandLine.Structure;
+﻿using MathCommandLine.Evaluation;
+using MathCommandLine.Structure;
 using MathCommandLine.Structure.FunctionTypes;
 using System;
 using System.Collections.Generic;
@@ -66,12 +67,15 @@ namespace MathCommandLine.CoreDataTypes
         {
             return list.iList.IndexOf(value);
         }
-        public static int IndexOfCustom(MList list, MValue value, MLambda equalityEvaluator)
+        public static int IndexOfCustom(MList list, MValue value, MLambda equalityEvaluator, IEvaluator evaluator)
         {
             for (int i = 0; i < list.iList.Count; i++)
             {
-                MArguments args = new MArguments(new MArgument(value), new MArgument(list.iList[i]));
-                MValue result = equalityEvaluator.Execute(args);
+                MArguments args = new MArguments(
+                    new MArgument(value), 
+                    new MArgument(list.iList[i])
+                );
+                MValue result = equalityEvaluator.Evaluate(args, evaluator);
                 if (result != MValue.Number(0))
                 {
                     // Result is true, so return index
@@ -80,22 +84,23 @@ namespace MathCommandLine.CoreDataTypes
             }
             return -1;
         }
-        public static MList Map(MList list, MLambda lambda)
+        public static MList Map(MList list, MLambda lambda, IEvaluator evaluator)
         {
             List<MValue> newList = new List<MValue>();
             for (int i = 0; i < list.iList.Count; i++)
             {
-                MValue result = lambda.Execute(
+                MValue result = lambda.Evaluate(
                     new MArguments(
                         new MArgument(list.iList[i]), 
                         new MArgument(MValue.Number(i))
-                    )
+                    ),
+                    evaluator
                 );
                 newList.Add(result);
             }
             return new MList(newList);
         }
-        public static MValue Reduce(MList list, MLambda lambda, MValue initial)
+        public static MValue Reduce(MList list, MLambda lambda, MValue initial, IEvaluator evaluator)
         {
             MValue runningResult = initial;
             for (int i = 0; i < list.iList.Count; i++)
@@ -104,7 +109,8 @@ namespace MathCommandLine.CoreDataTypes
                     new MArguments(
                         new MArgument(runningResult),
                         new MArgument(list.iList[i])
-                    )
+                    ),
+                    evaluator
                 );
             }
             return runningResult;

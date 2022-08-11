@@ -23,5 +23,39 @@ namespace MathCommandLine.Structure
             NativeEvaluator = nativeEvaluator;
             IsNativeExpression = true;
         }
+
+        public static bool operator ==(MExpression ex1, MExpression ex2)
+        {
+            if (ex1.IsNativeExpression != ex2.IsNativeExpression)
+            {
+                return false;
+            }
+            if (ex1.IsNativeExpression)
+            {
+                return ex1.Expression == ex2.Expression;
+            }
+            else
+            {
+                // TODO
+                return false;
+            }
+        }
+        public static bool operator !=(MExpression ex1, MExpression ex2)
+        {
+            return !(ex1 == ex2);
+        }
+        public override bool Equals(object obj)
+        {
+            if (obj is MExpression)
+            {
+                MExpression exp = (MExpression)obj;
+                return this == exp;
+            }
+            return false;
+        }
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }
