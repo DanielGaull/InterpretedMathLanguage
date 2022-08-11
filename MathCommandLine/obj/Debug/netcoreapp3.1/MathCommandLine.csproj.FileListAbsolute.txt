@@ -1,0 +1,5 @@
+C:\Users\gaulldj\Documents\MTool\InterpretedMathLanguage\MathCommandLine\obj\Debug\netcoreapp3.1\MathCommandLine.csproj.AssemblyReference.cache
+C:\Users\gaulldj\Documents\MTool\InterpretedMathLanguage\MathCommandLine\obj\Debug\netcoreapp3.1\MathCommandLine.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\gaulldj\Documents\MTool\InterpretedMathLanguage\MathCommandLine\obj\Debug\netcoreapp3.1\MathCommandLine.AssemblyInfoInputs.cache
+C:\Users\gaulldj\Documents\MTool\InterpretedMathLanguage\MathCommandLine\obj\Debug\netcoreapp3.1\MathCommandLine.AssemblyInfo.cs
+C:\Users\gaulldj\Documents\MTool\InterpretedMathLanguage\MathCommandLine\obj\Debug\netcoreapp3.1\MathCommandLine.csproj.CoreCompileInputs.cache

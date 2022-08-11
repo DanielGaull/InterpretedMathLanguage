@@ -5,7 +5,7 @@ using System.Text;
 
 namespace MathCommandLine.Structure
 {
-    public delegate MValue NativeEvaluator(MArgument[] args);
+    public delegate MValue NativeEvaluator(MArguments args);
     public class MExpression
     {
         public string Expression { get; private set; }

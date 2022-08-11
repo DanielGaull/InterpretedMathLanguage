@@ -8,7 +8,7 @@ namespace MathCommandLine.Evaluation
 {
     class NativeEvaluator : IEvaluator
     {
-        public MValue Evaluate(MExpression expression, MArgument[] arguments)
+        public MValue Evaluate(MExpression expression, MArguments arguments)
         {
             if (expression.IsNativeExpression)
             {

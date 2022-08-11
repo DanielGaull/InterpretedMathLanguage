@@ -151,5 +151,29 @@ namespace MathCommandLine.Structure
                 return builder.ToString();
             }
         }
+
+        public static bool operator ==(MValue v1, MValue v2)
+        {
+            // TODO
+            return false;
+        }
+        public static bool operator !=(MValue v1, MValue v2)
+        {
+            // TODO
+            return false;
+        }
+        public override bool Equals(object obj)
+        {
+            if (obj is MValue)
+            {
+                MValue value = (MValue)obj;
+                return value == this;
+            }
+            return false;
+        }
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }

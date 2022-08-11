@@ -14,5 +14,8 @@ namespace MathCommandLine.Structure.FunctionTypes
             Name = name;
             Value = value;
         }
+        public MArgument(MValue value)
+            : this("", value)
+        {}
     }
 }

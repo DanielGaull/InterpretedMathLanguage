@@ -15,7 +15,7 @@ namespace MathCommandLine.Evaluation
             nativeEvaluator = new NativeEvaluator();
             stringEvaluator = new StringEvaluator();
         }
-        public MValue Evaluate(MExpression expression, MArgument[] arguments)
+        public MValue Evaluate(MExpression expression, MArguments arguments)
         {
             if (expression.IsNativeExpression)
             {

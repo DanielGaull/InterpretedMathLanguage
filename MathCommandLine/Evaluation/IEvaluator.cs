@@ -8,6 +8,6 @@ namespace MathCommandLine.Evaluation
 {
     public interface IEvaluator
     {
-        public MValue Evaluate(MExpression expression, MArgument[] arguments);
+        public MValue Evaluate(MExpression expression, MArguments arguments);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using MathCommandLine.Structure;
+using MathCommandLine.Structure.FunctionTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,11 +9,11 @@ namespace MathCommandLine.CoreDataTypes
 {
     public struct MList
     {
-        private List<MValue> list;
+        private List<MValue> iList;
 
         private MList(List<MValue> list)
         {
-            this.list = list;
+            iList = list;
         }
 
         public static MList Empty = new MList();
@@ -29,16 +30,102 @@ namespace MathCommandLine.CoreDataTypes
         public override string ToString()
         {
             StringBuilder builder = new StringBuilder("{ ");
-            for (int i = 0; i < list.Count; i++)
+            for (int i = 0; i < iList.Count; i++)
             {
-                builder.Append(list[i].ToString());
-                if (i + 1 < list.Count)
+                builder.Append(iList[i].ToString());
+                if (i + 1 < iList.Count)
                 {
                     builder.Append(", ");
                 }
             }
             builder.Append(" }");
             return builder.ToString();
+        }
+
+        public static int Length(MList list)
+        {
+            return list.iList.Count;
+        }
+        public static MValue Get(MList list, int index)
+        {
+            return list.iList[index];
+        }
+        public static MList Insert(MList list, int index, MValue value)
+        {
+            List<MValue> newList = new List<MValue>(list.iList);
+            newList.Insert(index, value);
+            return new MList(newList);
+        }
+        public static MList Remove(MList list, int index)
+        {
+            List<MValue> newList = new List<MValue>(list.iList);
+            newList.RemoveAt(index);
+            return new MList(newList);
+        }
+        public static int IndexOf(MList list, MValue value)
+        {
+            return list.iList.IndexOf(value);
+        }
+        public static int IndexOfCustom(MList list, MValue value, MLambda equalityEvaluator)
+        {
+            for (int i = 0; i < list.iList.Count; i++)
+            {
+                MArguments args = new MArguments(new MArgument(value), new MArgument(list.iList[i]));
+                MValue result = equalityEvaluator.Execute(args);
+                if (result != MValue.Number(0))
+                {
+                    // Result is true, so return index
+                    return i;
+                }
+            }
+            return -1;
+        }
+        public static MList Map(MList list, MLambda lambda)
+        {
+            List<MValue> newList = new List<MValue>();
+            for (int i = 0; i < list.iList.Count; i++)
+            {
+                MValue result = lambda.Execute(
+                    new MArguments(
+                        new MArgument(list.iList[i]), 
+                        new MArgument(MValue.Number(i))
+                    )
+                );
+                newList.Add(result);
+            }
+            return new MList(newList);
+        }
+        public static MValue Reduce(MList list, MLambda lambda, MValue initial)
+        {
+            MValue runningResult = initial;
+            for (int i = 0; i < list.iList.Count; i++)
+            {
+                runningResult = lambda.Execute(
+                    new MArguments(
+                        new MArgument(runningResult),
+                        new MArgument(list.iList[i])
+                    )
+                );
+            }
+            return runningResult;
+        }
+        public static MList CreateRange(int max)
+        {
+            if (max <= 0)
+            {
+                return Empty;
+            }
+            List<MValue> newList = new List<MValue>();
+            for (int i = 0; i < max; i++)
+            {
+                newList.Add(MValue.Number(i));
+            }
+            return new MList(newList);
+        }
+        public static MList Join(MList list1, MList list2)
+        {
+            IEnumerable<MValue> result = list1.iList.Concat(list2.iList);
+            return new MList(result.ToList());
         }
     }
 }

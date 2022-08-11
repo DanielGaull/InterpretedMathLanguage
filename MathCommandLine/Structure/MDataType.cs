@@ -7,6 +7,8 @@ namespace MathCommandLine.Structure
 {
     public struct MDataType
     {
+        // The internal ID for "any" type
+        private const int ANY_TYPE_ID = -1;
         private static int internalIdTracker = 0;
         // An internal ID for the data type. This is unique for each data type, and therefore determines whether or not two data types are equal
         private int internalId;
@@ -24,6 +26,13 @@ namespace MathCommandLine.Structure
             IsPrimitive = isPrimitive;
             this.keysAndValues = keysAndValues;
         }
+        private MDataType(int internalId, string name)
+        {
+            this.internalId = internalId;
+            Name = name;
+            IsPrimitive = true;
+            keysAndValues = null;
+        }
 
         // Creates a primitive data type
         public MDataType(string name)
@@ -38,6 +47,7 @@ namespace MathCommandLine.Structure
         public static MDataType Empty = new MDataType();
 
         // Core data types
+        public static MDataType Any = new MDataType(ANY_TYPE_ID, "any");
         public static MDataType Number = new MDataType("number");
         public static MDataType List = new MDataType("list");
         public static MDataType Lambda = new MDataType("lambda");
@@ -51,11 +61,26 @@ namespace MathCommandLine.Structure
 
         public static bool operator ==(MDataType dt1, MDataType dt2)
         {
-            return dt1.internalId == dt2.internalId;
+            // The "any" type is equivelant to every other type
+            // Type equality is not transitive
+            return (dt1.internalId == dt2.internalId) || (dt1.internalId == ANY_TYPE_ID) || (dt2.internalId == ANY_TYPE_ID);
         }
         public static bool operator !=(MDataType dt1, MDataType dt2)
         {
-            return dt1.internalId != dt2.internalId;
+            return (dt1.internalId != dt2.internalId) && (dt1.internalId != ANY_TYPE_ID) && (dt2.internalId != ANY_TYPE_ID);
+        }
+        public override bool Equals(object obj)
+        {
+            if (obj is MDataType)
+            {
+                MDataType dt = (MDataType)obj;
+                return dt == this;
+            }
+            return false;
+        }
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
 
         public override string ToString()
