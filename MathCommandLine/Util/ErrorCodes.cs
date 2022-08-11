@@ -13,5 +13,6 @@ namespace MathCommandLine.Util
         NOT_A_STRING = 4,
         I_OUT_OF_RANGE = 5,
         WRONG_ARG_COUNT = 6,
+        DIV_BY_ZERO = 7,
     }
 }
