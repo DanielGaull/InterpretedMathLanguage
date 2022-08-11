@@ -154,13 +154,50 @@ namespace MathCommandLine.Structure
 
         public static bool operator ==(MValue v1, MValue v2)
         {
-            // TODO
-            return false;
+            // TODO: Handle other number types
+            // A big_int(0) should be equal to a number(0)
+            if (v1.DataType != v2.DataType)
+            {
+                return false;
+            }
+            MDataType dt = v1.DataType;
+            if (dt == MDataType.Number)
+            {
+                return v1.NumberValue == v2.NumberValue;
+            }
+            else if (dt == MDataType.List)
+            {
+                return v1.ListValue == v2.ListValue;
+            }
+            else if (dt == MDataType.Lambda)
+            {
+                return v1.LambdaValue == v2.LambdaValue;
+            }
+            else if (dt == MDataType.Type)
+            {
+                return v1.TypeValue == v2.TypeValue;
+            }
+            else
+            {
+                // Composite type
+                // Check if fields are equal
+                if (v1.DataValues.Count != v2.DataValues.Count)
+                {
+                    return false;
+                }
+                foreach (KeyValuePair<string, MValue> kv in v1.DataValues)
+                {
+                    if (kv.Value != v2.DataValues[kv.Key])
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
         }
         public static bool operator !=(MValue v1, MValue v2)
         {
-            // TODO
-            return false;
+            return !(v1 == v2);
         }
         public override bool Equals(object obj)
         {

@@ -15,5 +15,23 @@ namespace MathCommandLine.CoreDataTypes
         {
             return MValue.Error(ErrorCodes.FATAL_UNKNOWN, "Not Implemented", MList.Empty);
         }
+
+        // TODO
+        public static bool operator ==(MLambda l1, MLambda l2)
+        {
+            return false;
+        }
+        public static bool operator !=(MLambda l1, MLambda l2)
+        {
+            return true;
+        }
+        public override bool Equals(object obj)
+        {
+            return false;
+        }
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }

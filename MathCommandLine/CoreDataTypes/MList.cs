@@ -127,5 +127,23 @@ namespace MathCommandLine.CoreDataTypes
             IEnumerable<MValue> result = list1.iList.Concat(list2.iList);
             return new MList(result.ToList());
         }
+
+        // TODO
+        public static bool operator ==(MList l1, MList l2)
+        {
+            return false;
+        }
+        public static bool operator !=(MList l1, MList l2)
+        {
+            return true;
+        }
+        public override bool Equals(object obj)
+        {
+            return false;
+        }
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }
