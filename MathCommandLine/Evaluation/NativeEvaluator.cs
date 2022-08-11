@@ -12,7 +12,7 @@ namespace MathCommandLine.Evaluation
         {
             if (expression.IsNativeExpression)
             {
-                return expression.NativeEvaluator(arguments);
+                return expression.NativeExpression(arguments);
             }
             throw new NotImplementedException();
         }

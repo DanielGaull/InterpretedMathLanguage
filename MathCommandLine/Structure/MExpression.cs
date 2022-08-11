@@ -5,11 +5,11 @@ using System.Text;
 
 namespace MathCommandLine.Structure
 {
-    public delegate MValue NativeEvaluator(MArguments args);
+    public delegate MValue NativeExpression(MArguments args);
     public class MExpression
     {
         public string Expression { get; private set; }
-        public NativeEvaluator NativeEvaluator { get; private set; }
+        public NativeExpression NativeExpression { get; private set; }
         public bool IsNativeExpression { get; private set; }
 
         public MExpression(string expression)
@@ -18,9 +18,9 @@ namespace MathCommandLine.Structure
             IsNativeExpression = false;
         }
 
-        public MExpression(NativeEvaluator nativeEvaluator)
+        public MExpression(NativeExpression nativeEvaluator)
         {
-            NativeEvaluator = nativeEvaluator;
+            NativeExpression = nativeEvaluator;
             IsNativeExpression = true;
         }
 
