@@ -243,6 +243,7 @@ namespace MathCommandLine.Structure.Functions
         }
         public static MFunction IndexOfListCustom(IEvaluator evaluator)
         {
+            // TODO: Attempt to cast result of equality evaluation to number
             return new MFunction(
                 "_indexlc", MDataType.Number,
                 (args) =>
