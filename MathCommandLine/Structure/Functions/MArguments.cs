@@ -22,6 +22,21 @@ namespace MathCommandLine.Structure.FunctionTypes
             this.args = new List<MArgument>(args);
         }
 
+        public MArgument this[int index]
+        {
+            get
+            {
+                return Get(index);
+            }
+        }
+        public MArgument this[string key]
+        {
+            get
+            {
+                return Get(key);
+            }
+        }
+
         public MArgument Get(int index)
         {
             return args[index];

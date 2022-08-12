@@ -320,5 +320,140 @@ namespace MathCommandLine.Structure.Functions
                 "Concatenates the elements of 'list1' and 'list2' into a new list, which is returned."
             );
         }
+
+        // Calculation Functions
+        // TODO: derivatives/integrals/solve
+
+        // Utility Functions
+        public static MFunction TypeOf(IEvaluator evaluator)
+        {
+            return new MFunction(
+                "_type_of", MDataType.Type,
+                (args) =>
+                {
+                    return MValue.Type(args.Get(0).Value.DataType);
+                },
+                new MParameters(
+                    new MParameter(MDataType.Any, "value")
+                ),
+                "Returns the type of 'value'."
+            );
+        }
+        public static MFunction LessThan(IEvaluator evaluator)
+        {
+            return new MFunction(
+                "_lt", MDataType.Number,
+                (args) =>
+                {
+                    double first = args.Get(0).Value.NumberValue;
+                    double second = args.Get(0).Value.NumberValue;
+                    return MValue.Number((first < second) ? 1 : 0);
+                },
+                new MParameters(
+                    new MParameter(MDataType.Number, "first"),
+                    new MParameter(MDataType.Number, "second")
+                ),
+                "If 'first' is less than 'second', returns 1. Otherwise, returns 0."
+            );
+        }
+        public static MFunction EqualTo(IEvaluator evaluator)
+        {
+            return new MFunction(
+                "_eq", MDataType.Number,
+                (args) =>
+                {
+                    double first = args.Get(0).Value.NumberValue;
+                    double second = args.Get(0).Value.NumberValue;
+                    return MValue.Number((first == second) ? 1 : 0);
+                },
+                new MParameters(
+                    new MParameter(MDataType.Number, "first"),
+                    new MParameter(MDataType.Number, "second")
+                ),
+                "If 'first' is equal to 'second', returns 1. Otherwise, returns 0."
+            );
+        }
+        public static MFunction CaseFunction(IEvaluator evaluator)
+        {
+            return new MFunction(
+                "_c", MDataType.Any,
+                (args) =>
+                {
+                    MValue value = args[0].Value;
+                    MValue defaultValue = args[3].Value;
+                    List<MValue> cases = args[1].Value.ListValue.GetInternalList();
+                    List<MValue> results = args[2].Value.ListValue.GetInternalList();
+                    for (int i = 0; i < cases.Count; i++)
+                    {
+                        if (cases[i] == value)
+                        {
+                            return results[i];
+                        }
+                    }
+                    return defaultValue;
+                },
+                new MParameters(
+                    new MParameter(MDataType.Any, "value"),
+                    new MParameter(MDataType.List, "cases"),
+                    new MParameter(MDataType.List, "results"),
+                    new MParameter(MDataType.Any, "default")
+                ),
+                "If 'value' appears in 'cases', returns the corresponding value in 'results' (the one with the same index). Otherwise, returns 'default'."
+            );
+        }
+        public static MFunction GetValue(IEvaluator evaluator)
+        {
+            return new MFunction(
+                "_gv", MDataType.Any,
+                (args) =>
+                {
+                    string key = Utilities.MListToString(args[0].Value.ListValue);
+                    MValue original = args[1].Value;
+                    return original.GetValueByName(key);
+                },
+                new MParameters(
+                    new MParameter(MDataType.List, "key"),
+                    new MParameter(MDataType.Any, "original")
+                ),
+                "Interprets 'key' as a string, attempting to get that value from 'original'. Returns NOT_COMPOSITE if 'original' isn't composite, or " + 
+                "KEY_DOES_NOT_EXIST if the key does not exist in 'original'."
+            );
+        }
+        public static MFunction CastFunction(IEvaluator evaluator)
+        {
+            return new MFunction(
+                "_cast", MDataType.Any,
+                (args) =>
+                {
+                    // TODO: Write this once casts are added to the evaluator
+                    return MValue.Error(ErrorCodes.INVALID_CAST);
+                },
+                new MParameters(
+                    new MParameter(MDataType.Any, "value"),
+                    new MParameter(MDataType.Type, "type")
+                ),
+                "Attempts to cast 'value' to 'type'. If it cannot be casted, an INVALID_CAST error is returned. The shortest cast path will be chosen."
+            );
+        }
+        public static MFunction CreateErrorFunction(IEvaluator evaluator)
+        {
+            // TODO: Apply arg requirements
+            return new MFunction(
+                "_error", MDataType.Error,
+                (args) =>
+                {
+                    int code = (int)args[0].Value.NumberValue;
+                    MList msg = args[1].Value.ListValue;
+                    MList info = args[2].Value.ListValue;
+                    return MValue.Error((ErrorCodes)code, msg, info);
+                },
+                new MParameters(
+                    new MParameter(MDataType.Number, "code"),
+                    new MParameter(MDataType.List, "message"),
+                    new MParameter(MDataType.List, "info")
+                ),
+                "Creates and returns an error with the specified code, message, and info list."
+            );
+        }
     }
 }

@@ -72,6 +72,16 @@ namespace MathCommandLine.Structure
             };
             return Composite(MDataType.Error, values);
         }
+        public static MValue Error(ErrorCodes code, MList message, MList data)
+        {
+            Dictionary<string, MValue> values = new Dictionary<string, MValue>()
+            {
+                { "code", Number((int) code) },
+                { "message", List(message) },
+                { "data", List(data) }
+            };
+            return Composite(MDataType.Error, values);
+        }
         public static MValue Error(ErrorCodes code)
         {
             Dictionary<string, MValue> values = new Dictionary<string, MValue>()

@@ -62,11 +62,11 @@ namespace MathCommandLine.Structure
             // Now check the types of the arguments to ensure they match. If any errors appear in the arguments, return that immediately
             for (int i = 0; i < args.Length; i++)
             {
-                if (args.Get(i).Value.DataType != Parameters.Get(i).DataType)
+                if (Parameters.Get(i).ContainsType(args.Get(i).Value.DataType))
                 {
                     // Improper data type!
-                    return MValue.Error(ErrorCodes.INVALID_TYPE, 
-                        "Expected argument \"" +  Parameters.Get(i).Name + "\" to be of type '" + Parameters.Get(i).DataType + "' but received type '" + args.Get(i).Value.DataType + "'.", 
+                    return MValue.Error(ErrorCodes.INVALID_TYPE,
+                        "Expected argument \"" + Parameters.Get(i).Name + "\" to be of type '" + Parameters.Get(i).DataTypeString() + "' but received type '" + args.Get(i).Value.DataType + "'.",
                         MList.FromOne(MValue.Number(i)));
                 }
                 else if (args.Get(i).Value.DataType == MDataType.Error)

@@ -14,5 +14,6 @@ namespace MathCommandLine.Util
         I_OUT_OF_RANGE = 5,
         WRONG_ARG_COUNT = 6,
         DIV_BY_ZERO = 7,
+        INVALID_CAST = 8,
     }
 }

@@ -19,6 +19,11 @@ namespace MathCommandLine.CoreDataTypes
 
         public static MList Empty = new MList();
 
+        public List<MValue> GetInternalList()
+        {
+            return iList;
+        }
+
         public static MList FromArray(MValue[] values)
         {
             return new MList(values.ToList());
@@ -105,7 +110,7 @@ namespace MathCommandLine.CoreDataTypes
             MValue runningResult = initial;
             for (int i = 0; i < list.iList.Count; i++)
             {
-                runningResult = lambda.Execute(
+                runningResult = lambda.Evaluate(
                     new MArguments(
                         new MArgument(runningResult),
                         new MArgument(list.iList[i])
