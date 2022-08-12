@@ -31,6 +31,21 @@ namespace MathCommandLine.Structure.FunctionTypes
             return parameters.Where((arg) => arg.Name == name).FirstOrDefault();
         }
 
+        public MParameter this[int index]
+        {
+            get
+            {
+                return Get(index);
+            }
+        }
+        public MParameter this[string key]
+        {
+            get
+            {
+                return Get(key);
+            }
+        }
+
         public static bool operator ==(MParameters p1, MParameters p2)
         {
             if (p1.parameters.Count != p2.parameters.Count)
