@@ -8,10 +8,14 @@ using System.Text;
 
 namespace MathCommandLine.CoreDataTypes
 {
-    public struct MList
+    public class MList
     {
         private List<MValue> iList;
 
+        private MList()
+        {
+            iList = new List<MValue>();
+        }
         private MList(List<MValue> list)
         {
             iList = list;
