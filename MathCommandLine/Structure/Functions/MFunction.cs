@@ -72,7 +72,9 @@ namespace MathCommandLine.Structure
                 else if (!Parameters[i].PassesRequirements(args[i].Value))
                 {
                     // Fails requirements!
-                    // TODO
+                    return MValue.Error(ErrorCodes.FAILS_REQUIREMENT,
+                        "Argument \"" + Parameters.Get(i).Name + "\" fails one or more parameter requirements.",
+                        MList.FromOne(MValue.Number(i)));
                 }
                 else if (args.Get(i).Value.DataType == MDataType.Error)
                 {
