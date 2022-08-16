@@ -10,6 +10,10 @@ namespace MathCommandLine.Functions
 {
     public abstract class Callable
     {
+        // RESTRUCTURING:
+        // Change MList and MLambda back to structs
+        // Remove the Evaluate function & Callable
+        // Move this evaluate parameter/argument-checking to Evaluators themselves
         public MParameters Parameters { get; set; }
         public MExpression Expression { get; set; }
 

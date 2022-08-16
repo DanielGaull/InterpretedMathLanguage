@@ -21,6 +21,10 @@ namespace MathCommandLine.Functions
         {
             this.args = new List<MArgument>(args);
         }
+        public MArguments(List<MArgument> args)
+        {
+            this.args = new List<MArgument>(args);
+        }
 
         public MArgument this[int index]
         {

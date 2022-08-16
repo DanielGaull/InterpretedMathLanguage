@@ -32,6 +32,8 @@ namespace MathCommandLine.Structure
             DataValues = dataValues;
         }
 
+        public static readonly MValue Empty = new MValue(MDataType.Empty, 0, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, null);
+
         public static MValue Number(double numberValue)
         {
             return new MValue(MDataType.Number, numberValue, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, null);
