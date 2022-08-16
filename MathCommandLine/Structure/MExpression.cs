@@ -1,4 +1,4 @@
-﻿using MathCommandLine.Structure.FunctionTypes;
+﻿using MathCommandLine.Functions;
 using System;
 using System.Collections.Generic;
 using System.Text;

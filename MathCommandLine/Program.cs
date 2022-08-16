@@ -6,9 +6,11 @@ namespace MathCommandLine
 {
     class Program
     {
-        GenericEvaluator evaluator;
+        static GenericEvaluator evaluator;
         static void Main(string[] args)
         {
+            evaluator = new GenericEvaluator();
+
             
         }
     }

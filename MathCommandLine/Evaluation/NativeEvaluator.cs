@@ -1,5 +1,5 @@
-﻿using MathCommandLine.Structure;
-using MathCommandLine.Structure.FunctionTypes;
+﻿using MathCommandLine.Functions;
+using MathCommandLine.Structure;
 using System;
 using System.Collections.Generic;
 using System.Text;

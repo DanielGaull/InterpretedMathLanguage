@@ -1,14 +1,14 @@
 ﻿using MathCommandLine.CoreDataTypes;
 using MathCommandLine.Evaluation;
 using MathCommandLine.Functions;
-using MathCommandLine.Structure.FunctionTypes;
+using MathCommandLine.Structure;
 using MathCommandLine.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace MathCommandLine.Structure
+namespace MathCommandLine.Functions
 {
     public class MFunction : Callable
     {

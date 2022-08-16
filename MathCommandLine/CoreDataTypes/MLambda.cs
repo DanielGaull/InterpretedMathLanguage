@@ -1,7 +1,6 @@
 ﻿using MathCommandLine.Evaluation;
 using MathCommandLine.Functions;
 using MathCommandLine.Structure;
-using MathCommandLine.Structure.FunctionTypes;
 using MathCommandLine.Util;
 using System;
 using System.Collections.Generic;
