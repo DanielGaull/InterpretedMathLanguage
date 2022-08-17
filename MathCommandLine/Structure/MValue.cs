@@ -112,6 +112,10 @@ namespace MathCommandLine.Structure
 
         public override string ToString()
         {
+            return ToLongString();
+        }
+        public string ToShortString()
+        {
             if (DataType == MDataType.Number)
             {
                 return NumberValue.ToString();
@@ -162,6 +166,10 @@ namespace MathCommandLine.Structure
                 builder.Append(" )");
                 return builder.ToString();
             }
+        }
+        public string ToLongString()
+        {
+            return "(" + DataType.Name + ") " + ToShortString();
         }
 
         public static bool operator ==(MValue v1, MValue v2)

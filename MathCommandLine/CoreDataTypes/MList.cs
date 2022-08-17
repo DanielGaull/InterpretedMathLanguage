@@ -12,13 +12,13 @@ namespace MathCommandLine.CoreDataTypes
     {
         private List<MValue> iList;
 
-        private MList()
+        public MList()
         {
             iList = new List<MValue>();
         }
-        private MList(List<MValue> list)
+        public MList(List<MValue> list)
         {
-            iList = list;
+            iList = new List<MValue>(list);
         }
 
         public static MList Empty = new MList();
