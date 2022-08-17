@@ -8,6 +8,8 @@ namespace MathCommandLine.Evaluation
 {
     public class StringEvaluator : IEvaluator
     {
+        private IEvaluator superEvaluator;
+
         private FunctionDict funcDict;
 
         private const string NUMBER_REGEX = @"[+-]?[0-9]+(\.[0-9]*)?";
@@ -15,8 +17,9 @@ namespace MathCommandLine.Evaluation
         private const string LAMBDA_REGEX = @"\(.*\)=>\{.*\}";
         private const string FUNCTION_REGEX = @"^[a-zA-Z_][a-zA-Z0-9_]*\(.*\)$";
 
-        public StringEvaluator(FunctionDict funcDict)
+        public StringEvaluator(IEvaluator superEvaluator, FunctionDict funcDict)
         {
+            this.superEvaluator = superEvaluator;
             this.funcDict = funcDict;
         }
 
@@ -52,8 +55,8 @@ namespace MathCommandLine.Evaluation
                         argsList.Add(new MArgument(EvaluateAst(ast.ArgumentArray[i], variables)));
                     }
                     MArguments args = new MArguments(argsList);
-                    // TODO: Evaluate actual function
-                    break;
+                    MFunction function = funcDict.GetFunction(ast.Name);
+                    return function.Evaluate(args, superEvaluator);
                 case AstTypes.LiteralValue:
                     // Very easy, can just literally return the value of the AST
                     return ast.ValueArg;

@@ -21,7 +21,8 @@ namespace MathCommandLine.Evaluation
 
             List<MFunction> coreFuncs = CoreFunctions.GenerateCoreFunctions(this);
             FunctionDict funcDict = new FunctionDict(coreFuncs);
-            stringEvaluator = new StringEvaluator(funcDict);
+            // TODO: Add user-defined functions here
+            stringEvaluator = new StringEvaluator(this, funcDict);
         }
 
         public MValue Evaluate(MExpression expression, MArguments arguments)
