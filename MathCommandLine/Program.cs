@@ -10,7 +10,7 @@ namespace MathCommandLine
         static GenericEvaluator evaluator;
         static void Main(string[] args)
         {
-            evaluator = new GenericEvaluator(new FunctionDict());
+            evaluator = new GenericEvaluator();
         }
     }
 }
