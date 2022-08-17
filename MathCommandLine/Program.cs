@@ -2,6 +2,7 @@
 using MathCommandLine.Functions;
 using MathCommandLine.Structure;
 using System;
+using System.Text.RegularExpressions;
 
 namespace MathCommandLine
 {

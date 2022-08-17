@@ -12,39 +12,16 @@ namespace MathCommandLine.Evaluation
     public class StringEvaluator : IEvaluator
     {
         private IEvaluator superEvaluator;
-
+        private Parser parser;
         private FunctionDict funcDict;
+        private DataTypeDict dtDict;
 
-        private const string NUMBER_REGEX_STR = @"[+-]?[0-9]+(\.[0-9]*)?";
-        private const string LIST_REGEX_STR = @"\{.*\}";
-        private const string LAMBDA_REGEX_STR = @"\(.*\)=>\{.*\}";
-        private const string TYPE_REGEX_STR = @"#[^\s]*";
-        private const string FUNCTION_REGEX_STR = @"[a-zA-Z_][a-zA-Z0-9_]*\(.*\)";
-
-        // Regexes for matching language symbols
-        private readonly Regex NUMBER_REGEX = new Regex(NUMBER_REGEX_STR);
-        private readonly Regex LIST_REGEX = new Regex(LIST_REGEX_STR);
-        private readonly Regex LAMBDA_REGEX = new Regex(LAMBDA_REGEX_STR);
-        private readonly Regex TYPE_REGEX = new Regex(TYPE_REGEX_STR);
-        private readonly Regex FUNCTION_REGEX = new Regex(FUNCTION_REGEX_STR);
-        // Regexes for matching language symbols, where they are the ONLY thing in the string (i.e. find if the whole string is a list) 
-        private readonly Regex NUMBER_ONLY_REGEX = new Regex("^" + NUMBER_REGEX_STR + "$");
-        private readonly Regex LIST_ONLY_REGEX = new Regex("^" + LIST_REGEX_STR + "$");
-        private readonly Regex LAMBDA_ONLY_REGEX = new Regex("^" + LAMBDA_REGEX_STR + "$");
-        private readonly Regex TYPE_ONLY_REGEX = new Regex("^" + TYPE_REGEX_STR + "$");
-        private readonly Regex FUNCTION_ONLY_REGEX = new Regex("^" + FUNCTION_REGEX_STR + "$");
-
-        // Other useful regexes
-        // List helpers
-        private readonly Regex LIST_DELIMITER_REGEX = new Regex(@",");
-        private readonly Regex LIST_EXTRACTOR_REGEX = new Regex(@"\{([^}]*)\}");
-        // Other helpers
-        private readonly Regex WHITESPACE_REGEX = new Regex(@"\s+");
-
-        public StringEvaluator(IEvaluator superEvaluator, FunctionDict funcDict)
+        public StringEvaluator(IEvaluator superEvaluator, Parser parser, FunctionDict funcDict, DataTypeDict dtDict)
         {
             this.superEvaluator = superEvaluator;
+            this.parser = parser;
             this.funcDict = funcDict;
+            this.dtDict = dtDict;
         }
 
         public MValue Evaluate(MExpression expression, MArguments variables)
@@ -60,43 +37,10 @@ namespace MathCommandLine.Evaluation
         // functions, variables (i.e. arguments), and literal core values
         private MValue FinalStageEvaluate(string expression, MArguments variables)
         {
-            Ast tree = ParseExpression(expression);
+            Ast tree = parser.ParseExpression(expression);
             return EvaluateAst(tree, variables);
         }
 
-        private Ast ParseExpression(string expression)
-        {
-            // TODO: Add support for big_decimal and big_int (require D or L at the end of the number literal, i.e. 750L or 0.642D)
-            // 'expression' is either a function or literal
-            if (FUNCTION_ONLY_REGEX.IsMatch(expression))
-            {
-
-            }
-            else if (NUMBER_ONLY_REGEX.IsMatch(expression))
-            {
-                // Parse the double and throw it into the AST
-                double number = double.Parse(expression);
-                return Ast.NumberLiteral(number);
-            }
-            else if (LIST_ONLY_REGEX.IsMatch(expression))
-            {
-                // Extract the elements of the list
-                string elements = LIST_EXTRACTOR_REGEX.Match(expression).Groups[1].Value;
-                // Separate by the list delimiter
-                string[] elementStrings = LIST_DELIMITER_REGEX.Split(elements);
-                List<Ast> elementAsts = new List<Ast>();
-
-            }
-            else if (LAMBDA_ONLY_REGEX.IsMatch(expression))
-            {
-
-            }
-            else if (TYPE_ONLY_REGEX.IsMatch(expression))
-            {
-                // TODO: Extract type from string
-            }
-            throw new InvalidParseException(expression);
-        }
         private MValue EvaluateAst(Ast ast, MArguments variables)
         {
             switch (ast.Type)
@@ -128,8 +72,7 @@ namespace MathCommandLine.Evaluation
                     // TODO
                     break;
                 case AstTypes.TypeLiteral:
-                    // TODO
-                    break;
+                    return MValue.Type(dtDict.GetType(ast.Name));
             }
             return MValue.Empty;
         }

@@ -1,4 +1,5 @@
-﻿using MathCommandLine.Functions;
+﻿using MathCommandLine.CoreDataTypes;
+using MathCommandLine.Functions;
 using MathCommandLine.Structure;
 using System;
 using System.Collections.Generic;
@@ -21,8 +22,9 @@ namespace MathCommandLine.Evaluation
 
             List<MFunction> coreFuncs = CoreFunctions.GenerateCoreFunctions(this);
             FunctionDict funcDict = new FunctionDict(coreFuncs);
-            // TODO: Add user-defined functions here
-            stringEvaluator = new StringEvaluator(this, funcDict);
+            DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, MDataType.Lambda, MDataType.Type, MDataType.Error);
+            Parser parser = new Parser();
+            stringEvaluator = new StringEvaluator(this, parser, funcDict, dtDict);
         }
 
         public MValue Evaluate(MExpression expression, MArguments arguments)
