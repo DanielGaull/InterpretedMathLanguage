@@ -13,6 +13,11 @@ namespace MathCommandLine.Functions
             internalDict = new Dictionary<string, MFunction>();
             AddFunctions(functions);
         }
+        public FunctionDict(List<MFunction> functions)
+        {
+            internalDict = new Dictionary<string, MFunction>();
+            AddFunctions(functions);
+        }
 
         public void AddFunctions(List<MFunction> functions)
         {

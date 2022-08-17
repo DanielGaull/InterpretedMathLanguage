@@ -10,11 +10,20 @@ namespace MathCommandLine.Evaluation
     {
         NativeEvaluator nativeEvaluator;
         StringEvaluator stringEvaluator;
-        public GenericEvaluator(FunctionDict funcDict)
+        public GenericEvaluator()
+        {
+            Initialize();
+        }
+
+        private void Initialize()
         {
             nativeEvaluator = new NativeEvaluator();
+
+            List<MFunction> coreFuncs = CoreFunctions.GenerateCoreFunctions(this);
+            FunctionDict funcDict = new FunctionDict(coreFuncs);
             stringEvaluator = new StringEvaluator(funcDict);
         }
+
         public MValue Evaluate(MExpression expression, MArguments arguments)
         {
             if (expression.IsNativeExpression)

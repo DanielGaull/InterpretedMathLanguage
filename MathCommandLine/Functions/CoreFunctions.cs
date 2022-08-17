@@ -13,6 +13,39 @@ namespace MathCommandLine.Functions
      */
     public static class CoreFunctions
     {
+        public static List<MFunction> GenerateCoreFunctions(IEvaluator evaluator)
+        {
+            return new List<MFunction>()
+            {
+                Add(evaluator),
+                Multiply(evaluator),
+                Negate(evaluator),
+                MulInverse(evaluator),
+                Pow(evaluator),
+                GetIntPart(evaluator),
+                TrigFunction(evaluator),
+                NaturalLog(evaluator),
+
+                ListLength(evaluator),
+                GetFromList(evaluator),
+                InsertInList(evaluator),
+                RemoveFromList(evaluator),
+                IndexOfList(evaluator),
+                IndexOfListCustom(evaluator),
+                MapList(evaluator),
+                ReduceList(evaluator),
+                CreateRangeList(evaluator),
+                JoinLists(evaluator),
+
+                TypeOf(evaluator),
+                CompareFunction(evaluator),
+                CaseFunction(evaluator),
+                GetValue(evaluator),
+                CastFunction(evaluator),
+                CreateErrorFunction(evaluator)
+            };
+        }
+
         // Numerical Functions
         public static MFunction Add(IEvaluator evaluator) {
             return new MFunction(
@@ -339,38 +372,21 @@ namespace MathCommandLine.Functions
                 "Returns the type of 'value'."
             );
         }
-        public static MFunction LessThan(IEvaluator evaluator)
+        public static MFunction CompareFunction(IEvaluator evaluator)
         {
             return new MFunction(
-                "_lt", MDataType.Number,
+                "_cmp", MDataType.Number,
                 (args) =>
                 {
                     double first = args.Get(0).Value.NumberValue;
                     double second = args.Get(0).Value.NumberValue;
-                    return MValue.Number((first < second) ? 1 : 0);
+                    return MValue.Number((first < second) ? -1 : (first == second ? 0 : 1));
                 },
                 new MParameters(
                     new MParameter(MDataType.Number, "first"),
                     new MParameter(MDataType.Number, "second")
                 ),
-                "If 'first' is less than 'second', returns 1. Otherwise, returns 0."
-            );
-        }
-        public static MFunction EqualTo(IEvaluator evaluator)
-        {
-            return new MFunction(
-                "_eq", MDataType.Number,
-                (args) =>
-                {
-                    double first = args.Get(0).Value.NumberValue;
-                    double second = args.Get(0).Value.NumberValue;
-                    return MValue.Number((first == second) ? 1 : 0);
-                },
-                new MParameters(
-                    new MParameter(MDataType.Number, "first"),
-                    new MParameter(MDataType.Number, "second")
-                ),
-                "If 'first' is equal to 'second', returns 1. Otherwise, returns 0."
+                "If 'first' is less than 'second', returns -1. If 'first' == 'second', returns 0. If 'first' > 'second', returns 1."
             );
         }
         public static MFunction CaseFunction(IEvaluator evaluator)
