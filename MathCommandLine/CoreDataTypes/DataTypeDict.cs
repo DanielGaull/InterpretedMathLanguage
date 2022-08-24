@@ -11,10 +11,12 @@ namespace MathCommandLine.CoreDataTypes
 
         public DataTypeDict(params MDataType[] types)
         {
+            internalDict = new Dictionary<string, MDataType>();
             AddTypes(types);
         }
         public DataTypeDict(List<MDataType> types)
         {
+            internalDict = new Dictionary<string, MDataType>();
             AddTypes(types);
         }
 

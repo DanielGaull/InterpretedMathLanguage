@@ -22,7 +22,8 @@ namespace MathCommandLine.Evaluation
 
             List<MFunction> coreFuncs = CoreFunctions.GenerateCoreFunctions(this);
             FunctionDict funcDict = new FunctionDict(coreFuncs);
-            DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, MDataType.Lambda, MDataType.Type, MDataType.Error);
+            DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, MDataType.Lambda, 
+                MDataType.Type, MDataType.Error);
             Parser parser = new Parser();
             stringEvaluator = new StringEvaluator(this, parser, funcDict, dtDict);
         }
