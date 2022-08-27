@@ -15,8 +15,11 @@ namespace MathCommandLine.Evaluation
     /// </summary>
     public class Parser
     {
+        // Regexes for common necessities
+        private const string NUMBER_REGEX_PATTERN = @"^[+-]?[0-9]+(\.[0-9]*)?$";
+
         // Regexes for matching language symbols
-        private static readonly Regex NUMBER_REGEX = new Regex(@"^[+-]?[0-9]+(\.[0-9]*)?$"); // No groups
+        private static readonly Regex NUMBER_REGEX = new Regex(NUMBER_REGEX_PATTERN); // No groups
         private static readonly Regex LIST_REGEX = new Regex(@"^\{([^}]*)\}$"); // Group for the list elements
         private static readonly Regex LAMBDA_REGEX = new Regex(@"^\(([^)]*)\)=>\{([^}]*)\}$"); // Group for param list and for the expression
         private static readonly Regex TYPE_REGEX = new Regex(@"^#([a-zA-Z_][a-zA-Z0-9_]*)$"); // Group for the type name
@@ -28,6 +31,15 @@ namespace MathCommandLine.Evaluation
         private static readonly Regex PARAM_TYPES_DELIMITER_REGEX = new Regex(@"\|");
         private static readonly Regex PARAM_NAME_TYPE_REGEX = new Regex(@"(.*):(.*)"); // Group for param name and group for type(s)
         private static readonly Regex PARAM_TYPE_REQS_REGEX = new Regex(@"(?:\[(.*)\])?([a-zA-Z_][a-zA-Z0-9_]*)"); // Group for requirements, and for type name
+
+        // Parameter Requirement regexes
+        private static readonly Regex PARAM_REQ_INTEGER = new Regex(@"%");
+        private static readonly Regex PARAM_REQ_POSITIVE = new Regex(@"\+");
+        private static readonly Regex PARAM_REQ_NEGATIVE = new Regex(@"-");
+        private static readonly Regex PARAM_REQ_LT = new Regex(@$"<\(({NUMBER_REGEX_PATTERN})\)");
+        private static readonly Regex PARAM_REQ_GT = new Regex(@$">\(({NUMBER_REGEX_PATTERN})\)");
+        private static readonly Regex PARAM_REQ_LTE = new Regex(@$"<=\(({NUMBER_REGEX_PATTERN})\)");
+        private static readonly Regex PARAM_REQ_GTE = new Regex(@$">=\(({NUMBER_REGEX_PATTERN})\)");
 
         // Other useful regexes
         private static readonly Regex LIST_DELIMITER_REGEX = new Regex(@",");
@@ -141,6 +153,7 @@ namespace MathCommandLine.Evaluation
 
                 // Need to evaluate all of the requirements
                 // TODO: Evaluate all requirements
+                // Use the requirement regexes
                 ParamRequirement[] reqs = new ParamRequirement[0];
 
                 return new AstParameterTypeEntry(type, reqs);
