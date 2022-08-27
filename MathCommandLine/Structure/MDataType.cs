@@ -83,6 +83,11 @@ namespace MathCommandLine.Structure
             return base.GetHashCode();
         }
 
+        public bool IsEmpty()
+        {
+            return this == Empty;
+        }
+
         public override string ToString()
         {
             StringBuilder builder = new StringBuilder("#");

@@ -2,6 +2,7 @@
 using MathCommandLine.Structure;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace MathCommandLine.Evaluation
@@ -59,13 +60,33 @@ namespace MathCommandLine.Evaluation
 
     public class AstParameter
     {
-        public MDataType[] AcceptedTypes { get; private set; }
+        public AstParameterTypeEntry[] TypeEntries { get; private set; }
+        public string Name { get; private set; }
+
+        public AstParameter(string name, params AstParameterTypeEntry[] typeEntries)
+        {
+            Name = name;
+            TypeEntries = typeEntries;
+        }
+        public AstParameter(string name, params MDataType[] dataTypes)
+            : this(name, dataTypes.Select(x => new AstParameterTypeEntry(x)).ToArray())
+        {
+
+        }
+    }
+    public class AstParameterTypeEntry
+    {
+        public MDataType DataType { get; private set; }
         public ParamRequirement[] ParamRequirements { get; private set; }
 
-        public AstParameter(MDataType[] acceptedTypes, ParamRequirement[] paramRequirements)
+        public AstParameterTypeEntry(MDataType dataType, ParamRequirement[] paramRequirements)
         {
-            AcceptedTypes = acceptedTypes;
+            DataType = dataType;
             ParamRequirements = paramRequirements;
+        }
+        public AstParameterTypeEntry(MDataType dataType)
+            : this(dataType, new ParamRequirement[0])
+        {
         }
     }
 

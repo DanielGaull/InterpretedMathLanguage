@@ -24,7 +24,7 @@ namespace MathCommandLine.Evaluation
             FunctionDict funcDict = new FunctionDict(coreFuncs);
             DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, MDataType.Lambda, 
                 MDataType.Type, MDataType.Error);
-            Parser parser = new Parser();
+            Parser parser = new Parser(funcDict, dtDict);
             stringEvaluator = new StringEvaluator(this, parser, funcDict, dtDict);
         }
 

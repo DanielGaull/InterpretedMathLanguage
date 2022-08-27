@@ -11,5 +11,10 @@ namespace MathCommandLine.Exceptions
         {
 
         }
+        public InvalidParseException(string message, string expression)
+            : base("Cannot parse expression: \"" + expression + "\" (" + message + ").")
+        {
+
+        }
     }
 }

@@ -1,7 +1,10 @@
-﻿using MathCommandLine.Exceptions;
+﻿using MathCommandLine.CoreDataTypes;
+using MathCommandLine.Exceptions;
+using MathCommandLine.Functions;
 using MathCommandLine.Structure;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -17,18 +20,32 @@ namespace MathCommandLine.Evaluation
         private static readonly Regex LIST_REGEX = new Regex(@"^\{([^}]*)\}$"); // Group for the list elements
         private static readonly Regex LAMBDA_REGEX = new Regex(@"^\(([^)]*)\)=>\{([^}]*)\}$"); // Group for param list and for the expression
         private static readonly Regex TYPE_REGEX = new Regex(@"^#([a-zA-Z_][a-zA-Z0-9_]*)$"); // Group for the type name
-        private static readonly Regex FUNCTION_REGEX = new Regex(@"^[a-zA-Z_][a-zA-Z0-9_]*\(.*\)$"); // TODO: Group for the function name and for the arguments
+        private static readonly Regex FUNCTION_REGEX = new Regex(@"^([a-zA-Z_][a-zA-Z0-9_]*)\((.*)\)$"); // Group for the function name and for the arguments
+        private static readonly Regex SYMBOL_NAME_REGEX = new Regex(@"^[a-zA-Z_][a-zA-Z0-9_]*$");
+        
+        // Parameter parsing regexes
+        private static readonly Regex PARAM_DELIMITER_REGEX = new Regex(@",");
+        private static readonly Regex PARAM_TYPES_DELIMITER_REGEX = new Regex(@"\|");
+        private static readonly Regex PARAM_NAME_TYPE_REGEX = new Regex(@"(.*):(.*)"); // Group for param name and group for type(s)
+        private static readonly Regex PARAM_TYPE_REQS_REGEX = new Regex(@"(?:\[(.*)\])?([a-zA-Z_][a-zA-Z0-9_]*)"); // Group for requirements, and for type name
 
         // Other useful regexes
         private static readonly Regex LIST_DELIMITER_REGEX = new Regex(@",");
-        private static readonly Regex PARAM_DELIMITER_REGEX = new Regex(@",");
-        private static readonly Regex PARAM_TYPES_DELIMITER_REGEX = new Regex(@"\|");
-        private static readonly Regex PARAM_NAME_TYPE_SPLITTER_REGEX = new Regex(@":");
         private static readonly Regex ARG_DELIMITER_REGEX = new Regex(@",");
         private static readonly Regex WHITESPACE_REGEX = new Regex(@"\s+");
 
+        private FunctionDict funcDict;
+        private DataTypeDict dtDict;
+
+        public Parser(FunctionDict funcDict, DataTypeDict dtDict)
+        {
+            this.funcDict = funcDict;
+            this.dtDict = dtDict;
+        }
+
         // TODO: Function that removes whitespace from expressions
         // TODO: Function that converts strings to lists (returns back an expression string)
+        // TODO: Error checking for if Regex doesn't return enough groups
 
         /// <summary>
         /// Parses a finalized expression into an AST
@@ -91,8 +108,44 @@ namespace MathCommandLine.Evaluation
         /// <returns></returns>
         public AstParameter ParseParameter(string parameter)
         {
-            // TODO
-            return null;
+            // Check if no type provided. If parameter simply matches valid variable name, then it is of the any type
+            if (SYMBOL_NAME_REGEX.IsMatch(parameter))
+            {
+                // Name is the parameter string, and type is of the any type
+                return new AstParameter(parameter, MDataType.Any);
+            }
+            var groups = PARAM_NAME_TYPE_REGEX.Match(parameter).Groups;
+            string nameString = groups[1].Value;
+            // Note: There can be multiple types, and any type can have requirements
+            string typesString = groups[2].Value;
+            if (!SYMBOL_NAME_REGEX.IsMatch(nameString))
+            {
+                // Not a valid parameter name
+                throw new InvalidParseException("\"" + nameString + "\" is not a valid parameter name.", parameter);
+            }
+            // Start getting out the data types
+            string[] eachTypes = PARAM_TYPES_DELIMITER_REGEX.Split(typesString);
+            AstParameterTypeEntry[] typeEntries = eachTypes.Select((typeString) =>
+            {
+                // Need to extract the requirements from this string
+                var typeGroups = PARAM_TYPE_REQS_REGEX.Match(typeString).Groups;
+                // Don't always have reqs array, but it will always appear as the first group, and be empty if it doesn't exist
+                string reqsArray = typeGroups[1].Value;
+                string typeName = typeGroups[2].Value;
+                // Get the type from the dictionary
+                MDataType type = dtDict.GetType(typeName);
+                if (type.IsEmpty())
+                {
+                    // TODO: Invalid DT error
+                }
+
+                // Need to evaluate all of the requirements
+                // TODO: Evaluate all requirements
+                ParamRequirement[] reqs = new ParamRequirement[0];
+
+                return new AstParameterTypeEntry(type, reqs);
+            }).ToArray();
+            return new AstParameter(nameString, typeEntries);
         }
     }
 }

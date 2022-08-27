@@ -11,7 +11,11 @@ namespace MathCommandLine
         static GenericEvaluator evaluator;
         static void Main(string[] args)
         {
-            evaluator = new GenericEvaluator();
+            //evaluator = new GenericEvaluator();
+
+            Regex PARAM_TYPE_REQS_REGEX = new Regex(@"(?:\[(.*)\])?([a-zA-Z_][a-zA-Z0-9_]*)");
+            var groups = PARAM_TYPE_REQS_REGEX.Match("number").Groups;
+            Console.WriteLine("'" + groups[0].Value + "'; '" + groups[1].Value + "'; '" + groups[2].Value + "'");
         }
     }
 }
