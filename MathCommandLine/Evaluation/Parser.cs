@@ -149,7 +149,8 @@ namespace MathCommandLine.Evaluation
                 MDataType type = dtDict.GetType(typeName);
                 if (type.IsEmpty())
                 {
-                    // TODO: Invalid DT error
+                    // Invalid DT
+                    throw new InvalidParseException("\"" + typeName + "\" is not a valid data type.", parameter);
                 }
 
                 // Need to evaluate all of the requirements
@@ -224,7 +225,7 @@ namespace MathCommandLine.Evaluation
                     }
 
                     // String is not a valid restriction
-                    return new InvalidParseException("\"" + reqStr + "\" is an invalid value restriction.", parameter);
+                    throw new InvalidParseException("\"" + reqStr + "\" is an invalid value restriction.", parameter);
                 }).ToArray();
 
                 return new AstParameterTypeEntry(type, reqs);
