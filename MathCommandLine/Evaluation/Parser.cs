@@ -29,6 +29,7 @@ namespace MathCommandLine.Evaluation
         // Parameter parsing regexes
         private static readonly Regex PARAM_DELIMITER_REGEX = new Regex(@",");
         private static readonly Regex PARAM_TYPES_DELIMITER_REGEX = new Regex(@"\|");
+        private static readonly Regex PARAM_REQS_DELIMITER_REGEX = new Regex(@",");
         private static readonly Regex PARAM_NAME_TYPE_REGEX = new Regex(@"(.*):(.*)"); // Group for param name and group for type(s)
         private static readonly Regex PARAM_TYPE_REQS_REGEX = new Regex(@"(?:\[(.*)\])?([a-zA-Z_][a-zA-Z0-9_]*)"); // Group for requirements, and for type name
 
@@ -154,7 +155,77 @@ namespace MathCommandLine.Evaluation
                 // Need to evaluate all of the requirements
                 // TODO: Evaluate all requirements
                 // Use the requirement regexes
-                ParamRequirement[] reqs = new ParamRequirement[0];
+                string[] reqDefsStrings = PARAM_REQS_DELIMITER_REGEX.Split(reqsArray);
+                ParamRequirement[] reqs = reqDefsStrings.Select((reqStr) =>
+                {
+                    if (PARAM_REQ_INTEGER.IsMatch(reqStr))
+                    {
+                        return ParamRequirement.Integer();
+                    }
+                    else if (PARAM_REQ_POSITIVE.IsMatch(reqStr))
+                    {
+                        return ParamRequirement.Positive();
+                    }
+                    else if (PARAM_REQ_NEGATIVE.IsMatch(reqStr))
+                    {
+                        return ParamRequirement.Negative();
+                    }
+                    else if (PARAM_REQ_LT.IsMatch(reqStr))
+                    {
+                        var thisReqGroup = PARAM_REQ_LT.Match(reqStr).Groups;
+                        string argAsString = thisReqGroup[1].Value;
+                        if (double.TryParse(argAsString, out double arg))
+                        {
+                            return ParamRequirement.LessThan(arg);
+                        }
+                        else
+                        {
+                            // TODO: Invalid input somehow, though Regex should ensure no invalid inputs are provided
+                        }
+                    }
+                    else if (PARAM_REQ_LTE.IsMatch(reqStr))
+                    {
+                        var thisReqGroup = PARAM_REQ_LTE.Match(reqStr).Groups;
+                        string argAsString = thisReqGroup[1].Value;
+                        if (double.TryParse(argAsString, out double arg))
+                        {
+                            return ParamRequirement.LessThanOrEqualTo(arg);
+                        }
+                        else
+                        {
+                            // TODO: Invalid input somehow, though Regex should ensure no invalid inputs are provided
+                        }
+                    }
+                    else if (PARAM_REQ_GT.IsMatch(reqStr))
+                    {
+                        var thisReqGroup = PARAM_REQ_GT.Match(reqStr).Groups;
+                        string argAsString = thisReqGroup[1].Value;
+                        if (double.TryParse(argAsString, out double arg))
+                        {
+                            return ParamRequirement.GreaterThan(arg);
+                        }
+                        else
+                        {
+                            // TODO: Invalid input somehow, though Regex should ensure no invalid inputs are provided
+                        }
+                    }
+                    else if (PARAM_REQ_GTE.IsMatch(reqStr))
+                    {
+                        var thisReqGroup = PARAM_REQ_GTE.Match(reqStr).Groups;
+                        string argAsString = thisReqGroup[1].Value;
+                        if (double.TryParse(argAsString, out double arg))
+                        {
+                            return ParamRequirement.GreaterThanOrEqualTo(arg);
+                        }
+                        else
+                        {
+                            // TODO: Invalid input somehow, though Regex should ensure no invalid inputs are provided
+                        }
+                    }
+
+                    // String is not a valid restriction
+                    return new InvalidParseException("\"" + reqStr + "\" is an invalid value restriction.", parameter);
+                }).ToArray();
 
                 return new AstParameterTypeEntry(type, reqs);
             }).ToArray();
