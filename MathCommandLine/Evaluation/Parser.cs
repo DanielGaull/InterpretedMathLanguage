@@ -73,6 +73,10 @@ namespace MathCommandLine.Evaluation
             // 'expression' is either a function or literal
             if (FUNCTION_REGEX.IsMatch(expression))
             {
+                var groups = FUNCTION_REGEX.Match(expression).Groups;
+                string nameString = groups[1].Value;
+                string argsString = groups[2].Value;
+
                 // TODO: Select function name & args list
             }
             else if (NUMBER_REGEX.IsMatch(expression))
@@ -101,10 +105,16 @@ namespace MathCommandLine.Evaluation
                 string paramsString = groups[1].Value;
                 string exprString = groups[2].Value;
 
-                // TODO: Parse Parameters
+                // Parse Parameters
+                AstParameter[] parsedParams = PARAM_DELIMITER_REGEX.Split(paramsString).Select((paramString) =>
+                {
+                    return ParseParameter(paramString);
+                }).ToArray();
 
-                // Getting this to an AST is simple
+                // Getting the expression to an AST is simple
                 Ast expressionAst = ParseExpression(exprString);
+
+                return Ast.LambdaLiteral(parsedParams, expressionAst);
             }
             else if (TYPE_REGEX.IsMatch(expression))
             {
