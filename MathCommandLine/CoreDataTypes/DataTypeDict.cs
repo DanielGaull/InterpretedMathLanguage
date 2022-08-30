@@ -41,7 +41,7 @@ namespace MathCommandLine.CoreDataTypes
             {
                 return internalDict[name];
             }
-            // TODO: Return dt doesn't exist error
+            // DT doesn't exist
             return MDataType.Empty;
         }
     }

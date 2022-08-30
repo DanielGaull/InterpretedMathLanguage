@@ -9,8 +9,9 @@ namespace MathCommandLine.Structure
     {
         // The internal ID for "any" type
         private const int ANY_TYPE_ID = -1;
-        private static int internalIdTracker = 0;
+        private static int internalIdTracker = 1;
         // An internal ID for the data type. This is unique for each data type, and therefore determines whether or not two data types are equal
+        // Start it at 1 since the empty type will use the default value (0) for internal ID
         private int internalId;
         // The name of this data type. This is the name that is used in-code to refer to this type
         public string Name;

@@ -1,7 +1,9 @@
-﻿using MathCommandLine.Evaluation;
+﻿using MathCommandLine.CoreDataTypes;
+using MathCommandLine.Evaluation;
 using MathCommandLine.Functions;
 using MathCommandLine.Structure;
 using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace MathCommandLine
@@ -13,9 +15,18 @@ namespace MathCommandLine
         {
             //evaluator = new GenericEvaluator();
 
-            Regex PARAM_TYPE_REQS_REGEX = new Regex(@"(?:\[(.*)\])?([a-zA-Z_][a-zA-Z0-9_]*)");
-            var groups = PARAM_TYPE_REQS_REGEX.Match("number").Groups;
-            Console.WriteLine("'" + groups[0].Value + "'; '" + groups[1].Value + "'; '" + groups[2].Value + "'");
+            //Regex PARAM_TYPE_REQS_REGEX = new Regex(@"(?:\[(.*)\])?([a-zA-Z_][a-zA-Z0-9_]*)");
+            //var groups = PARAM_TYPE_REQS_REGEX.Match("number").Groups;
+            //Console.WriteLine("'" + groups[0].Value + "'; '" + groups[1].Value + "'; '" + groups[2].Value + "'");
+
+            List<MFunction> coreFuncs = new List<MFunction>();
+            FunctionDict funcDict = new FunctionDict(coreFuncs);
+            DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, MDataType.Lambda,
+                MDataType.Type, MDataType.Error);
+            Parser parser = new Parser(funcDict, dtDict);
+
+            var res = parser.ParseParameter("_hi:[%,<(1)]number");
+            Console.WriteLine("Done");
         }
     }
 }
