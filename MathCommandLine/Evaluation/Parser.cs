@@ -169,6 +169,7 @@ namespace MathCommandLine.Evaluation
                 string[] reqDefsStrings = PARAM_REQS_DELIMITER_REGEX.Split(reqsArray);
                 ParamRequirement[] reqs = reqDefsStrings.Select((reqStr) =>
                 {
+                    // TODO: Exclude empty req strings
                     if (PARAM_REQ_INTEGER.IsMatch(reqStr))
                     {
                         return ParamRequirement.Integer();
