@@ -19,6 +19,8 @@ namespace MathCommandLine
             //var groups = PARAM_TYPE_REQS_REGEX.Match("number").Groups;
             //Console.WriteLine("'" + groups[0].Value + "'; '" + groups[1].Value + "'; '" + groups[2].Value + "'");
 
+            Regex t = new Regex(@"^[+-]?[0-9]+(\.[0-9]*)?$");
+
             List<MFunction> coreFuncs = new List<MFunction>();
             FunctionDict funcDict = new FunctionDict(coreFuncs);
             DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, MDataType.Lambda,
