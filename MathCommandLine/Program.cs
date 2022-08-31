@@ -15,10 +15,15 @@ namespace MathCommandLine
         {
             evaluator = new GenericEvaluator();
 
-            Parser parser = new Parser();
-
-            string expr = "{5,3,{1,2}}";
-            Console.WriteLine(evaluator.Evaluate(new MExpression(expr), new MArguments()).ToLongString());
+            // Simple reading for now
+            while (true)
+            {
+                Console.Write("Enter Expression: ");
+                string input = Console.ReadLine();
+                MValue result = evaluator.Evaluate(new MExpression(input), new MArguments());
+                string resultString = result.ToLongString();
+                Console.WriteLine(resultString);
+            }
         }
     }
 }

@@ -143,7 +143,9 @@ namespace MathCommandLine.Structure
             else if (DataType == MDataType.Error)
             {
                 StringBuilder builder = new StringBuilder("Error: #");
-                builder.Append(GetValueByName("code"));
+                MValue codeValue = GetValueByName("code");
+                builder.Append(codeValue.ToShortString());
+                builder.Append(" (").Append(((ErrorCodes)codeValue.NumberValue).ToString()).Append(")");
                 builder.Append(" \"").Append(Utilities.MListToString(GetValueByName("message").ListValue)).Append("\" Data: ");
                 builder.Append(GetValueByName("data").ListValue.ToString());
                 return builder.ToString();
