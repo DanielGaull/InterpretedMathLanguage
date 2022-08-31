@@ -9,22 +9,22 @@ namespace MathCommandLine.Functions
     public struct MParameter
     {
         public List<MDataType> DataTypes;
-        public List<ParamRequirement> Requirements;
+        public List<ValueRestriction> Requirements;
         public string Name;
 
         public MParameter(MDataType dataType, string name)
         {
             DataTypes = new List<MDataType> { dataType };
             Name = name;
-            Requirements = new List<ParamRequirement>();
+            Requirements = new List<ValueRestriction>();
         }
         public MParameter(string name, params MDataType[] dataTypes)
         {
             DataTypes = new List<MDataType>(dataTypes);
             Name = name;
-            Requirements = new List<ParamRequirement>();
+            Requirements = new List<ValueRestriction>();
         }
-        public MParameter(string name, List<MDataType> dataTypes, List<ParamRequirement> requirements)
+        public MParameter(string name, List<MDataType> dataTypes, List<ValueRestriction> requirements)
         {
             DataTypes = dataTypes;
             Name = name;
@@ -39,7 +39,7 @@ namespace MathCommandLine.Functions
         {
             if (value.DataType == MDataType.Number)
             {
-                foreach (ParamRequirement requirement in Requirements)
+                foreach (ValueRestriction requirement in Requirements)
                 {
                     if (!requirement.SatisfiesNumRequirement(value.NumberValue))
                     {

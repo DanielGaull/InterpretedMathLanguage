@@ -163,7 +163,7 @@ namespace MathCommandLine.Evaluation
                     throw new InvalidParseException("\"" + typeName + "\" is not a valid data type.", parameter);
                 }
 
-                ParamRequirement[] reqs = new ParamRequirement[0];
+                ValueRestriction[] reqs = new ValueRestriction[0];
                 // Need to evaluate all of the requirements
                 if (reqsArray.Length > 0)
                 {
@@ -173,15 +173,15 @@ namespace MathCommandLine.Evaluation
                         // TODO: Exclude empty req strings
                         if (PARAM_REQ_INTEGER.IsMatch(reqStr))
                         {
-                            return ParamRequirement.Integer();
+                            return ValueRestriction.Integer();
                         }
                         else if (PARAM_REQ_POSITIVE.IsMatch(reqStr))
                         {
-                            return ParamRequirement.Positive();
+                            return ValueRestriction.Positive();
                         }
                         else if (PARAM_REQ_NEGATIVE.IsMatch(reqStr))
                         {
-                            return ParamRequirement.Negative();
+                            return ValueRestriction.Negative();
                         }
                         else if (PARAM_REQ_LT.IsMatch(reqStr))
                         {
@@ -189,7 +189,7 @@ namespace MathCommandLine.Evaluation
                             string argAsString = thisReqGroup[1].Value;
                             if (double.TryParse(argAsString, out double arg))
                             {
-                                return ParamRequirement.LessThan(arg);
+                                return ValueRestriction.LessThan(arg);
                             }
                             else
                             {
@@ -202,7 +202,7 @@ namespace MathCommandLine.Evaluation
                             string argAsString = thisReqGroup[1].Value;
                             if (double.TryParse(argAsString, out double arg))
                             {
-                                return ParamRequirement.LessThanOrEqualTo(arg);
+                                return ValueRestriction.LessThanOrEqualTo(arg);
                             }
                             else
                             {
@@ -215,7 +215,7 @@ namespace MathCommandLine.Evaluation
                             string argAsString = thisReqGroup[1].Value;
                             if (double.TryParse(argAsString, out double arg))
                             {
-                                return ParamRequirement.GreaterThan(arg);
+                                return ValueRestriction.GreaterThan(arg);
                             }
                             else
                             {
@@ -228,7 +228,7 @@ namespace MathCommandLine.Evaluation
                             string argAsString = thisReqGroup[1].Value;
                             if (double.TryParse(argAsString, out double arg))
                             {
-                                return ParamRequirement.GreaterThanOrEqualTo(arg);
+                                return ValueRestriction.GreaterThanOrEqualTo(arg);
                             }
                             else
                             {
