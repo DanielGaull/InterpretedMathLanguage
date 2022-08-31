@@ -20,8 +20,8 @@ namespace MathCommandLine.Evaluation
 
         // Regexes for matching language symbols
         private static readonly Regex NUMBER_REGEX = new Regex("^" + NUMBER_REGEX_PATTERN + "$"); // No groups
-        private static readonly Regex LIST_REGEX = new Regex(@"^\{([^}]*)\}$"); // Group for the list elements
-        private static readonly Regex LAMBDA_REGEX = new Regex(@"^\(([^)]*)\)=>\{([^}]*)\}$"); // Group for param list and for the expression
+        private static readonly Regex LIST_REGEX = new Regex(@"^\{(.*)\}$"); // Group for the list elements
+        private static readonly Regex LAMBDA_REGEX = new Regex(@"^\((.*)\)=>\{(.*)\}$"); // Group for param list and for the expression
         private static readonly Regex TYPE_REGEX = new Regex(@"^#([a-zA-Z_][a-zA-Z0-9_]*)$"); // Group for the type name
         private static readonly Regex FUNCTION_REGEX = new Regex(@"^([a-zA-Z_][a-zA-Z0-9_]*)\((.*)\)$"); // Group for the function name and for the arguments
         

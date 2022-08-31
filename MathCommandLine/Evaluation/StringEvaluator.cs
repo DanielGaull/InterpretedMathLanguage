@@ -30,6 +30,8 @@ namespace MathCommandLine.Evaluation
             if (!expression.IsNativeExpression)
             {
                 // TODO: Evaluate the string expression
+                // TODO: Remove whitespace, handle variables, etc.
+                return FinalStageEvaluate(expression.Expression, variables);
             }
             throw new NotImplementedException();
         }

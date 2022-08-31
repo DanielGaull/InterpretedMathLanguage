@@ -13,18 +13,12 @@ namespace MathCommandLine
         static GenericEvaluator evaluator;
         static void Main(string[] args)
         {
-            //evaluator = new GenericEvaluator();
-
-            //Regex PARAM_TYPE_REQS_REGEX = new Regex(@"(?:\[(.*)\])?([a-zA-Z_][a-zA-Z0-9_]*)");
-            //var groups = PARAM_TYPE_REQS_REGEX.Match("number").Groups;
-            //Console.WriteLine("'" + groups[0].Value + "'; '" + groups[1].Value + "'; '" + groups[2].Value + "'");
-
-            Regex t = new Regex(@"^[+-]?[0-9]+(\.[0-9]*)?$");
+            evaluator = new GenericEvaluator();
 
             Parser parser = new Parser();
 
-            var res = parser.ParseExpression("(x:[]number)=>{5}");
-            Console.WriteLine("Done");
+            string expr = "{5,3,{1,2}}";
+            Console.WriteLine(evaluator.Evaluate(new MExpression(expr), new MArguments()).ToLongString());
         }
     }
 }
