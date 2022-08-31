@@ -27,7 +27,7 @@ namespace MathCommandLine
                 MDataType.Type, MDataType.Error);
             Parser parser = new Parser(funcDict, dtDict);
 
-            var res = parser.ParseExpression("(x:number)=>{5}");
+            var res = parser.ParseExpression("(x:[]number)=>{5}");
             Console.WriteLine("Done");
         }
     }
