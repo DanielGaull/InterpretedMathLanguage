@@ -141,7 +141,7 @@ namespace MathCommandLine.Functions
         }
         public static MFunction TrigFunction(IEvaluator evaluator)
         {
-            // TODO: Add parameter requirements, and make the op here have to be a number from 0-5
+            // TODO: Add parameter restrictions, and make the op here have to be a number from 0-5
             // TODO: Hyperbolic trig functions
             return new MFunction(
                 "_trig", MDataType.Number,
@@ -453,7 +453,7 @@ namespace MathCommandLine.Functions
         }
         public static MFunction CreateErrorFunction(IEvaluator evaluator)
         {
-            // TODO: Apply arg requirements
+            // TODO: Apply arg restrictions
             return new MFunction(
                 "_error", MDataType.Error,
                 (args) =>

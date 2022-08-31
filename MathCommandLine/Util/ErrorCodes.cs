@@ -15,6 +15,6 @@ namespace MathCommandLine.Util
         WRONG_ARG_COUNT = 6,
         DIV_BY_ZERO = 7,
         INVALID_CAST = 8,
-        FAILS_REQUIREMENT = 9,
+        FAILS_RESTRICTION = 9,
     }
 }

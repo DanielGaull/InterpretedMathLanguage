@@ -77,12 +77,12 @@ namespace MathCommandLine.Evaluation
     public class AstParameterTypeEntry
     {
         public MDataType DataType { get; private set; }
-        public ValueRestriction[] ParamRequirements { get; private set; }
+        public ValueRestriction[] ValueRestrictions { get; private set; }
 
-        public AstParameterTypeEntry(MDataType dataType, ValueRestriction[] paramRequirements)
+        public AstParameterTypeEntry(MDataType dataType, ValueRestriction[] valueRestrictions)
         {
             DataType = dataType;
-            ParamRequirements = paramRequirements;
+            ValueRestrictions = valueRestrictions;
         }
         public AstParameterTypeEntry(MDataType dataType)
             : this(dataType, new ValueRestriction[0])

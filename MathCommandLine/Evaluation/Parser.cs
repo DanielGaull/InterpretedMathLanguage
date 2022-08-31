@@ -31,16 +31,16 @@ namespace MathCommandLine.Evaluation
         private static readonly Regex PARAM_TYPES_DELIMITER_REGEX = new Regex(@"\|");
         private static readonly Regex PARAM_REQS_DELIMITER_REGEX = new Regex(@",");
         private static readonly Regex PARAM_NAME_TYPE_REGEX = new Regex(@"(.*):(.*)"); // Group for param name and group for type(s)
-        private static readonly Regex PARAM_TYPE_REQS_REGEX = new Regex(@"(?:\[(.*)\])?([a-zA-Z_][a-zA-Z0-9_]*)"); // Group for requirements, and for type name
+        private static readonly Regex PARAM_TYPE_RESTS_REGEX = new Regex(@"(?:\[(.*)\])?([a-zA-Z_][a-zA-Z0-9_]*)"); // Group for restrictions, and for type name
 
-        // Parameter Requirement regexes
-        private static readonly Regex PARAM_REQ_INTEGER = new Regex(@"%");
-        private static readonly Regex PARAM_REQ_POSITIVE = new Regex(@"\+");
-        private static readonly Regex PARAM_REQ_NEGATIVE = new Regex(@"-");
-        private static readonly Regex PARAM_REQ_LT = new Regex(@$"<\(({NUMBER_REGEX_PATTERN})\)");
-        private static readonly Regex PARAM_REQ_GT = new Regex(@$">\(({NUMBER_REGEX_PATTERN})\)");
-        private static readonly Regex PARAM_REQ_LTE = new Regex(@$"<=\(({NUMBER_REGEX_PATTERN})\)");
-        private static readonly Regex PARAM_REQ_GTE = new Regex(@$">=\(({NUMBER_REGEX_PATTERN})\)");
+        // Value restriction regexes
+        private static readonly Regex VALUE_REST_INTEGER = new Regex(@"%");
+        private static readonly Regex VALUE_REST_POSITIVE = new Regex(@"\+");
+        private static readonly Regex VALUE_REST_NEGATIVE = new Regex(@"-");
+        private static readonly Regex VALUE_REST_LT = new Regex(@$"<\(({NUMBER_REGEX_PATTERN})\)");
+        private static readonly Regex VALUE_REST_GT = new Regex(@$">\(({NUMBER_REGEX_PATTERN})\)");
+        private static readonly Regex VALUE_REST_LTE = new Regex(@$"<=\(({NUMBER_REGEX_PATTERN})\)");
+        private static readonly Regex VALUE_REST_GTE = new Regex(@$">=\(({NUMBER_REGEX_PATTERN})\)");
 
         // Other useful regexes
         private static readonly Regex LIST_DELIMITER_REGEX = new Regex(@",");
@@ -139,7 +139,7 @@ namespace MathCommandLine.Evaluation
             }
             var groups = PARAM_NAME_TYPE_REGEX.Match(parameter).Groups;
             string nameString = groups[1].Value;
-            // Note: There can be multiple types, and any type can have requirements
+            // Note: There can be multiple types, and any type can have restrictions
             string typesString = groups[2].Value;
             if (!SYMBOL_NAME_REGEX.IsMatch(nameString))
             {
@@ -150,8 +150,8 @@ namespace MathCommandLine.Evaluation
             string[] eachTypes = PARAM_TYPES_DELIMITER_REGEX.Split(typesString);
             AstParameterTypeEntry[] typeEntries = eachTypes.Select((typeString) =>
             {
-                // Need to extract the requirements from this string
-                var typeGroups = PARAM_TYPE_REQS_REGEX.Match(typeString).Groups;
+                // Need to extract the restrictions from this string
+                var typeGroups = PARAM_TYPE_RESTS_REGEX.Match(typeString).Groups;
                 // Don't always have reqs array, but it will always appear as the first group, and be empty if it doesn't exist
                 string reqsArray = typeGroups[1].Value;
                 string typeName = typeGroups[2].Value;
@@ -164,28 +164,28 @@ namespace MathCommandLine.Evaluation
                 }
 
                 ValueRestriction[] reqs = new ValueRestriction[0];
-                // Need to evaluate all of the requirements
+                // Need to evaluate all of the restrictions
                 if (reqsArray.Length > 0)
                 {
                     string[] reqDefsStrings = PARAM_REQS_DELIMITER_REGEX.Split(reqsArray);
                     reqs = reqDefsStrings.Select((reqStr) =>
                     {
                         // TODO: Exclude empty req strings
-                        if (PARAM_REQ_INTEGER.IsMatch(reqStr))
+                        if (VALUE_REST_INTEGER.IsMatch(reqStr))
                         {
                             return ValueRestriction.Integer();
                         }
-                        else if (PARAM_REQ_POSITIVE.IsMatch(reqStr))
+                        else if (VALUE_REST_POSITIVE.IsMatch(reqStr))
                         {
                             return ValueRestriction.Positive();
                         }
-                        else if (PARAM_REQ_NEGATIVE.IsMatch(reqStr))
+                        else if (VALUE_REST_NEGATIVE.IsMatch(reqStr))
                         {
                             return ValueRestriction.Negative();
                         }
-                        else if (PARAM_REQ_LT.IsMatch(reqStr))
+                        else if (VALUE_REST_LT.IsMatch(reqStr))
                         {
-                            var thisReqGroup = PARAM_REQ_LT.Match(reqStr).Groups;
+                            var thisReqGroup = VALUE_REST_LT.Match(reqStr).Groups;
                             string argAsString = thisReqGroup[1].Value;
                             if (double.TryParse(argAsString, out double arg))
                             {
@@ -196,9 +196,9 @@ namespace MathCommandLine.Evaluation
                                 // TODO: Invalid input somehow, though Regex should ensure no invalid inputs are provided
                             }
                         }
-                        else if (PARAM_REQ_LTE.IsMatch(reqStr))
+                        else if (VALUE_REST_LTE.IsMatch(reqStr))
                         {
-                            var thisReqGroup = PARAM_REQ_LTE.Match(reqStr).Groups;
+                            var thisReqGroup = VALUE_REST_LTE.Match(reqStr).Groups;
                             string argAsString = thisReqGroup[1].Value;
                             if (double.TryParse(argAsString, out double arg))
                             {
@@ -209,9 +209,9 @@ namespace MathCommandLine.Evaluation
                                 // TODO: Invalid input somehow, though Regex should ensure no invalid inputs are provided
                             }
                         }
-                        else if (PARAM_REQ_GT.IsMatch(reqStr))
+                        else if (VALUE_REST_GT.IsMatch(reqStr))
                         {
-                            var thisReqGroup = PARAM_REQ_GT.Match(reqStr).Groups;
+                            var thisReqGroup = VALUE_REST_GT.Match(reqStr).Groups;
                             string argAsString = thisReqGroup[1].Value;
                             if (double.TryParse(argAsString, out double arg))
                             {
@@ -222,9 +222,9 @@ namespace MathCommandLine.Evaluation
                                 // TODO: Invalid input somehow, though Regex should ensure no invalid inputs are provided
                             }
                         }
-                        else if (PARAM_REQ_GTE.IsMatch(reqStr))
+                        else if (VALUE_REST_GTE.IsMatch(reqStr))
                         {
-                            var thisReqGroup = PARAM_REQ_GTE.Match(reqStr).Groups;
+                            var thisReqGroup = VALUE_REST_GTE.Match(reqStr).Groups;
                             string argAsString = thisReqGroup[1].Value;
                             if (double.TryParse(argAsString, out double arg))
                             {

@@ -36,11 +36,11 @@ namespace MathCommandLine.Functions
                         "Expected argument \"" + Parameters.Get(i).Name + "\" to be of type '" + Parameters.Get(i).DataTypeString() + "' but received type '" + args.Get(i).Value.DataType + "'.",
                         MList.FromOne(MValue.Number(i)));
                 }
-                else if (!Parameters[i].PassesRequirements(args[i].Value))
+                else if (!Parameters[i].PassesRestrictions(args[i].Value))
                 {
-                    // Fails requirements!
-                    return MValue.Error(ErrorCodes.FAILS_REQUIREMENT,
-                        "Argument \"" + Parameters.Get(i).Name + "\" fails one or more parameter requirements.",
+                    // Fails restrictions!
+                    return MValue.Error(ErrorCodes.FAILS_RESTRICTION,
+                        "Argument \"" + Parameters.Get(i).Name + "\" fails one or more parameter restrictions.",
                         MList.FromOne(MValue.Number(i)));
                 }
                 else if (args.Get(i).Value.DataType == MDataType.Error)

@@ -9,39 +9,39 @@ namespace MathCommandLine.Functions
     public struct MParameter
     {
         public List<MDataType> DataTypes;
-        public List<ValueRestriction> Requirements;
+        public List<ValueRestriction> Restrictions;
         public string Name;
 
         public MParameter(MDataType dataType, string name)
         {
             DataTypes = new List<MDataType> { dataType };
             Name = name;
-            Requirements = new List<ValueRestriction>();
+            Restrictions = new List<ValueRestriction>();
         }
         public MParameter(string name, params MDataType[] dataTypes)
         {
             DataTypes = new List<MDataType>(dataTypes);
             Name = name;
-            Requirements = new List<ValueRestriction>();
+            Restrictions = new List<ValueRestriction>();
         }
-        public MParameter(string name, List<MDataType> dataTypes, List<ValueRestriction> requirements)
+        public MParameter(string name, List<MDataType> dataTypes, List<ValueRestriction> restrictions)
         {
             DataTypes = dataTypes;
             Name = name;
-            Requirements = requirements;
+            Restrictions = restrictions;
         }
 
         public bool ContainsType(MDataType type)
         {
             return DataTypes.Contains(type) || DataTypes.Contains(MDataType.Any);
         }
-        public bool PassesRequirements(MValue value)
+        public bool PassesRestrictions(MValue value)
         {
             if (value.DataType == MDataType.Number)
             {
-                foreach (ValueRestriction requirement in Requirements)
+                foreach (ValueRestriction restriction in Restrictions)
                 {
-                    if (!requirement.SatisfiesNumRequirement(value.NumberValue))
+                    if (!restriction.SatisfiesNumRestriction(value.NumberValue))
                     {
                         return false;
                     }
