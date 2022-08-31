@@ -58,6 +58,7 @@ namespace MathCommandLine.Evaluation
                     MFunction function = funcDict.GetFunction(ast.Name);
                     return function.Evaluate(args, superEvaluator);
                 case AstTypes.Variable:
+                    // TODO: Handle if variable doesn't exist
                     // Return the value of the variable with this name (in arguments)
                     return variables[ast.Name].Value;
                 case AstTypes.NumberLiteral:

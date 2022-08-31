@@ -124,6 +124,11 @@ namespace MathCommandLine.Evaluation
                 string dtString = TYPE_REGEX.Match(expression).Groups[1].Value;
                 return Ast.TypeLiteral(dtString);
             }
+            else if (SYMBOL_NAME_REGEX.IsMatch(expression))
+            {
+                // We've got a variable
+                return Ast.Variable(expression);
+            }
             throw new InvalidParseException(expression);
         }
 
