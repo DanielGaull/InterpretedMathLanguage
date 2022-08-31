@@ -21,11 +21,7 @@ namespace MathCommandLine
 
             Regex t = new Regex(@"^[+-]?[0-9]+(\.[0-9]*)?$");
 
-            List<MFunction> coreFuncs = new List<MFunction>();
-            FunctionDict funcDict = new FunctionDict(coreFuncs);
-            DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, MDataType.Lambda,
-                MDataType.Type, MDataType.Error);
-            Parser parser = new Parser(funcDict, dtDict);
+            Parser parser = new Parser();
 
             var res = parser.ParseExpression("(x:[]number)=>{5}");
             Console.WriteLine("Done");

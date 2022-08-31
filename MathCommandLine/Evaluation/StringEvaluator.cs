@@ -45,7 +45,7 @@ namespace MathCommandLine.Evaluation
         {
             switch (ast.Type)
             {
-                case AstTypes.Function:
+                case AstTypes.FunctionCall:
                     List<MArgument> argsList = new List<MArgument>();
                     for (int i = 0; i < ast.AstCollectionArg.Length; i++)
                     {
@@ -57,7 +57,6 @@ namespace MathCommandLine.Evaluation
                 case AstTypes.Variable:
                     // Return the value of the variable with this name (in arguments)
                     return variables[ast.Name].Value;
-
                 case AstTypes.NumberLiteral:
                     return MValue.Number(ast.NumberArg);
                 case AstTypes.ListLiteral:
@@ -70,6 +69,7 @@ namespace MathCommandLine.Evaluation
                     return MValue.List(new MList(elements));
                 case AstTypes.LambdaLiteral:
                     // TODO
+                    
                     break;
                 case AstTypes.TypeLiteral:
                     return MValue.Type(dtDict.GetType(ast.Name));

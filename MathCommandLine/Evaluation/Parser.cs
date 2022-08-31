@@ -24,7 +24,6 @@ namespace MathCommandLine.Evaluation
         private static readonly Regex LAMBDA_REGEX = new Regex(@"^\(([^)]*)\)=>\{([^}]*)\}$"); // Group for param list and for the expression
         private static readonly Regex TYPE_REGEX = new Regex(@"^#([a-zA-Z_][a-zA-Z0-9_]*)$"); // Group for the type name
         private static readonly Regex FUNCTION_REGEX = new Regex(@"^([a-zA-Z_][a-zA-Z0-9_]*)\((.*)\)$"); // Group for the function name and for the arguments
-        private static readonly Regex SYMBOL_NAME_REGEX = new Regex(@"^[a-zA-Z_][a-zA-Z0-9_]*$");
         
         // Parameter parsing regexes
         private static readonly Regex PARAM_DELIMITER_REGEX = new Regex(@",");
@@ -46,14 +45,10 @@ namespace MathCommandLine.Evaluation
         private static readonly Regex LIST_DELIMITER_REGEX = new Regex(@",");
         private static readonly Regex ARG_DELIMITER_REGEX = new Regex(@",");
         private static readonly Regex WHITESPACE_REGEX = new Regex(@"\s+");
+        private static readonly Regex SYMBOL_NAME_REGEX = new Regex(@"^[a-zA-Z_][a-zA-Z0-9_]*$");
 
-        private FunctionDict funcDict;
-        private DataTypeDict dtDict;
-
-        public Parser(FunctionDict funcDict, DataTypeDict dtDict)
+        public Parser()
         {
-            this.funcDict = funcDict;
-            this.dtDict = dtDict;
         }
 
         // TODO: Function that removes whitespace from expressions
@@ -77,7 +72,17 @@ namespace MathCommandLine.Evaluation
                 string nameString = groups[1].Value;
                 string argsString = groups[2].Value;
 
-                // TODO: Select function name & args list
+                // Verify that function name is valid
+                if (!SYMBOL_NAME_REGEX.IsMatch(nameString))
+                {
+                    throw new InvalidParseException("\"" + nameString + "\" is not a valid function name.", expression);
+                }
+
+                // Pull the arguments
+                string[] argStrings = ARG_DELIMITER_REGEX.Split(argsString);
+                // Parse all the arguments
+                Ast[] args = argStrings.Select(ParseExpression).ToArray();
+                return Ast.FunctionCall(nameString, args);
             }
             else if (NUMBER_REGEX.IsMatch(expression))
             {
@@ -135,7 +140,7 @@ namespace MathCommandLine.Evaluation
             if (SYMBOL_NAME_REGEX.IsMatch(parameter))
             {
                 // Name is the parameter string, and type is of the any type
-                return new AstParameter(parameter, MDataType.Any);
+                return new AstParameter(parameter, MDataType.Any.Name);
             }
             var groups = PARAM_NAME_TYPE_REGEX.Match(parameter).Groups;
             string nameString = groups[1].Value;
@@ -155,13 +160,6 @@ namespace MathCommandLine.Evaluation
                 // Don't always have reqs array, but it will always appear as the first group, and be empty if it doesn't exist
                 string reqsArray = typeGroups[1].Value;
                 string typeName = typeGroups[2].Value;
-                // Get the type from the dictionary
-                MDataType type = dtDict.GetType(typeName);
-                if (type.IsEmpty())
-                {
-                    // Invalid DT
-                    throw new InvalidParseException("\"" + typeName + "\" is not a valid data type.", parameter);
-                }
 
                 ValueRestriction[] reqs = new ValueRestriction[0];
                 // Need to evaluate all of the restrictions
@@ -170,7 +168,6 @@ namespace MathCommandLine.Evaluation
                     string[] reqDefsStrings = PARAM_REQS_DELIMITER_REGEX.Split(reqsArray);
                     reqs = reqDefsStrings.Select((reqStr) =>
                     {
-                        // TODO: Exclude empty req strings
                         if (VALUE_REST_INTEGER.IsMatch(reqStr))
                         {
                             return ValueRestriction.Integer();
@@ -241,7 +238,7 @@ namespace MathCommandLine.Evaluation
                     }).ToArray();
                 }
 
-                return new AstParameterTypeEntry(type, reqs);
+                return new AstParameterTypeEntry(typeName, reqs);
             }).ToArray();
             return new AstParameter(nameString, typeEntries);
         }

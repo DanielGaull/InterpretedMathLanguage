@@ -22,6 +22,15 @@ namespace MathCommandLine.Evaluation
         // Used for Function, Variable, TypeLiteral types
         public string Name { get; private set; }
 
+        /* Used:
+         * NumberLiteral: NumberArg
+         * ListLiteral: AstCollectionArg
+         * LambdaLiteral: Parameters, Expression
+         * TypeLiteral: Name
+         * Variable: Name
+         * FunctionCall: Name, AstCollectionArg
+         */
+
         public Ast(AstTypes type, double numberArg, Ast[] astCollectionArg, Ast expression, AstParameter[] parameters, string name)
         {
             Type = type;
@@ -31,6 +40,8 @@ namespace MathCommandLine.Evaluation
             Parameters = parameters;
             Name = name;
         }
+
+        #region Constructor Functions
 
         public static Ast NumberLiteral(double value)
         {
@@ -48,14 +59,16 @@ namespace MathCommandLine.Evaluation
         {
             return new Ast(AstTypes.TypeLiteral, 0, null, null, null, typeName);
         }
-        public static Ast Function(string name, params Ast[] args)
+        public static Ast FunctionCall(string name, params Ast[] args)
         {
-            return new Ast(AstTypes.Parameter, 0, args, null, null, name);
+            return new Ast(AstTypes.FunctionCall, 0, args, null, null, name);
         }
         public static Ast Variable(string name)
         {
             return new Ast(AstTypes.NumberLiteral, 0, null, null, null, name);
         }
+
+        #endregion
     }
 
     public class AstParameter
@@ -68,24 +81,24 @@ namespace MathCommandLine.Evaluation
             Name = name;
             TypeEntries = typeEntries;
         }
-        public AstParameter(string name, params MDataType[] dataTypes)
-            : this(name, dataTypes.Select(x => new AstParameterTypeEntry(x)).ToArray())
+        public AstParameter(string name, params string[] dataTypeNames)
+            : this(name, dataTypeNames.Select(x => new AstParameterTypeEntry(x)).ToArray())
         {
 
         }
     }
     public class AstParameterTypeEntry
     {
-        public MDataType DataType { get; private set; }
+        public string DataTypeName { get; private set; }
         public ValueRestriction[] ValueRestrictions { get; private set; }
 
-        public AstParameterTypeEntry(MDataType dataType, ValueRestriction[] valueRestrictions)
+        public AstParameterTypeEntry(string dataTypeName, ValueRestriction[] valueRestrictions)
         {
-            DataType = dataType;
+            DataTypeName = dataTypeName;
             ValueRestrictions = valueRestrictions;
         }
-        public AstParameterTypeEntry(MDataType dataType)
-            : this(dataType, new ValueRestriction[0])
+        public AstParameterTypeEntry(string dataTypeName)
+            : this(dataTypeName, new ValueRestriction[0])
         {
         }
     }
@@ -96,8 +109,7 @@ namespace MathCommandLine.Evaluation
         ListLiteral,
         LambdaLiteral,
         TypeLiteral,
-        Function,
         Variable,
-        Parameter,
+        FunctionCall,
     }
 }
