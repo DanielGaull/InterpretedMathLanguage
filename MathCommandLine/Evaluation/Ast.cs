@@ -13,7 +13,7 @@ namespace MathCommandLine.Evaluation
         // Used for Literal types
         // For number literals
         public double NumberArg { get; private set; }
-        public Ast Expression { get; private set; }
+        public string Expression { get; private set; }
         // For lambdas
         public AstParameter[] Parameters { get; private set; }
 
@@ -31,7 +31,7 @@ namespace MathCommandLine.Evaluation
          * FunctionCall: Name, AstCollectionArg
          */
 
-        public Ast(AstTypes type, double numberArg, Ast[] astCollectionArg, Ast expression, AstParameter[] parameters, string name)
+        public Ast(AstTypes type, double numberArg, Ast[] astCollectionArg, string expression, AstParameter[] parameters, string name)
         {
             Type = type;
             NumberArg = numberArg;
@@ -51,7 +51,7 @@ namespace MathCommandLine.Evaluation
         {
             return new Ast(AstTypes.ListLiteral, 0, elements, null, null, null);
         }
-        public static Ast LambdaLiteral(AstParameter[] parameters, Ast expression)
+        public static Ast LambdaLiteral(AstParameter[] parameters, string expression)
         {
             return new Ast(AstTypes.LambdaLiteral, 0, null, expression, parameters, null);
         }

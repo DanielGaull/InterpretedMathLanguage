@@ -16,5 +16,6 @@ namespace MathCommandLine.Util
         DIV_BY_ZERO = 7,
         INVALID_CAST = 8,
         FAILS_RESTRICTION = 9,
+        TYPE_DOES_NOT_EXIST = 10,
     }
 }

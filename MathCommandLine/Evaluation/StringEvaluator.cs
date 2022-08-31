@@ -4,6 +4,7 @@ using MathCommandLine.Functions;
 using MathCommandLine.Structure;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -68,10 +69,38 @@ namespace MathCommandLine.Evaluation
                     }
                     return MValue.List(new MList(elements));
                 case AstTypes.LambdaLiteral:
-                    // TODO
-                    
-                    break;
+                    MExpression expression = new MExpression(ast.Expression);
+                    MParameter[] paramArray = ast.Parameters.Select((astParam) =>
+                    {
+                        string name = astParam.Name;
+                        MTypeRestrictionsEntry[] entries = astParam.TypeEntries.Select((entry) =>
+                        {
+                            if (!dtDict.Contains(entry.DataTypeName))
+                            {
+                                return new MTypeRestrictionsEntry();
+                            }
+                            return new MTypeRestrictionsEntry(dtDict.GetType(entry.DataTypeName), entry.ValueRestrictions);
+                        }).ToArray();
+                        if (entries.Any((entry) => entry.IsEmpty))
+                        {
+                            return MParameter.Empty;
+                        }
+                        // If any type entries are empty, then return an error (type doesn't exist)
+                        return new MParameter(name, entries);
+                    }).ToArray();
+                    if (paramArray.Any((param) => param.IsEmpty))
+                    {
+                        return MValue.Error(Util.ErrorCodes.TYPE_DOES_NOT_EXIST,
+                            "Type \"" + ast.Name + "\" is not defined.", MList.Empty);
+                    }
+                    MParameters parameters = new MParameters();
+                    return MValue.Lambda(new MLambda(parameters, expression));
                 case AstTypes.TypeLiteral:
+                    if (!dtDict.Contains(ast.Name))
+                    {
+                        return MValue.Error(Util.ErrorCodes.TYPE_DOES_NOT_EXIST,
+                            "Type \"" + ast.Name + "\" is not defined.", MList.Empty);
+                    }
                     return MValue.Type(dtDict.GetType(ast.Name));
             }
             return MValue.Empty;

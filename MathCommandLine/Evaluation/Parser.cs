@@ -116,10 +116,7 @@ namespace MathCommandLine.Evaluation
                     return ParseParameter(paramString);
                 }).ToArray();
 
-                // Getting the expression to an AST is simple
-                Ast expressionAst = ParseExpression(exprString);
-
-                return Ast.LambdaLiteral(parsedParams, expressionAst);
+                return Ast.LambdaLiteral(parsedParams, exprString);
             }
             else if (TYPE_REGEX.IsMatch(expression))
             {

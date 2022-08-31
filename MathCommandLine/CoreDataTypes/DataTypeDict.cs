@@ -44,5 +44,10 @@ namespace MathCommandLine.CoreDataTypes
             // DT doesn't exist
             return MDataType.Empty;
         }
+
+        public bool Contains(string name) 
+        {
+            return internalDict.ContainsKey(name);
+        }
     }
 }

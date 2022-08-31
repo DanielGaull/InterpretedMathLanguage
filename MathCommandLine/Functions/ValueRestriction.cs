@@ -65,5 +65,27 @@ namespace MathCommandLine.Functions
         {
             return LessThan(0);
         }
+
+        public static bool operator ==(ValueRestriction p1, ValueRestriction p2)
+        {
+            return p1.Type == p2.Type && p1.DoubleArg == p2.DoubleArg;
+        }
+        public static bool operator !=(ValueRestriction p1, ValueRestriction p2)
+        {
+            return !(p1 == p2);
+        }
+        public override bool Equals(object obj)
+        {
+            if (obj is ValueRestriction)
+            {
+                ValueRestriction value = (ValueRestriction)obj;
+                return value == this;
+            }
+            return false;
+        }
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }
