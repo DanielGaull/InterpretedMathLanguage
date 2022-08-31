@@ -29,7 +29,7 @@ namespace MathCommandLine.Functions
             // Now check the types of the arguments to ensure they match. If any errors appear in the arguments, return that immediately
             for (int i = 0; i < args.Length; i++)
             {
-                if (Parameters[i].ContainsType(args[i].Value.DataType))
+                if (!Parameters[i].ContainsType(args[i].Value.DataType))
                 {
                     // Improper data type!
                     return MValue.Error(ErrorCodes.INVALID_TYPE,
