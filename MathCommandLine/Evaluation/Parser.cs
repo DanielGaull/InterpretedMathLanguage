@@ -17,6 +17,7 @@ namespace MathCommandLine.Evaluation
     {
         // Regexes for common necessities
         private const string NUMBER_REGEX_PATTERN = @"[+-]?[0-9]+(\.[0-9]*)?";
+        private const string WRAPPER_EXCLUSION_PATTERN = @"(?![^\(\[\{]*[\)\]\}])";
 
         // Regexes for matching language symbols
         private static readonly Regex NUMBER_REGEX = new Regex("^" + NUMBER_REGEX_PATTERN + "$"); // No groups
@@ -26,9 +27,9 @@ namespace MathCommandLine.Evaluation
         private static readonly Regex FUNCTION_REGEX = new Regex(@"^([a-zA-Z_][a-zA-Z0-9_]*)\((.*)\)$"); // Group for the function name and for the arguments
         
         // Parameter parsing regexes
-        private static readonly Regex PARAM_DELIMITER_REGEX = new Regex(@",");
+        private static readonly Regex PARAM_DELIMITER_REGEX = new Regex(@"," + WRAPPER_EXCLUSION_PATTERN);
         private static readonly Regex PARAM_TYPES_DELIMITER_REGEX = new Regex(@"\|");
-        private static readonly Regex PARAM_REQS_DELIMITER_REGEX = new Regex(@",");
+        private static readonly Regex PARAM_REQS_DELIMITER_REGEX = new Regex(@"," + WRAPPER_EXCLUSION_PATTERN);
         private static readonly Regex PARAM_NAME_TYPE_REGEX = new Regex(@"(.*):(.*)"); // Group for param name and group for type(s)
         private static readonly Regex PARAM_TYPE_RESTS_REGEX = new Regex(@"(?:\[(.*)\])?([a-zA-Z_][a-zA-Z0-9_]*)"); // Group for restrictions, and for type name
 
@@ -42,8 +43,8 @@ namespace MathCommandLine.Evaluation
         private static readonly Regex VALUE_REST_GTE = new Regex(@$">=\(({NUMBER_REGEX_PATTERN})\)");
 
         // Other useful regexes
-        private static readonly Regex LIST_DELIMITER_REGEX = new Regex(@",");
-        private static readonly Regex ARG_DELIMITER_REGEX = new Regex(@",");
+        private static readonly Regex LIST_DELIMITER_REGEX = new Regex(@"," + WRAPPER_EXCLUSION_PATTERN);
+        private static readonly Regex ARG_DELIMITER_REGEX = new Regex(@"," + WRAPPER_EXCLUSION_PATTERN);
         private static readonly Regex WHITESPACE_REGEX = new Regex(@"\s+");
         private static readonly Regex SYMBOL_NAME_REGEX = new Regex(@"^[a-zA-Z_][a-zA-Z0-9_]*$");
 
