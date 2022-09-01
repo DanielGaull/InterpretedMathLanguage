@@ -18,13 +18,22 @@ namespace MathCommandLine.Evaluation
         // Regexes for common necessities
         private const string NUMBER_REGEX_PATTERN = @"[+-]?[0-9]+(\.[0-9]*)?";
         private const string WRAPPER_EXCLUSION_PATTERN = @"(?![^\(\[\{]*[\)\]\}])";
+        private const string LAMBDA_PATTERN = @"\((.*)\)=>\{(.*)\}";  // Group for param list and for the expression
+        private const string SYMBOL_PATTERN = @"[a-zA-Z_][a-zA-Z0-9_]*";
 
         // Regexes for matching language symbols
-        private static readonly Regex NUMBER_REGEX = new Regex("^" + NUMBER_REGEX_PATTERN + "$"); // No groups
-        private static readonly Regex LIST_REGEX = new Regex(@"^\{(.*)\}$"); // Group for the list elements
-        private static readonly Regex LAMBDA_REGEX = new Regex(@"^\((.*)\)=>\{(.*)\}$"); // Group for param list and for the expression
-        private static readonly Regex TYPE_REGEX = new Regex(@"^#([a-zA-Z_][a-zA-Z0-9_]*)$"); // Group for the type name
-        private static readonly Regex FUNCTION_REGEX = new Regex(@"^([a-zA-Z_][a-zA-Z0-9_]*)\((.*)\)$"); // Group for the function name and for the arguments
+        private static readonly Regex NUMBER_REGEX = new Regex("^" + NUMBER_REGEX_PATTERN + "$");
+        // Group for the list elements
+        private static readonly Regex LIST_REGEX = new Regex(@"^\{(.*)\}$");
+        private static readonly Regex LAMBDA_REGEX = new Regex("^" + LAMBDA_PATTERN + "$");
+        // Group for the type name
+        private static readonly Regex TYPE_REGEX = new Regex(@"^#([a-zA-Z_][a-zA-Z0-9_]*)$");
+        // Group for the function name and for the arguments
+        private static readonly Regex FUNCTION_REGEX = new Regex(@$"^({SYMBOL_PATTERN})\((.*)\)$");
+        // Group for param list, expression, and args
+        private static readonly Regex LAMBDA_CALL_REGEX = new Regex(@$"^{LAMBDA_PATTERN}\((.*)\)$");
+        // Group for the thing being called, and a group for the arguments
+        private static readonly Regex CALL_REGEX = new Regex(@"^(.*)\((.*)\)$");
         
         // Parameter parsing regexes
         private static readonly Regex PARAM_DELIMITER_REGEX = new Regex(@"," + WRAPPER_EXCLUSION_PATTERN);
@@ -46,7 +55,7 @@ namespace MathCommandLine.Evaluation
         private static readonly Regex LIST_DELIMITER_REGEX = new Regex(@"," + WRAPPER_EXCLUSION_PATTERN);
         private static readonly Regex ARG_DELIMITER_REGEX = new Regex(@"," + WRAPPER_EXCLUSION_PATTERN);
         private static readonly Regex WHITESPACE_REGEX = new Regex(@"\s+");
-        private static readonly Regex SYMBOL_NAME_REGEX = new Regex(@"^[a-zA-Z_][a-zA-Z0-9_]*$");
+        private static readonly Regex SYMBOL_NAME_REGEX = new Regex(@$"^{SYMBOL_PATTERN}$");
 
         public Parser()
         {
@@ -66,24 +75,21 @@ namespace MathCommandLine.Evaluation
         {
             // TODO: Add support for big_decimal and big_int (require D or L at the end of the number literal, i.e. 750L or 0.642D)
 
-            // 'expression' is either a function or literal
-            if (FUNCTION_REGEX.IsMatch(expression))
+            // 'expression' is either a call, variable, or literal
+            if (CALL_REGEX.IsMatch(expression))
             {
-                var groups = FUNCTION_REGEX.Match(expression).Groups;
-                string nameString = groups[1].Value;
+                // Performing some sort of call
+                var groups = CALL_REGEX.Match(expression).Groups;
+                string callerString = groups[1].Value;
                 string argsString = groups[2].Value;
 
-                // Verify that function name is valid
-                if (!SYMBOL_NAME_REGEX.IsMatch(nameString))
-                {
-                    throw new InvalidParseException("\"" + nameString + "\" is not a valid function name.", expression);
-                }
+                Ast caller = ParseExpression(callerString);
 
-                // Pull the arguments
                 string[] argStrings = ARG_DELIMITER_REGEX.Split(argsString);
                 // Parse all the arguments
                 Ast[] args = argStrings.Select(ParseExpression).ToArray();
-                return Ast.FunctionCall(nameString, args);
+
+                return Ast.Call(caller, args);
             }
             else if (NUMBER_REGEX.IsMatch(expression))
             {

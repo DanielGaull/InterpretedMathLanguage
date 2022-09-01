@@ -48,7 +48,7 @@ namespace MathCommandLine.Evaluation
         {
             switch (ast.Type)
             {
-                case AstTypes.FunctionCall:
+                case AstTypes.Call:
                     List<MArgument> argsList = new List<MArgument>();
                     for (int i = 0; i < ast.AstCollectionArg.Length; i++)
                     {

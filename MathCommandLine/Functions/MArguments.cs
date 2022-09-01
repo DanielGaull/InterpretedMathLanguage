@@ -47,7 +47,7 @@ namespace MathCommandLine.Functions
         }
         public MArgument Get(string name)
         {
-            return args.Where((arg) => arg.Name == name).FirstOrDefault();
+            return args.Where((arg) => arg.Name == name).First();
         }
     }
 }
