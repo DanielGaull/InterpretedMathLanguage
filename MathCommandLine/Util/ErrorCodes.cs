@@ -17,5 +17,6 @@ namespace MathCommandLine.Util
         INVALID_CAST = 8,
         FAILS_RESTRICTION = 9,
         TYPE_DOES_NOT_EXIST = 10,
+        NOT_CALLABLE = 11,
     }
 }

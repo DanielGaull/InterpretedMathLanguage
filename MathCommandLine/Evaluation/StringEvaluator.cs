@@ -14,14 +14,14 @@ namespace MathCommandLine.Evaluation
     {
         private IEvaluator superEvaluator;
         private Parser parser;
-        private FunctionDict funcDict;
+        //private FunctionDict funcDict;
         private DataTypeDict dtDict;
 
         public StringEvaluator(IEvaluator superEvaluator, Parser parser, FunctionDict funcDict, DataTypeDict dtDict)
         {
             this.superEvaluator = superEvaluator;
             this.parser = parser;
-            this.funcDict = funcDict;
+            //this.funcDict = funcDict;
             this.dtDict = dtDict;
         }
 
@@ -55,8 +55,15 @@ namespace MathCommandLine.Evaluation
                         argsList.Add(new MArgument(EvaluateAst(ast.AstCollectionArg[i], variables)));
                     }
                     MArguments args = new MArguments(argsList);
-                    MFunction function = funcDict.GetFunction(ast.Name);
-                    return function.Evaluate(args, superEvaluator);
+                    MValue evaluatedCaller = EvaluateAst(ast.CalledAst, variables);
+                    if (evaluatedCaller.DataType != MDataType.Lambda)
+                    {
+                        // Not a callable object
+                        return MValue.Error(Util.ErrorCodes.NOT_CALLABLE, 
+                            "\"" + evaluatedCaller.DataType.Name + "\" is not a callable data type.", MList.Empty);
+                    }
+                    // We have a callable type!
+                    return evaluatedCaller.LambdaValue.Evaluate(args, superEvaluator);
                 case AstTypes.Variable:
                     // TODO: Handle if variable doesn't exist
                     // Return the value of the variable with this name (in arguments)
