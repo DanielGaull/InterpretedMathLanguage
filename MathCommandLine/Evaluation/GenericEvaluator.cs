@@ -25,7 +25,7 @@ namespace MathCommandLine.Evaluation
             DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, MDataType.Lambda, 
                 MDataType.Type, MDataType.Error);
             Parser parser = new Parser();
-            stringEvaluator = new StringEvaluator(this, parser, funcDict, dtDict);
+            stringEvaluator = new StringEvaluator(this, parser, dtDict);
         }
 
         public MValue Evaluate(MExpression expression, MArguments arguments)

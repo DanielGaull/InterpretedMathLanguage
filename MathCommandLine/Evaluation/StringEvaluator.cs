@@ -14,16 +14,14 @@ namespace MathCommandLine.Evaluation
     {
         private IEvaluator superEvaluator;
         private Parser parser;
-        //private FunctionDict funcDict;
         private DataTypeDict dtDict;
 
         private static readonly Regex WHITESPACE_REGEX = new Regex(@"\s+");
 
-        public StringEvaluator(IEvaluator superEvaluator, Parser parser, FunctionDict funcDict, DataTypeDict dtDict)
+        public StringEvaluator(IEvaluator superEvaluator, Parser parser, DataTypeDict dtDict)
         {
             this.superEvaluator = superEvaluator;
             this.parser = parser;
-            //this.funcDict = funcDict;
             this.dtDict = dtDict;
         }
 
@@ -31,8 +29,7 @@ namespace MathCommandLine.Evaluation
         {
             if (!mExpression.IsNativeExpression)
             {
-                // TODO: Evaluate the string expression
-                // TODO: Remove whitespace, handle variables, etc.
+                // TODO: Handle variables, etc.
                 string expr = mExpression.Expression;
                 expr = parser.ConvertStringsToLists(expr);
                 expr = CleanWhitespace(expr);
