@@ -68,7 +68,7 @@ namespace MathCommandLine.Evaluation
         }
         public static Ast Variable(string name)
         {
-            return new Ast(AstTypes.NumberLiteral, 0, null, null, null, name, null);
+            return new Ast(AstTypes.Variable, 0, null, null, null, name, null);
         }
 
         #endregion

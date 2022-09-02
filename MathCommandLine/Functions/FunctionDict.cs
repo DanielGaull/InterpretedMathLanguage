@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace MathCommandLine.Functions
@@ -7,6 +8,14 @@ namespace MathCommandLine.Functions
     public class FunctionDict
     {
         private Dictionary<string, MFunction> internalDict;
+
+        public List<MFunction> Functions
+        {
+            get
+            {
+                return internalDict.Values.ToList();
+            }
+        }
 
         public FunctionDict(params MFunction[] functions)
         {

@@ -18,20 +18,15 @@ namespace MathCommandLine.Evaluation
         // Regexes for common necessities
         private const string NUMBER_REGEX_PATTERN = @"[+-]?[0-9]+(\.[0-9]*)?";
         private const string WRAPPER_EXCLUSION_PATTERN = @"(?![^\(\[\{]*[\)\]\}])";
-        private const string LAMBDA_PATTERN = @"\((.*)\)=>\{(.*)\}";  // Group for param list and for the expression
         private const string SYMBOL_PATTERN = @"[a-zA-Z_][a-zA-Z0-9_]*";
 
         // Regexes for matching language symbols
         private static readonly Regex NUMBER_REGEX = new Regex("^" + NUMBER_REGEX_PATTERN + "$");
         // Group for the list elements
         private static readonly Regex LIST_REGEX = new Regex(@"^\{(.*)\}$");
-        private static readonly Regex LAMBDA_REGEX = new Regex("^" + LAMBDA_PATTERN + "$");
+        private static readonly Regex LAMBDA_REGEX = new Regex(@"^\((.*)\)=>\{(.*)\}$");
         // Group for the type name
         private static readonly Regex TYPE_REGEX = new Regex(@"^#([a-zA-Z_][a-zA-Z0-9_]*)$");
-        // Group for the function name and for the arguments
-        private static readonly Regex FUNCTION_REGEX = new Regex(@$"^({SYMBOL_PATTERN})\((.*)\)$");
-        // Group for param list, expression, and args
-        private static readonly Regex LAMBDA_CALL_REGEX = new Regex(@$"^{LAMBDA_PATTERN}\((.*)\)$");
         // Group for the thing being called, and a group for the arguments
         private static readonly Regex CALL_REGEX = new Regex(@"^(.*)\((.*)\)$");
         

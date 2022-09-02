@@ -13,17 +13,12 @@ namespace MathCommandLine.Evaluation
         StringEvaluator stringEvaluator;
         public GenericEvaluator()
         {
-            Initialize();
         }
 
-        private void Initialize()
+        public void Initialize(DataTypeDict dtDict)
         {
             nativeEvaluator = new NativeEvaluator();
 
-            List<MFunction> coreFuncs = CoreFunctions.GenerateCoreFunctions(this);
-            FunctionDict funcDict = new FunctionDict(coreFuncs);
-            DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, MDataType.Lambda, 
-                MDataType.Type, MDataType.Error);
             Parser parser = new Parser();
             stringEvaluator = new StringEvaluator(this, parser, dtDict);
         }

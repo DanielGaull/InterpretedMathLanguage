@@ -9,16 +9,16 @@ namespace MathCommandLine.Variables
 {
     public class VariableManager
     {
-        private List<MNamedValue> namedValues;
+        public List<MNamedValue> NamedValues { get; private set; }
 
         public VariableManager()
         {
-            namedValues = new List<MNamedValue>();
+            NamedValues = new List<MNamedValue>();
         }
 
         public MValue GetValue(string name)
         {
-            var selection = namedValues.Where((v) => v.Name == name && v.CanGetValue());
+            var selection = NamedValues.Where((v) => v.Name == name && v.CanGetValue());
             if (selection.Count() > 0)
             {
                 return selection.First().GetValue();
@@ -29,7 +29,7 @@ namespace MathCommandLine.Variables
 
         public void SetValue(string name, MValue value)
         {
-            var selection = namedValues.Where((v) => v.Name == name && v.CanAssign(value));
+            var selection = NamedValues.Where((v) => v.Name == name && v.CanAssign(value));
             if (selection.Count() > 0)
             {
                 selection.First().Assign(value);
@@ -43,19 +43,19 @@ namespace MathCommandLine.Variables
         // TODO: Don't allow any duplicate names
         public void AddNamedValues(params MNamedValue[] vals)
         {
-            namedValues.AddRange(vals);
+            NamedValues.AddRange(vals);
         }
         public void AddConstant(string name, MValue value)
         {
-            namedValues.Add(new MConstant(name, value));
+            NamedValues.Add(new MConstant(name, value));
         }
         public void AddVariable(string name, List<MTypeRestrictionsEntry> entries)
         {
-            namedValues.Add(new MVariable(name, entries));
+            NamedValues.Add(new MVariable(name, entries));
         }
         public void AddVariable(string name, List<MTypeRestrictionsEntry> entries, MValue value)
         {
-            namedValues.Add(new MVariable(name, entries, value));
+            NamedValues.Add(new MVariable(name, entries, value));
         }
     }
 }

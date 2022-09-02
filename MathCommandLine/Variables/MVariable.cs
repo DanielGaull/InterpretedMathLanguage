@@ -54,7 +54,7 @@ namespace MathCommandLine.Variables
 
         public override bool CanGetValue()
         {
-            throw hasBeenAssigned;
+            return hasBeenAssigned;
         }
     }
 }
