@@ -39,8 +39,10 @@ namespace MathCommandLine.Evaluation
         private static readonly Regex PARAM_DELIMITER_REGEX = new Regex(@"," + WRAPPER_EXCLUSION_PATTERN);
         private static readonly Regex PARAM_TYPES_DELIMITER_REGEX = new Regex(@"\|");
         private static readonly Regex PARAM_REQS_DELIMITER_REGEX = new Regex(@"," + WRAPPER_EXCLUSION_PATTERN);
-        private static readonly Regex PARAM_NAME_TYPE_REGEX = new Regex(@"(.*):(.*)"); // Group for param name and group for type(s)
-        private static readonly Regex PARAM_TYPE_RESTS_REGEX = new Regex(@"(?:\[(.*)\])?([a-zA-Z_][a-zA-Z0-9_]*)"); // Group for restrictions, and for type name
+        // Group for param name and group for type(s)
+        private static readonly Regex PARAM_NAME_TYPE_REGEX = new Regex(@"(.*):(.*)");
+        // Group for restrictions, and for type name
+        private static readonly Regex PARAM_TYPE_RESTS_REGEX = new Regex(@"(?:\[(.*)\])?([a-zA-Z_][a-zA-Z0-9_]*)");
 
         // Value restriction regexes
         private static readonly Regex VALUE_REST_INTEGER = new Regex(@"%");
@@ -54,8 +56,9 @@ namespace MathCommandLine.Evaluation
         // Other useful regexes
         private static readonly Regex LIST_DELIMITER_REGEX = new Regex(@"," + WRAPPER_EXCLUSION_PATTERN);
         private static readonly Regex ARG_DELIMITER_REGEX = new Regex(@"," + WRAPPER_EXCLUSION_PATTERN);
-        private static readonly Regex WHITESPACE_REGEX = new Regex(@"\s+");
         private static readonly Regex SYMBOL_NAME_REGEX = new Regex(@$"^{SYMBOL_PATTERN}$");
+        // Group to parse out the characters in the string
+        private static readonly Regex STRING_LITERAL_REGEX = new Regex("\"([^\"]*)\"");
 
         public Parser()
         {
@@ -64,6 +67,20 @@ namespace MathCommandLine.Evaluation
         // TODO: Function that removes whitespace from expressions
         // TODO: Function that converts strings to lists (returns back an expression string)
         // TODO: Error checking for if Regex doesn't return enough groups
+
+        /// <summary>
+        /// Converts all string literals appearing in an expression to list literals within the string
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <returns>The modified expression</returns>
+        public string ConvertStringsToLists(string expression)
+        {
+            return STRING_LITERAL_REGEX.Replace(expression, delegate(Match match)
+            {
+                MList list = Utilities.StringToMList(match.Groups[1].Value);
+                return list.ToString();
+            });
+        }
 
         /// <summary>
         /// Parses a finalized expression into an AST

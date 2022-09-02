@@ -23,6 +23,14 @@ namespace MathCommandLine.CoreDataTypes
 
         public static MList Empty = new MList();
 
+        public List<MValue> InternalList
+        {
+            get
+            {
+                return iList;
+            }
+        }
+
         public List<MValue> GetInternalList()
         {
             return iList;
@@ -42,7 +50,7 @@ namespace MathCommandLine.CoreDataTypes
             StringBuilder builder = new StringBuilder("{ ");
             for (int i = 0; i < iList.Count; i++)
             {
-                builder.Append(iList[i].ToString());
+                builder.Append(iList[i].ToShortString());
                 if (i + 1 < iList.Count)
                 {
                     builder.Append(", ");
