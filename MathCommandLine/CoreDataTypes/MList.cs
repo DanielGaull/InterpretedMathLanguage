@@ -151,17 +151,32 @@ namespace MathCommandLine.CoreDataTypes
             return new MList(result.ToList());
         }
 
-        // TODO
         public static bool operator ==(MList l1, MList l2)
         {
-            return false;
+            if (l1.InternalList.Count != l2.InternalList.Count)
+            {
+                return false;
+            }
+            for (int i = 0; i < l1.InternalList.Count; i++)
+            {
+                if (l1.InternalList[i] != l2.InternalList[i])
+                {
+                    return false;
+                }
+            }
+            return true;
         }
         public static bool operator !=(MList l1, MList l2)
         {
-            return true;
+            return !(l1 == l2);
         }
         public override bool Equals(object obj)
         {
+            if (obj is MList)
+            {
+                MList list = (MList)obj;
+                return list == this;
+            }
             return false;
         }
         public override int GetHashCode()
