@@ -29,6 +29,13 @@ namespace MathCommandLine.Evaluation
         private static readonly Regex TYPE_REGEX = new Regex(@"^#([a-zA-Z_][a-zA-Z0-9_]*)$");
         // Group for the thing being called, and a group for the arguments
         private static readonly Regex CALL_REGEX = new Regex(@"^(.*)\((.*)\)$");
+        // Group for the innards that should be parsed next
+        // Used for when whole expression is wrapped in parentheses
+        //private static readonly Regex PAREN_WRAP_REGEX = new Regex(@"(?>\((?<START>)|\)(?<-START>)|(?!\(|\)))+(?(START)(?!))");
+
+        // Call parsing values
+        private const char CALL_END_WRAPPER = ')';
+        private const char CALL_START_WRAPPER = '(';
         
         // Parameter parsing regexes
         private static readonly Regex PARAM_DELIMITER_REGEX = new Regex(@"," + WRAPPER_EXCLUSION_PATTERN);
@@ -88,6 +95,8 @@ namespace MathCommandLine.Evaluation
             // TODO: Add support for big_decimal and big_int (require D or L at the end of the number literal, i.e. 750L or 0.642D)
 
             // 'expression' is either a call, variable, or literal
+            // May be something that is wrapped entirely in parenthesis
+
             if (CALL_REGEX.IsMatch(expression))
             {
                 // Performing some sort of call
@@ -262,6 +271,75 @@ namespace MathCommandLine.Evaluation
                 return new AstParameterTypeEntry(typeName, reqs);
             }).ToArray();
             return new AstParameter(nameString, typeEntries);
+        }
+        
+        /// <summary>
+        /// Attempts to match this expression to a "call", returning if the match succeeded, and the
+        /// caller/arguments
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <returns></returns>
+        private CallMatch MatchCall(string expression)
+        {
+            // What makes a call a call?
+            // Well, it's simply some "thing" followed by parentheses, which may have arguments in them
+            // It's important to note that the "thing" must have balanced brackets: that is, balanced curly braces
+            // and balanced parentheses. That way, '((x)' doesn't count as a call, because it appears to really be
+            // the start of a lambda ex. '((x)=>{_add(x,7)})
+            // So, lets start from the back. The last character should be a parenthesis. Then, we simply find its
+            // matching balanced one. As long as the match is not the first character in the string, then
+            // there is something before the pair, and we've found what should be interpreted as a call!
+            if (expression[expression.Length - 1] != CALL_END_WRAPPER)
+            {
+                // Last character is not a closing parenthesis
+                return CallMatch.Failure;
+            }
+            // Now time to backtrack. We'll go character by character. Depending on parentheses we find, we'll keep a count
+            // Need to find the open wrapper when the counter is zero though
+            int wrapperCounter = 0;
+            int startWrapperIndex = -1;
+            for (int i = expression.Length - 1; i >= 0; i--)
+            {
+                if (expression[i] == CALL_END_WRAPPER)
+                {
+                    wrapperCounter++;
+                }
+                else if (expression[i] == CALL_START_WRAPPER)
+                {
+                    if (wrapperCounter == 0)
+                    {
+                        // We've found the corresponding location!
+                        startWrapperIndex = i;
+                        break;
+                    }
+                    else
+                    {
+                        wrapperCounter--;
+                    }
+                }
+            }
+            if (startWrapperIndex < 0)
+            {
+                // Didn't find the matching start in the whole string
+                return CallMatch.Failure;
+            }
+
+            return new CallMatch();
+        }
+        private struct CallMatch
+        {
+            public bool IsMatch;
+            public string Caller;
+            public string Args;
+
+            public CallMatch(bool isMatch, string caller, string args)
+            {
+                IsMatch = isMatch;
+                Caller = caller;
+                Args = args;
+            }
+
+            public static readonly CallMatch Failure = new CallMatch(false, null, null);
         }
     }
 }
