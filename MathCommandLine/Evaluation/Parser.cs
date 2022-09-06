@@ -96,13 +96,13 @@ namespace MathCommandLine.Evaluation
 
             // 'expression' is either a call, variable, or literal
             // May be something that is wrapped entirely in parenthesis
+            CallMatch attempedCallMatch = MatchCall(expression);
 
-            if (CALL_REGEX.IsMatch(expression))
+            if (attempedCallMatch.IsMatch)
             {
                 // Performing some sort of call
-                var groups = CALL_REGEX.Match(expression).Groups;
-                string callerString = groups[1].Value;
-                string argsString = groups[2].Value;
+                string callerString = attempedCallMatch.Caller;
+                string argsString = attempedCallMatch.Args;
 
                 Ast caller = ParseExpression(callerString);
 
@@ -318,13 +318,19 @@ namespace MathCommandLine.Evaluation
                     }
                 }
             }
-            if (startWrapperIndex < 0)
+            if (startWrapperIndex < 0 || startWrapperIndex == 0)
             {
-                // Didn't find the matching start in the whole string
+                // Didn't find the matching start in the whole string, or the starting parenthesis was the first character,
+                // meaning this is just an expression wrapped in parentheses
                 return CallMatch.Failure;
             }
 
-            return new CallMatch();
+            // Everything before the start index is what was called (the callee/caller, terminology is not consistent here)
+            string calledPart = expression.Substring(0, startWrapperIndex);
+
+            string argsString = expression.Substring(startWrapperIndex + 1, expression.Length - (startWrapperIndex + 1) - 1);
+
+            return new CallMatch(true, calledPart, argsString);
         }
         private struct CallMatch
         {
