@@ -296,9 +296,10 @@ namespace MathCommandLine.Evaluation
             }
             // Now time to backtrack. We'll go character by character. Depending on parentheses we find, we'll keep a count
             // Need to find the open wrapper when the counter is zero though
+            // Start at second-to-last char b/c we know the last one is a ')'
             int wrapperCounter = 0;
             int startWrapperIndex = -1;
-            for (int i = expression.Length - 1; i >= 0; i--)
+            for (int i = expression.Length - 2; i >= 0; i--)
             {
                 if (expression[i] == CALL_END_WRAPPER)
                 {
