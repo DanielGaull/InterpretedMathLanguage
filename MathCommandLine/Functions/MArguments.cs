@@ -49,5 +49,12 @@ namespace MathCommandLine.Functions
         {
             return args.Where((arg) => arg.Name == name).First();
         }
+
+        public static MArguments Concat(MArguments first, MArguments second)
+        {
+            MArguments newArgs = new MArguments(first.args);
+            newArgs.args.AddRange(new List<MArgument>(second.args));
+            return newArgs;
+        }
     }
 }

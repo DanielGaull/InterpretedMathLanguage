@@ -16,7 +16,7 @@ namespace MathCommandLine.Functions
         {
             TypeEntries = new List<MTypeRestrictionsEntry> { new MTypeRestrictionsEntry(dataType) };
             Name = name;
-            isNotEmpty = false;
+            isNotEmpty = true;
         }
         public MParameter(string name, params MDataType[] dataTypes)
         {
@@ -25,19 +25,19 @@ namespace MathCommandLine.Functions
                 return new MTypeRestrictionsEntry(type);
             }));
             Name = name;
-            isNotEmpty = false;
+            isNotEmpty = true;
         }
         public MParameter(string name, List<MTypeRestrictionsEntry> entries)
         {
             TypeEntries = entries;
             Name = name;
-            isNotEmpty = false;
+            isNotEmpty = true;
         }
         public MParameter(string name, params MTypeRestrictionsEntry[] entries)
         {
             TypeEntries = new List<MTypeRestrictionsEntry>(entries);
             Name = name;
-            isNotEmpty = false;
+            isNotEmpty = true;
         }
 
         public static MParameter Empty = new MParameter();
@@ -133,7 +133,7 @@ namespace MathCommandLine.Functions
         {
             DataType = dataType;
             ValueRestrictions = valueRestrictions;
-            isNotEmpty = false;
+            isNotEmpty = true;
         }
 
         public static MTypeRestrictionsEntry Empty = new MTypeRestrictionsEntry();

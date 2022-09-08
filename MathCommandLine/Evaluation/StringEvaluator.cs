@@ -56,12 +56,6 @@ namespace MathCommandLine.Evaluation
             switch (ast.Type)
             {
                 case AstTypes.Call:
-                    List<MArgument> argsList = new List<MArgument>();
-                    for (int i = 0; i < ast.AstCollectionArg.Length; i++)
-                    {
-                        argsList.Add(new MArgument(EvaluateAst(ast.AstCollectionArg[i], variables)));
-                    }
-                    MArguments args = new MArguments(argsList);
                     MValue evaluatedCaller = EvaluateAst(ast.CalledAst, variables);
                     if (evaluatedCaller.DataType != MDataType.Lambda)
                     {
@@ -69,8 +63,16 @@ namespace MathCommandLine.Evaluation
                         return MValue.Error(Util.ErrorCodes.NOT_CALLABLE, 
                             "\"" + evaluatedCaller.DataType.Name + "\" is not a callable data type.", MList.Empty);
                     }
+                    MLambda lambda = evaluatedCaller.LambdaValue;
+                    List<MArgument> argsList = new List<MArgument>();
+                    for (int i = 0; i < ast.AstCollectionArg.Length; i++)
+                    {
+                        argsList.Add(new MArgument(lambda.Parameters[i].Name, 
+                            EvaluateAst(ast.AstCollectionArg[i], variables)));
+                    }
+                    MArguments args = new MArguments(argsList);
                     // We have a callable type!
-                    return evaluatedCaller.LambdaValue.Evaluate(args, superEvaluator);
+                    return lambda.Evaluate(MArguments.Concat(variables, args), superEvaluator);
                 case AstTypes.Variable:
                     // TODO: Handle if variable doesn't exist
                     // Return the value of the variable with this name (in arguments)
@@ -110,7 +112,7 @@ namespace MathCommandLine.Evaluation
                         return MValue.Error(Util.ErrorCodes.TYPE_DOES_NOT_EXIST,
                             "Type \"" + ast.Name + "\" is not defined.", MList.Empty);
                     }
-                    MParameters parameters = new MParameters();
+                    MParameters parameters = new MParameters(paramArray);
                     return MValue.Lambda(new MLambda(parameters, expression));
                 case AstTypes.TypeLiteral:
                     if (!dtDict.Contains(ast.Name))
