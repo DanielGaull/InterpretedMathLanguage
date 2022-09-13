@@ -16,6 +16,11 @@ namespace MathCommandLine.Variables
             NamedValues = new List<MNamedValue>();
         }
 
+        public VariableReader GetReader()
+        {
+            return new VariableReader(this);
+        }
+
         public MValue GetValue(string name)
         {
             var selection = NamedValues.Where((v) => v.Name == name && v.CanGetValue());
