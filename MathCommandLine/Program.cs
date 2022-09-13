@@ -22,6 +22,11 @@ namespace MathCommandLine
             VariableReader varReader = varManager.GetReader();
 
             List<MFunction> coreFuncs = CoreFunctions.GenerateCoreFunctions(evaluator);
+            for (int i = 0; i < coreFuncs.Count; i++)
+            {
+                varManager.AddConstant(coreFuncs[i].Name, 
+                    MValue.Lambda(new MLambda(coreFuncs[i].Parameters, coreFuncs[i].Expression)));
+            }
             funcDict = new FunctionDict(coreFuncs);
             DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, MDataType.Lambda,
                 MDataType.Type, MDataType.Error, MDataType.Any);
