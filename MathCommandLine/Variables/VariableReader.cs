@@ -19,5 +19,10 @@ namespace MathCommandLine.Variables
         {
             return srcManager.GetValue(name);
         }
+
+        public bool HasValue(string name)
+        {
+            return srcManager.HasValue(name);
+        }
     }
 }

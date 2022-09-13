@@ -50,6 +50,10 @@ namespace MathCommandLine.Functions
             return args.Where((arg) => arg.Name == name).First();
         }
 
+        public bool HasArg(string name)
+        {
+            return args.Where((arg) => arg.Name == name).Count() > 0;
+        }
         public static MArguments Concat(MArguments first, MArguments second)
         {
             MArguments newArgs = new MArguments(first.args);

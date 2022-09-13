@@ -2,6 +2,7 @@
 using MathCommandLine.Exceptions;
 using MathCommandLine.Functions;
 using MathCommandLine.Structure;
+using MathCommandLine.Variables;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,14 +16,16 @@ namespace MathCommandLine.Evaluation
         private IEvaluator superEvaluator;
         private Parser parser;
         private DataTypeDict dtDict;
+        private VariableReader varReader;
 
         private static readonly Regex WHITESPACE_REGEX = new Regex(@"\s+");
 
-        public StringEvaluator(IEvaluator superEvaluator, Parser parser, DataTypeDict dtDict)
+        public StringEvaluator(IEvaluator superEvaluator, Parser parser, DataTypeDict dtDict, VariableReader varReader)
         {
             this.superEvaluator = superEvaluator;
             this.parser = parser;
             this.dtDict = dtDict;
+            this.varReader = varReader;
         }
 
         public MValue Evaluate(MExpression mExpression, MArguments variables)
@@ -75,9 +78,20 @@ namespace MathCommandLine.Evaluation
                     // We have a callable type!
                     return lambda.Evaluate(args, superEvaluator);
                 case AstTypes.Variable:
-                    // TODO: Handle if variable doesn't exist
                     // Return the value of the variable with this name (in arguments)
-                    return variables[ast.Name].Value;
+                    if (variables.HasArg(ast.Name))
+                    {
+                        return variables[ast.Name].Value;
+                    }
+                    else if (varReader.HasValue(ast.Name))
+                    {
+                        return varReader.GetValue(ast.Name);
+                    }
+                    else
+                    {
+                        return MValue.Error(Util.ErrorCodes.VAR_DOES_NOT_EXIST, 
+                            $"Variable or argument \"{ast.Name}\" does not exist.", MList.Empty);
+                    }
                 case AstTypes.NumberLiteral:
                     return MValue.Number(ast.NumberArg);
                 case AstTypes.ListLiteral:

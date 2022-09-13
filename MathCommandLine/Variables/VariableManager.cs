@@ -32,6 +32,11 @@ namespace MathCommandLine.Variables
             return MValue.Empty;
         }
 
+        public bool HasValue(string name)
+        {
+            return NamedValues.Where((v) => v.Name == name && v.CanGetValue()).Count() > 0;
+        }
+
         public void SetValue(string name, MValue value)
         {
             var selection = NamedValues.Where((v) => v.Name == name && v.CanAssign(value));

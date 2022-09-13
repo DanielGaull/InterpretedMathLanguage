@@ -19,12 +19,13 @@ namespace MathCommandLine
         {
             evaluator = new GenericEvaluator();
             varManager = new VariableManager();
+            VariableReader varReader = varManager.GetReader();
 
             List<MFunction> coreFuncs = CoreFunctions.GenerateCoreFunctions(evaluator);
             funcDict = new FunctionDict(coreFuncs);
             DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, MDataType.Lambda,
                 MDataType.Type, MDataType.Error, MDataType.Any);
-            evaluator.Initialize(dtDict);
+            evaluator.Initialize(dtDict, varReader);
 
             // Simple reading for now
             while (true)
