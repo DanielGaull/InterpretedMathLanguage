@@ -23,7 +23,7 @@ namespace MathCommandLine
             List<MFunction> coreFuncs = CoreFunctions.GenerateCoreFunctions(evaluator);
             funcDict = new FunctionDict(coreFuncs);
             DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, MDataType.Lambda,
-                MDataType.Type, MDataType.Error);
+                MDataType.Type, MDataType.Error, MDataType.Any);
             evaluator.Initialize(dtDict);
 
             // Simple reading for now

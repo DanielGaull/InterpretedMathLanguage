@@ -67,12 +67,13 @@ namespace MathCommandLine.Evaluation
                     List<MArgument> argsList = new List<MArgument>();
                     for (int i = 0; i < ast.AstCollectionArg.Length; i++)
                     {
+                        // TODO: Will crash here if we provide too many args
                         argsList.Add(new MArgument(lambda.Parameters[i].Name, 
                             EvaluateAst(ast.AstCollectionArg[i], variables)));
                     }
                     MArguments args = new MArguments(argsList);
                     // We have a callable type!
-                    return lambda.Evaluate(MArguments.Concat(variables, args), superEvaluator);
+                    return lambda.Evaluate(args, superEvaluator);
                 case AstTypes.Variable:
                     // TODO: Handle if variable doesn't exist
                     // Return the value of the variable with this name (in arguments)

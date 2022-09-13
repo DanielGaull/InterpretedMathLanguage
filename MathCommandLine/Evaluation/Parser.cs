@@ -67,8 +67,6 @@ namespace MathCommandLine.Evaluation
         }
 
         // TODO: Function that removes whitespace from expressions
-        // TODO: Function that converts strings to lists (returns back an expression string)
-        // TODO: Error checking for if Regex doesn't return enough groups
 
         /// <summary>
         /// Converts all string literals appearing in an expression to list literals within the string
