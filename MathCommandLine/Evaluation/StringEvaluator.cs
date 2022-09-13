@@ -60,6 +60,11 @@ namespace MathCommandLine.Evaluation
             {
                 case AstTypes.Call:
                     MValue evaluatedCaller = EvaluateAst(ast.CalledAst, variables);
+                    // If an error, return that error instead of attempting to call it
+                    if (evaluatedCaller.DataType == MDataType.Error)
+                    {
+                        return evaluatedCaller;
+                    }
                     if (evaluatedCaller.DataType != MDataType.Lambda)
                     {
                         // Not a callable object
