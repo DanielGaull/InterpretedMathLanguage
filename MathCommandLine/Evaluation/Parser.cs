@@ -36,6 +36,10 @@ namespace MathCommandLine.Evaluation
         // Call parsing values
         private const char CALL_END_WRAPPER = ')';
         private const char CALL_START_WRAPPER = '(';
+
+        // Param parsing values
+        private const char GENERIC_END_WRAPPER = ')';
+        private const char GENERIC_START_WRAPPER = '(';
         
         // Parameter parsing regexes
         private static readonly Regex PARAM_DELIMITER_REGEX = new Regex(@"," + WRAPPER_EXCLUSION_PATTERN);
@@ -91,6 +95,13 @@ namespace MathCommandLine.Evaluation
         public Ast ParseExpression(string expression)
         {
             // TODO: Add support for big_decimal and big_int (require D or L at the end of the number literal, i.e. 750L or 0.642D)
+
+            // Initially, attempt to extract an expression from parentheses
+            while (IsParamWrapped(expression))
+            {
+                // Pull out the expression without the first and last characters
+                expression = expression.Substring(1, expression.Length - 2);
+            }
 
             // 'expression' is either a call, variable, or literal
             // May be something that is wrapped entirely in parenthesis
@@ -269,6 +280,48 @@ namespace MathCommandLine.Evaluation
                 return new AstParameterTypeEntry(typeName, reqs);
             }).ToArray();
             return new AstParameter(nameString, typeEntries);
+        }
+
+        /// <summary>
+        /// Returns true if the expression is wrapped in a pair of matching parentheses
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <returns></returns>
+        private bool IsParamWrapped(string expression)
+        {
+            if (expression[0] != GENERIC_START_WRAPPER || expression[expression.Length - 1] != GENERIC_END_WRAPPER)
+            {
+                return false;
+            }
+
+            int wrapperCounter = 0;
+            int startWrapperIndex = -1;
+            for (int i = expression.Length - 2; i >= 0; i--)
+            {
+                if (expression[i] == CALL_END_WRAPPER)
+                {
+                    wrapperCounter++;
+                }
+                else if (expression[i] == CALL_START_WRAPPER)
+                {
+                    if (wrapperCounter == 0)
+                    {
+                        // We've found the corresponding location!
+                        startWrapperIndex = i;
+                        break;
+                    }
+                    else
+                    {
+                        wrapperCounter--;
+                    }
+                }
+            }
+            if (startWrapperIndex == 0)
+            {
+                // Starting parenthesis was the first character, so this is an expression wrapped in parentheses
+                return true;
+            }
+            return false;
         }
         
         /// <summary>
