@@ -69,15 +69,14 @@ namespace MathCommandLine.Evaluation
                     {
                         // Not a callable object
                         return MValue.Error(Util.ErrorCodes.NOT_CALLABLE, 
-                            "\"" + evaluatedCaller.DataType.Name + "\" is not a callable data type.", MList.Empty);
+                            "Cannot invoke because \"" + evaluatedCaller.DataType.Name + "\" is not a callable data type.", 
+                            MList.Empty);
                     }
                     MLambda lambda = evaluatedCaller.LambdaValue;
                     List<MArgument> argsList = new List<MArgument>();
                     for (int i = 0; i < ast.AstCollectionArg.Length; i++)
                     {
-                        // TODO: Will crash here if we provide too many args
-                        argsList.Add(new MArgument(lambda.Parameters[i].Name, 
-                            EvaluateAst(ast.AstCollectionArg[i], variables)));
+                        argsList.Add(new MArgument(EvaluateAst(ast.AstCollectionArg[i], variables)));
                     }
                     MArguments args = new MArguments(argsList);
                     // We have a callable type!
