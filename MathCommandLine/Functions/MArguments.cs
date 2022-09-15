@@ -50,6 +50,11 @@ namespace MathCommandLine.Functions
             return args.Where((arg) => arg.Name == name).First();
         }
 
+        public void Set(int index, MArgument value)
+        {
+            args[index] = value;
+        }
+
         public bool HasArg(string name)
         {
             return args.Where((arg) => arg.Name == name).Count() > 0;

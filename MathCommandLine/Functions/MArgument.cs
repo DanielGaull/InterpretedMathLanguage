@@ -18,5 +18,14 @@ namespace MathCommandLine.Functions
         public MArgument(MValue value)
             : this("", value)
         {}
+
+        public void SetValue(MValue newValue)
+        {
+            Value = newValue;
+        }
+        public void SetName(string newName)
+        {
+            Name = newName;
+        }
     }
 }

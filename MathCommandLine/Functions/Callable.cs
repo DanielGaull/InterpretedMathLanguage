@@ -49,6 +49,12 @@ namespace MathCommandLine.Functions
                     // TODO: Allow a flag that prevents this from happening and allows errors to be fed to functions
                     return args.Get(i).Value;
                 }
+                else
+                {
+                    // Arg passes! But we need to make sure it's properly named
+                    MArgument newArg = new MArgument(Parameters[i].Name, args[i].Value);
+                    args.Set(i, newArg);
+                }
             }
             // It appears that the arguments passed to this function are valid, so time to run the evaluation
             return evaluator.Evaluate(Expression, args);
