@@ -17,7 +17,6 @@ namespace MathCommandLine.Evaluation
     {
         // Regexes for common necessities
         private const string NUMBER_REGEX_PATTERN = @"[+-]?[0-9]+(\.[0-9]*)?";
-        private const string WRAPPER_EXCLUSION_PATTERN = @"(?![^\(\[\{]*[\)\]\}])";
         private const string SYMBOL_PATTERN = @"[a-zA-Z_][a-zA-Z0-9_]*";
 
         // Regexes for matching language symbols
@@ -27,11 +26,6 @@ namespace MathCommandLine.Evaluation
         private static readonly Regex LAMBDA_REGEX = new Regex(@"^\((.*)\)=>\{(.*)\}$");
         // Group for the type name
         private static readonly Regex TYPE_REGEX = new Regex(@"^#([a-zA-Z_][a-zA-Z0-9_]*)$");
-        // Group for the thing being called, and a group for the arguments
-        private static readonly Regex CALL_REGEX = new Regex(@"^(.*)\((.*)\)$");
-        // Group for the innards that should be parsed next
-        // Used for when whole expression is wrapped in parentheses
-        //private static readonly Regex PAREN_WRAP_REGEX = new Regex(@"(?>\((?<START>)|\)(?<-START>)|(?!\(|\)))+(?(START)(?!))");
 
         // Call parsing values
         private const char CALL_END_WRAPPER = ')';
@@ -40,11 +34,11 @@ namespace MathCommandLine.Evaluation
         // Param parsing values
         private const char GENERIC_END_WRAPPER = ')';
         private const char GENERIC_START_WRAPPER = '(';
-        
+
         // Parameter parsing regexes
-        private static readonly Regex PARAM_DELIMITER_REGEX = new Regex(@"," + WRAPPER_EXCLUSION_PATTERN);
-        private static readonly Regex PARAM_TYPES_DELIMITER_REGEX = new Regex(@"\|");
-        private static readonly Regex PARAM_REQS_DELIMITER_REGEX = new Regex(@"," + WRAPPER_EXCLUSION_PATTERN);
+        private const char PARAM_DELIMITER = ',';
+        private const char PARAM_TYPES_DELIMITER = '|';
+        private const char PARAM_REQS_DELIMITER = ',';
         // Group for param name and group for type(s)
         private static readonly Regex PARAM_NAME_TYPE_REGEX = new Regex(@"(.*):(.*)");
         // Group for restrictions, and for type name
@@ -60,8 +54,8 @@ namespace MathCommandLine.Evaluation
         private static readonly Regex VALUE_REST_GTE = new Regex(@$">=\(({NUMBER_REGEX_PATTERN})\)");
 
         // Other useful regexes
-        private static readonly Regex LIST_DELIMITER_REGEX = new Regex(@"," + WRAPPER_EXCLUSION_PATTERN);
-        private static readonly Regex ARG_DELIMITER_REGEX = new Regex(@"," + WRAPPER_EXCLUSION_PATTERN);
+        private const char LIST_DELIMITER = ',';
+        private const char ARG_DELIMITER = ',';
         private static readonly Regex SYMBOL_NAME_REGEX = new Regex(@$"^{SYMBOL_PATTERN}$");
         // Group to parse out the characters in the string
         private static readonly Regex STRING_LITERAL_REGEX = new Regex("\"([^\"]*)\"");
@@ -115,7 +109,7 @@ namespace MathCommandLine.Evaluation
 
                 Ast caller = ParseExpression(callerString);
 
-                string[] argStrings = ARG_DELIMITER_REGEX.Split(argsString);
+                string[] argStrings = SplitByDelimiter(argsString, ARG_DELIMITER);
                 // Parse all the arguments
                 Ast[] args = argStrings.Select(ParseExpression).ToArray();
 
@@ -132,7 +126,7 @@ namespace MathCommandLine.Evaluation
                 // Extract the elements of the list
                 string elements = LIST_REGEX.Match(expression).Groups[1].Value;
                 // Separate by the list delimiter
-                string[] elementStrings = LIST_DELIMITER_REGEX.Split(elements);
+                string[] elementStrings = SplitByDelimiter(elements, LIST_DELIMITER);
                 List<Ast> elementAsts = new List<Ast>();
                 foreach (string str in elementStrings)
                 {
@@ -148,7 +142,7 @@ namespace MathCommandLine.Evaluation
                 string exprString = groups[2].Value;
 
                 // Parse Parameters
-                AstParameter[] parsedParams = PARAM_DELIMITER_REGEX.Split(paramsString).Select((paramString) =>
+                AstParameter[] parsedParams = SplitByDelimiter(paramsString, PARAM_DELIMITER).Select((paramString) =>
                 {
                     return ParseParameter(paramString);
                 }).ToArray();
@@ -191,7 +185,7 @@ namespace MathCommandLine.Evaluation
                 throw new InvalidParseException("\"" + nameString + "\" is not a valid parameter name.", parameter);
             }
             // Start getting out the data types
-            string[] eachTypes = PARAM_TYPES_DELIMITER_REGEX.Split(typesString);
+            string[] eachTypes = SplitByDelimiter(typesString, PARAM_TYPES_DELIMITER);
             AstParameterTypeEntry[] typeEntries = eachTypes.Select((typeString) =>
             {
                 // Need to extract the restrictions from this string
@@ -204,7 +198,7 @@ namespace MathCommandLine.Evaluation
                 // Need to evaluate all of the restrictions
                 if (reqsArray.Length > 0)
                 {
-                    string[] reqDefsStrings = PARAM_REQS_DELIMITER_REGEX.Split(reqsArray);
+                    string[] reqDefsStrings = SplitByDelimiter(reqsArray, PARAM_REQS_DELIMITER);
                     reqs = reqDefsStrings.Select((reqStr) =>
                     {
                         if (VALUE_REST_INTEGER.IsMatch(reqStr))
@@ -322,6 +316,63 @@ namespace MathCommandLine.Evaluation
                 return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// Splits "expr" into many strings delimited by "delimiter", but not if the delimiter is wrapped in parentheses or braces
+        /// </summary>
+        /// <param name="expr"></param>
+        /// <param name="delimiter"></param>
+        /// <returns></returns>
+        private static string[] SplitByDelimiter(string expr, char delimiter)
+        {
+            int parenCounter = 0;
+            int braceCounter = 0;
+            List<string> substrings = new List<string>();
+            // TODO: Finish
+            StringBuilder currentString = new StringBuilder();
+            for (int i = 0; i < expr.Length; i++)
+            {
+                char c = expr[i];
+                if (c == delimiter)
+                {
+                    // If not in parentheses or braces, then we add this as a split string
+                    if (parenCounter == 0 && braceCounter == 0)
+                    {
+                        substrings.Add(currentString.ToString());
+                        currentString.Clear();
+                    }
+                    else
+                    {
+                        // The delimiter is part of a currently-being-built string
+                        currentString.Append(c);
+                    }
+                }
+                else
+                {
+                    // Add the character to our current string, update the counts as necessary
+                    currentString.Append(c);
+                    if (c == '(')
+                    {
+                        parenCounter++;
+                    }
+                    else if (c == ')')
+                    {
+                        parenCounter--;
+                    }
+                    else if (c == '{')
+                    {
+                        braceCounter++;
+                    }
+                    else if (c == '}')
+                    {
+                        braceCounter--;
+                    }
+                }
+            }
+            // Remember to add the string that we are in the middle of building
+            substrings.Add(currentString.ToString());
+            return substrings.ToArray();
         }
         
         /// <summary>
