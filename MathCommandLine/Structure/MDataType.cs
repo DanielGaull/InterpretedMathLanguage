@@ -59,6 +59,9 @@ namespace MathCommandLine.Structure
             Tuple.Create("code", Number),
             Tuple.Create("message", List),
             Tuple.Create("data", List));
+        public static MDataType Reference = new MDataType("reference");
+        public static MDataType String = new MDataType("string",
+            Tuple.Create("chars", List));
 
         public static bool operator ==(MDataType dt1, MDataType dt2)
         {
