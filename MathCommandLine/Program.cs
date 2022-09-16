@@ -27,6 +27,9 @@ namespace MathCommandLine
                 varManager.AddConstant(coreFuncs[i].Name, 
                     MValue.Lambda(new MLambda(coreFuncs[i].Parameters, coreFuncs[i].Expression)));
             }
+            // Add core constants
+            // TODO: Add core constant for TIME
+            varManager.AddConstant("void", MValue.Void());
             funcDict = new FunctionDict(coreFuncs);
             DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, MDataType.Lambda,
                 MDataType.Type, MDataType.Error, MDataType.Reference, MDataType.String, MDataType.Void, MDataType.Any);
