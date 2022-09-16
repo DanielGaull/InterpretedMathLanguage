@@ -65,6 +65,10 @@ namespace MathCommandLine.Structure
         {
             return new MValue(MDataType.Reference, 0, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, referenceName, null);
         }
+        public static MValue Void()
+        {
+            return new MValue(MDataType.Void, 0, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, null, null);
+        }
         public static MValue Composite(MDataType type, Dictionary<string, MValue> values)
         {
             return new MValue(type, 0, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, null, values);
