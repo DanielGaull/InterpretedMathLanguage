@@ -57,7 +57,7 @@ namespace MathCommandLine.Structure
         public static MDataType BigDecimal = new MDataType("big_decimal");
         public static MDataType Error = new MDataType("error",
             Tuple.Create("code", Number),
-            Tuple.Create("message", List),
+            Tuple.Create("message", String),
             Tuple.Create("data", List));
         public static MDataType Reference = new MDataType("reference");
         public static MDataType String = new MDataType("string",

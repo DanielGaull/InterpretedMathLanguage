@@ -424,15 +424,15 @@ namespace MathCommandLine.Functions
                 "_gv", MDataType.Any,
                 (args) =>
                 {
-                    string key = Utilities.MListToString(args[0].Value.ListValue);
-                    MValue original = args[1].Value;
+                    MValue original = args[0].Value;
+                    string key = Utilities.MListToString(args[1].Value.GetValueByName("chars").ListValue);
                     return original.GetValueByName(key);
                 },
                 new MParameters(
-                    new MParameter(MDataType.List, "key"),
-                    new MParameter(MDataType.Any, "original")
+                    new MParameter(MDataType.Any, "original"),
+                    new MParameter(MDataType.String, "key")
                 ),
-                "Interprets 'key' as a string, attempting to get that value from 'original'. Returns NOT_COMPOSITE if 'original' isn't composite, or " + 
+                "Attempts to get the value for 'key' from 'original'. Returns NOT_COMPOSITE if 'original' isn't composite, or " + 
                 "KEY_DOES_NOT_EXIST if the key does not exist in 'original'."
             );
         }
@@ -460,13 +460,13 @@ namespace MathCommandLine.Functions
                 (args) =>
                 {
                     int code = (int)args[0].Value.NumberValue;
-                    MList msg = args[1].Value.ListValue;
+                    string msg = Utilities.MListToString(args[1].Value.GetValueByName("chars").ListValue);
                     MList info = args[2].Value.ListValue;
                     return MValue.Error((ErrorCodes)code, msg, info);
                 },
                 new MParameters(
                     new MParameter(MDataType.Number, "code"),
-                    new MParameter(MDataType.List, "message"),
+                    new MParameter(MDataType.String, "message"),
                     new MParameter(MDataType.List, "info")
                 ),
                 "Creates and returns an error with the specified code, message, and info list."
