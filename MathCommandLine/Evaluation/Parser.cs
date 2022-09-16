@@ -67,7 +67,7 @@ namespace MathCommandLine.Evaluation
         // TODO: Function that removes whitespace from expressions
 
         /// <summary>
-        /// Converts all string literals appearing in an expression to list literals within the string
+        /// Converts all string literals appearing in an expression to _str string declarations
         /// </summary>
         /// <param name="expression"></param>
         /// <returns>The modified expression</returns>
@@ -76,7 +76,7 @@ namespace MathCommandLine.Evaluation
             return STRING_LITERAL_REGEX.Replace(expression, delegate(Match match)
             {
                 MList list = Utilities.StringToMList(match.Groups[1].Value);
-                return list.ToString();
+                return "_str(" + list.ToString() + ")";
             });
         }
 

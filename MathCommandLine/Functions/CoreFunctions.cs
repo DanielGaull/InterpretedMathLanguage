@@ -42,7 +42,8 @@ namespace MathCommandLine.Functions
                 CaseFunction(evaluator),
                 GetValue(evaluator),
                 CastFunction(evaluator),
-                CreateErrorFunction(evaluator)
+                CreateErrorFunction(evaluator),
+                CreateStringFunction(evaluator)
             };
         }
 
