@@ -159,6 +159,21 @@ namespace MathCommandLine.Structure
             {
                 return TypeValue.ToString();
             }
+            else if (DataType == MDataType.Reference)
+            {
+                return "&" + NameValue;
+            }
+            else if (DataType == MDataType.String)
+            {
+                StringBuilder builder = new StringBuilder("\"");
+                builder.Append(Utilities.MListToString(GetValueByName("chars").ListValue));
+                builder.Append("\"");
+                return builder.ToString();
+            }
+            else if (DataType == MDataType.Void)
+            {
+                return "void";
+            }
             else if (DataType == MDataType.Error)
             {
                 StringBuilder builder = new StringBuilder("Error: #");
