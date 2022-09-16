@@ -29,7 +29,7 @@ namespace MathCommandLine
             }
             funcDict = new FunctionDict(coreFuncs);
             DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, MDataType.Lambda,
-                MDataType.Type, MDataType.Error, MDataType.Any);
+                MDataType.Type, MDataType.Error, MDataType.Reference, MDataType.String, MDataType.Void, MDataType.Any);
             evaluator.Initialize(dtDict, varReader);
 
             // Simple reading for now
