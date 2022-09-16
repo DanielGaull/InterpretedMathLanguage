@@ -471,5 +471,21 @@ namespace MathCommandLine.Functions
                 "Creates and returns an error with the specified code, message, and info list."
             );
         }
+
+        // TODO: Add restriction
+        public static MFunction CreateStringFunction(IEvaluator evaluator)
+        {
+            return new MFunction(
+                "_str", MDataType.String,
+                (args) =>
+                {
+                    return MValue.String(Utilities.MListToString(args[0].Value.ListValue));
+                },
+                new MParameters(
+                    new MParameter(MDataType.List, "chars")
+                ),
+                "Creates a string with the specified char stream."
+            );
+        }
     }
 }
