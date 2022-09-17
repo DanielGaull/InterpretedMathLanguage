@@ -44,6 +44,7 @@ namespace MathCommandLine.Functions
                 CastFunction(evaluator),
                 CreateErrorFunction(evaluator),
                 CreateStringFunction(evaluator),
+                CreateReferenceFunctoin(evaluator),
                 DisplayFunction(evaluator)
             };
         }
@@ -503,6 +504,21 @@ namespace MathCommandLine.Functions
                     new MParameter(MDataType.String, "str")
                 ),
                 "Prints the specified string to the standard output stream"
+            );
+        }
+
+        public static MFunction CreateReferenceFunctoin(IEvaluator evaluator)
+        {
+            return new MFunction(
+                "_ref", MDataType.Reference,
+                (args) =>
+                {
+                    return MValue.Reference(args[0].Value.GetStringValue());
+                },
+                new MParameters(
+                    new MParameter(MDataType.String, "var_name")
+                ),
+                "Returns a reference to the variable whose name is specified"
             );
         }
     }
