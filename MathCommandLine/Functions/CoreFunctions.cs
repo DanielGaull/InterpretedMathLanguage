@@ -47,6 +47,7 @@ namespace MathCommandLine.Functions
                 CreateReferenceFunction(evaluator),
                 DisplayFunction(evaluator),
                 CreateTypeFunction(evaluator),
+                TimeFunction(evaluator),
             };
         }
 
@@ -544,6 +545,22 @@ namespace MathCommandLine.Functions
                     new MParameter(MDataType.String, "var_name")
                 ),
                 "Returns a reference to the variable whose name is specified"
+            );
+        }
+
+        public static MFunction TimeFunction(IInterpreter interpreter)
+        {
+
+            return new MFunction(
+                "_time", MDataType.Number,
+                (args) =>
+                {
+                    DateTimeOffset now = DateTimeOffset.UtcNow;
+                    long unixTimeMilliseconds = now.ToUnixTimeMilliseconds();
+                    return MValue.Number((double)unixTimeMilliseconds);
+                },
+                new MParameters(),
+                "Returns the number of milliseconds since the epoch"
             );
         }
     }

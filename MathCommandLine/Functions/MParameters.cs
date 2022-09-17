@@ -13,7 +13,14 @@ namespace MathCommandLine.Functions
         {
             get
             {
-                return parameters.Count;
+                if (parameters != null)
+                {
+                    return parameters.Count;
+                }
+                else
+                {
+                    return 0;
+                }
             }
         }
 
