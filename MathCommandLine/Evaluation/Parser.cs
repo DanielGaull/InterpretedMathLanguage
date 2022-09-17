@@ -109,7 +109,7 @@ namespace MathCommandLine.Evaluation
 
                 Ast caller = ParseExpression(callerString);
 
-                string[] argStrings = SplitByDelimiter(argsString, ARG_DELIMITER);
+                string[] argStrings = argsString.Length > 0 ? SplitByDelimiter(argsString, ARG_DELIMITER) : new string[0];
                 // Parse all the arguments
                 Ast[] args = argStrings.Select(ParseExpression).ToArray();
 
@@ -142,10 +142,10 @@ namespace MathCommandLine.Evaluation
                 string exprString = groups[2].Value;
 
                 // Parse Parameters
-                AstParameter[] parsedParams = SplitByDelimiter(paramsString, PARAM_DELIMITER).Select((paramString) =>
+                AstParameter[] parsedParams = paramsString.Length > 0 ? (SplitByDelimiter(paramsString, PARAM_DELIMITER).Select((paramString) =>
                 {
                     return ParseParameter(paramString);
-                }).ToArray();
+                }).ToArray()) : new AstParameter[0];
 
                 return Ast.LambdaLiteral(parsedParams, exprString);
             }
