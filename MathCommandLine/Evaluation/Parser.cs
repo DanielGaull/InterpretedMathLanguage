@@ -126,7 +126,7 @@ namespace MathCommandLine.Evaluation
                 // Extract the elements of the list
                 string elements = LIST_REGEX.Match(expression).Groups[1].Value;
                 // Separate by the list delimiter
-                string[] elementStrings = SplitByDelimiter(elements, LIST_DELIMITER);
+                string[] elementStrings = elements.Length > 0 ? SplitByDelimiter(elements, LIST_DELIMITER) : new string[0];
                 List<Ast> elementAsts = new List<Ast>();
                 foreach (string str in elementStrings)
                 {
