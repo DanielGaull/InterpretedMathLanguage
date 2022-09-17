@@ -44,8 +44,9 @@ namespace MathCommandLine.Functions
                 CastFunction(evaluator),
                 CreateErrorFunction(evaluator),
                 CreateStringFunction(evaluator),
-                CreateReferenceFunctoin(evaluator),
-                DisplayFunction(evaluator)
+                CreateReferenceFunction(evaluator),
+                DisplayFunction(evaluator),
+                CreateTypeFunction(evaluator),
             };
         }
 
@@ -507,13 +508,37 @@ namespace MathCommandLine.Functions
             );
         }
 
-        public static MFunction CreateReferenceFunctoin(IInterpreter evaluator)
+        public static MFunction CreateReferenceFunction(IInterpreter evaluator)
         {
             return new MFunction(
                 "_ref", MDataType.Reference,
                 (args) =>
                 {
                     return MValue.Reference(args[0].Value.GetStringValue());
+                },
+                new MParameters(
+                    new MParameter(MDataType.String, "var_name")
+                ),
+                "Returns a reference to the variable whose name is specified"
+            );
+        }
+
+        public static MFunction CreateTypeFunction(IInterpreter interpreter)
+        {
+            return new MFunction(
+                "_type", MDataType.Type,
+                (args) =>
+                {
+                    string typeName = args[0].Value.GetStringValue();
+                    MDataType type = interpreter.GetDataType(typeName);
+                    if (type.IsEmpty())
+                    {
+                        return MValue.Error(ErrorCodes.TYPE_DOES_NOT_EXIST, $"Type \"{typeName}\" does not exist.");
+                    }
+                    else
+                    {
+                        return MValue.Type(type);
+                    }
                 },
                 new MParameters(
                     new MParameter(MDataType.String, "var_name")

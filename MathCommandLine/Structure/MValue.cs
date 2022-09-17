@@ -98,15 +98,13 @@ namespace MathCommandLine.Structure
             };
             return Composite(MDataType.Error, values);
         }
+        public static MValue Error(ErrorCodes code, string message)
+        {
+            return Error(code, message, MList.Empty);
+        }
         public static MValue Error(ErrorCodes code)
         {
-            Dictionary<string, MValue> values = new Dictionary<string, MValue>()
-            {
-                { "code", Number((int) code) },
-                { "message", String("") },
-                { "data", List(MList.Empty) }
-            };
-            return Composite(MDataType.Error, values);
+            return Error(code, "", MList.Empty);
         }
         public static MValue String(string value)
         {
