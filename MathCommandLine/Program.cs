@@ -12,14 +12,13 @@ namespace MathCommandLine
 {
     class Program
     {
-        static GenericEvaluator evaluator;
+        static Interpreter evaluator;
         static VariableManager varManager;
         static FunctionDict funcDict;
         static void Main(string[] args)
         {
-            evaluator = new GenericEvaluator();
+            evaluator = new Interpreter();
             varManager = new VariableManager();
-            VariableReader varReader = varManager.GetReader();
 
             List<MFunction> coreFuncs = CoreFunctions.GenerateCoreFunctions(evaluator);
             for (int i = 0; i < coreFuncs.Count; i++)
@@ -33,7 +32,7 @@ namespace MathCommandLine
             funcDict = new FunctionDict(coreFuncs);
             DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, MDataType.Lambda,
                 MDataType.Type, MDataType.Error, MDataType.Reference, MDataType.String, MDataType.Void, MDataType.Any);
-            evaluator.Initialize(dtDict, varReader);
+            evaluator.Initialize(dtDict, varManager);
 
             // Simple reading for now
             while (true)

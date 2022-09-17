@@ -8,7 +8,7 @@ using System.Text;
 
 namespace MathCommandLine.Evaluation
 {
-    public class GenericEvaluator : IInterpreter
+    public class Interpreter : IInterpreter
     {
         NativeEvaluator nativeEvaluator;
         StringEvaluator stringEvaluator;
@@ -16,7 +16,7 @@ namespace MathCommandLine.Evaluation
         DataTypeDict dtDict;
         VariableManager variableManager;
 
-        public GenericEvaluator()
+        public Interpreter()
         {
         }
 

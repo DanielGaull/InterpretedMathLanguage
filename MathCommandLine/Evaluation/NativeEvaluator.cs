@@ -6,7 +6,7 @@ using System.Text;
 
 namespace MathCommandLine.Evaluation
 {
-    class NativeEvaluator : IInterpreter
+    public class NativeEvaluator
     {
         public MValue Evaluate(MExpression expression, MArguments arguments)
         {

@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 
 namespace MathCommandLine.Evaluation
 {
-    public class StringEvaluator : IInterpreter
+    public class StringEvaluator
     {
         private IInterpreter superEvaluator;
         private Parser parser;
