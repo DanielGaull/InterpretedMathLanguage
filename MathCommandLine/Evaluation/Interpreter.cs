@@ -51,5 +51,10 @@ namespace MathCommandLine.Evaluation
             }
             return MDataType.Empty;
         }
+
+        public VariableManager GetVariableManager()
+        {
+            return variableManager;
+        }
     }
 }

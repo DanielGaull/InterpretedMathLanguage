@@ -2,6 +2,7 @@
 using MathCommandLine.Evaluation;
 using MathCommandLine.Structure;
 using MathCommandLine.Util;
+using MathCommandLine.Variables;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -36,6 +37,8 @@ namespace MathCommandLine.Functions
                 ReduceList(evaluator),
                 CreateRangeList(evaluator),
                 JoinLists(evaluator),
+
+                Get(evaluator),
 
                 TypeOf(evaluator),
                 CompareFunction(evaluator),
@@ -358,6 +361,60 @@ namespace MathCommandLine.Functions
                 "Concatenates the elements of 'list1' and 'list2' into a new list, which is returned."
             );
         }
+
+        // Reference/var manipulation functions
+        public static MFunction Get(IInterpreter interpreter) 
+        {
+            return new MFunction(
+                "_get", MDataType.Any,
+                (args) =>
+                {
+                    string refName = args[0].Value.NameValue;
+                    VariableManager varManager = interpreter.GetVariableManager();
+                    if (varManager.HasValue(refName))
+                    {
+                        return varManager.GetValue(refName);
+                    }
+                    else
+                    {
+                        return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST,
+                            $"Variable or argument \"{refName}\" does not exist.", MList.Empty);
+                    }
+                },
+                new MParameters(
+                    new MParameter(MDataType.Reference, "ref")
+                ),
+                "Returns the value stored in 'ref'. Returns VAR_DOES_NOT_EXIST if reference variable does not exist."
+            );
+        }
+        public static MFunction Set(IInterpreter interpreter)
+        {
+            // TODO
+            return new MFunction(
+                "_set", MDataType.Void,
+                (args) =>
+                {
+                    string refName = args[0].Value.NameValue;
+                    VariableManager varManager = interpreter.GetVariableManager();
+                    if (varManager.HasValue(refName))
+                    {
+                        //varManager.SetValue()
+                        return varManager.GetValue(refName);
+                    }
+                    else
+                    {
+                        return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST,
+                            $"Variable or argument \"{refName}\" does not exist.", MList.Empty);
+                    }
+                },
+                new MParameters(
+                    new MParameter(MDataType.Reference, "ref")
+                ),
+                "Assigns the value for 'ref' to 'value'. Returns VAR_DOES_NOT_EXIST if reference variable does not exist, and" + 
+                " CAN_NOT_ASSIGN if reference variable is constant."
+            );
+        }
+
 
         // Calculation Functions
         // TODO: derivatives/integrals/solve
