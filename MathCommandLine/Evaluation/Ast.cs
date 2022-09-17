@@ -58,10 +58,6 @@ namespace MathCommandLine.Evaluation
         {
             return new Ast(AstTypes.LambdaLiteral, 0, null, expression, parameters, null, null);
         }
-        public static Ast TypeLiteral(string typeName)
-        {
-            return new Ast(AstTypes.TypeLiteral, 0, null, null, null, typeName, null);
-        }
         public static Ast Call(Ast calledAst, params Ast[] args)
         {
             return new Ast(AstTypes.Call, 0, args, null, null, null, calledAst);
@@ -111,7 +107,6 @@ namespace MathCommandLine.Evaluation
         NumberLiteral,
         ListLiteral,
         LambdaLiteral,
-        TypeLiteral,
         Variable,
         Call,
     }

@@ -133,13 +133,6 @@ namespace MathCommandLine.Evaluation
                     }
                     MParameters parameters = new MParameters(paramArray);
                     return MValue.Lambda(new MLambda(parameters, expression));
-                case AstTypes.TypeLiteral:
-                    if (!dtDict.Contains(ast.Name))
-                    {
-                        return MValue.Error(Util.ErrorCodes.TYPE_DOES_NOT_EXIST,
-                            "Type \"" + ast.Name + "\" is not defined.", MList.Empty);
-                    }
-                    return MValue.Type(dtDict.GetType(ast.Name));
             }
             return MValue.Empty;
         }

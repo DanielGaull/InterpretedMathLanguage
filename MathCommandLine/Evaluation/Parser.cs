@@ -24,8 +24,6 @@ namespace MathCommandLine.Evaluation
         // Group for the list elements
         private static readonly Regex LIST_REGEX = new Regex(@"^\{(.*)\}$");
         private static readonly Regex LAMBDA_REGEX = new Regex(@"^\((.*)\)=>\{(.*)\}$");
-        // Group for the type name
-        private static readonly Regex TYPE_REGEX = new Regex(@"^#([a-zA-Z_][a-zA-Z0-9_]*)$");
 
         // Call parsing values
         private const char CALL_END_WRAPPER = ')';
@@ -148,11 +146,6 @@ namespace MathCommandLine.Evaluation
                 }).ToArray()) : new AstParameter[0];
 
                 return Ast.LambdaLiteral(parsedParams, exprString);
-            }
-            else if (TYPE_REGEX.IsMatch(expression))
-            {
-                string dtString = TYPE_REGEX.Match(expression).Groups[1].Value;
-                return Ast.TypeLiteral(dtString);
             }
             else if (SYMBOL_NAME_REGEX.IsMatch(expression))
             {
