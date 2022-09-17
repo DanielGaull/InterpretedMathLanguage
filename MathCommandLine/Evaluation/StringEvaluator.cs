@@ -11,16 +11,16 @@ using System.Text.RegularExpressions;
 
 namespace MathCommandLine.Evaluation
 {
-    public class StringEvaluator : IEvaluator
+    public class StringEvaluator : IInterpreter
     {
-        private IEvaluator superEvaluator;
+        private IInterpreter superEvaluator;
         private Parser parser;
         private DataTypeDict dtDict;
         private VariableReader varReader;
 
         private static readonly Regex WHITESPACE_REGEX = new Regex(@"\s+");
 
-        public StringEvaluator(IEvaluator superEvaluator, Parser parser, DataTypeDict dtDict, VariableReader varReader)
+        public StringEvaluator(IInterpreter superEvaluator, Parser parser, DataTypeDict dtDict, VariableReader varReader)
         {
             this.superEvaluator = superEvaluator;
             this.parser = parser;

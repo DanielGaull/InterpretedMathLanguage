@@ -8,21 +8,27 @@ using System.Text;
 
 namespace MathCommandLine.Evaluation
 {
-    public class GenericEvaluator : IEvaluator
+    public class GenericEvaluator : IInterpreter
     {
         NativeEvaluator nativeEvaluator;
         StringEvaluator stringEvaluator;
-        
+
+        DataTypeDict dtDict;
+        VariableManager variableManager;
+
         public GenericEvaluator()
         {
         }
 
-        public void Initialize(DataTypeDict dtDict, VariableReader varReader)
+        public void Initialize(DataTypeDict dtDict, VariableManager variableManager)
         {
+            this.dtDict = dtDict;
+            this.variableManager = variableManager;
+
             nativeEvaluator = new NativeEvaluator();
 
             Parser parser = new Parser();
-            stringEvaluator = new StringEvaluator(this, parser, dtDict, varReader);
+            stringEvaluator = new StringEvaluator(this, parser, dtDict, variableManager.GetReader());
         }
 
         public MValue Evaluate(MExpression expression, MArguments arguments)
@@ -35,6 +41,15 @@ namespace MathCommandLine.Evaluation
             {
                 return stringEvaluator.Evaluate(expression, arguments);
             }
+        }
+
+        public MDataType GetDataType(string typeName)
+        {
+            if (dtDict.Contains(typeName))
+            {
+                return dtDict.GetType(typeName);
+            }
+            return MDataType.Empty;
         }
     }
 }

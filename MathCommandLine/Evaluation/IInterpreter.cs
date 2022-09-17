@@ -6,8 +6,10 @@ using System.Text;
 
 namespace MathCommandLine.Evaluation
 {
-    public interface IEvaluator
+    public interface IInterpreter
     {
         public MValue Evaluate(MExpression expression, MArguments arguments);
+        public MDataType GetDataType(string typeName);
+
     }
 }

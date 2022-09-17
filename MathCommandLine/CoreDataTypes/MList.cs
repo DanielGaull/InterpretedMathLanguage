@@ -84,7 +84,7 @@ namespace MathCommandLine.CoreDataTypes
         {
             return list.iList.IndexOf(value);
         }
-        public static int IndexOfCustom(MList list, MValue value, MLambda equalityEvaluator, IEvaluator evaluator)
+        public static int IndexOfCustom(MList list, MValue value, MLambda equalityEvaluator, IInterpreter evaluator)
         {
             for (int i = 0; i < list.iList.Count; i++)
             {
@@ -101,7 +101,7 @@ namespace MathCommandLine.CoreDataTypes
             }
             return -1;
         }
-        public static MList Map(MList list, MLambda lambda, IEvaluator evaluator)
+        public static MList Map(MList list, MLambda lambda, IInterpreter evaluator)
         {
             List<MValue> newList = new List<MValue>();
             for (int i = 0; i < list.iList.Count; i++)
@@ -117,7 +117,7 @@ namespace MathCommandLine.CoreDataTypes
             }
             return new MList(newList);
         }
-        public static MValue Reduce(MList list, MLambda lambda, MValue initial, IEvaluator evaluator)
+        public static MValue Reduce(MList list, MLambda lambda, MValue initial, IInterpreter evaluator)
         {
             MValue runningResult = initial;
             for (int i = 0; i < list.iList.Count; i++)

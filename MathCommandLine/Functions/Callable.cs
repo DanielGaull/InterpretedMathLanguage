@@ -19,7 +19,7 @@ namespace MathCommandLine.Functions
             Expression = expression;
         }
 
-        public MValue Evaluate(MArguments args, IEvaluator evaluator)
+        public MValue Evaluate(MArguments args, IInterpreter evaluator)
         {
             // Need to check that we've been provided the right number of arguments
             if (args.Length != Parameters.Length)
