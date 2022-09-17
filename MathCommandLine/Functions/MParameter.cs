@@ -58,7 +58,8 @@ namespace MathCommandLine.Functions
         public bool ContainsType(MDataType type)
         {
             List<MDataType> types = GetDataTypes();
-            return types.Contains(type) || types.Contains(MDataType.Any);
+            // If types contains this type, or types contains the any type (can't do contains check because all types == any)
+            return types.Contains(type) || types.Where((type) => type.IsAnyType).Count() > 0;
         }
         public bool PassesRestrictions(MValue value)
         {

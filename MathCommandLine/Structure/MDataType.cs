@@ -47,6 +47,14 @@ namespace MathCommandLine.Structure
 
         public static MDataType Empty = new MDataType();
 
+        public bool IsAnyType
+        {
+            get
+            {
+                return internalId == ANY_TYPE_ID;
+            }
+        }
+
         // Core data types
         public static MDataType Any = new MDataType(ANY_TYPE_ID, "any");
         public static MDataType Number = new MDataType("number");
