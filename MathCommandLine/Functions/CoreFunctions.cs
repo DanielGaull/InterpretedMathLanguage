@@ -43,7 +43,8 @@ namespace MathCommandLine.Functions
                 GetValue(evaluator),
                 CastFunction(evaluator),
                 CreateErrorFunction(evaluator),
-                CreateStringFunction(evaluator)
+                CreateStringFunction(evaluator),
+                DisplayFunction(evaluator)
             };
         }
 
@@ -425,7 +426,7 @@ namespace MathCommandLine.Functions
                 (args) =>
                 {
                     MValue original = args[0].Value;
-                    string key = Utilities.MListToString(args[1].Value.GetValueByName("chars").ListValue);
+                    string key = args[1].Value.GetStringValue();
                     return original.GetValueByName(key);
                 },
                 new MParameters(
@@ -460,7 +461,7 @@ namespace MathCommandLine.Functions
                 (args) =>
                 {
                     int code = (int)args[0].Value.NumberValue;
-                    string msg = Utilities.MListToString(args[1].Value.GetValueByName("chars").ListValue);
+                    string msg = args[1].Value.GetStringValue();
                     MList info = args[2].Value.ListValue;
                     return MValue.Error((ErrorCodes)code, msg, info);
                 },
@@ -480,12 +481,28 @@ namespace MathCommandLine.Functions
                 "_str", MDataType.String,
                 (args) =>
                 {
-                    return MValue.String(Utilities.MListToString(args[0].Value.ListValue));
+                    return MValue.String(args[0].Value.ListValue);
                 },
                 new MParameters(
                     new MParameter(MDataType.List, "chars")
                 ),
                 "Creates a string with the specified char stream."
+            );
+        }
+
+        public static MFunction DisplayFunction(IEvaluator evaluator)
+        {
+            return new MFunction(
+                "_display", MDataType.Void,
+                (args) =>
+                {
+                    Console.WriteLine(args[0].Value.GetStringValue());
+                    return MValue.Void();
+                },
+                new MParameters(
+                    new MParameter(MDataType.String, "str")
+                ),
+                "Prints the specified string to the standard output stream"
             );
         }
     }

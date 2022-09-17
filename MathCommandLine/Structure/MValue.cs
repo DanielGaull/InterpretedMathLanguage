@@ -74,6 +74,19 @@ namespace MathCommandLine.Structure
             return new MValue(type, 0, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, null, values);
         }
 
+        /// <summary>
+        /// If this is a string, return the string value. Otherwise, return null
+        /// </summary>
+        /// <returns></returns>
+        public string GetStringValue()
+        {
+            if (DataType == MDataType.String)
+            {
+                return Utilities.MListToString(GetValueByName("chars").ListValue);
+            }
+            return null;
+        }
+
         // Errors are a core composite type, so they are not primitive but still exist in core code
         public static MValue Error(ErrorCodes code, string message, MList data)
         {
@@ -97,11 +110,15 @@ namespace MathCommandLine.Structure
         }
         public static MValue String(string value)
         {
+            return String(Utilities.StringToMList(value));
+        }
+        public static MValue String(MList value)
+        {
             Dictionary<string, MValue> values = new Dictionary<string, MValue>()
             {
-                { "chars", List(Utilities.StringToMList(value)) }
+                { "chars", List(value) }
             };
-            return Composite(MDataType.String, values);     
+            return Composite(MDataType.String, values);
         }
 
         public MValue GetValueByName(string name)

@@ -41,8 +41,12 @@ namespace MathCommandLine
                 Console.Write("Enter Expression: ");
                 string input = Console.ReadLine();
                 MValue result = evaluator.Evaluate(new MExpression(input), VarsToArgs());
-                string resultString = result.ToLongString();
-                Console.WriteLine(resultString);
+                if (result.DataType != MDataType.Void)
+                {
+                    // Never output void as a result, since we're typically running a function
+                    string resultString = result.ToLongString();
+                    Console.WriteLine(resultString);
+                }
             }
         }
 
