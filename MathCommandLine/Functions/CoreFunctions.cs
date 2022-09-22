@@ -39,6 +39,7 @@ namespace MathCommandLine.Functions
                 JoinLists(evaluator),
 
                 Get(evaluator),
+                Set(evaluator),
 
                 TypeOf(evaluator),
                 CompareFunction(evaluator),
@@ -389,17 +390,24 @@ namespace MathCommandLine.Functions
         }
         public static MFunction Set(IInterpreter interpreter)
         {
-            // TODO
             return new MFunction(
                 "_set", MDataType.Void,
                 (args) =>
                 {
                     string refName = args[0].Value.NameValue;
+                    MValue value = args[1].Value;
                     VariableManager varManager = interpreter.GetVariableManager();
                     if (varManager.HasValue(refName))
                     {
-                        //varManager.SetValue()
-                        return varManager.GetValue(refName);
+                        if (varManager.CanModifyValue(refName, value))
+                        {
+                            varManager.SetValue(refName, value);
+                            return MValue.Void();
+                        }
+                        else
+                        {
+                            return MValue.Error(ErrorCodes.CANNOT_ASSIGN, $"Cannot assign {value} to \"refName\".");
+                        }
                     }
                     else
                     {
@@ -408,13 +416,13 @@ namespace MathCommandLine.Functions
                     }
                 },
                 new MParameters(
-                    new MParameter(MDataType.Reference, "ref")
+                    new MParameter(MDataType.Reference, "ref"),
+                    new MParameter(MDataType.Any, "value")
                 ),
                 "Assigns the value for 'ref' to 'value'. Returns VAR_DOES_NOT_EXIST if reference variable does not exist, and" + 
                 " CAN_NOT_ASSIGN if reference variable is constant."
             );
         }
-
 
         // Calculation Functions
         // TODO: derivatives/integrals/solve

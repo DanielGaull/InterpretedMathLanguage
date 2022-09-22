@@ -37,6 +37,11 @@ namespace MathCommandLine.Variables
             return NamedValues.Where((v) => v.Name == name && v.CanGetValue()).Count() > 0;
         }
 
+        public bool CanModifyValue(string name, MValue value)
+        {
+            return NamedValues.Where((v) => v.Name == name && v.CanAssign(value)).Count() > 0;
+        }
+
         public void SetValue(string name, MValue value)
         {
             var selection = NamedValues.Where((v) => v.Name == name && v.CanAssign(value));
@@ -46,7 +51,7 @@ namespace MathCommandLine.Variables
             }
             else
             {
-                // TODO: Exception for var doesn't exist
+                // TODO: Exception for var doesn't exist, or for var cannot be modified
             }
         }
 
