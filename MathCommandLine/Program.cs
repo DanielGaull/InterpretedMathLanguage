@@ -53,7 +53,7 @@ namespace MathCommandLine
         {
             List<MArgument> argsList = new List<MArgument>();
             argsList.AddRange(varManager.NamedValues
-                .Where((value) => value.CanGetValue())
+                .Where((value) => value.CanGetValue)
                 .Select((value) => new MArgument(value.Name, value.GetValue())));
             argsList.AddRange(funcDict.Functions.Select((func) =>
                 new MArgument(func.Name, MValue.Lambda(new MLambda(func.Parameters, func.Expression)))));

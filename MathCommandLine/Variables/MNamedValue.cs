@@ -5,31 +5,35 @@ using System.Text;
 
 namespace MathCommandLine.Variables
 {
-    public abstract class MNamedValue
+    public class MNamedValue
     {
         // TODO: Add reference to the module this value appears in
         public string Name { get; protected set; }
         private MValue value;
-        public MNamedValue(string name, MValue value)
+
+        public bool CanGetValue { get; protected set; }
+        public bool CanSetValue { get; protected set; }
+
+        public MNamedValue(string name, MValue value, bool canGet, bool canSet)
         {
             Name = name;
             this.value = value;
+            this.CanGetValue = canGet;
+            this.CanSetValue = canSet;
         }
 
-        public abstract bool CanAssign(MValue value);
         public virtual bool Assign(MValue value)
         {
-            if (CanAssign(value))
+            if (CanSetValue)
             {
                 this.value = value;
                 return true;
             }
             return false;
         }
-        public abstract bool CanGetValue();
         public virtual MValue GetValue()
         {
-            if (CanGetValue())
+            if (CanGetValue)
             {
                 return value;
             }
