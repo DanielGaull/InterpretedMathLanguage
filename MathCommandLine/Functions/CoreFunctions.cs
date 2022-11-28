@@ -40,6 +40,7 @@ namespace MathCommandLine.Functions
 
                 Get(evaluator),
                 Set(evaluator),
+                Declare(evaluator),
 
                 TypeOf(evaluator),
                 CompareFunction(evaluator),
@@ -48,10 +49,11 @@ namespace MathCommandLine.Functions
                 CastFunction(evaluator),
                 CreateErrorFunction(evaluator),
                 CreateStringFunction(evaluator),
-                CreateReferenceFunction(evaluator),
                 DisplayFunction(evaluator),
                 CreateTypeFunction(evaluator),
                 TimeFunction(evaluator),
+
+                CreateReferenceFunction(evaluator),
             };
         }
 
@@ -406,7 +408,7 @@ namespace MathCommandLine.Functions
                         }
                         else
                         {
-                            return MValue.Error(ErrorCodes.CANNOT_ASSIGN, $"Cannot assign {value} to \"refName\".");
+                            return MValue.Error(ErrorCodes.CANNOT_ASSIGN, $"Cannot assign {value} to \"{refName}\".");
                         }
                     }
                     else
@@ -421,6 +423,44 @@ namespace MathCommandLine.Functions
                 ),
                 "Assigns the value for 'ref' to 'value'. Returns VAR_DOES_NOT_EXIST if reference variable does not exist, and" + 
                 " CAN_NOT_ASSIGN if reference variable is constant."
+            );
+        }
+        public static MFunction Declare(IInterpreter interpreter)
+        {
+            return new MFunction(
+                "_declare", MDataType.Reference,
+                (args) =>
+                {
+                    string refName = args[0].Value.GetStringValue();
+                    double can_get = args[1].Value.NumberValue;
+                    double can_set = args[2].Value.NumberValue;
+                    MValue value = args[3].Value;
+                    VariableManager varManager = interpreter.GetVariableManager();
+                    if (varManager.HasValue(refName))
+                    {
+                        return MValue.Error(ErrorCodes.CANNOT_DECLARE, $"Named value \"{refName}\" already exists.");
+                    }
+                    else
+                    {
+                        varManager.AddNamedValues(new MNamedValue(refName, value, can_get == 1, can_set == 1));
+                        return MValue.Void();
+                    }
+                },
+                new MParameters(
+                    new MParameter(MDataType.String, "nv_name"),
+                    new MParameter("can_get", new MTypeRestrictionsEntry(MDataType.Number, new ValueRestriction[] {
+                        new ValueRestriction(ValueRestriction.ValueRestrictionTypes.GreaterThanOrEqualTo, 0),
+                        new ValueRestriction(ValueRestriction.ValueRestrictionTypes.LessThanOrEqualTo, 1)
+                    })),
+                    new MParameter("can_set", new MTypeRestrictionsEntry(MDataType.Number, new ValueRestriction[] {
+                        new ValueRestriction(ValueRestriction.ValueRestrictionTypes.GreaterThanOrEqualTo, 0),
+                        new ValueRestriction(ValueRestriction.ValueRestrictionTypes.LessThanOrEqualTo, 1)
+                    })),
+                    new MParameter(MDataType.Any, "value")
+                ),
+                "Declares the named value 'nv_name' and assigns 'value' to it. If 'can_get' is 0, then 'var_name' " +
+                "cannot be accessed. If 'can_get' is 0, then 'var_name' cannot be modified. Returns CANNOT_DECLARE error " + 
+                "if the named value has already been declared."
             );
         }
 

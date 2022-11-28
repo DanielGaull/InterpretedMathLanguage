@@ -20,5 +20,6 @@ namespace MathCommandLine.Util
         NOT_CALLABLE = 11,
         VAR_DOES_NOT_EXIST = 12,
         CANNOT_ASSIGN = 13,
+        CANNOT_DECLARE = 14,
     }
 }
