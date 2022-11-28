@@ -41,6 +41,7 @@ namespace MathCommandLine.Functions
                 Get(evaluator),
                 Set(evaluator),
                 Declare(evaluator),
+                Delete(evaluator),
 
                 TypeOf(evaluator),
                 CompareFunction(evaluator),
@@ -461,6 +462,31 @@ namespace MathCommandLine.Functions
                 "Declares the named value 'nv_name' and assigns 'value' to it. If 'can_get' is 0, then 'var_name' " +
                 "cannot be accessed. If 'can_get' is 0, then 'var_name' cannot be modified. Returns CANNOT_DECLARE error " + 
                 "if the named value has already been declared."
+            );
+        }
+        public static MFunction Delete(IInterpreter interpreter)
+        {
+            return new MFunction(
+                "_delete", MDataType.Void,
+                (args) =>
+                {
+                    string refName = args[0].Value.NameValue;
+                    VariableManager varManager = interpreter.GetVariableManager();
+                    if (varManager.HasValue(refName))
+                    {
+                        varManager.DeleteNamedValue(refName);
+                        return MValue.Void();
+                    }
+                    else
+                    {
+                        return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST,
+                            $"Variable or argument \"{refName}\" does not exist.", MList.Empty);
+                    }
+                },
+                new MParameters(
+                    new MParameter(MDataType.Reference, "ref")
+                ),
+                "Deletes the named value pointed to by 'ref'. Returns VAR_DOES_NOT_EXIST if the named value does not exist."
             );
         }
 

@@ -68,5 +68,18 @@ namespace MathCommandLine.Variables
         {
             NamedValues.Add(new MNamedValue(name, value, true, false));
         }
+
+        public bool DeleteNamedValue(string name)
+        {
+            for (int i = 0; i < NamedValues.Count; i++)
+            {
+                if (NamedValues[i].Name == name)
+                {
+                    NamedValues.RemoveAt(i);
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }
