@@ -13,13 +13,15 @@ namespace MathCommandLine.Variables
 
         public bool CanGetValue { get; protected set; }
         public bool CanSetValue { get; protected set; }
+        public bool CanDeleteValue { get; protected set; }
 
-        public MNamedValue(string name, MValue value, bool canGet, bool canSet)
+        public MNamedValue(string name, MValue value, bool canGet, bool canSet, bool canDelete)
         {
             Name = name;
             this.value = value;
             this.CanGetValue = canGet;
             this.CanSetValue = canSet;
+            this.CanDeleteValue = canDelete;
         }
 
         public virtual bool Assign(MValue value)

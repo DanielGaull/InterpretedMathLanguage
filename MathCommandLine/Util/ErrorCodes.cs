@@ -21,5 +21,6 @@ namespace MathCommandLine.Util
         VAR_DOES_NOT_EXIST = 12,
         CANNOT_ASSIGN = 13,
         CANNOT_DECLARE = 14,
+        CANNOT_DELETE = 15,
     }
 }

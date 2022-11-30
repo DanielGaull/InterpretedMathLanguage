@@ -24,11 +24,11 @@ namespace MathCommandLine
             for (int i = 0; i < coreFuncs.Count; i++)
             {
                 varManager.AddConstant(coreFuncs[i].Name, 
-                    MValue.Lambda(new MLambda(coreFuncs[i].Parameters, coreFuncs[i].Expression)));
+                    MValue.Lambda(new MLambda(coreFuncs[i].Parameters, coreFuncs[i].Expression)), false);
             }
             // Add core constants
             // TODO: Add core constant for TIME
-            varManager.AddConstant("void", MValue.Void());
+            varManager.AddConstant("void", MValue.Void(), false);
             funcDict = new FunctionDict(coreFuncs);
             DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, MDataType.Lambda,
                 MDataType.Type, MDataType.Error, MDataType.Reference, MDataType.String, MDataType.Void, MDataType.Any);

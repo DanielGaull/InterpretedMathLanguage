@@ -42,6 +42,11 @@ namespace MathCommandLine.Variables
             return NamedValues.Where((v) => v.Name == name && v.CanSetValue).Count() > 0;
         }
 
+        public bool CanDelete(string name)
+        {
+            return NamedValues.Where((v) => v.Name == name && v.CanDeleteValue).Count() > 0;
+        }
+
         public void SetValue(string name, MValue value)
         {
             var selection = NamedValues.Where((v) => v.Name == name && v.CanSetValue);
@@ -60,13 +65,13 @@ namespace MathCommandLine.Variables
         {
             NamedValues.AddRange(vals);
         }
-        public void AddVariable(string name, MValue value)
+        public void AddVariable(string name, MValue value, bool canDelete)
         {
-            NamedValues.Add(new MNamedValue(name, value, true, true));
+            NamedValues.Add(new MNamedValue(name, value, true, true, canDelete));
         }
-        public void AddConstant(string name, MValue value)
+        public void AddConstant(string name, MValue value, bool canDelete)
         {
-            NamedValues.Add(new MNamedValue(name, value, true, false));
+            NamedValues.Add(new MNamedValue(name, value, true, false, canDelete));
         }
 
         public bool DeleteNamedValue(string name)
@@ -75,8 +80,16 @@ namespace MathCommandLine.Variables
             {
                 if (NamedValues[i].Name == name)
                 {
-                    NamedValues.RemoveAt(i);
-                    return true;
+                    if (NamedValues[i].CanDeleteValue)
+                    {
+                        NamedValues.RemoveAt(i);
+                        return true;
+                    }
+                    else
+                    {
+                        // TODO: Error for unable to delete
+                        return false;
+                    }
                 }
             }
             return false;

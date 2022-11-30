@@ -433,9 +433,10 @@ namespace MathCommandLine.Functions
                 (args) =>
                 {
                     string refName = args[0].Value.GetStringValue();
-                    double can_get = args[1].Value.NumberValue;
-                    double can_set = args[2].Value.NumberValue;
-                    MValue value = args[3].Value;
+                    double can_get = args[2].Value.NumberValue;
+                    double can_set = args[3].Value.NumberValue;
+                    double can_delete = args[4].Value.NumberValue;
+                    MValue value = args[1].Value;
                     VariableManager varManager = interpreter.GetVariableManager();
                     if (varManager.HasValue(refName))
                     {
@@ -443,12 +444,14 @@ namespace MathCommandLine.Functions
                     }
                     else
                     {
-                        varManager.AddNamedValues(new MNamedValue(refName, value, can_get == 1, can_set == 1));
+                        varManager.AddNamedValues(new MNamedValue(refName, value, can_get == 1, can_set == 1, 
+                            can_delete == 1));
                         return MValue.Void();
                     }
                 },
                 new MParameters(
                     new MParameter(MDataType.String, "nv_name"),
+                    new MParameter(MDataType.Any, "value"),
                     new MParameter("can_get", new MTypeRestrictionsEntry(MDataType.Number, new ValueRestriction[] {
                         new ValueRestriction(ValueRestriction.ValueRestrictionTypes.GreaterThanOrEqualTo, 0),
                         new ValueRestriction(ValueRestriction.ValueRestrictionTypes.LessThanOrEqualTo, 1)
@@ -457,11 +460,15 @@ namespace MathCommandLine.Functions
                         new ValueRestriction(ValueRestriction.ValueRestrictionTypes.GreaterThanOrEqualTo, 0),
                         new ValueRestriction(ValueRestriction.ValueRestrictionTypes.LessThanOrEqualTo, 1)
                     })),
-                    new MParameter(MDataType.Any, "value")
+                    new MParameter("can_delete", new MTypeRestrictionsEntry(MDataType.Number, new ValueRestriction[] {
+                        new ValueRestriction(ValueRestriction.ValueRestrictionTypes.GreaterThanOrEqualTo, 0),
+                        new ValueRestriction(ValueRestriction.ValueRestrictionTypes.LessThanOrEqualTo, 1)
+                    }))
                 ),
-                "Declares the named value 'nv_name' and assigns 'value' to it. If 'can_get' is 0, then 'var_name' " +
-                "cannot be accessed. If 'can_get' is 0, then 'var_name' cannot be modified. Returns CANNOT_DECLARE error " + 
-                "if the named value has already been declared."
+                "Declares the named value 'nv_name' and assigns 'value' to it. If 'can_get' is 0, then 'nv_name' " +
+                "cannot be accessed. If 'can_get' is 0, then 'nv_name' cannot be modified. " +
+                "If 'can_delete' is 0, then 'nv_name' cannot be deleted. " +
+                "Returns CANNOT_DECLARE error if the named value has already been declared."
             );
         }
         public static MFunction Delete(IInterpreter interpreter)
@@ -474,7 +481,15 @@ namespace MathCommandLine.Functions
                     VariableManager varManager = interpreter.GetVariableManager();
                     if (varManager.HasValue(refName))
                     {
-                        varManager.DeleteNamedValue(refName);
+                        if (varManager.CanDelete(refName))
+                        {
+                            varManager.DeleteNamedValue(refName);
+                        }
+                        else
+                        {
+                            return MValue.Error(ErrorCodes.CANNOT_DELETE,
+                                $"Variable or argument \"{refName}\" cannot be deleted.", MList.Empty);
+                        }
                         return MValue.Void();
                     }
                     else
