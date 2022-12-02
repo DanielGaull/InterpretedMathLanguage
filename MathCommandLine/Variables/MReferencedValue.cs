@@ -5,19 +5,16 @@ using System.Text;
 
 namespace MathCommandLine.Variables
 {
-    public class MNamedValue
+    public class MReferencedValue
     {
-        // TODO: Add reference to the module this value appears in
-        public string Name { get; protected set; }
         private MValue value;
 
         public bool CanGetValue { get; protected set; }
         public bool CanSetValue { get; protected set; }
         public bool CanDeleteValue { get; protected set; }
 
-        public MNamedValue(string name, MValue value, bool canGet, bool canSet, bool canDelete)
+        public MReferencedValue(MValue value, bool canGet, bool canSet, bool canDelete)
         {
-            Name = name;
             this.value = value;
             this.CanGetValue = canGet;
             this.CanSetValue = canSet;

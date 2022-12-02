@@ -9,11 +9,17 @@ namespace MathCommandLine.Variables
 {
     public class VariableManager
     {
-        public List<MNamedValue> NamedValues { get; private set; }
+        Dictionary<string, int> nameMap;
+        Dictionary<int, MReferencedValue> addressMap;
+        int addrCounter = 0;
+        // TODO: Intelligently handle when addresses are freed (can switch to an array/list w/ indexing)
+        // Otherwise addrCounter can overflow
 
         public VariableManager()
         {
-            NamedValues = new List<MNamedValue>();
+            nameMap = new Dictionary<string, int>();
+            addressMap = new Dictionary<int, MReferencedValue>();
+            addrCounter = 0;
         }
 
         public VariableReader GetReader()
@@ -61,7 +67,7 @@ namespace MathCommandLine.Variables
         }
 
         // TODO: Don't allow any duplicate names
-        public void AddNamedValues(params MNamedValue[] vals)
+        public void AddNamedValues(params MReferencedValue[] vals)
         {
             NamedValues.AddRange(vals);
         }
