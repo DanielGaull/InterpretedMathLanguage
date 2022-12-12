@@ -20,20 +20,21 @@ namespace MathCommandLine
             evaluator = new Interpreter();
             varManager = new VariableManager();
 
+            // Add core constants
+            varManager.AddConstant("null", MValue.Null(), false);
+            varManager.AddConstant("void", MValue.Void(), false);
+            varManager.AddConstant("TRUE", MValue.Bool(true), false);
+            varManager.AddConstant("FALSE", MValue.Bool(false), false);
             List<MFunction> coreFuncs = CoreFunctions.GenerateCoreFunctions(evaluator);
             for (int i = 0; i < coreFuncs.Count; i++)
             {
                 varManager.AddConstant(coreFuncs[i].Name, 
                     MValue.Lambda(new MLambda(coreFuncs[i].Parameters, coreFuncs[i].Expression)), false);
             }
-            // Add core constants
-            varManager.AddConstant("void", MValue.Void(), false);
-            varManager.AddConstant("TRUE", MValue.Bool(true), false);
-            varManager.AddConstant("FALSE", MValue.Bool(false), false);
             funcDict = new FunctionDict(coreFuncs);
             DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, MDataType.Lambda,
                 MDataType.Type, MDataType.Error, MDataType.Reference, MDataType.String, MDataType.Void,
-                MDataType.Boolean, MDataType.Any);
+                MDataType.Boolean, MDataType.Null, MDataType.Any);
             evaluator.Initialize(dtDict, varManager);
 
             // Simple reading for now

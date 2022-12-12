@@ -81,6 +81,11 @@ namespace MathCommandLine.Structure
             return new MValue(MDataType.Void, 0, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, -1, 
                 false, null);
         }
+        public static MValue Null()
+        {
+            return new MValue(MDataType.Null, 0, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, -1,
+                false, null);
+        }
         public static MValue Composite(MDataType type, Dictionary<string, MValue> values)
         {
             return new MValue(type, 0, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, -1, false, values);
@@ -201,6 +206,10 @@ namespace MathCommandLine.Structure
                 {
                     return "FALSE";
                 }
+            }
+            else if (DataType == MDataType.Null)
+            {
+                return "null";
             }
             else if (DataType == MDataType.Error)
             {
