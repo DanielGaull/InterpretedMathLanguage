@@ -53,6 +53,7 @@ namespace MathCommandLine.Functions
                 DisplayFunction(evaluator),
                 CreateTypeFunction(evaluator),
                 TimeFunction(evaluator),
+                CheckFunction(evaluator),
 
                 CreateReferenceFunction(evaluator),
             };
@@ -699,6 +700,46 @@ namespace MathCommandLine.Functions
                 },
                 new MParameters(),
                 "Returns the number of milliseconds since the epoch"
+            );
+        }
+
+        public static MFunction CheckFunction(IInterpreter interpreter)
+        {
+            return new MFunction(
+                "_chk", MDataType.Any,
+                (args) =>
+                {
+                    List<MValue> pairs = args[0].Value.ListValue.InternalList;
+                    for (int i = 0; i < pairs.Count; i++)
+                    {
+                        List<MValue> pair = pairs[i].ListValue.InternalList;
+                        if (pair.Count != 2)
+                        {
+                            return MValue.Error(ErrorCodes.INVALID_ARGUMENT, 
+                                "Expected list length of 2 but found " + pair.Count + ".");
+                        }
+                        MLambda cond = pair[0].LambdaValue;
+                        MValue condValue = cond.Evaluate(MArguments.Empty(), interpreter);
+                        // Everything is truthy except the "false" value, "void", and "null"
+                        bool isTruthy = !(condValue.DataType == MDataType.Boolean && !condValue.BoolValue)
+                                            && condValue.DataType != MDataType.Void
+                                            && condValue.DataType != MDataType.Null;
+                        if (isTruthy)
+                        {
+                            MLambda outputFunc = pair[1].LambdaValue;
+                            MValue output = outputFunc.Evaluate(MArguments.Empty(), interpreter);
+                            return output;
+                        }
+                    }
+                    // Return void if we didn't evaluate any of the conditions
+                    return MValue.Void();
+                },
+                new MParameters(
+                    // TODO: Add restrictions here
+                    new MParameter(MDataType.List, "pairs")
+                ),
+                "Takes in a list of 2-lists of functions with no arguments, evaluating the each element. Once an element returns " +
+                "true, then the corresponding code is run and returned, with no other code being run."
             );
         }
     }

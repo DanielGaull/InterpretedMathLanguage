@@ -22,5 +22,6 @@ namespace MathCommandLine.Util
         CANNOT_ASSIGN = 13,
         CANNOT_DECLARE = 14,
         CANNOT_DELETE = 15,
+        INVALID_ARGUMENT = 16,
     }
 }
