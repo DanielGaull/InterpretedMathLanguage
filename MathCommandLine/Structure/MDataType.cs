@@ -59,7 +59,7 @@ namespace MathCommandLine.Structure
         public static MDataType Any = new MDataType(ANY_TYPE_ID, "any");
         public static MDataType Number = new MDataType("number");
         public static MDataType List = new MDataType("list");
-        public static MDataType Lambda = new MDataType("lambda");
+        public static MDataType Lambda = new MDataType("function");
         public static MDataType Type = new MDataType("type");
         public static MDataType BigInt = new MDataType("big_int");
         public static MDataType BigDecimal = new MDataType("big_decimal");
