@@ -23,7 +23,7 @@ namespace MathCommandLine.Evaluation
         private static readonly Regex NUMBER_REGEX = new Regex("^" + NUMBER_REGEX_PATTERN + "$");
         // Group for the list elements
         private static readonly Regex LIST_REGEX = new Regex(@"^\{(.*)\}$");
-        private static readonly Regex LAMBDA_REGEX = new Regex(@"^\((.*)\)=>\{(.*)\}$");
+        private static readonly Regex LAMBDA_REGEX = new Regex(@"^\((.*?)\)=>\{(.*)\}$");
 
         // Call parsing values
         private const char CALL_END_WRAPPER = ')';
