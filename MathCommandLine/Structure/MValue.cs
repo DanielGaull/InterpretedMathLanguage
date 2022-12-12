@@ -17,11 +17,12 @@ namespace MathCommandLine.Structure
         public long BigIntValue; // For the big_int type
         public MDataType TypeValue; // For the type type (that represents an actual data type)
         public int AddrValue; // For the reference type
+        public bool BoolValue; // For the boolean type
         public Dictionary<string, MValue> DataValues; // The Data Values for composite types (maps name => value)
         public MDataType DataType;
 
         public MValue(MDataType dataType, double numberValue, MList listValue, MLambda lambdaValue, decimal bigDecimalValue, 
-            long bigIntValue, MDataType typeValue, int addrValue, Dictionary<string, MValue> dataValues)
+            long bigIntValue, MDataType typeValue, int addrValue, bool boolValue, Dictionary<string, MValue> dataValues)
         {
             DataType = dataType;
             NumberValue = numberValue;
@@ -32,46 +33,57 @@ namespace MathCommandLine.Structure
             TypeValue = typeValue;
             DataValues = dataValues;
             AddrValue = addrValue;
+            BoolValue = boolValue;
         }
 
         public static readonly MValue Empty = new MValue(MDataType.Empty, 0, MList.Empty, MLambda.Empty, 0, 0, 
-            MDataType.Empty, -1, null);
+            MDataType.Empty, -1, false, null);
 
         public static MValue Number(double numberValue)
         {
-            return new MValue(MDataType.Number, numberValue, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, -1, null);
+            return new MValue(MDataType.Number, numberValue, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, -1, 
+                false, null);
         }
         public static MValue List(MList list)
         {
-            return new MValue(MDataType.List, 0, list, MLambda.Empty, 0, 0, MDataType.Empty, -1, null);
+            return new MValue(MDataType.List, 0, list, MLambda.Empty, 0, 0, MDataType.Empty, -1, false, null);
         }
         public static MValue Lambda(MLambda lambda)
         {
-            return new MValue(MDataType.Lambda, 0, MList.Empty, lambda, 0, 0, MDataType.Empty, -1, null);
+            return new MValue(MDataType.Lambda, 0, MList.Empty, lambda, 0, 0, MDataType.Empty, -1, false, null);
         }
         public static MValue BigDecimal(decimal bigDecimal)
         {
-            return new MValue(MDataType.BigDecimal, 0, MList.Empty, MLambda.Empty, bigDecimal, 0, MDataType.Empty, -1, null);
+            return new MValue(MDataType.BigDecimal, 0, MList.Empty, MLambda.Empty, bigDecimal, 0, MDataType.Empty, -1, 
+                false, null);
         }
         public static MValue BigInt(long bigInt)
         {
-            return new MValue(MDataType.BigInt, 0, MList.Empty, MLambda.Empty, 0, bigInt, MDataType.Empty, -1, null);
+            return new MValue(MDataType.BigInt, 0, MList.Empty, MLambda.Empty, 0, bigInt, MDataType.Empty, -1, 
+                false, null);
         }
         public static MValue Type(MDataType type)
         {
-            return new MValue(MDataType.Type, 0, MList.Empty, MLambda.Empty, 0, 0, type, -1, null);
+            return new MValue(MDataType.Type, 0, MList.Empty, MLambda.Empty, 0, 0, type, -1, false, null);
         }
         public static MValue Reference(int refAddr)
         {
-            return new MValue(MDataType.Reference, 0, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, refAddr, null);
+            return new MValue(MDataType.Reference, 0, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, refAddr, 
+                false, null);
+        }
+        public static MValue Bool(bool boolValue)
+        {
+            return new MValue(MDataType.Boolean, 0, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, -1,
+                boolValue, null);
         }
         public static MValue Void()
         {
-            return new MValue(MDataType.Void, 0, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, -1, null);
+            return new MValue(MDataType.Void, 0, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, -1, 
+                false, null);
         }
         public static MValue Composite(MDataType type, Dictionary<string, MValue> values)
         {
-            return new MValue(type, 0, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, -1, values);
+            return new MValue(type, 0, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, -1, false, values);
         }
 
         /// <summary>
@@ -179,6 +191,17 @@ namespace MathCommandLine.Structure
             {
                 return "void";
             }
+            else if (DataType == MDataType.Boolean)
+            {
+                if (BoolValue)
+                {
+                    return "TRUE";
+                }
+                else
+                {
+                    return "FALSE";
+                }
+            }
             else if (DataType == MDataType.Error)
             {
                 StringBuilder builder = new StringBuilder("Error: #");
@@ -237,6 +260,14 @@ namespace MathCommandLine.Structure
             else if (dt == MDataType.Type)
             {
                 return v1.TypeValue == v2.TypeValue;
+            }
+            else if (dt == MDataType.Boolean)
+            {
+                return v1.BoolValue == v2.BoolValue;
+            }
+            else if (dt == MDataType.Reference)
+            {
+                return v1.AddrValue == v2.AddrValue;
             }
             else
             {

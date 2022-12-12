@@ -27,11 +27,13 @@ namespace MathCommandLine
                     MValue.Lambda(new MLambda(coreFuncs[i].Parameters, coreFuncs[i].Expression)), false);
             }
             // Add core constants
-            // TODO: Add core constant for TIME
             varManager.AddConstant("void", MValue.Void(), false);
+            varManager.AddConstant("TRUE", MValue.Bool(true), false);
+            varManager.AddConstant("FALSE", MValue.Bool(false), false);
             funcDict = new FunctionDict(coreFuncs);
             DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, MDataType.Lambda,
-                MDataType.Type, MDataType.Error, MDataType.Reference, MDataType.String, MDataType.Void, MDataType.Any);
+                MDataType.Type, MDataType.Error, MDataType.Reference, MDataType.String, MDataType.Void,
+                MDataType.Boolean, MDataType.Any);
             evaluator.Initialize(dtDict, varManager);
 
             // Simple reading for now

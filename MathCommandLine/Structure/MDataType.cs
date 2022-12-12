@@ -71,6 +71,7 @@ namespace MathCommandLine.Structure
         public static MDataType String = new MDataType("string",
             Tuple.Create("chars", List));
         public static MDataType Void = new MDataType("void");
+        public static MDataType Boolean = new MDataType("bool");
 
         public static bool operator ==(MDataType dt1, MDataType dt2)
         {
