@@ -433,9 +433,9 @@ namespace MathCommandLine.Functions
                 (args) =>
                 {
                     string refName = args[0].Value.GetStringValue();
-                    double can_get = args[2].Value.NumberValue;
-                    double can_set = args[3].Value.NumberValue;
-                    double can_delete = args[4].Value.NumberValue;
+                    bool can_get = args[2].Value.BoolValue;
+                    bool can_set = args[3].Value.BoolValue;
+                    bool can_delete = args[4].Value.BoolValue;
                     MValue value = args[1].Value;
                     VariableManager varManager = interpreter.GetVariableManager();
                     if (varManager.HasValue(refName))
@@ -444,30 +444,20 @@ namespace MathCommandLine.Functions
                     }
                     else
                     {
-                        varManager.AddNamedValue(refName, new MReferencedValue(value, can_get == 1,
-                            can_set == 1, can_delete == 1));
+                        varManager.AddNamedValue(refName, new MReferencedValue(value, can_get, can_set, can_delete));
                         return MValue.Void();
                     }
                 },
                 new MParameters(
                     new MParameter(MDataType.String, "nv_name"),
                     new MParameter(MDataType.Any, "value"),
-                    new MParameter("can_get", new MTypeRestrictionsEntry(MDataType.Number, new ValueRestriction[] {
-                        new ValueRestriction(ValueRestriction.ValueRestrictionTypes.GreaterThanOrEqualTo, 0),
-                        new ValueRestriction(ValueRestriction.ValueRestrictionTypes.LessThanOrEqualTo, 1)
-                    })),
-                    new MParameter("can_set", new MTypeRestrictionsEntry(MDataType.Number, new ValueRestriction[] {
-                        new ValueRestriction(ValueRestriction.ValueRestrictionTypes.GreaterThanOrEqualTo, 0),
-                        new ValueRestriction(ValueRestriction.ValueRestrictionTypes.LessThanOrEqualTo, 1)
-                    })),
-                    new MParameter("can_delete", new MTypeRestrictionsEntry(MDataType.Number, new ValueRestriction[] {
-                        new ValueRestriction(ValueRestriction.ValueRestrictionTypes.GreaterThanOrEqualTo, 0),
-                        new ValueRestriction(ValueRestriction.ValueRestrictionTypes.LessThanOrEqualTo, 1)
-                    }))
+                    new MParameter(MDataType.Boolean, "can_get"),
+                    new MParameter(MDataType.Boolean, "can_set"),
+                    new MParameter(MDataType.Boolean, "can_delete")
                 ),
-                "Declares the named value 'nv_name' and assigns 'value' to it. If 'can_get' is 0, then 'nv_name' " +
-                "cannot be accessed. If 'can_get' is 0, then 'nv_name' cannot be modified. " +
-                "If 'can_delete' is 0, then 'nv_name' cannot be deleted. " +
+                "Declares the named value 'nv_name' and assigns 'value' to it. If 'can_get' is false, then 'nv_name' " +
+                "cannot be accessed. If 'can_get' is false, then 'nv_name' cannot be modified. " +
+                "If 'can_delete' is false, then 'nv_name' cannot be deleted. " +
                 "Returns CANNOT_DECLARE error if the named value has already been declared."
             );
         }
