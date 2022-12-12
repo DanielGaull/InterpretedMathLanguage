@@ -39,7 +39,7 @@ namespace MathCommandLine
             {
                 Console.Write("Enter Expression: ");
                 string input = Console.ReadLine();
-                MValue result = evaluator.Evaluate(new MExpression(input), VarsToArgs());
+                MValue result = evaluator.Evaluate(new MExpression(input), new MArguments());
                 if (result.DataType != MDataType.Void)
                 {
                     // Never output void as a result, since we're typically running a function
@@ -47,17 +47,6 @@ namespace MathCommandLine
                     Console.WriteLine(resultString);
                 }
             }
-        }
-
-        static MArguments VarsToArgs()
-        {
-            List<MArgument> argsList = new List<MArgument>();
-            argsList.AddRange(varManager.NamedValues
-                .Where((value) => value.CanGetValue)
-                .Select((value) => new MArgument(value.Name, value.GetValue())));
-            argsList.AddRange(funcDict.Functions.Select((func) =>
-                new MArgument(func.Name, MValue.Lambda(new MLambda(func.Parameters, func.Expression)))));
-            return new MArguments(argsList);
         }
     }
 }

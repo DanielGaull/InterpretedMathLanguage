@@ -29,76 +29,111 @@ namespace MathCommandLine.Variables
 
         public MValue GetValue(string name)
         {
-            var selection = NamedValues.Where((v) => v.Name == name && v.CanGetValue);
-            if (selection.Count() > 0)
+            if (nameMap.ContainsKey(name))
             {
-                return selection.First().GetValue();
+                int addr = nameMap[name];
+                MReferencedValue reffed = addressMap[addr];
+                if (reffed.CanGetValue)
+                {
+                    return reffed.GetValue();
+                }
+                // TODO: Error for var cannot be read
             }
-            // TODO: Exception for var doesn't exist
+            // TODO: Error for var does not exist
             return MValue.Empty;
+        }
+        public MValue GetValue(int addr)
+        {
+            return addressMap[addr].GetValue();
+        }
+
+        public int AddressForName(string name)
+        {
+            return nameMap[name];
         }
 
         public bool HasValue(string name)
         {
-            return NamedValues.Where((v) => v.Name == name && v.CanGetValue).Count() > 0;
+            return nameMap.ContainsKey(name);
+        }
+        public bool HasValue(int addr)
+        {
+            return addressMap.ContainsKey(addr);
         }
 
-        public bool CanModifyValue(string name, MValue value)
+        public bool CanModifyValue(int addr, MValue value)
         {
-            return NamedValues.Where((v) => v.Name == name && v.CanSetValue).Count() > 0;
+            return addressMap.ContainsKey(addr) && addressMap[addr].CanSetValue;
         }
-
-        public bool CanDelete(string name)
+        public void SetValue(int addr, MValue value)
         {
-            return NamedValues.Where((v) => v.Name == name && v.CanDeleteValue).Count() > 0;
-        }
-
-        public void SetValue(string name, MValue value)
-        {
-            var selection = NamedValues.Where((v) => v.Name == name && v.CanSetValue);
-            if (selection.Count() > 0)
+            if (addressMap.ContainsKey(addr))
             {
-                selection.First().Assign(value);
+                if (addressMap[addr].CanSetValue)
+                {
+                    addressMap[addr].Assign(value);
+                }
+                // TODO: Error since var can't be set?
             }
-            else
-            {
-                // TODO: Exception for var doesn't exist, or for var cannot be modified
-            }
+            // TODO: Error since var doesn't exist? This func returns nothing so maybe not
         }
 
         // TODO: Don't allow any duplicate names
-        public void AddNamedValues(params MReferencedValue[] vals)
-        {
-            NamedValues.AddRange(vals);
-        }
         public void AddVariable(string name, MValue value, bool canDelete)
         {
-            NamedValues.Add(new MNamedValue(name, value, true, true, canDelete));
+            AddNamedValue(name, new MReferencedValue(value, true, true, canDelete));
         }
         public void AddConstant(string name, MValue value, bool canDelete)
         {
-            NamedValues.Add(new MNamedValue(name, value, true, false, canDelete));
+            AddNamedValue(name, new MReferencedValue(value, true, false, canDelete));
+        }
+        public void AddNamedValue(string name, MReferencedValue refValue)
+        {
+            int addr = addrCounter++;
+            nameMap.Add(name, addr);
+            addressMap.Add(addr, refValue);
         }
 
-        public bool DeleteNamedValue(string name)
+        public bool CanDelete(int addr)
         {
-            for (int i = 0; i < NamedValues.Count; i++)
+            return addressMap[addr].CanDeleteValue;
+        }
+        public void Delete(int addr)
+        {
+            addressMap.Remove(addr);
+            // Remove all names pointing to this address
+            List<string> namesToDelete = new List<string>();
+            foreach (var kv in nameMap)
             {
-                if (NamedValues[i].Name == name)
+                if (kv.Value == addr)
                 {
-                    if (NamedValues[i].CanDeleteValue)
-                    {
-                        NamedValues.RemoveAt(i);
-                        return true;
-                    }
-                    else
-                    {
-                        // TODO: Error for unable to delete
-                        return false;
-                    }
+                    namesToDelete.Add(kv.Key);
                 }
             }
-            return false;
+            foreach (string name in namesToDelete)
+            {
+                nameMap.Remove(name);
+            }
+        }
+
+        // Creates a clone of this to represent a new "scope frame"
+        public VariableManager Clone()
+        {
+            Dictionary<string, int> nnameMap = new Dictionary<string, int>();
+            Dictionary<int, MReferencedValue> naddressMap = new Dictionary<int, MReferencedValue>();
+            foreach (var kv in nameMap)
+            {
+                nnameMap.Add(kv.Key, kv.Value);
+            }
+            foreach (var kv in addressMap)
+            {
+                naddressMap.Add(kv.Key, kv.Value);
+            }
+            VariableManager nvm = new VariableManager();
+            nvm.nameMap = nnameMap;
+            nvm.addressMap = naddressMap;
+            nvm.addrCounter = addrCounter;
+            return nvm;
         }
     }
 }

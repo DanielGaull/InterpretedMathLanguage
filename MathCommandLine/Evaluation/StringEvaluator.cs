@@ -20,7 +20,8 @@ namespace MathCommandLine.Evaluation
 
         private static readonly Regex WHITESPACE_REGEX = new Regex(@"\s+");
 
-        public StringEvaluator(IInterpreter superEvaluator, Parser parser, DataTypeDict dtDict, VariableReader varReader)
+        public StringEvaluator(IInterpreter superEvaluator, Parser parser, DataTypeDict dtDict, 
+            VariableReader varReader)
         {
             this.superEvaluator = superEvaluator;
             this.parser = parser;

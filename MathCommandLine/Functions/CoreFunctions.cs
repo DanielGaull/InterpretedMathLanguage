@@ -373,16 +373,16 @@ namespace MathCommandLine.Functions
                 "_get", MDataType.Any,
                 (args) =>
                 {
-                    string refName = args[0].Value.NameValue;
+                    int refAddr = args[0].Value.AddrValue;
                     VariableManager varManager = interpreter.GetVariableManager();
-                    if (varManager.HasValue(refName))
+                    if (varManager.HasValue(refAddr))
                     {
-                        return varManager.GetValue(refName);
+                        return varManager.GetValue(refAddr);
                     }
                     else
                     {
                         return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST,
-                            $"Variable or argument \"{refName}\" does not exist.", MList.Empty);
+                            $"Variable or argument @ \"{refAddr}\" does not exist.", MList.Empty);
                     }
                 },
                 new MParameters(
@@ -397,25 +397,25 @@ namespace MathCommandLine.Functions
                 "_set", MDataType.Void,
                 (args) =>
                 {
-                    string refName = args[0].Value.NameValue;
+                    int refAddr = args[0].Value.AddrValue;
                     MValue value = args[1].Value;
                     VariableManager varManager = interpreter.GetVariableManager();
-                    if (varManager.HasValue(refName))
+                    if (varManager.HasValue(refAddr))
                     {
-                        if (varManager.CanModifyValue(refName, value))
+                        if (varManager.CanModifyValue(refAddr, value))
                         {
-                            varManager.SetValue(refName, value);
+                            varManager.SetValue(refAddr, value);
                             return MValue.Void();
                         }
                         else
                         {
-                            return MValue.Error(ErrorCodes.CANNOT_ASSIGN, $"Cannot assign {value} to \"{refName}\".");
+                            return MValue.Error(ErrorCodes.CANNOT_ASSIGN, $"Cannot assign {value} to @\"{refAddr}\".");
                         }
                     }
                     else
                     {
                         return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST,
-                            $"Variable or argument \"{refName}\" does not exist.", MList.Empty);
+                            $"Variable or argument @\"{refAddr}\" does not exist.", MList.Empty);
                     }
                 },
                 new MParameters(
@@ -444,8 +444,8 @@ namespace MathCommandLine.Functions
                     }
                     else
                     {
-                        varManager.AddNamedValues(new MNamedValue(refName, value, can_get == 1, can_set == 1, 
-                            can_delete == 1));
+                        varManager.AddNamedValue(refName, new MReferencedValue(value, can_get == 1,
+                            can_set == 1, can_delete == 1));
                         return MValue.Void();
                     }
                 },
@@ -477,25 +477,25 @@ namespace MathCommandLine.Functions
                 "_delete", MDataType.Void,
                 (args) =>
                 {
-                    string refName = args[0].Value.NameValue;
+                    int refValue = args[0].Value.AddrValue;
                     VariableManager varManager = interpreter.GetVariableManager();
-                    if (varManager.HasValue(refName))
+                    if (varManager.HasValue(refValue))
                     {
-                        if (varManager.CanDelete(refName))
+                        if (varManager.CanDelete(refValue))
                         {
-                            varManager.DeleteNamedValue(refName);
+                            varManager.Delete(refValue);
                         }
                         else
                         {
                             return MValue.Error(ErrorCodes.CANNOT_DELETE,
-                                $"Variable or argument \"{refName}\" cannot be deleted.", MList.Empty);
+                                $"Variable or argument @\"{refValue}\" cannot be deleted.", MList.Empty);
                         }
                         return MValue.Void();
                     }
                     else
                     {
                         return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST,
-                            $"Variable or argument \"{refName}\" does not exist.", MList.Empty);
+                            $"Variable or argument @\"{refValue}\" does not exist.", MList.Empty);
                     }
                 },
                 new MParameters(
@@ -661,7 +661,9 @@ namespace MathCommandLine.Functions
                 "_ref", MDataType.Reference,
                 (args) =>
                 {
-                    return MValue.Reference(args[0].Value.GetStringValue());
+                    VariableManager varManager = evaluator.GetVariableManager();
+                    string name = args[0].Value.GetStringValue();
+                    return MValue.Reference(varManager.AddressForName(name));
                 },
                 new MParameters(
                     new MParameter(MDataType.String, "var_name")

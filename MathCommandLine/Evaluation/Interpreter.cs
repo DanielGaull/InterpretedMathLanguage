@@ -31,15 +31,15 @@ namespace MathCommandLine.Evaluation
             stringEvaluator = new StringEvaluator(this, parser, dtDict, variableManager.GetReader());
         }
 
-        public MValue Evaluate(MExpression expression, MArguments arguments)
+        public MValue Evaluate(MExpression expression, MArguments args)
         {
             if (expression.IsNativeExpression)
             {
-                return nativeEvaluator.Evaluate(expression, arguments);
+                return nativeEvaluator.Evaluate(expression, args);
             }
             else
             {
-                return stringEvaluator.Evaluate(expression, arguments);
+                return stringEvaluator.Evaluate(expression, args);
             }
         }
 
