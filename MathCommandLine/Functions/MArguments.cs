@@ -26,6 +26,11 @@ namespace MathCommandLine.Functions
             this.args = new List<MArgument>(args);
         }
 
+        public static MArguments Empty()
+        {
+            return new MArguments() { args = new List<MArgument>() };
+        }
+
         public MArgument this[int index]
         {
             get

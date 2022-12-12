@@ -28,7 +28,7 @@ namespace MathCommandLine.Evaluation
             nativeEvaluator = new NativeEvaluator();
 
             Parser parser = new Parser();
-            stringEvaluator = new StringEvaluator(this, parser, dtDict, variableManager.GetReader());
+            stringEvaluator = new StringEvaluator(this, parser, dtDict, variableManager);
         }
 
         public MValue Evaluate(MExpression expression, MArguments args)

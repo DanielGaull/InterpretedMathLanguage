@@ -90,7 +90,15 @@ namespace MathCommandLine.Variables
         public void AddNamedValue(string name, MReferencedValue refValue)
         {
             int addr = addrCounter++;
-            nameMap.Add(name, addr);
+            if (nameMap.ContainsKey(name))
+            {
+                // Reassign the address of this name if necessary
+                nameMap[name] = addr;
+            }
+            else
+            {
+                nameMap.Add(name, addr);
+            }
             addressMap.Add(addr, refValue);
         }
 

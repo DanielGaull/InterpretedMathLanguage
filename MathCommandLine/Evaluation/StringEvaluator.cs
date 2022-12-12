@@ -16,24 +16,27 @@ namespace MathCommandLine.Evaluation
         private IInterpreter superEvaluator;
         private Parser parser;
         private DataTypeDict dtDict;
-        private VariableReader varReader;
+        private VariableManager varManager;
 
         private static readonly Regex WHITESPACE_REGEX = new Regex(@"\s+");
 
         public StringEvaluator(IInterpreter superEvaluator, Parser parser, DataTypeDict dtDict, 
-            VariableReader varReader)
+            VariableManager varManager)
         {
             this.superEvaluator = superEvaluator;
             this.parser = parser;
             this.dtDict = dtDict;
-            this.varReader = varReader;
+            this.varManager = varManager;
         }
 
         public MValue Evaluate(MExpression mExpression, MArguments variables)
         {
             if (!mExpression.IsNativeExpression)
             {
-                // TODO: Handle variables, etc.
+                for (int i = 0; i < variables.Length; i++)
+                {
+                    varManager.AddVariable(variables[i].Name, variables[i].Value, false);
+                }
                 string expr = mExpression.Expression;
                 expr = parser.ConvertStringsToLists(expr);
                 expr = CleanWhitespace(expr);
@@ -83,14 +86,10 @@ namespace MathCommandLine.Evaluation
                     // We have a callable type!
                     return lambda.Evaluate(args, superEvaluator);
                 case AstTypes.Variable:
-                    // Return the value of the variable with this name (in arguments)
-                    if (variables.HasArg(ast.Name))
+                    // Return the value of the variable with this name
+                    if (varManager.HasValue(ast.Name))
                     {
-                        return variables[ast.Name].Value;
-                    }
-                    else if (varReader.HasValue(ast.Name))
-                    {
-                        return varReader.GetValue(ast.Name);
+                        return varManager.GetValue(ast.Name);
                     }
                     else
                     {
