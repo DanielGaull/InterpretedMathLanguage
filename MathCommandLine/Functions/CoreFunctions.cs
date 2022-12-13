@@ -56,6 +56,12 @@ namespace MathCommandLine.Functions
                 CheckFunction(evaluator),
 
                 CreateReferenceFunction(evaluator),
+
+                AndFunction(evaluator),
+                AndeFunction(evaluator),
+                OrFunction(evaluator),
+                OreFunction(evaluator),
+                NotFunction(evaluator),
             };
         }
 
@@ -740,6 +746,108 @@ namespace MathCommandLine.Functions
                 ),
                 "Takes in a list of 2-lists of functions with no arguments, evaluating the each element. Once an element returns " +
                 "true, then the corresponding code is run and returned, with no other code being run."
+            );
+        }
+
+        // Boolean functions
+        public static MFunction AndFunction(IInterpreter interpreter)
+        {
+
+            return new MFunction(
+                "_and", MDataType.Boolean,
+                (args) =>
+                {
+                    bool b1 = args[0].Value.BoolValue;
+                    bool b2 = args[1].Value.BoolValue;
+                    return MValue.Bool(b1 && b2);
+                },
+                new MParameters(
+                    new MParameter(MDataType.Boolean, "input1"),
+                    new MParameter(MDataType.Boolean, "input2")
+                ),
+                "Returns true iff both inputs are true"
+            );
+        }
+        public static MFunction OrFunction(IInterpreter interpreter)
+        {
+
+            return new MFunction(
+                "_or", MDataType.Boolean,
+                (args) =>
+                {
+                    bool b1 = args[0].Value.BoolValue;
+                    bool b2 = args[1].Value.BoolValue;
+                    return MValue.Bool(b1 || b2);
+                },
+                new MParameters(
+                    new MParameter(MDataType.Boolean, "input1"),
+                    new MParameter(MDataType.Boolean, "input2")
+                ),
+                "Returns true if either input is true"
+            );
+        }
+        public static MFunction NotFunction(IInterpreter interpreter)
+        {
+
+            return new MFunction(
+                "_not", MDataType.Boolean,
+                (args) =>
+                {
+                    bool b = args[0].Value.BoolValue;
+                    return MValue.Bool(b);
+                },
+                new MParameters(
+                    new MParameter(MDataType.Boolean, "input")
+                ),
+                "Inverts the input"
+            );
+        }
+        public static MFunction AndeFunction(IInterpreter interpreter)
+        {
+
+            return new MFunction(
+                "_ande", MDataType.Boolean,
+                (args) =>
+                {
+                    MLambda b1 = args[0].Value.LambdaValue;
+                    MLambda b2 = args[1].Value.LambdaValue;
+                    MValue result1 = b1.Evaluate(MArguments.Empty(), interpreter);
+                    if (result1.BoolValue)
+                    {
+                        // Simply return the second value
+                        return b2.Evaluate(MArguments.Empty(), interpreter);
+                    }
+                    return MValue.Bool(false);
+                },
+                new MParameters(
+                    new MParameter(MDataType.Lambda, "eval1"),
+                    new MParameter(MDataType.Lambda, "eval2")
+                ),
+                "If 'eval1' returns true, returns the result of 'eval2'. Otherwise, returns false"
+            );
+        }
+        public static MFunction OreFunction(IInterpreter interpreter)
+        {
+
+            return new MFunction(
+                "_ore", MDataType.Boolean,
+                (args) =>
+                {
+                    MLambda b1 = args[0].Value.LambdaValue;
+                    MLambda b2 = args[1].Value.LambdaValue;
+                    MValue result1 = b1.Evaluate(MArguments.Empty(), interpreter);
+                    if (!result1.BoolValue)
+                    {
+                        // Simply return the second value
+                        return b2.Evaluate(MArguments.Empty(), interpreter);
+                    }
+                    return MValue.Bool(true);
+                },
+                new MParameters(
+                    new MParameter(MDataType.Lambda, "eval1"),
+                    new MParameter(MDataType.Lambda, "eval2")
+                ),
+                "If 'eval1' returns false, returns the result of 'eval2'. Otherwise, returns true"
             );
         }
     }
