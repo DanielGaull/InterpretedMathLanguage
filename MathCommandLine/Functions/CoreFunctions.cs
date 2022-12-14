@@ -805,7 +805,7 @@ namespace MathCommandLine.Functions
         {
 
             return new MFunction(
-                "_ande", MDataType.Boolean,
+                "_and_e", MDataType.Boolean,
                 (args) =>
                 {
                     MLambda b1 = args[0].Value.LambdaValue;
@@ -829,7 +829,7 @@ namespace MathCommandLine.Functions
         {
 
             return new MFunction(
-                "_ore", MDataType.Boolean,
+                "_or_e", MDataType.Boolean,
                 (args) =>
                 {
                     MLambda b1 = args[0].Value.LambdaValue;
