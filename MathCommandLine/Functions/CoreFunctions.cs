@@ -62,6 +62,8 @@ namespace MathCommandLine.Functions
                 OrFunction(evaluator),
                 OreFunction(evaluator),
                 NotFunction(evaluator),
+                EqFunction(evaluator),
+                LtFunction(evaluator)
             };
         }
 
@@ -845,6 +847,43 @@ namespace MathCommandLine.Functions
                     new MParameter(MDataType.Lambda, "eval2")
                 ),
                 "If 'eval1' returns truthy, returns result. Otherwise, returns result of 'eval2'"
+            );
+        }
+
+        public static MFunction EqFunction(IInterpreter interpreter)
+        {
+
+            return new MFunction(
+                "_eq", MDataType.Boolean,
+                (args) =>
+                {
+                    MValue item1 = args[0].Value;
+                    MValue item2 = args[1].Value;
+                    return MValue.Bool(item1 == item2);
+                },
+                new MParameters(
+                    new MParameter(MDataType.Any, "item1"),
+                    new MParameter(MDataType.Any, "item2")
+                ),
+                "Returns whether or not both items are equal"
+            );
+        }
+        public static MFunction LtFunction(IInterpreter interpreter)
+        {
+
+            return new MFunction(
+                "_lt", MDataType.Boolean,
+                (args) =>
+                {
+                    double item1 = args[0].Value.NumberValue;
+                    double item2 = args[1].Value.NumberValue;
+                    return MValue.Bool(item1 < item2);
+                },
+                new MParameters(
+                    new MParameter(MDataType.Number, "num1"),
+                    new MParameter(MDataType.Number, "num2")
+                ),
+                "Returns true if num1 is less than num2"
             );
         }
     }
