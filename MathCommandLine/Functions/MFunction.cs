@@ -12,8 +12,6 @@ namespace MathCommandLine.Functions
 {
     public class MFunction : Callable
     {
-        // TODO: Something should be done with the return type other than just storing it
-        public MDataType ReturnType { get; private set; } 
         public string Name { get; set; }
 
         /// <summary>
@@ -28,9 +26,8 @@ namespace MathCommandLine.Functions
         /// <param name="returnType">The return type of the function</param>
         /// <param name="expression">The string expression to evaluate, using the provided paramters</param>
         /// <param name="parameters">The function's parameters</param>
-        public MFunction(string name, MDataType returnType, string expression, MParameters parameters, string desc) : base(parameters, new MExpression(expression))
+        public MFunction(string name, string expression, MParameters parameters, string desc) : base(parameters, new MExpression(expression))
         {
-            ReturnType = returnType;
             Name = name;
             Description = desc;
         }
@@ -42,9 +39,8 @@ namespace MathCommandLine.Functions
         /// <param name="returnType">The return type of the function</param>
         /// <param name="expression">Delegate for native code to execute, taking in the arguments. Argument types have already been resolved.</param>
         /// <param name="parameters">The function's parameters</param>
-        public MFunction(string name, MDataType returnType, NativeExpression expression, MParameters parameters, string desc) : base(parameters, new MExpression(expression))
+        public MFunction(string name, NativeExpression expression, MParameters parameters, string desc) : base(parameters, new MExpression(expression))
         {
-            ReturnType = returnType;
             Name = name;
             Description = desc;
         }
