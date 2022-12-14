@@ -727,10 +727,7 @@ namespace MathCommandLine.Functions
                         MLambda cond = pair[0].LambdaValue;
                         MValue condValue = cond.Evaluate(MArguments.Empty(), interpreter);
                         // Everything is truthy except the "false" value, "void", and "null"
-                        bool isTruthy = !(condValue.DataType == MDataType.Boolean && !condValue.BoolValue)
-                                            && condValue.DataType != MDataType.Void
-                                            && condValue.DataType != MDataType.Null;
-                        if (isTruthy)
+                        if (condValue.IsTruthy())
                         {
                             MLambda outputFunc = pair[1].LambdaValue;
                             MValue output = outputFunc.Evaluate(MArguments.Empty(), interpreter);
@@ -757,13 +754,13 @@ namespace MathCommandLine.Functions
                 "_and", MDataType.Boolean,
                 (args) =>
                 {
-                    bool b1 = args[0].Value.BoolValue;
-                    bool b2 = args[1].Value.BoolValue;
+                    bool b1 = args[0].Value.IsTruthy();
+                    bool b2 = args[1].Value.IsTruthy();
                     return MValue.Bool(b1 && b2);
                 },
                 new MParameters(
-                    new MParameter(MDataType.Boolean, "input1"),
-                    new MParameter(MDataType.Boolean, "input2")
+                    new MParameter(MDataType.Any, "input1"),
+                    new MParameter(MDataType.Any, "input2")
                 ),
                 "Returns true iff both inputs are true"
             );
@@ -775,13 +772,13 @@ namespace MathCommandLine.Functions
                 "_or", MDataType.Boolean,
                 (args) =>
                 {
-                    bool b1 = args[0].Value.BoolValue;
-                    bool b2 = args[1].Value.BoolValue;
+                    bool b1 = args[0].Value.IsTruthy();
+                    bool b2 = args[1].Value.IsTruthy();
                     return MValue.Bool(b1 || b2);
                 },
                 new MParameters(
-                    new MParameter(MDataType.Boolean, "input1"),
-                    new MParameter(MDataType.Boolean, "input2")
+                    new MParameter(MDataType.Any, "input1"),
+                    new MParameter(MDataType.Any, "input2")
                 ),
                 "Returns true if either input is true"
             );
@@ -793,11 +790,11 @@ namespace MathCommandLine.Functions
                 "_not", MDataType.Boolean,
                 (args) =>
                 {
-                    bool b = args[0].Value.BoolValue;
-                    return MValue.Bool(b);
+                    bool b = args[0].Value.IsTruthy();
+                    return MValue.Bool(!b);
                 },
                 new MParameters(
-                    new MParameter(MDataType.Boolean, "input")
+                    new MParameter(MDataType.Any, "input")
                 ),
                 "Inverts the input"
             );
@@ -812,7 +809,7 @@ namespace MathCommandLine.Functions
                     MLambda b1 = args[0].Value.LambdaValue;
                     MLambda b2 = args[1].Value.LambdaValue;
                     MValue result1 = b1.Evaluate(MArguments.Empty(), interpreter);
-                    if (result1.BoolValue)
+                    if (result1.IsTruthy())
                     {
                         // Simply return the second value
                         return b2.Evaluate(MArguments.Empty(), interpreter);
@@ -823,7 +820,7 @@ namespace MathCommandLine.Functions
                     new MParameter(MDataType.Lambda, "eval1"),
                     new MParameter(MDataType.Lambda, "eval2")
                 ),
-                "If 'eval1' returns true, returns the result of 'eval2'. Otherwise, returns false"
+                "If 'eval1' returns truthy, returns the result of 'eval2'. Otherwise, returns false"
             );
         }
         public static MFunction OreFunction(IInterpreter interpreter)
@@ -836,18 +833,18 @@ namespace MathCommandLine.Functions
                     MLambda b1 = args[0].Value.LambdaValue;
                     MLambda b2 = args[1].Value.LambdaValue;
                     MValue result1 = b1.Evaluate(MArguments.Empty(), interpreter);
-                    if (!result1.BoolValue)
+                    if (!result1.IsTruthy())
                     {
                         // Simply return the second value
                         return b2.Evaluate(MArguments.Empty(), interpreter);
                     }
-                    return MValue.Bool(true);
+                    return result1;
                 },
                 new MParameters(
                     new MParameter(MDataType.Lambda, "eval1"),
                     new MParameter(MDataType.Lambda, "eval2")
                 ),
-                "If 'eval1' returns false, returns the result of 'eval2'. Otherwise, returns true"
+                "If 'eval1' returns truthy, returns result. Otherwise, returns result of 'eval2'"
             );
         }
     }

@@ -151,6 +151,13 @@ namespace MathCommandLine.Structure
             return Error(ErrorCodes.NOT_COMPOSITE);
         }
 
+        public bool IsTruthy()
+        {
+            return !(DataType == MDataType.Boolean && !BoolValue) &&
+                DataType != MDataType.Null &&
+                DataType != MDataType.Void;
+        }
+
         public override string ToString()
         {
             return ToLongString();
