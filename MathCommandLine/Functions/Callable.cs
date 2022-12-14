@@ -24,7 +24,8 @@ namespace MathCommandLine.Functions
             // Need to check that we've been provided the right number of arguments
             if (args.Length != Parameters.Length)
             {
-                return MValue.Error(ErrorCodes.WRONG_ARG_COUNT, "Expected " + Parameters.Length + " arguments but received " + args.Length + ".", MList.Empty);
+                return MValue.Error(ErrorCodes.WRONG_ARG_COUNT, "Expected " + Parameters.Length + 
+                    " arguments but received " + args.Length + ".", MList.Empty);
             }
             // Now check the types of the arguments to ensure they match. If any errors appear in the arguments, return that immediately
             for (int i = 0; i < args.Length; i++)
@@ -33,7 +34,8 @@ namespace MathCommandLine.Functions
                 {
                     // Improper data type!
                     return MValue.Error(ErrorCodes.INVALID_TYPE,
-                        "Expected argument \"" + Parameters.Get(i).Name + "\" to be of type '" + Parameters.Get(i).DataTypeString() + "' but received type '" + args.Get(i).Value.DataType + "'.",
+                        "Expected argument \"" + Parameters.Get(i).Name + "\" to be of type '" + 
+                            Parameters.Get(i).DataTypeString() + "' but received type '" + args.Get(i).Value.DataType + "'.",
                         MList.FromOne(MValue.Number(i)));
                 }
                 else if (!Parameters[i].PassesRestrictions(args[i].Value))

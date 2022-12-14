@@ -50,6 +50,8 @@ namespace MathCommandLine.Evaluation
         private static readonly Regex VALUE_REST_GT = new Regex(@$">\(({NUMBER_REGEX_PATTERN})\)");
         private static readonly Regex VALUE_REST_LTE = new Regex(@$"<=\(({NUMBER_REGEX_PATTERN})\)");
         private static readonly Regex VALUE_REST_GTE = new Regex(@$">=\(({NUMBER_REGEX_PATTERN})\)");
+        private static readonly Regex VALUE_REST_TYPES = new Regex(@"$t\((.*)\)^");
+        private static readonly Regex VALUE_REST_LEN_EQ = new Regex(@"$l=\(([+]?[0-9]*)\)^");
 
         // Other useful regexes
         private const char LIST_DELIMITER = ',';
@@ -256,6 +258,19 @@ namespace MathCommandLine.Evaluation
                             else
                             {
                                 // TODO: Invalid input somehow, though Regex should ensure no invalid inputs are provided
+                            }
+                        }
+                        else if (VALUE_REST_LEN_EQ.IsMatch(reqStr))
+                        {
+                            var thisReqGroup = VALUE_REST_LEN_EQ.Match(reqStr).Groups;
+                            string argAsString = thisReqGroup[1].Value;
+                            if (int.TryParse(argAsString, out int arg))
+                            {
+                                return ValueRestriction.LengthEqual(arg);
+                            }
+                            else
+                            {
+                                // TODO: Invalid input somehow, even though Regex should prevent this
                             }
                         }
 

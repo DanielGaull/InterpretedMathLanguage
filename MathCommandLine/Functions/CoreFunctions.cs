@@ -714,7 +714,7 @@ namespace MathCommandLine.Functions
         public static MFunction CheckFunction(IInterpreter interpreter)
         {
             return new MFunction(
-                "_chk", 
+                "_c", 
                 (args) =>
                 {
                     List<MValue> pairs = args[0].Value.ListValue.InternalList;
@@ -740,8 +740,8 @@ namespace MathCommandLine.Functions
                     return MValue.Void();
                 },
                 new MParameters(
-                    // TODO: Add restrictions here
-                    new MParameter(MDataType.List, "pairs")
+                    new MParameter("pairs", new MTypeRestrictionsEntry(MDataType.List, 
+                        ValueRestriction.TypesAllowed(MDataType.List)))
                 ),
                 "Takes in a list of 2-lists of functions with no arguments, evaluating the each element. Once an element returns " +
                 "true, then the corresponding code is run and returned, with no other code being run."

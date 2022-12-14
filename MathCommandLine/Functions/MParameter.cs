@@ -82,6 +82,24 @@ namespace MathCommandLine.Functions
                     }
                 }
             }
+            else if (value.DataType == MDataType.List)
+            {
+                // Grabs the list Type-Restriction entry
+                MTypeRestrictionsEntry entry = TypeEntries
+                    .Where((entry) => entry.DataType == MDataType.List)
+                    .FirstOrDefault();
+                if (entry.IsEmpty)
+                {
+                    return true;
+                }
+                foreach (ValueRestriction restriction in entry.ValueRestrictions)
+                {
+                    if (!restriction.SatisfiesListRestriction(value.ListValue))
+                    {
+                        return false;
+                    }
+                }
+            }
             return true;
         }
         public string DataTypeString()
