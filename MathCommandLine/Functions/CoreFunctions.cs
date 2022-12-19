@@ -727,12 +727,12 @@ namespace MathCommandLine.Functions
                                 "Expected list length of 2 but found " + pair.Count + ".");
                         }
                         MLambda cond = pair[0].LambdaValue;
-                        MValue condValue = cond.Evaluate(MArguments.Empty(), interpreter);
+                        MValue condValue = cond.Evaluate(MArguments.Empty, interpreter);
                         // Everything is truthy except the "false" value, "void", and "null"
                         if (condValue.IsTruthy())
                         {
                             MLambda outputFunc = pair[1].LambdaValue;
-                            MValue output = outputFunc.Evaluate(MArguments.Empty(), interpreter);
+                            MValue output = outputFunc.Evaluate(MArguments.Empty, interpreter);
                             return output;
                         }
                     }
@@ -810,11 +810,11 @@ namespace MathCommandLine.Functions
                 {
                     MLambda b1 = args[0].Value.LambdaValue;
                     MLambda b2 = args[1].Value.LambdaValue;
-                    MValue result1 = b1.Evaluate(MArguments.Empty(), interpreter);
+                    MValue result1 = b1.Evaluate(MArguments.Empty, interpreter);
                     if (result1.IsTruthy())
                     {
                         // Simply return the second value
-                        return b2.Evaluate(MArguments.Empty(), interpreter);
+                        return b2.Evaluate(MArguments.Empty, interpreter);
                     }
                     return MValue.Bool(false);
                 },
@@ -834,11 +834,11 @@ namespace MathCommandLine.Functions
                 {
                     MLambda b1 = args[0].Value.LambdaValue;
                     MLambda b2 = args[1].Value.LambdaValue;
-                    MValue result1 = b1.Evaluate(MArguments.Empty(), interpreter);
+                    MValue result1 = b1.Evaluate(MArguments.Empty, interpreter);
                     if (!result1.IsTruthy())
                     {
                         // Simply return the second value
-                        return b2.Evaluate(MArguments.Empty(), interpreter);
+                        return b2.Evaluate(MArguments.Empty, interpreter);
                     }
                     return result1;
                 },

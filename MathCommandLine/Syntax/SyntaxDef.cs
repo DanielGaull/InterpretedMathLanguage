@@ -1,5 +1,8 @@
-﻿using System;
+﻿using MathCommandLine.Evaluation;
+using MathCommandLine.Structure;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -23,7 +26,7 @@ namespace MathCommandLine.Syntax
         }
 
         // Generates a regex for testing if a string matches, and also pulling the arguments out of the source
-        private Regex GenerateMatchingRegex()
+        public Regex GenerateMatchingRegex()
         {
             StringBuilder regexBuilder = new StringBuilder();
             for (int i = 0; i < symbols.Count; i++)
@@ -48,6 +51,11 @@ namespace MathCommandLine.Syntax
                 }
             }
             return new Regex(regexBuilder.ToString());
+        }
+
+        public List<SyntaxSymbol> GetParameterSymbols()
+        {
+            return symbols.Where((symbol) => symbol.Type == SyntaxSymbolTypes.SyntaxParam).ToList();
         }
     }
 }

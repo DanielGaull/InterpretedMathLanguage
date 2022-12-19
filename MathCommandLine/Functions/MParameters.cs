@@ -29,6 +29,8 @@ namespace MathCommandLine.Functions
             this.parameters = new List<MParameter>(parameters);
         }
 
+        public static MParameters Empty = new MParameters(new MParameter[0]);
+
         public MParameter Get(int index)
         {
             return parameters[index];
