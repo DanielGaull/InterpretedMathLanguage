@@ -16,6 +16,8 @@ namespace MathCommandLine.Syntax
     // Converting: Given an expression, convert it into a proper result expression
     public class SyntaxDef
     {
+        private const string SYMBOL_PATTERN = @"[a-zA-Z_][a-zA-Z0-9_]*";
+
         List<SyntaxSymbol> symbols = new List<SyntaxSymbol>();
         public string ResultExpression { get; private set; }
 
@@ -47,7 +49,15 @@ namespace MathCommandLine.Syntax
                     // And wrap it into a group
                     // Pretty simple because we don't know what this variable expression could look like
                     // We will handle selecting this later
-                    regexBuilder.Append(@"(.*)");
+                    // However, if looking for a symbol, we WILL use that regex to force a symbol selection
+                    if (symbols[i].ParameterArg.IsStringSymbol)
+                    {
+                        regexBuilder.Append(SYMBOL_PATTERN);
+                    }
+                    else
+                    {
+                        regexBuilder.Append(@"(.*)");
+                    }
                 }
             }
             return new Regex(regexBuilder.ToString());
