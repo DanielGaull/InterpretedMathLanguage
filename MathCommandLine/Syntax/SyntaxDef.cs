@@ -36,14 +36,11 @@ namespace MathCommandLine.Syntax
                 if (symbols[i].Type == SyntaxSymbolTypes.LiteralString)
                 {
                     // Just want to search for this string, but of course have to escape it
-                    // We also want to convert all whitespaces into a single whitespace \w indicator
                     string s = symbols[i].StringArg;
-                    s = Regex.Replace(s, @"\w", "\\w");
-                    // TODO: Verify that this works properly with whitespace
                     s = Regex.Escape(s);
                     regexBuilder.Append(s);
                 }
-                else
+                else if (symbols[i].Type == SyntaxSymbolTypes.SyntaxParam)
                 {
                     // We have a variable, so need to recognize that we'll have to select for anything in here
                     // And wrap it into a group
@@ -58,6 +55,11 @@ namespace MathCommandLine.Syntax
                     {
                         regexBuilder.Append(@"(.*)");
                     }
+                }
+                else if (symbols[i].Type == SyntaxSymbolTypes.Whitespace)
+                {
+                    // Allow variable whitespace, but require it
+                    regexBuilder.Append(@"\w+");
                 }
             }
             return new Regex(regexBuilder.ToString());

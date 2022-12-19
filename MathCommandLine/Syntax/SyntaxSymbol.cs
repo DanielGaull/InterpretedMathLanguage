@@ -22,11 +22,16 @@ namespace MathCommandLine.Syntax
             Type = SyntaxSymbolTypes.SyntaxParam;
             ParameterArg = param;
         }
+        public SyntaxSymbol()
+        {
+            Type = SyntaxSymbolTypes.Whitespace;
+        }
     }
 
     public enum SyntaxSymbolTypes
     {
         LiteralString,
         SyntaxParam,
+        Whitespace,
     }
 }
