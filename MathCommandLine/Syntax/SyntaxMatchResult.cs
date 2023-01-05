@@ -8,24 +8,25 @@ namespace MathCommandLine.Syntax
     public class SyntaxMatchResult
     {
         public bool IsMatch { get; private set; }
-        Dictionary<string, MValue> vars;
+        // Simply maps each parameter name to its string representation in the code
+        Dictionary<string, SyntaxArgument> args;
 
         public SyntaxMatchResult(bool isMatch)
             : this(isMatch, null)
         {}
-        public SyntaxMatchResult(bool isMatch, Dictionary<string, MValue> vars)
+        public SyntaxMatchResult(bool isMatch, Dictionary<string, SyntaxArgument> args)
         {
-            this.vars = vars;
+            this.args = args;
             this.IsMatch = isMatch;
         }
 
-        public MValue GetValue(string name)
+        public SyntaxArgument GetValue(string name)
         {
-            if (vars == null)
+            if (args == null)
             {
-                return MValue.Empty;
+                return null;
             }
-            return vars[name];
+            return args[name];
         }
     }
 }

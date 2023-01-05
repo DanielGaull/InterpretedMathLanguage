@@ -39,13 +39,20 @@ namespace MathCommandLine
             evaluator.Initialize(dtDict, varManager);
 
             // SYNTAX TESTING
-            SyntaxDef def = new SyntaxDef(new List<SyntaxSymbol> {
-                new SyntaxSymbol(new SyntaxParameter(new MParameter(MDataType.Number, "a"))),
-                new SyntaxSymbol("+"),
-                new SyntaxSymbol(new SyntaxParameter(new MParameter(MDataType.Number, "b")))
-            }, "_add(a,b)");
+            SyntaxDef def = new SyntaxDef(new List<SyntaxDefSymbol> {
+                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Number, "a"))),
+                new SyntaxDefSymbol("+"),
+                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Number, "b")))
+            }, new List<SyntaxResultSymbol>() {
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, "_add("),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "a"),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ","),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "b"),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ")")
+            });
             SyntaxHandler sh = new SyntaxHandler(evaluator);
             var m = sh.Match(def, "1+2");
+            var x = sh.Convert(def, "1+2");
 
             Console.ReadLine();
             return;

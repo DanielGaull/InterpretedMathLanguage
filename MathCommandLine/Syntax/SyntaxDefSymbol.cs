@@ -6,29 +6,29 @@ namespace MathCommandLine.Syntax
 {
     // Represents a syntax symbol in an input expression to match
     // A symbol can either be a syntax parameter or a literal string
-    public class SyntaxSymbol
+    public class SyntaxDefSymbol
     {
-        public SyntaxSymbolTypes Type { get; private set; }
+        public SyntaxDefSymbolTypes Type { get; private set; }
         public string StringArg { get; private set; }
         public SyntaxParameter ParameterArg { get; private set; }
 
-        public SyntaxSymbol(string literal)
+        public SyntaxDefSymbol(string literal)
         {
-            Type = SyntaxSymbolTypes.LiteralString;
+            Type = SyntaxDefSymbolTypes.LiteralString;
             StringArg = literal;
         }
-        public SyntaxSymbol(SyntaxParameter param)
+        public SyntaxDefSymbol(SyntaxParameter param)
         {
-            Type = SyntaxSymbolTypes.SyntaxParam;
+            Type = SyntaxDefSymbolTypes.SyntaxParam;
             ParameterArg = param;
         }
-        public SyntaxSymbol()
+        public SyntaxDefSymbol()
         {
-            Type = SyntaxSymbolTypes.Whitespace;
+            Type = SyntaxDefSymbolTypes.Whitespace;
         }
     }
 
-    public enum SyntaxSymbolTypes
+    public enum SyntaxDefSymbolTypes
     {
         LiteralString,
         SyntaxParam,

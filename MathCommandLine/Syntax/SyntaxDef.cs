@@ -18,36 +18,36 @@ namespace MathCommandLine.Syntax
     {
         private const string SYMBOL_PATTERN = @"[a-zA-Z_][a-zA-Z0-9_]*";
 
-        List<SyntaxSymbol> symbols = new List<SyntaxSymbol>();
-        public string ResultExpression { get; private set; }
+        List<SyntaxDefSymbol> defSymbols = new List<SyntaxDefSymbol>();
+        List<SyntaxResultSymbol> resultSymbols = new List<SyntaxResultSymbol>();
 
-        public SyntaxDef(List<SyntaxSymbol> symbols, string result)
+        public SyntaxDef(List<SyntaxDefSymbol> defSymbols, List<SyntaxResultSymbol> resultSymbols)
         {
-            this.symbols = symbols;
-            ResultExpression = result;
+            this.defSymbols = defSymbols;
+            this.resultSymbols = resultSymbols;
         }
 
         // Generates a regex for testing if a string matches, and also pulling the arguments out of the source
         public Regex GenerateMatchingRegex()
         {
             StringBuilder regexBuilder = new StringBuilder();
-            for (int i = 0; i < symbols.Count; i++)
+            for (int i = 0; i < defSymbols.Count; i++)
             {
-                if (symbols[i].Type == SyntaxSymbolTypes.LiteralString)
+                if (defSymbols[i].Type == SyntaxDefSymbolTypes.LiteralString)
                 {
                     // Just want to search for this string, but of course have to escape it
-                    string s = symbols[i].StringArg;
+                    string s = defSymbols[i].StringArg;
                     s = Regex.Escape(s);
                     regexBuilder.Append(s);
                 }
-                else if (symbols[i].Type == SyntaxSymbolTypes.SyntaxParam)
+                else if (defSymbols[i].Type == SyntaxDefSymbolTypes.SyntaxParam)
                 {
                     // We have a variable, so need to recognize that we'll have to select for anything in here
                     // And wrap it into a group
                     // Pretty simple because we don't know what this variable expression could look like
                     // We will handle selecting this later
                     // However, if looking for a symbol, we WILL use that regex to force a symbol selection
-                    if (symbols[i].ParameterArg.IsStringSymbol)
+                    if (defSymbols[i].ParameterArg.IsStringSymbol)
                     {
                         regexBuilder.Append(SYMBOL_PATTERN);
                     }
@@ -56,7 +56,7 @@ namespace MathCommandLine.Syntax
                         regexBuilder.Append(@"(.*)");
                     }
                 }
-                else if (symbols[i].Type == SyntaxSymbolTypes.Whitespace)
+                else if (defSymbols[i].Type == SyntaxDefSymbolTypes.Whitespace)
                 {
                     // Allow variable whitespace, but require it
                     regexBuilder.Append(@"\w+");
@@ -65,9 +65,18 @@ namespace MathCommandLine.Syntax
             return new Regex(regexBuilder.ToString());
         }
 
-        public List<SyntaxSymbol> GetParameterSymbols()
+        public List<SyntaxDefSymbol> GetParameterSymbols()
         {
-            return symbols.Where((symbol) => symbol.Type == SyntaxSymbolTypes.SyntaxParam).ToList();
+            return defSymbols.Where((symbol) => symbol.Type == SyntaxDefSymbolTypes.SyntaxParam).ToList();
+        }
+
+        public int GetResultSymbolCount()
+        {
+            return resultSymbols.Count;
+        }
+        public SyntaxResultSymbol GetResultSymbol(int index)
+        {
+            return resultSymbols[index];
         }
     }
 }
