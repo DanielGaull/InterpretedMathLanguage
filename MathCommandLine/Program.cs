@@ -67,7 +67,7 @@ namespace MathCommandLine
             SyntaxHandler sh = new SyntaxHandler(evaluator);
             var m = sh.Match(def, "1+2");
             var x = sh.Convert(def, "1+2");
-            var z = sh.Convert(def2, "var x=7"); // z is null right now
+            var z = sh.Convert(def2, "var x=7"); // z is not correct
 
             Console.ReadLine();
             return;

@@ -49,7 +49,7 @@ namespace MathCommandLine.Syntax
                     // However, if looking for a symbol, we WILL use that regex to force a symbol selection
                     if (defSymbols[i].ParameterArg.IsStringSymbol)
                     {
-                        regexBuilder.Append(SYMBOL_PATTERN);
+                        regexBuilder.Append("(").Append(SYMBOL_PATTERN).Append(")");
                     }
                     else
                     {
@@ -59,7 +59,7 @@ namespace MathCommandLine.Syntax
                 else if (defSymbols[i].Type == SyntaxDefSymbolTypes.Whitespace)
                 {
                     // Allow variable whitespace, but require it
-                    regexBuilder.Append(@"\w+");
+                    regexBuilder.Append(@"\s+");
                 }
             }
             return new Regex(regexBuilder.ToString());
