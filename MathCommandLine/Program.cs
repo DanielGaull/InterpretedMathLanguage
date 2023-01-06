@@ -50,9 +50,24 @@ namespace MathCommandLine
                 new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "b"),
                 new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ")")
             });
+            // Syntax definition for variable declarations
+            SyntaxDef def2 = new SyntaxDef(new List<SyntaxDefSymbol> {
+                new SyntaxDefSymbol("var"),
+                new SyntaxDefSymbol(),
+                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.String, "name"), true, false)),
+                new SyntaxDefSymbol("="),
+                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Any, "value")))
+            }, new List<SyntaxResultSymbol>() {
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, "_declare("),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "name"),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ","),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "value"),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ", TRUE, TRUE, TRUE)")
+            });
             SyntaxHandler sh = new SyntaxHandler(evaluator);
             var m = sh.Match(def, "1+2");
             var x = sh.Convert(def, "1+2");
+            var z = sh.Convert(def2, "var x=7"); // z is null right now
 
             Console.ReadLine();
             return;
