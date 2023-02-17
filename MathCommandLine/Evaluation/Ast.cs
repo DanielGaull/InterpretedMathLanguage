@@ -27,9 +27,9 @@ namespace MathCommandLine.Evaluation
          * NumberLiteral: NumberArg
          * ListLiteral: AstCollectionArg
          * LambdaLiteral: Parameters, Expression
-         * TypeLiteral: Name
          * Variable: Name
          * Call: CalledAst, AstCollectionArg
+         * Invalid: Expression
          */
 
         public Ast(AstTypes type, double numberArg, Ast[] astCollectionArg, string expression, AstParameter[] parameters,
@@ -65,6 +65,10 @@ namespace MathCommandLine.Evaluation
         public static Ast Variable(string name)
         {
             return new Ast(AstTypes.Variable, 0, null, null, null, name, null);
+        }
+        public static Ast Invalid(string expr)
+        {
+            return new Ast(AstTypes.Invalid, 0, null, expr, null, null, null);
         }
 
         #endregion
@@ -104,10 +108,22 @@ namespace MathCommandLine.Evaluation
 
     public enum AstTypes
     {
+        // A literal number, such as 5, -10.2, or 0.6
         NumberLiteral,
+        // A literal list, in the format of { [element0], [element1], [element2], ... }
         ListLiteral,
+        // A literal lamda, in the format of ([params])=>{[body]}
         LambdaLiteral,
+        // A literal variable, which must be made up of valid characters (A-Z, a-z, 0-9, _)
+        // Can only start with a letter
         Variable,
+        // An instance in which an invokation is being performed on some other object
+        // i.e. _add(1, 2)
+        // Format is: [callee]([arg0],[arg1],...)
         Call,
+        // Anything that doesn't fit into the above definitions
+        // Used in syntax handling, but if it appears when parsing some final expression,
+        // then there's an error
+        Invalid,
     }
 }

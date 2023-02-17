@@ -154,7 +154,13 @@ namespace MathCommandLine.Evaluation
                 // We've got a variable
                 return Ast.Variable(expression);
             }
-            throw new InvalidParseException(expression);
+            else
+            {
+                // We don't recognize this, so call it "invalid" and chuck it in here
+                // Someone else will either handle it or throw an error
+                return Ast.Invalid(expression);
+            }
+            //throw new InvalidParseException(expression);
         }
 
         /// <summary>

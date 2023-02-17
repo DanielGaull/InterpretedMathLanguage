@@ -36,7 +36,8 @@ namespace MathCommandLine
             DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, MDataType.Lambda,
                 MDataType.Type, MDataType.Error, MDataType.Reference, MDataType.String, MDataType.Void,
                 MDataType.Boolean, MDataType.Null, MDataType.Any);
-            evaluator.Initialize(dtDict, varManager);
+            Parser parser = new Parser();
+            evaluator.Initialize(dtDict, varManager, parser);
 
             // SYNTAX TESTING
             SyntaxDef def = new SyntaxDef(new List<SyntaxDefSymbol> {
@@ -62,12 +63,38 @@ namespace MathCommandLine
                 new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "name"),
                 new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ","),
                 new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "value"),
-                new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ", TRUE, TRUE, TRUE)")
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ",TRUE,TRUE,TRUE)")
             });
-            SyntaxHandler sh = new SyntaxHandler(evaluator);
-            var m = sh.Match(def, "1+2");
+            SyntaxDef def3 = new SyntaxDef(new List<SyntaxDefSymbol> {
+                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.String, "name"), true, false)),
+                new SyntaxDefSymbol("="),
+                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Any, "value")))
+            }, new List<SyntaxResultSymbol>() {
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, "_assign(_ref("),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "name"),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, "),"),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "value"),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ")")
+            });
+            SyntaxDef def4 = new SyntaxDef(new List<SyntaxDefSymbol> {
+                new SyntaxDefSymbol("["),
+                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Lambda, "code"), false, true)),
+                new SyntaxDefSymbol("]")
+            }, new List<SyntaxResultSymbol>() {
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "code")
+            });
+            SyntaxHandler sh = new SyntaxHandler(parser);
+            //var m = sh.Match(def, "1+2");
             var x = sh.Convert(def, "1+2");
-            var z = sh.Convert(def2, "var x=7"); // z is not correct
+            var z = sh.Convert(def2, "var x=7");
+            var w = sh.Convert(def3, "x=7");
+            var a = sh.Convert(def4, "[_add(5,2)]");
+            Console.WriteLine(x);
+            Console.WriteLine(z);
+            Console.WriteLine(w);
+            Console.WriteLine(a);
+
+            var kalsf = parser.ParseExpression("()=>{5+2}");
 
             Console.ReadLine();
             return;

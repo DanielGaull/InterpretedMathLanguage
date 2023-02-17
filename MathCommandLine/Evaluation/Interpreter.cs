@@ -20,14 +20,13 @@ namespace MathCommandLine.Evaluation
         {
         }
 
-        public void Initialize(DataTypeDict dtDict, VariableManager variableManager)
+        public void Initialize(DataTypeDict dtDict, VariableManager variableManager, Parser parser)
         {
             this.dtDict = dtDict;
             this.variableManager = variableManager;
 
             nativeEvaluator = new NativeEvaluator();
 
-            Parser parser = new Parser();
             stringEvaluator = new StringEvaluator(this, parser, dtDict, variableManager);
         }
 

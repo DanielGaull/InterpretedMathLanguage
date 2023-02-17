@@ -10,11 +10,11 @@ namespace MathCommandLine.Syntax
 {
     public class SyntaxHandler
     {
-        IInterpreter interpreter;
+        Parser parser;
 
-        public SyntaxHandler(IInterpreter interpreter)
+        public SyntaxHandler(Parser parser)
         {
-            this.interpreter = interpreter;
+            this.parser = parser;
         }
 
         public SyntaxMatchResult Match(SyntaxDef def, string source)
@@ -30,28 +30,15 @@ namespace MathCommandLine.Syntax
             for (int i = 0; i < varSymbols.Count; i++)
             {
                 SyntaxParameter symbol = varSymbols[i].ParameterArg;
-                //MValue val;
                 string literalValue = result.Groups[i + 1].Value;
-                //if (symbol.IsStringSymbol)
-                //{
-                //    // The literal value is wrapped into a string
-                //    val = MValue.String(literalValue);
-                //}
-                //else if (symbol.IsWrappingLambda)
-                //{
-                //    // Need to throw the literal value into a lambda
-                //    val = MValue.Lambda(new CoreDataTypes.MLambda(MParameters.Empty,
-                //        new MExpression(literalValue)));
-                //}
-                //else
-                //{
-                //    val = interpreter.Evaluate(new MExpression(literalValue), MArguments.Empty);
-                //}
                 varDict.Add(symbol.Name, new SyntaxArgument(symbol, literalValue));
             }
             return new SyntaxMatchResult(true, varDict);
         }
 
+        // Converts one string to another using a single syntax definition
+        // Performs only a single conversion
+        // ** This is used as one step of a full conversion
         public string Convert(SyntaxDef def, string source)
         {
             SyntaxMatchResult match = Match(def, source);
@@ -88,6 +75,62 @@ namespace MathCommandLine.Syntax
                 }
             }
             return result.ToString();
+        }
+
+        // Recursively performs conversions to completely convert a source string
+        // to pure core language using the provided definitions
+        // ** This is a full conversion
+        public string FullConvert(List<SyntaxDef> definitions, string source)
+        {
+            // Steps:
+            /*
+             * Check if the source matches any of the definitions
+             *  If yes:
+             *   Convert using that definition
+             *   Recursively call FullConvert on our new string
+             *   
+             *  If no, need to check the pieces of it (described later...)
+             *   Use some sort of parser to extract the subexpressions in the string (which is in a legal format)
+             *    and recursively FullConvert those
+             *   However, if there are no subexpressions, then the string is final
+             * 
+             */
+            SyntaxDef matchingDef = null;
+            for (int i = 0; i < definitions.Count; i++)
+            {
+                SyntaxMatchResult match = Match(definitions[i], source);
+                if (match.IsMatch)
+                {
+                    matchingDef = definitions[i];
+                    break;
+                }
+            }
+            if (matchingDef != null)
+            {
+                // We've got a match
+                // Need to Convert this expression, then recurse over that result
+                string result = Convert(matchingDef, source);
+                return FullConvert(definitions, result);
+            }
+            else
+            {
+                // No match, need to parse out the subexpressions
+                Ast result = parser.ParseExpression(source);
+
+            }
+            return null;
+        }
+
+        public SyntaxDef ParseSyntaxDefinitionStatement(string source, string result)
+        {
+            
+            return null;
+        }
+        private List<SyntaxDefSymbol> ParseSourceString(string source)
+        {
+            // Source is made up of string literals, and instances of {{ [parameter] }}
+            // The parameter is going to be the standard 
+            return null;
         }
     }
 }
