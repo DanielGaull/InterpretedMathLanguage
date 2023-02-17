@@ -107,7 +107,6 @@ namespace MathCommandLine.Evaluation
                     }
                     return MValue.List(new MList(elements));
                 case AstTypes.LambdaLiteral:
-                    MExpression expression = new MExpression(ast.Expression);
                     MParameter[] paramArray = ast.Parameters.Select((astParam) =>
                     {
                         string name = astParam.Name;
@@ -132,7 +131,7 @@ namespace MathCommandLine.Evaluation
                             "Type \"" + ast.Name + "\" is not defined.", MList.Empty);
                     }
                     MParameters parameters = new MParameters(paramArray);
-                    return MValue.Lambda(new MLambda(parameters, expression));
+                    return MValue.Lambda(new MLambda(parameters, ast.Body));
             }
             return MValue.Empty;
         }

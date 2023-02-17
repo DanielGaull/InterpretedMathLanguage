@@ -14,6 +14,8 @@ namespace MathCommandLine.Evaluation
         public double NumberArg { get; private set; }
         // Used for invalid ASTs
         public string Expression { get; private set; }
+        // Used for lambdas
+        public Ast Body { get; set; }
         // For lambdas
         public AstParameter[] Parameters { get; private set; }
         // Array of ASTs, used for: Arguments -> Functions, Elements -> Lists
@@ -26,14 +28,14 @@ namespace MathCommandLine.Evaluation
         /* Used:
          * NumberLiteral: NumberArg
          * ListLiteral: AstCollectionArg
-         * LambdaLiteral: Parameters, Expression
+         * LambdaLiteral: Parameters, Body
          * Variable: Name
          * Call: CalledAst, AstCollectionArg
          * Invalid: Expression
          */
 
         public Ast(AstTypes type, double numberArg, Ast[] astCollectionArg, string expression, AstParameter[] parameters,
-            string name, Ast calledAst)
+            string name, Ast calledAst, Ast body)
         {
             Type = type;
             NumberArg = numberArg;
@@ -42,33 +44,34 @@ namespace MathCommandLine.Evaluation
             Parameters = parameters;
             Name = name;
             CalledAst = calledAst;
+            Body = body;
         }
 
         #region Constructor Functions
 
         public static Ast NumberLiteral(double value)
         {
-            return new Ast(AstTypes.NumberLiteral, value, null, null, null, null, null);
+            return new Ast(AstTypes.NumberLiteral, value, null, null, null, null, null, null);
         }
         public static Ast ListLiteral(Ast[] elements)
         {
-            return new Ast(AstTypes.ListLiteral, 0, elements, null, null, null, null);
+            return new Ast(AstTypes.ListLiteral, 0, elements, null, null, null, null, null);
         }
-        public static Ast LambdaLiteral(AstParameter[] parameters, string expression)
+        public static Ast LambdaLiteral(AstParameter[] parameters, Ast body)
         {
-            return new Ast(AstTypes.LambdaLiteral, 0, null, expression, parameters, null, null);
+            return new Ast(AstTypes.LambdaLiteral, 0, null, null, parameters, null, null, body);
         }
         public static Ast Call(Ast calledAst, params Ast[] args)
         {
-            return new Ast(AstTypes.Call, 0, args, null, null, null, calledAst);
+            return new Ast(AstTypes.Call, 0, args, null, null, null, calledAst, null);
         }
         public static Ast Variable(string name)
         {
-            return new Ast(AstTypes.Variable, 0, null, null, null, name, null);
+            return new Ast(AstTypes.Variable, 0, null, null, null, name, null, null);
         }
         public static Ast Invalid(string expr)
         {
-            return new Ast(AstTypes.Invalid, 0, null, expr, null, null, null);
+            return new Ast(AstTypes.Invalid, 0, null, expr, null, null, null, null);
         }
 
         #endregion
@@ -82,7 +85,8 @@ namespace MathCommandLine.Evaluation
                 case AstTypes.ListLiteral:
                     return "{" + string.Join(',', AstCollectionArg.Select(x => x.ToExpressionString()).ToArray()) + "}";
                 case AstTypes.LambdaLiteral:
-                    return "(" + string.Join(',', Parameters.Select(x => x.ToString()).ToArray()) + ")=>{" + Expression + "}";
+                    return "(" + string.Join(',', Parameters.Select(x => x.ToString()).ToArray()) + ")=>{" + 
+                        Body.ToExpressionString() + "}";
                 case AstTypes.Variable:
                     return Name;
                 case AstTypes.Call:

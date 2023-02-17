@@ -8,21 +8,32 @@ using System.Text;
 
 namespace MathCommandLine.CoreDataTypes
 {
-    public class MLambda : Callable
+    public class MLambda
     {
+        Ast body;
+        NativeExpression nativeBody;
+        MParameters parameters;
+
         public static MLambda Empty = new MLambda();
 
-        public MLambda() : base(new MParameters(), null)
+        private MLambda()
         {
 
         }
-        public MLambda(MParameters parameters, MExpression expression) : base(parameters, expression)
+        public MLambda(MParameters parameters, Ast body)
         {
+            this.parameters = parameters;
+            this.body = body;
+        }
+        public MLambda(MParameters parameters, NativeExpression nativeBody)
+        {
+            this.parameters = parameters;
+            this.nativeBody = nativeBody;
         }
 
         public static bool operator ==(MLambda l1, MLambda l2)
         {
-            return (l1.Expression == l2.Expression) && (l1.Parameters == l2.Parameters);
+            return (l1.body == l2.body) && (l1.parameters == l2.parameters);
         }
         public static bool operator !=(MLambda l1, MLambda l2)
         {

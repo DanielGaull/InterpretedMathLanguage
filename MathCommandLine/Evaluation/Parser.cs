@@ -150,12 +150,15 @@ namespace MathCommandLine.Evaluation
                 string exprString = groups[2].Value;
 
                 // Parse Parameters
-                AstParameter[] parsedParams = paramsString.Length > 0 ? (SplitByDelimiter(paramsString, PARAM_DELIMITER).Select((paramString) =>
-                {
-                    return ParseParameter(paramString);
-                }).ToArray()) : new AstParameter[0];
+                AstParameter[] parsedParams = paramsString.Length > 0 ? 
+                    (SplitByDelimiter(paramsString, PARAM_DELIMITER).Select((paramString) =>
+                    {  
+                        return ParseParameter(paramString);
+                    }).ToArray()) : new AstParameter[0];
 
-                return Ast.LambdaLiteral(parsedParams, exprString);
+                Ast body = ParseExpression(exprString);
+
+                return Ast.LambdaLiteral(parsedParams, body);
             }
             else if (SYMBOL_NAME_REGEX.IsMatch(expression))
             {
