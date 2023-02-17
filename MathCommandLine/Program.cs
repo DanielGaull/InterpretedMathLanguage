@@ -52,6 +52,17 @@ namespace MathCommandLine
                 new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "b"),
                 new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ")")
             });
+            SyntaxDef mulDef = new SyntaxDef(new List<SyntaxDefSymbol> {
+                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Number, "a"))),
+                new SyntaxDefSymbol("*"),
+                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Number, "b")))
+            }, new List<SyntaxResultSymbol>() {
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, "_mul("),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "a"),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ","),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "b"),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ")")
+            });
             // Syntax definition for variable declarations
             SyntaxDef def2 = new SyntaxDef(new List<SyntaxDefSymbol> {
                 new SyntaxDefSymbol("var"),
@@ -85,7 +96,7 @@ namespace MathCommandLine
                 new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "code")
             });
             List<SyntaxDef> definitions = new List<SyntaxDef>() {
-                def4, def, def2, def3
+                def4, def, mulDef, def2, def3
             };
             SyntaxHandler sh = new SyntaxHandler(parser);
             //var m = sh.Match(def, "1+2");
@@ -100,6 +111,13 @@ namespace MathCommandLine
 
             var b = sh.FullConvert(definitions, "[5+2]");
             Console.WriteLine(b);
+
+            while (true)
+            {
+                string input = Console.ReadLine();
+                var output = sh.FullConvert(definitions, input);
+                Console.WriteLine(output);
+            }
 
             Console.ReadLine();
             return;
