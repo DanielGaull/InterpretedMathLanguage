@@ -64,7 +64,15 @@ namespace MathCommandLine.Evaluation
         {
         }
 
-        // TODO: Function that removes whitespace from expressions
+        public string ListToString(string[] elements)
+        {
+            // TODO: Move the braces into constants
+            return "{" + string.Join(LIST_DELIMITER, elements) + "}";
+        }
+        public string CallToString(string callee, string[] args)
+        {
+            return callee + CALL_START_WRAPPER + string.Join(ARG_DELIMITER, args) + CALL_END_WRAPPER;
+        }
 
         /// <summary>
         /// Converts all string literals appearing in an expression to _str string declarations

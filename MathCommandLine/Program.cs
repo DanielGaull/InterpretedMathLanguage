@@ -83,6 +83,9 @@ namespace MathCommandLine
             }, new List<SyntaxResultSymbol>() {
                 new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "code")
             });
+            List<SyntaxDef> definitions = new List<SyntaxDef>() { 
+                def, def2, def3, def4
+            };
             SyntaxHandler sh = new SyntaxHandler(parser);
             //var m = sh.Match(def, "1+2");
             var x = sh.Convert(def, "1+2");
@@ -94,7 +97,8 @@ namespace MathCommandLine
             Console.WriteLine(w);
             Console.WriteLine(a);
 
-            var kalsf = parser.ParseExpression("()=>{5+2}");
+            var b = sh.FullConvert(definitions, "{5+2}");
+            Console.WriteLine(b);
 
             Console.ReadLine();
             return;

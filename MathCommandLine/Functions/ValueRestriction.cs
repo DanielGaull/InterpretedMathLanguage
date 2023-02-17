@@ -19,6 +19,26 @@ namespace MathCommandLine.Functions
             DataTypesArg = dataTypesArg;
         }
 
+        public override string ToString()
+        {
+            switch (Type)
+            {
+                case ValueRestrictionTypes.Integer:
+                    return "%";
+                case ValueRestrictionTypes.LessThan:
+                    return "<(" + DoubleArg + ")";
+                case ValueRestrictionTypes.LessThanOrEqualTo:
+                    return "<=(" + DoubleArg + ")";
+                case ValueRestrictionTypes.GreaterThan:
+                    return ">(" + DoubleArg + ")";
+                case ValueRestrictionTypes.GreaterThanOrEqualTo:
+                    return ">=(" + DoubleArg + ")";
+                    // TODO: Others
+
+            }
+            return base.ToString();
+        }
+
         public bool SatisfiesNumRestriction(double value)
         {
             return Type switch

@@ -3,6 +3,7 @@ using MathCommandLine.Functions;
 using MathCommandLine.Structure;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -116,7 +117,49 @@ namespace MathCommandLine.Syntax
             {
                 // No match, need to parse out the subexpressions
                 Ast result = parser.ParseExpression(source);
-
+                // Right now, lambdas do not parse their bodies until later
+                // Only types that require any handling are calls and lists since those
+                // are the only ASTs with sub-ASTs
+                switch (result.Type)
+                {
+                    case AstTypes.ListLiteral:
+                        // Need to syntax-handle each element
+                        string[] results = result.AstCollectionArg.Select(elem =>
+                        {
+                            if (elem.Type == AstTypes.Invalid)
+                            {
+                                return FullConvert(definitions, elem.Expression);
+                            }
+                            else
+                            {
+                                return elem.ToExpressionString();
+                            }
+                        }).ToArray();
+                        return parser.ListToString(results);
+                    case AstTypes.Call:
+                        // Need to syntax-handle the callee and each element
+                        string callee = "";
+                        if (result.CalledAst.Type == AstTypes.Invalid)
+                        {
+                            callee = FullConvert(definitions, result.CalledAst.Expression);
+                        }
+                        else
+                        {
+                            callee = result.CalledAst.ToExpressionString();
+                        }
+                        string[] args = result.AstCollectionArg.Select(elem =>
+                        {
+                            if (elem.Type == AstTypes.Invalid)
+                            {
+                                return FullConvert(definitions, elem.Expression);
+                            }
+                            else
+                            {
+                                return elem.ToExpressionString();
+                            }
+                        }).ToArray();
+                        return parser.CallToString(callee, args);
+                }
             }
             return null;
         }
