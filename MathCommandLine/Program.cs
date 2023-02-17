@@ -84,8 +84,8 @@ namespace MathCommandLine
             }, new List<SyntaxResultSymbol>() {
                 new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "code")
             });
-            List<SyntaxDef> definitions = new List<SyntaxDef>() { 
-                def, def2, def3, def4
+            List<SyntaxDef> definitions = new List<SyntaxDef>() {
+                def4, def, def2, def3
             };
             SyntaxHandler sh = new SyntaxHandler(parser);
             //var m = sh.Match(def, "1+2");
