@@ -1,4 +1,5 @@
 ﻿using MathCommandLine.Evaluation;
+using MathCommandLine.Exceptions;
 using MathCommandLine.Functions;
 using MathCommandLine.Structure;
 using System;
@@ -83,85 +84,76 @@ namespace MathCommandLine.Syntax
         // ** This is a full conversion
         public string FullConvert(List<SyntaxDef> definitions, string source)
         {
-            // Steps:
-            /*
-             * Check if the source matches any of the definitions
-             *  If yes:
-             *   Convert using that definition
-             *   Recursively call FullConvert on our new string
-             *   
-             *  If no, need to check the pieces of it (described later...)
-             *   Use some sort of parser to extract the subexpressions in the string (which is in a legal format)
-             *    and recursively FullConvert those
-             *   However, if there are no subexpressions, then the string is final
-             * 
-             */
-            SyntaxDef matchingDef = null;
-            for (int i = 0; i < definitions.Count; i++)
+            Ast result = parser.ParseExpression(source);
+            // Right now, lambdas do not parse their bodies until later
+            // Only types that require any handling are calls and lists since those
+            // are the only ASTs with sub-ASTs
+            switch (result.Type)
             {
-                SyntaxMatchResult match = Match(definitions[i], source);
-                if (match.IsMatch)
-                {
-                    matchingDef = definitions[i];
-                    break;
-                }
-            }
-            if (matchingDef != null)
-            {
-                // We've got a match
-                // Need to Convert this expression, then recurse over that result
-                string result = Convert(matchingDef, source);
-                return FullConvert(definitions, result);
-            }
-            else
-            {
-                // No match, need to parse out the subexpressions
-                Ast result = parser.ParseExpression(source);
-                // Right now, lambdas do not parse their bodies until later
-                // Only types that require any handling are calls and lists since those
-                // are the only ASTs with sub-ASTs
-                switch (result.Type)
-                {
-                    case AstTypes.ListLiteral:
-                        // Need to syntax-handle each element
-                        string[] results = result.AstCollectionArg.Select(elem =>
+                case AstTypes.ListLiteral:
+                    // Need to syntax-handle each element
+                    string[] results = result.AstCollectionArg.Select(elem =>
+                    {
+                        if (elem.Type == AstTypes.Invalid)
                         {
-                            if (elem.Type == AstTypes.Invalid)
-                            {
-                                return FullConvert(definitions, elem.Expression);
-                            }
-                            else
-                            {
-                                return elem.ToExpressionString();
-                            }
-                        }).ToArray();
-                        return parser.ListToString(results);
-                    case AstTypes.Call:
-                        // Need to syntax-handle the callee and each element
-                        string callee = "";
-                        if (result.CalledAst.Type == AstTypes.Invalid)
-                        {
-                            callee = FullConvert(definitions, result.CalledAst.Expression);
+                            return FullConvert(definitions, elem.Expression);
                         }
                         else
                         {
-                            callee = result.CalledAst.ToExpressionString();
+                            return elem.ToExpressionString();
                         }
-                        string[] args = result.AstCollectionArg.Select(elem =>
+                    }).ToArray();
+                    return parser.ListToString(results);
+                case AstTypes.Call:
+                    // Need to syntax-handle the callee and each element
+                    string callee = "";
+                    if (result.CalledAst.Type == AstTypes.Invalid)
+                    {
+                        callee = FullConvert(definitions, result.CalledAst.Expression);
+                    }
+                    else
+                    {
+                        callee = result.CalledAst.ToExpressionString();
+                    }
+                    string[] args = result.AstCollectionArg.Select(elem =>
+                    {
+                        if (elem.Type == AstTypes.Invalid)
                         {
-                            if (elem.Type == AstTypes.Invalid)
-                            {
-                                return FullConvert(definitions, elem.Expression);
-                            }
-                            else
-                            {
-                                return elem.ToExpressionString();
-                            }
-                        }).ToArray();
-                        return parser.CallToString(callee, args);
-                }
+                            return FullConvert(definitions, elem.Expression);
+                        }
+                        else
+                        {
+                            return elem.ToExpressionString();
+                        }
+                    }).ToArray();
+                    return parser.CallToString(callee, args);
+                case AstTypes.Invalid:
+                    // Check if any syntax matches this expression
+                    SyntaxDef matchingDef = null;
+                    for (int i = 0; i < definitions.Count; i++)
+                    {
+                        SyntaxMatchResult match = Match(definitions[i], source);
+                        if (match.IsMatch)
+                        {
+                            matchingDef = definitions[i];
+                            break;
+                        }
+                    }
+                    if (matchingDef != null)
+                    {
+                        // We've got a match
+                        // Need to Convert this expression, then recurse over that result
+                        string res = Convert(matchingDef, source);
+                        return FullConvert(definitions, res);
+                    }
+                    else
+                    {
+                        // No match, so we have an error
+                        throw new InvalidParseException(source);
+                    }
+                default:
+                    return source;
             }
-            return null;
         }
 
         public SyntaxDef ParseSyntaxDefinitionStatement(string source, string result)

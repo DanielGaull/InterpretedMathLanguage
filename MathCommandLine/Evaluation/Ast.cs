@@ -10,9 +10,9 @@ namespace MathCommandLine.Evaluation
     public class Ast
     {
         public AstTypes Type { get; private set; }
-        // Used for Literal types
         // For number literals
         public double NumberArg { get; private set; }
+        // Used for invalid ASTs
         public string Expression { get; private set; }
         // For lambdas
         public AstParameter[] Parameters { get; private set; }
