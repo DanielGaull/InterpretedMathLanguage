@@ -302,12 +302,13 @@ namespace MathCommandLine.Functions
                 "_indexlc", 
                 (args) =>
                 {
-                    return MValue.Number(MList.IndexOfCustom(args.Get(0).Value.ListValue, args.Get(1).Value, args.Get(2).Value.LambdaValue, evaluator));
+                    return MValue.Number(MList.IndexOfCustom(args.Get(0).Value.ListValue, args.Get(1).Value, 
+                        args.Get(2).Value.ClosureValue, evaluator));
                 },
                 new MParameters(
                     new MParameter(MDataType.List, "list"),
                     new MParameter(MDataType.Any, "element"),
-                    new MParameter(MDataType.Lambda, "equality_evaluator")
+                    new MParameter(MDataType.Closure, "equality_evaluator")
                 ),
                 "Returns the index of 'element' in 'list', or -1 if 'element' does not appear in 'list'. Two elements are considered equal if 'equality_evaluator' " + 
                 "returns a non-zero value when passed in those two elements."
@@ -319,11 +320,11 @@ namespace MathCommandLine.Functions
                 "_map", 
                 (args) =>
                 {
-                    return MValue.List(MList.Map(args.Get(0).Value.ListValue, args.Get(1).Value.LambdaValue, evaluator));
+                    return MValue.List(MList.Map(args.Get(0).Value.ListValue, args.Get(1).Value.ClosureValue, evaluator));
                 },
                 new MParameters(
                     new MParameter(MDataType.List, "list"),
-                    new MParameter(MDataType.Lambda, "evaluator")
+                    new MParameter(MDataType.Closure, "evaluator")
                 ),
                 "Executes 'evaluator' on each element of 'list', passing in the element and index, putting the results into a new list and returning it."
             );
@@ -334,11 +335,11 @@ namespace MathCommandLine.Functions
                 "_reduce", 
                 (args) =>
                 {
-                    return MList.Reduce(args.Get(0).Value.ListValue, args.Get(1).Value.LambdaValue, args.Get(2).Value, evaluator);
+                    return MList.Reduce(args.Get(0).Value.ListValue, args.Get(1).Value.ClosureValue, args.Get(2).Value, evaluator);
                 },
                 new MParameters(
                     new MParameter(MDataType.List, "list"),
-                    new MParameter(MDataType.Lambda, "reducer"),
+                    new MParameter(MDataType.Closure, "reducer"),
                     new MParameter(MDataType.Any, "init_value")
                 ),
                 "Runs 'reducer' on each element of 'list', passing in (previous, current). 'previous' is the result of the previous iteration (for first element, " +
@@ -726,13 +727,13 @@ namespace MathCommandLine.Functions
                             return MValue.Error(ErrorCodes.INVALID_ARGUMENT, 
                                 "Expected list length of 2 but found " + pair.Count + ".");
                         }
-                        MLambda cond = pair[0].LambdaValue;
-                        MValue condValue = cond.Evaluate(MArguments.Empty, interpreter);
+                        MClosure cond = pair[0].ClosureValue;
+                        MValue condValue = MValue.Null();// cond.Evaluate(MArguments.Empty, interpreter);
                         // Everything is truthy except the "false" value, "void", and "null"
                         if (condValue.IsTruthy())
                         {
-                            MLambda outputFunc = pair[1].LambdaValue;
-                            MValue output = outputFunc.Evaluate(MArguments.Empty, interpreter);
+                            MClosure outputFunc = pair[1].ClosureValue;
+                            MValue output = MValue.Null(); //outputFunc.Evaluate(MArguments.Empty, interpreter);
                             return output;
                         }
                     }
@@ -808,19 +809,19 @@ namespace MathCommandLine.Functions
                 "_and_e", 
                 (args) =>
                 {
-                    MLambda b1 = args[0].Value.LambdaValue;
-                    MLambda b2 = args[1].Value.LambdaValue;
-                    MValue result1 = b1.Evaluate(MArguments.Empty, interpreter);
+                    MClosure b1 = args[0].Value.ClosureValue;
+                    MClosure b2 = args[1].Value.ClosureValue;
+                    MValue result1 = MValue.Null(); //b1.Evaluate(MArguments.Empty, interpreter);
                     if (result1.IsTruthy())
                     {
                         // Simply return the second value
-                        return b2.Evaluate(MArguments.Empty, interpreter);
+                        return MValue.Null(); //b2.Evaluate(MArguments.Empty, interpreter);
                     }
                     return MValue.Bool(false);
                 },
                 new MParameters(
-                    new MParameter(MDataType.Lambda, "eval1"),
-                    new MParameter(MDataType.Lambda, "eval2")
+                    new MParameter(MDataType.Closure, "eval1"),
+                    new MParameter(MDataType.Closure, "eval2")
                 ),
                 "If 'eval1' returns truthy, returns the result of 'eval2'. Otherwise, returns false"
             );
@@ -832,19 +833,19 @@ namespace MathCommandLine.Functions
                 "_or_e", 
                 (args) =>
                 {
-                    MLambda b1 = args[0].Value.LambdaValue;
-                    MLambda b2 = args[1].Value.LambdaValue;
-                    MValue result1 = b1.Evaluate(MArguments.Empty, interpreter);
+                    MClosure b1 = args[0].Value.ClosureValue;
+                    MClosure b2 = args[1].Value.ClosureValue;
+                    MValue result1 = MValue.Null(); // b1.Evaluate(MArguments.Empty, interpreter);
                     if (!result1.IsTruthy())
                     {
                         // Simply return the second value
-                        return b2.Evaluate(MArguments.Empty, interpreter);
+                        return MValue.Null(); // b2.Evaluate(MArguments.Empty, interpreter);
                     }
                     return result1;
                 },
                 new MParameters(
-                    new MParameter(MDataType.Lambda, "eval1"),
-                    new MParameter(MDataType.Lambda, "eval2")
+                    new MParameter(MDataType.Closure, "eval1"),
+                    new MParameter(MDataType.Closure, "eval2")
                 ),
                 "If 'eval1' returns truthy, returns result. Otherwise, returns result of 'eval2'"
             );

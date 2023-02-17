@@ -30,5 +30,7 @@ namespace MathCommandLine.CoreDataTypes
             NativeBody = nativeBody;
             IsNativeBody = true;
         }
+
+        public static MClosure Empty = new MClosure(MParameters.Empty, null, Ast.Invalid(null));
     }
 }

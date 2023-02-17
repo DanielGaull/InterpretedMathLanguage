@@ -1,4 +1,5 @@
 ﻿using MathCommandLine.CoreDataTypes;
+using MathCommandLine.Environments;
 using MathCommandLine.Exceptions;
 using MathCommandLine.Functions;
 using MathCommandLine.Structure;
@@ -69,14 +70,14 @@ namespace MathCommandLine.Evaluation
                     {
                         return evaluatedCaller;
                     }
-                    if (evaluatedCaller.DataType != MDataType.Lambda)
+                    if (evaluatedCaller.DataType != MDataType.Closure)
                     {
                         // Not a callable object
                         return MValue.Error(Util.ErrorCodes.NOT_CALLABLE, 
                             "Cannot invoke because \"" + evaluatedCaller.DataType.Name + "\" is not a callable data type.", 
                             MList.Empty);
                     }
-                    MLambda lambda = evaluatedCaller.LambdaValue;
+                    MClosure closure = evaluatedCaller.ClosureValue;
                     List<MArgument> argsList = new List<MArgument>();
                     for (int i = 0; i < ast.AstCollectionArg.Length; i++)
                     {
@@ -84,7 +85,8 @@ namespace MathCommandLine.Evaluation
                     }
                     MArguments args = new MArguments(argsList);
                     // We have a callable type!
-                    return lambda.Evaluate(args, superEvaluator);
+                    // TODO: Evaluate the closure
+                    return MValue.Null();
                 case AstTypes.Variable:
                     // Return the value of the variable with this name
                     if (varManager.HasValue(ast.Name))
@@ -131,7 +133,7 @@ namespace MathCommandLine.Evaluation
                             "Type \"" + ast.Name + "\" is not defined.", MList.Empty);
                     }
                     MParameters parameters = new MParameters(paramArray);
-                    return MValue.Lambda(new MLambda(parameters, ast.Body));
+                    return MValue.Closure(new MClosure(parameters, MEnvironment.Empty, ast.Body));
             }
             return MValue.Empty;
         }

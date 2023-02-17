@@ -1,4 +1,5 @@
 ﻿using MathCommandLine.CoreDataTypes;
+using MathCommandLine.Environments;
 using MathCommandLine.Evaluation;
 using MathCommandLine.Functions;
 using MathCommandLine.Structure;
@@ -30,10 +31,10 @@ namespace MathCommandLine
             for (int i = 0; i < coreFuncs.Count; i++)
             {
                 varManager.AddConstant(coreFuncs[i].Name, 
-                    MValue.Lambda(new MLambda(coreFuncs[i].Parameters, coreFuncs[i].Expression)), false);
+                    MValue.Closure(new MClosure(coreFuncs[i].Parameters, MEnvironment.Empty, coreFuncs[i].Expression)), false);
             }
             funcDict = new FunctionDict(coreFuncs);
-            DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, MDataType.Lambda,
+            DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, MDataType.Closure,
                 MDataType.Type, MDataType.Error, MDataType.Reference, MDataType.String, MDataType.Void,
                 MDataType.Boolean, MDataType.Null, MDataType.Any);
             Parser parser = new Parser();
@@ -78,7 +79,7 @@ namespace MathCommandLine
             });
             SyntaxDef def4 = new SyntaxDef(new List<SyntaxDefSymbol> {
                 new SyntaxDefSymbol("["),
-                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Lambda, "code"), false, true)),
+                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Closure, "code"), false, true)),
                 new SyntaxDefSymbol("]")
             }, new List<SyntaxResultSymbol>() {
                 new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "code")
@@ -97,7 +98,7 @@ namespace MathCommandLine
             Console.WriteLine(w);
             Console.WriteLine(a);
 
-            var b = sh.FullConvert(definitions, "{5+2,3+2+1}");
+            var b = sh.FullConvert(definitions, "[5+2]");
             Console.WriteLine(b);
 
             Console.ReadLine();

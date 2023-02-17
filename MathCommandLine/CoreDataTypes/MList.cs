@@ -84,7 +84,7 @@ namespace MathCommandLine.CoreDataTypes
         {
             return list.iList.IndexOf(value);
         }
-        public static int IndexOfCustom(MList list, MValue value, MLambda equalityEvaluator, IInterpreter evaluator)
+        public static int IndexOfCustom(MList list, MValue value, MClosure equalityEvaluator, IInterpreter evaluator)
         {
             for (int i = 0; i < list.iList.Count; i++)
             {
@@ -92,7 +92,7 @@ namespace MathCommandLine.CoreDataTypes
                     new MArgument(value), 
                     new MArgument(list.iList[i])
                 );
-                MValue result = equalityEvaluator.Evaluate(args, evaluator);
+                MValue result = MValue.Empty;// equalityEvaluator.Evaluate(args, evaluator);
                 if (result != MValue.Number(0))
                 {
                     // Result is true, so return index
@@ -101,34 +101,35 @@ namespace MathCommandLine.CoreDataTypes
             }
             return -1;
         }
-        public static MList Map(MList list, MLambda lambda, IInterpreter evaluator)
+        public static MList Map(MList list, MClosure closure, IInterpreter evaluator)
         {
             List<MValue> newList = new List<MValue>();
             for (int i = 0; i < list.iList.Count; i++)
             {
-                MValue result = lambda.Evaluate(
-                    new MArguments(
-                        new MArgument(list.iList[i]), 
-                        new MArgument(MValue.Number(i))
-                    ),
-                    evaluator
-                );
+                //MValue result = lambda.Evaluate(
+                //    new MArguments(
+                //        new MArgument(list.iList[i]), 
+                //        new MArgument(MValue.Number(i))
+                //    ),
+                //    evaluator
+                //);
+                MValue result = MValue.Null();
                 newList.Add(result);
             }
             return new MList(newList);
         }
-        public static MValue Reduce(MList list, MLambda lambda, MValue initial, IInterpreter evaluator)
+        public static MValue Reduce(MList list, MClosure closure, MValue initial, IInterpreter evaluator)
         {
             MValue runningResult = initial;
             for (int i = 0; i < list.iList.Count; i++)
             {
-                runningResult = lambda.Evaluate(
-                    new MArguments(
-                        new MArgument(runningResult),
-                        new MArgument(list.iList[i])
-                    ),
-                    evaluator
-                );
+                //runningResult = lambda.Evaluate(
+                //    new MArguments(
+                //        new MArgument(runningResult),
+                //        new MArgument(list.iList[i])
+                //    ),
+                //    evaluator
+                //);
             }
             return runningResult;
         }

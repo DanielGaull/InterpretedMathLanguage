@@ -26,9 +26,9 @@ namespace MathCommandLine.Structure
         {
             return new MVariable(MDataType.List, MValue.List(value), name);
         }
-        public static MVariable Lambda(string name, MLambda value)
+        public static MVariable Closure(string name, MClosure value)
         {
-            return new MVariable(MDataType.Lambda, MValue.Lambda(value), name);
+            return new MVariable(MDataType.Closure, MValue.Closure(value), name);
         }
         public static MVariable Type(string name, MDataType value)
         {

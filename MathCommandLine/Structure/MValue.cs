@@ -12,7 +12,7 @@ namespace MathCommandLine.Structure
     {
         public double NumberValue; // For the number type, a 64-bit floating-pt number
         public MList ListValue; // For the list type
-        public MLambda LambdaValue; // For the lambda type
+        public MClosure ClosureValue; // For the lambda type
         public decimal BigDecimalValue; // For the big_decimal type
         public long BigIntValue; // For the big_int type
         public MDataType TypeValue; // For the type type (that represents an actual data type)
@@ -21,13 +21,13 @@ namespace MathCommandLine.Structure
         public Dictionary<string, MValue> DataValues; // The Data Values for composite types (maps name => value)
         public MDataType DataType;
 
-        public MValue(MDataType dataType, double numberValue, MList listValue, MLambda lambdaValue, decimal bigDecimalValue, 
+        public MValue(MDataType dataType, double numberValue, MList listValue, MClosure closureValue, decimal bigDecimalValue, 
             long bigIntValue, MDataType typeValue, int addrValue, bool boolValue, Dictionary<string, MValue> dataValues)
         {
             DataType = dataType;
             NumberValue = numberValue;
             ListValue = listValue;
-            LambdaValue = lambdaValue;
+            ClosureValue = closureValue;
             BigDecimalValue = bigDecimalValue;
             BigIntValue = bigIntValue;
             TypeValue = typeValue;
@@ -36,59 +36,59 @@ namespace MathCommandLine.Structure
             BoolValue = boolValue;
         }
 
-        public static readonly MValue Empty = new MValue(MDataType.Empty, 0, MList.Empty, MLambda.Empty, 0, 0, 
+        public static readonly MValue Empty = new MValue(MDataType.Empty, 0, MList.Empty, MClosure.Empty, 0, 0, 
             MDataType.Empty, -1, false, null);
 
         public static MValue Number(double numberValue)
         {
-            return new MValue(MDataType.Number, numberValue, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, -1, 
+            return new MValue(MDataType.Number, numberValue, MList.Empty, MClosure.Empty, 0, 0, MDataType.Empty, -1, 
                 false, null);
         }
         public static MValue List(MList list)
         {
-            return new MValue(MDataType.List, 0, list, MLambda.Empty, 0, 0, MDataType.Empty, -1, false, null);
+            return new MValue(MDataType.List, 0, list, MClosure.Empty, 0, 0, MDataType.Empty, -1, false, null);
         }
-        public static MValue Lambda(MLambda lambda)
+        public static MValue Closure(MClosure closure)
         {
-            return new MValue(MDataType.Lambda, 0, MList.Empty, lambda, 0, 0, MDataType.Empty, -1, false, null);
+            return new MValue(MDataType.Closure, 0, MList.Empty, closure, 0, 0, MDataType.Empty, -1, false, null);
         }
         public static MValue BigDecimal(decimal bigDecimal)
         {
-            return new MValue(MDataType.BigDecimal, 0, MList.Empty, MLambda.Empty, bigDecimal, 0, MDataType.Empty, -1, 
+            return new MValue(MDataType.BigDecimal, 0, MList.Empty, MClosure.Empty, bigDecimal, 0, MDataType.Empty, -1, 
                 false, null);
         }
         public static MValue BigInt(long bigInt)
         {
-            return new MValue(MDataType.BigInt, 0, MList.Empty, MLambda.Empty, 0, bigInt, MDataType.Empty, -1, 
+            return new MValue(MDataType.BigInt, 0, MList.Empty, MClosure.Empty, 0, bigInt, MDataType.Empty, -1, 
                 false, null);
         }
         public static MValue Type(MDataType type)
         {
-            return new MValue(MDataType.Type, 0, MList.Empty, MLambda.Empty, 0, 0, type, -1, false, null);
+            return new MValue(MDataType.Type, 0, MList.Empty, MClosure.Empty, 0, 0, type, -1, false, null);
         }
         public static MValue Reference(int refAddr)
         {
-            return new MValue(MDataType.Reference, 0, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, refAddr, 
+            return new MValue(MDataType.Reference, 0, MList.Empty, MClosure.Empty, 0, 0, MDataType.Empty, refAddr, 
                 false, null);
         }
         public static MValue Bool(bool boolValue)
         {
-            return new MValue(MDataType.Boolean, 0, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, -1,
+            return new MValue(MDataType.Boolean, 0, MList.Empty, MClosure.Empty, 0, 0, MDataType.Empty, -1,
                 boolValue, null);
         }
         public static MValue Void()
         {
-            return new MValue(MDataType.Void, 0, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, -1, 
+            return new MValue(MDataType.Void, 0, MList.Empty, MClosure.Empty, 0, 0, MDataType.Empty, -1, 
                 false, null);
         }
         public static MValue Null()
         {
-            return new MValue(MDataType.Null, 0, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, -1,
+            return new MValue(MDataType.Null, 0, MList.Empty, MClosure.Empty, 0, 0, MDataType.Empty, -1,
                 false, null);
         }
         public static MValue Composite(MDataType type, Dictionary<string, MValue> values)
         {
-            return new MValue(type, 0, MList.Empty, MLambda.Empty, 0, 0, MDataType.Empty, -1, false, values);
+            return new MValue(type, 0, MList.Empty, MClosure.Empty, 0, 0, MDataType.Empty, -1, false, values);
         }
 
         /// <summary>
@@ -172,9 +172,9 @@ namespace MathCommandLine.Structure
             {
                 return ListValue.ToString();
             }
-            else if (DataType == MDataType.Lambda)
+            else if (DataType == MDataType.Closure)
             {
-                return LambdaValue.ToString();
+                return ClosureValue.ToString();
             }
             else if (DataType == MDataType.BigDecimal)
             {
@@ -269,9 +269,9 @@ namespace MathCommandLine.Structure
             {
                 return v1.ListValue == v2.ListValue;
             }
-            else if (dt == MDataType.Lambda)
+            else if (dt == MDataType.Closure)
             {
-                return v1.LambdaValue == v2.LambdaValue;
+                return v1.ClosureValue == v2.ClosureValue;
             }
             else if (dt == MDataType.Type)
             {

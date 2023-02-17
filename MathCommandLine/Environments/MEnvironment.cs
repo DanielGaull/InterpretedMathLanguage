@@ -7,5 +7,6 @@ namespace MathCommandLine.Environments
     public class MEnvironment
     {
         // TODO: Write this class
+        public static MEnvironment Empty = new MEnvironment();
     }
 }

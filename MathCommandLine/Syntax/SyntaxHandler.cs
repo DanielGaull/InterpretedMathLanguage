@@ -127,6 +127,18 @@ namespace MathCommandLine.Syntax
                         }
                     }).ToArray();
                     return parser.CallToString(callee, args);
+                case AstTypes.LambdaLiteral:
+                    // Need to syntax-handle the body
+                    string body = null;
+                    if (result.Body.Type == AstTypes.Invalid)
+                    {
+                        body = FullConvert(definitions, result.Body.Expression);
+                    }
+                    else
+                    {
+                        body = result.Body.ToString();
+                    }
+                    return parser.LambdaToString(result, body);
                 case AstTypes.Invalid:
                     // Check if any syntax matches this expression
                     SyntaxDef matchingDef = null;

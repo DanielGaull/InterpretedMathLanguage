@@ -73,6 +73,13 @@ namespace MathCommandLine.Evaluation
         {
             return callee + CALL_START_WRAPPER + string.Join(ARG_DELIMITER, args) + CALL_END_WRAPPER;
         }
+        public string LambdaToString(Ast sourceLambda, string body)
+        {
+            // TODO: Move string fragments to constants
+            return "(" + 
+                string.Join(',', sourceLambda.Parameters.Select(x => x.ToString()).ToArray()) +
+                ")=>{" + body + "}";
+        }
 
         /// <summary>
         /// Converts all string literals appearing in an expression to _str string declarations
