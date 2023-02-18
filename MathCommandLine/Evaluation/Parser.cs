@@ -123,6 +123,11 @@ namespace MathCommandLine.Evaluation
                 string argsString = attempedCallMatch.Args;
 
                 Ast caller = ParseExpression(callerString);
+                if (caller.Type == AstTypes.Invalid)
+                {
+                    // Invalid caller means we need to return an invalid overall, instead of a valid call
+                    return Ast.Invalid(expression);
+                }
 
                 string[] argStrings = argsString.Length > 0 ? SplitByDelimiter(argsString, ARG_DELIMITER) : new string[0];
                 // Parse all the arguments

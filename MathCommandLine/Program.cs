@@ -109,8 +109,8 @@ namespace MathCommandLine
             Console.WriteLine(w);
             Console.WriteLine(a);
 
-            var b = sh.FullConvert(definitions, "[5+2]");
-            Console.WriteLine(b);
+            //var b = sh.FullConvert(definitions, "[5+2]");
+            //Console.WriteLine(b);
 
             while (true)
             {
