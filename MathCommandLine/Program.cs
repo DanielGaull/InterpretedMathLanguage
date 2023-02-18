@@ -28,10 +28,13 @@ namespace MathCommandLine
             varManager.AddConstant("TRUE", MValue.Bool(true), false);
             varManager.AddConstant("FALSE", MValue.Bool(false), false);
             List<MFunction> coreFuncs = CoreFunctions.GenerateCoreFunctions(evaluator);
+            MEnvironment baseEnv = new MEnvironment(MEnvironment.Empty);
             for (int i = 0; i < coreFuncs.Count; i++)
             {
-                varManager.AddConstant(coreFuncs[i].Name, 
-                    MValue.Closure(new MClosure(coreFuncs[i].Parameters, MEnvironment.Empty, coreFuncs[i].Expression)), false);
+                MValue closure = MValue.Closure(
+                    new MClosure(coreFuncs[i].Parameters, MEnvironment.Empty, coreFuncs[i].Expression));
+                varManager.AddConstant(coreFuncs[i].Name, closure, false);
+                baseEnv.AddConstant(coreFuncs[i].Name, closure);
             }
             funcDict = new FunctionDict(coreFuncs);
             DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, MDataType.Closure,
