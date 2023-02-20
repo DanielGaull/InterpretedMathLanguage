@@ -3,6 +3,7 @@ using MathCommandLine.Environments;
 using MathCommandLine.Exceptions;
 using MathCommandLine.Functions;
 using MathCommandLine.Structure;
+using MathCommandLine.Util;
 using MathCommandLine.Variables;
 using System;
 using System.Collections.Generic;
@@ -12,35 +13,24 @@ using System.Text.RegularExpressions;
 
 namespace MathCommandLine.Evaluation
 {
-    public class StringEvaluator
+    public class Evaluator
     {
-        private IInterpreter superEvaluator;
         private Parser parser;
         private DataTypeDict dtDict;
 
         private static readonly Regex WHITESPACE_REGEX = new Regex(@"\s+");
 
-        public StringEvaluator(IInterpreter superEvaluator, Parser parser, DataTypeDict dtDict)
+        public Evaluator(Parser parser, DataTypeDict dtDict)
         {
-            this.superEvaluator = superEvaluator;
             this.parser = parser;
             this.dtDict = dtDict;
         }
 
-        public MValue Evaluate(MExpression mExpression, MEnvironment env)
+        public MValue Evaluate(string expression, MEnvironment env)
         {
-            if (!mExpression.IsNativeExpression)
-            {
-                //for (int i = 0; i < variables.Length; i++)
-                //{
-                //    varManager.AddVariable(variables[i].Name, variables[i].Value, false);
-                //}
-                string expr = mExpression.Expression;
-                expr = parser.ConvertStringsToLists(expr);
-                expr = CleanWhitespace(expr);
-                return FinalStageEvaluate(expr, env);
-            }
-            throw new NotImplementedException();
+            expression = parser.ConvertStringsToLists(expression);
+            expression = CleanWhitespace(expression);
+            return FinalStageEvaluate(expression, env);
         }
 
         private string CleanWhitespace(string expression)
@@ -78,24 +68,13 @@ namespace MathCommandLine.Evaluation
                     List<MArgument> argsList = new List<MArgument>();
                     for (int i = 0; i < ast.AstCollectionArg.Length; i++)
                     {
-                        argsList.Add(new MArgument(EvaluateAst(ast.AstCollectionArg[i], env)));
+                        string name = closure.Parameters[i].Name;
+                        argsList.Add(new MArgument(name, EvaluateAst(ast.AstCollectionArg[i], env)));
                     }
-                    MArguments args = new MArguments(argsList);
-                    // We have a callable type!
-                    // TODO: Evaluate the closure
-                    return MValue.Null();
+                    return PerformCall(closure, argsList, env);
                 case AstTypes.Variable:
                     // Return the value of the variable with this name
                     return env.Get(ast.Name);
-                    //if ()
-                    //{
-                    //    return varManager.GetValue(ast.Name);
-                    //}
-                    //else
-                    //{
-                    //    return MValue.Error(Util.ErrorCodes.VAR_DOES_NOT_EXIST, 
-                    //        $"Variable or argument \"{ast.Name}\" does not exist.", MList.Empty);
-                    //}
                 case AstTypes.NumberLiteral:
                     return MValue.Number(ast.NumberArg);
                 case AstTypes.ListLiteral:
@@ -135,6 +114,70 @@ namespace MathCommandLine.Evaluation
                     return MValue.Closure(new MClosure(parameters, env, ast.Body));
             }
             return MValue.Empty;
+        }
+
+        private MValue PerformCall(MClosure closure, List<MArgument> argsList, MEnvironment currentEnv)
+        {
+            // We have a callable type!
+            // Verify that everything is good to go before we actually call it
+            // Need to check that we've been provided the right number of arguments
+            MParameters parameters = closure.Parameters;
+            if (argsList.Count != parameters.Length)
+            {
+                return MValue.Error(ErrorCodes.WRONG_ARG_COUNT, "Expected " + parameters.Length +
+                    " arguments but received " + argsList.Count + ".", MList.Empty);
+            }
+            // Now check the types of the arguments to ensure they match. If any errors appear in the arguments, return that immediately
+            for (int i = 0; i < argsList.Count; i++)
+            {
+                if (!parameters[i].ContainsType(argsList[i].Value.DataType))
+                {
+                    // Improper data type!
+                    return MValue.Error(ErrorCodes.INVALID_TYPE,
+                        "Expected argument \"" + parameters.Get(i).Name + "\" to be of type '" +
+                            parameters.Get(i).DataTypeString() + "' but received type '" + argsList[i].Value.DataType + "'.",
+                        MList.FromOne(MValue.Number(i)));
+                }
+                else if (!parameters[i].PassesRestrictions(argsList[i].Value))
+                {
+                    // Fails restrictions!
+                    return MValue.Error(ErrorCodes.FAILS_RESTRICTION,
+                        "Argument \"" + parameters.Get(i).Name + "\" fails one or more parameter restrictions.",
+                        MList.FromOne(MValue.Number(i)));
+                }
+                else if (argsList[i].Value.DataType == MDataType.Error)
+                {
+                    // An error was passed as an argument, so simply need to return it
+                    // TODO: Allow a flag that prevents this from happening and allows errors to be fed to functions
+                    return argsList[i].Value;
+                }
+                else
+                {
+                    // Arg passes! But we need to make sure it's properly named
+                    MArgument newArg = new MArgument(parameters[i].Name, argsList[i].Value);
+                    argsList[i] = newArg;
+                }
+            }
+
+            // Evaluate the closure
+            // Determine type
+            // - If a native closure, then hand it our current environment and call directly
+            // - Otherwise, need to create a new environment and evaluate the body w/ that environment
+            if (closure.IsNativeBody)
+            {
+                return closure.NativeBody(new MArguments(argsList), currentEnv);
+            }
+            else
+            {
+                // Step 1: Create the new environment
+                // Step 2: Evaluate the body with that new environment
+                MEnvironment newEnv = new MEnvironment(closure.Environment);
+                for (int i = 0; i < argsList.Count; i++)
+                {
+                    newEnv.AddVariable(argsList[i].Name, argsList[i].Value);
+                }
+                return EvaluateAst(closure.AstBody, newEnv);
+            }
         }
     }
 }

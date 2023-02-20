@@ -11,8 +11,8 @@ namespace MathCommandLine.Evaluation
 {
     public class Interpreter : IInterpreter
     {
-        NativeEvaluator nativeEvaluator;
-        StringEvaluator stringEvaluator;
+        //NativeEvaluator nativeEvaluator;
+        Evaluator evaluator;
 
         DataTypeDict dtDict;
 
@@ -24,21 +24,14 @@ namespace MathCommandLine.Evaluation
         {
             this.dtDict = dtDict;
 
-            nativeEvaluator = new NativeEvaluator();
+            //nativeEvaluator = new NativeEvaluator();
 
-            stringEvaluator = new StringEvaluator(this, parser, dtDict);
+            evaluator = new Evaluator(parser, dtDict);
         }
 
-        public MValue Evaluate(MExpression expression, MArguments args, MEnvironment env)
+        public MValue Evaluate(string expression, MArguments args, MEnvironment env)
         {
-            if (expression.IsNativeExpression)
-            {
-                return nativeEvaluator.Evaluate(expression, args, env);
-            }
-            else
-            {
-                return stringEvaluator.Evaluate(expression, env);
-            }
+            return evaluator.Evaluate(expression, env);
         }
 
         public MDataType GetDataType(string typeName)

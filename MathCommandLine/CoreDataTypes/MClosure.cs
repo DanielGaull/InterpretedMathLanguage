@@ -8,6 +8,7 @@ using System.Text;
 
 namespace MathCommandLine.CoreDataTypes
 {
+    public delegate MValue NativeExpression(MArguments args, MEnvironment env);
     public class MClosure
     {
         public MParameters Parameters { get; private set; }

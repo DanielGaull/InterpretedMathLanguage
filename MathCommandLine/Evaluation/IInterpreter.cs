@@ -10,7 +10,7 @@ namespace MathCommandLine.Evaluation
 {
     public interface IInterpreter
     {
-        public MValue Evaluate(MExpression expression, MArguments arguments, MEnvironment env);
+        public MValue Evaluate(string expression, MArguments arguments, MEnvironment env);
         public MDataType GetDataType(string typeName);
 
     }
