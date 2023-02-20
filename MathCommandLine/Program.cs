@@ -98,7 +98,7 @@ namespace MathCommandLine
             List<SyntaxDef> definitions = new List<SyntaxDef>() {
                 def4, def, mulDef, def2, def3
             };
-            SyntaxHandler sh = new SyntaxHandler(parser);
+            SyntaxHandler sh = new SyntaxHandler(parser, "{}(),".ToCharArray().ToList());
             //var m = sh.Match(def, "1+2");
             var x = sh.Convert(def, "1+2");
             var z = sh.Convert(def2, "var x=7");

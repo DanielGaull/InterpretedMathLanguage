@@ -14,9 +14,11 @@ namespace MathCommandLine.Syntax
     public class SyntaxHandler
     {
         Parser parser;
+        List<char> illegalChars;
 
-        public SyntaxHandler(Parser parser)
+        public SyntaxHandler(Parser parser, List<char> illegalChars)
         {
+            this.illegalChars = illegalChars;
             this.parser = parser;
         }
 
@@ -186,20 +188,47 @@ namespace MathCommandLine.Syntax
                                     .Cast<Match>()
                                     .Select(m => m.Value)
                                     .ToList();
-                return ParseSyntaxDefinitionStatement(tokens[1], tokens[2]);
+                SyntaxDef result = ParseSyntaxDefinitionStatement(tokens[1], tokens[2]);
+                if (result == null)
+                {
+                    // Means something went wrong
+                    throw new IllegalSyntaxException(line);
+                }
+                return result;
             }
             throw new IllegalSyntaxException(line);
         }
         public SyntaxDef ParseSyntaxDefinitionStatement(string source, string result)
         {
-            
             return null;
         }
+        // Returns null if something goes wrong
         private List<SyntaxDefSymbol> ParseSourceString(string source)
         {
             // Source is made up of string literals, and instances of {{ [parameter] }}
+            StringBuilder currentBuilder = new StringBuilder();
+            List<SyntaxDefSymbol> symbolDefs = new List<SyntaxDefSymbol>();
+            for (int i = 0; i < source.Length; i++)
+            {
+                if (source[i] != '{')
+                {
+                    currentBuilder.Append(source[i]);
+                }
+                else if (illegalChars.Contains(source[i]))
+                {
+                    return null;
+                }
+                else
+                {
+                    // Look at param definition, save off current string literal
+                    symbolDefs.Add(new SyntaxDefSymbol(currentBuilder.ToString()));
+                    currentBuilder = new StringBuilder();
 
-            return null;
+                    // Get info about param here
+                    // TODO
+                }
+            }
+            return symbolDefs;
         }
     }
 }
