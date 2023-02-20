@@ -33,6 +33,36 @@ namespace MathCommandLine.Environments
             AddValue(name, value, true, false, false);
         }
 
+        public bool Has(string name)
+        {
+            if (this == Empty)
+            {
+                return false;
+            }
+            if (values.ContainsKey(name))
+            {
+                return true;
+            }
+            return parent.Has(name);
+        }
+
+        public MBoxedValue GetBox(string name)
+        {
+            if (this == Empty)
+            {
+                return null;//MValue.Error(Util.ErrorCodes.VAR_DOES_NOT_EXIST);
+            }
+
+            if (values.ContainsKey(name))
+            {
+                return values[name];
+            }
+            else
+            {
+                return parent.GetBox(name);
+            }
+        }
+
         public MValue Get(string name)
         {
             if (this == Empty)
@@ -64,42 +94,6 @@ namespace MathCommandLine.Environments
             else
             {
                 return parent.Set(name, value);
-            }
-        }
-
-        // Used so that we can have references to the values and not access to the actual values directly
-        private class MBoxedValue
-        {
-            private MValue value;
-            public bool CanGet { get; private set; }
-            public bool CanSet { get; private set; }
-            public bool CanDelete { get; private set; }
-
-            public MBoxedValue(MValue value, bool canGet, bool canSet, bool canDelete)
-            {
-                this.value = value;
-                CanGet = canGet;
-                CanSet = canSet;
-                CanDelete = canDelete;
-            }
-
-            public MValue GetValue()
-            {
-                if (CanGet)
-                {
-                    return value;
-                }
-                return MValue.Error(Util.ErrorCodes.VAR_DOES_NOT_EXIST);
-            }
-
-            public MValue SetValue(MValue value)
-            {
-                if (CanSet)
-                {
-                    this.value = value;
-                    return MValue.Void();
-                }
-                return MValue.Error(Util.ErrorCodes.CANNOT_ASSIGN);
             }
         }
     }
