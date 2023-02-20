@@ -815,20 +815,19 @@ namespace MathCommandLine.Functions
         }
         public static MFunction AndeFunction(IInterpreter interpreter)
         {
-
             return new MFunction(
                 "_and_e", 
                 (args, env) =>
                 {
                     MClosure b1 = args[0].Value.ClosureValue;
                     MClosure b2 = args[1].Value.ClosureValue;
-                    MValue result1 = MValue.Null(); //b1.Evaluate(MArguments.Empty, interpreter);
+                    MValue result1 = interpreter.PerformCall(b1, MArguments.Empty, env);
                     if (result1.IsTruthy())
                     {
                         // Simply return the second value
-                        return MValue.Null(); //b2.Evaluate(MArguments.Empty, interpreter);
+                        return interpreter.PerformCall(b2, MArguments.Empty, env);
                     }
-                    return MValue.Bool(false);
+                    return result1;
                 },
                 new MParameters(
                     new MParameter(MDataType.Closure, "eval1"),
@@ -846,11 +845,11 @@ namespace MathCommandLine.Functions
                 {
                     MClosure b1 = args[0].Value.ClosureValue;
                     MClosure b2 = args[1].Value.ClosureValue;
-                    MValue result1 = MValue.Null(); // b1.Evaluate(MArguments.Empty, interpreter);
+                    MValue result1 = interpreter.PerformCall(b1, MArguments.Empty, env);
                     if (!result1.IsTruthy())
                     {
                         // Simply return the second value
-                        return MValue.Null(); // b2.Evaluate(MArguments.Empty, interpreter);
+                        return interpreter.PerformCall(b2, MArguments.Empty, env);
                     }
                     return result1;
                 },
