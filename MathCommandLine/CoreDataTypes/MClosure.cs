@@ -40,12 +40,7 @@ namespace MathCommandLine.CoreDataTypes
             {
                 return "<empty>";
             }
-            if (IsNativeBody)
-            {
-                return "<function>";
-            }
-            // Add params
-            return "(" + Parameters.ToString() + ")=>{" + AstBody.ToExpressionString() + "}";
+            return "(" + Parameters.ToString() + ")=>{" + (IsNativeBody ? "<function>" : AstBody.ToExpressionString()) + "}";
         }
     }
 }
