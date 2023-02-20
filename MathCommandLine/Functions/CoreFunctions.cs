@@ -7,6 +7,7 @@ using MathCommandLine.Variables;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace MathCommandLine.Functions
 {
@@ -450,9 +451,14 @@ namespace MathCommandLine.Functions
                     bool can_set = args[3].Value.BoolValue;
                     bool can_delete = args[4].Value.BoolValue;
                     MValue value = args[1].Value;
+                    Regex reg = new Regex("^[a-zA-Z][a-zA-Z0-9_]*$");
                     if (env.Has(refName))
                     {
                         return MValue.Error(ErrorCodes.CANNOT_DECLARE, $"Named value \"{refName}\" already exists.");
+                    }
+                    else if (!reg.IsMatch(refName))
+                    {
+                        return MValue.Error(ErrorCodes.CANNOT_DECLARE, $"The name \"{refName}\" is an invalid name.");
                     }
                     else
                     {
