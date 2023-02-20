@@ -1,6 +1,7 @@
 ﻿using MathCommandLine.CoreDataTypes;
 using MathCommandLine.Environments;
 using MathCommandLine.Evaluation;
+using MathCommandLine.Exceptions;
 using MathCommandLine.Functions;
 using MathCommandLine.Structure;
 using MathCommandLine.Syntax;
@@ -131,12 +132,22 @@ namespace MathCommandLine
                 {
                     continue;
                 }
-                MValue result = evaluator.Evaluate(input, baseEnv);
-                if (result.DataType != MDataType.Void)
+                MValue result = MValue.Empty;
+                try
                 {
-                    // Never output void as a result, since we're typically running a function
-                    string resultString = result.ToLongString();
-                    Console.WriteLine(resultString);
+                    result = evaluator.Evaluate(input, baseEnv);
+                    if (result.DataType != MDataType.Void)
+                    {
+                        // Never output void as a result, since we're typically running a function
+                        string resultString = result.ToLongString();
+                        Console.WriteLine(resultString);
+                    }
+                }
+                catch (InvalidParseException ex)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(ex.Message);
+                    Console.ForegroundColor = ConsoleColor.Gray;
                 }
             }
         }

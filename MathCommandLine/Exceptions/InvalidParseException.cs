@@ -7,12 +7,12 @@ namespace MathCommandLine.Exceptions
     public class InvalidParseException : Exception
     {
         public InvalidParseException(string expression)
-            : base("Cannot parse expression: \"" + expression + "\".")
+            : base("Invalid Syntax: \"" + expression + "\".")
         {
 
         }
         public InvalidParseException(string message, string expression)
-            : base("Cannot parse expression: \"" + expression + "\" (" + message + ").")
+            : base("Invalid Syntax: \"" + expression + "\" (" + message + ").")
         {
 
         }

@@ -1,5 +1,6 @@
 ﻿using MathCommandLine.CoreDataTypes;
 using MathCommandLine.Environments;
+using MathCommandLine.Exceptions;
 using MathCommandLine.Functions;
 using MathCommandLine.Structure;
 using MathCommandLine.Util;
@@ -115,6 +116,8 @@ namespace MathCommandLine.Evaluation
                     MParameters parameters = new MParameters(paramArray);
                     // Create a closure with this current environment
                     return MValue.Closure(new MClosure(parameters, env, ast.Body));
+                case AstTypes.Invalid:
+                    throw new InvalidParseException(ast.Expression);
             }
             return MValue.Empty;
         }
