@@ -34,6 +34,10 @@ namespace MathCommandLine.Functions
             {
                 return Get(index);
             }
+            set
+            {
+                Set(index, value);
+            }
         }
         public MArgument this[string key]
         {

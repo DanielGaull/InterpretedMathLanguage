@@ -1,4 +1,5 @@
-﻿using MathCommandLine.Environments;
+﻿using MathCommandLine.CoreDataTypes;
+using MathCommandLine.Environments;
 using MathCommandLine.Functions;
 using MathCommandLine.Structure;
 using MathCommandLine.Variables;
@@ -10,8 +11,8 @@ namespace MathCommandLine.Evaluation
 {
     public interface IInterpreter
     {
-        public MValue Evaluate(string expression, MArguments arguments, MEnvironment env);
+        public MValue Evaluate(string expression, MEnvironment env);
         public MDataType GetDataType(string typeName);
-
+        public MValue PerformCall(MClosure closure, MArguments args, MEnvironment currentEnv);
     }
 }
