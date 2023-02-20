@@ -33,5 +33,19 @@ namespace MathCommandLine.CoreDataTypes
         }
 
         public static MClosure Empty = new MClosure(MParameters.Empty, null, Ast.Invalid(null));
+
+        public override string ToString()
+        {
+            if (this == Empty)
+            {
+                return "<empty>";
+            }
+            if (IsNativeBody)
+            {
+                return "<function>";
+            }
+            // Add params
+            return "(" + Parameters.ToString() + ")=>{" + AstBody.ToExpressionString() + "}";
+        }
     }
 }

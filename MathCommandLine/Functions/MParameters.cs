@@ -87,5 +87,10 @@ namespace MathCommandLine.Functions
         {
             return base.GetHashCode();
         }
+
+        public override string ToString()
+        {
+            return string.Join(',', parameters);
+        }
     }
 }

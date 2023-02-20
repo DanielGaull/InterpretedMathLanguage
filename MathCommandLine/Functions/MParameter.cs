@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace MathCommandLine.Functions
 {
@@ -48,6 +47,11 @@ namespace MathCommandLine.Functions
             {
                 return !isNotEmpty;
             }
+        }
+
+        public override string ToString()
+        {
+            return Name + ":" + string.Join('|', TypeEntries);
         }
 
         public List<MDataType> GetDataTypes()
@@ -163,6 +167,11 @@ namespace MathCommandLine.Functions
             {
                 return !isNotEmpty;
             }
+        }
+
+        public override string ToString()
+        {
+            return "[" + string.Join(',', ValueRestrictions) + "]" + DataType.Name;
         }
 
         public static bool operator ==(MTypeRestrictionsEntry p1, MTypeRestrictionsEntry p2)
