@@ -737,12 +737,12 @@ namespace MathCommandLine.Functions
                                 "Expected list length of 2 but found " + pair.Count + ".");
                         }
                         MClosure cond = pair[0].ClosureValue;
-                        MValue condValue = MValue.Empty;// interpreter.Evaluate()
+                        MValue condValue = interpreter.PerformCall(cond, MArguments.Empty, env);
                         // Everything is truthy except the "false" value, "void", and "null"
                         if (condValue.IsTruthy())
                         {
                             MClosure outputFunc = pair[1].ClosureValue;
-                            MValue output = MValue.Null(); //outputFunc.Evaluate(MArguments.Empty, interpreter);
+                            MValue output = interpreter.PerformCall(outputFunc, MArguments.Empty, env);
                             return output;
                         }
                     }

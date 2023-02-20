@@ -63,7 +63,7 @@ namespace MathCommandLine.Evaluation
                     if (evaluatedCaller.DataType != MDataType.Closure)
                     {
                         // Not a callable object
-                        return MValue.Error(Util.ErrorCodes.NOT_CALLABLE,
+                        return MValue.Error(ErrorCodes.NOT_CALLABLE,
                             "Cannot invoke because \"" + evaluatedCaller.DataType.Name + "\" is not a callable data type.",
                             MList.Empty);
                     }
@@ -71,8 +71,8 @@ namespace MathCommandLine.Evaluation
                     List<MArgument> argsList = new List<MArgument>();
                     for (int i = 0; i < ast.AstCollectionArg.Length; i++)
                     {
-                        string name = closure.Parameters[i].Name;
-                        argsList.Add(new MArgument(name, EvaluateAst(ast.AstCollectionArg[i], env)));
+                        // Don't worry; names are added to values later
+                        argsList.Add(new MArgument(EvaluateAst(ast.AstCollectionArg[i], env)));
                     }
                     return PerformCall(closure, new MArguments(argsList), env);
                 case AstTypes.Variable:
@@ -109,7 +109,7 @@ namespace MathCommandLine.Evaluation
                     }).ToArray();
                     if (paramArray.Any((param) => param.IsEmpty))
                     {
-                        return MValue.Error(Util.ErrorCodes.TYPE_DOES_NOT_EXIST,
+                        return MValue.Error(ErrorCodes.TYPE_DOES_NOT_EXIST,
                             "Type \"" + ast.Name + "\" is not defined.", MList.Empty);
                     }
                     MParameters parameters = new MParameters(paramArray);
