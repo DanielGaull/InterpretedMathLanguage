@@ -127,6 +127,10 @@ namespace MathCommandLine
             {
                 Console.Write("Enter Expression: ");
                 string input = Console.ReadLine();
+                if (input.Length <= 0)
+                {
+                    continue;
+                }
                 MValue result = evaluator.Evaluate(input, baseEnv);
                 if (result.DataType != MDataType.Void)
                 {

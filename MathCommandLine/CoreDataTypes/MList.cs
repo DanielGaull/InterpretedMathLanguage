@@ -1,4 +1,5 @@
-﻿using MathCommandLine.Evaluation;
+﻿using MathCommandLine.Environments;
+using MathCommandLine.Evaluation;
 using MathCommandLine.Functions;
 using MathCommandLine.Structure;
 using System;
@@ -84,7 +85,8 @@ namespace MathCommandLine.CoreDataTypes
         {
             return list.iList.IndexOf(value);
         }
-        public static int IndexOfCustom(MList list, MValue value, MClosure equalityEvaluator, IInterpreter evaluator)
+        public static int IndexOfCustom(MList list, MValue value, MClosure equalityEvaluator, IInterpreter evaluator,
+            MEnvironment env)
         {
             for (int i = 0; i < list.iList.Count; i++)
             {
@@ -92,8 +94,8 @@ namespace MathCommandLine.CoreDataTypes
                     new MArgument(value), 
                     new MArgument(list.iList[i])
                 );
-                MValue result = MValue.Empty;// equalityEvaluator.Evaluate(args, evaluator);
-                if (result != MValue.Number(0))
+                MValue result = evaluator.PerformCall(equalityEvaluator, args, env);
+                if (result.IsTruthy())
                 {
                     // Result is true, so return index
                     return i;
@@ -101,35 +103,29 @@ namespace MathCommandLine.CoreDataTypes
             }
             return -1;
         }
-        public static MList Map(MList list, MClosure closure, IInterpreter evaluator)
+        public static MList Map(MList list, MClosure closure, IInterpreter evaluator, MEnvironment env)
         {
             List<MValue> newList = new List<MValue>();
             for (int i = 0; i < list.iList.Count; i++)
             {
-                //MValue result = lambda.Evaluate(
-                //    new MArguments(
-                //        new MArgument(list.iList[i]), 
-                //        new MArgument(MValue.Number(i))
-                //    ),
-                //    evaluator
-                //);
-                MValue result = MValue.Null();
+                MValue result = evaluator.PerformCall(closure, new MArguments(
+                    new MArgument(list.iList[i])
+                ), env);
                 newList.Add(result);
             }
             return new MList(newList);
         }
-        public static MValue Reduce(MList list, MClosure closure, MValue initial, IInterpreter evaluator)
+        public static MValue Reduce(MList list, MClosure closure, MValue initial, IInterpreter evaluator,
+            MEnvironment env)
         {
             MValue runningResult = initial;
             for (int i = 0; i < list.iList.Count; i++)
             {
-                //runningResult = lambda.Evaluate(
-                //    new MArguments(
-                //        new MArgument(runningResult),
-                //        new MArgument(list.iList[i])
-                //    ),
-                //    evaluator
-                //);
+                runningResult = evaluator.PerformCall(closure,
+                    new MArguments(
+                        new MArgument(runningResult),
+                        new MArgument(list.iList[i])
+                    ), env);
             }
             return runningResult;
         }
@@ -146,7 +142,7 @@ namespace MathCommandLine.CoreDataTypes
             }
             return new MList(newList);
         }
-        public static MList Join(MList list1, MList list2)
+        public static MList Concat(MList list1, MList list2)
         {
             IEnumerable<MValue> result = list1.iList.Concat(list2.iList);
             return new MList(result.ToList());

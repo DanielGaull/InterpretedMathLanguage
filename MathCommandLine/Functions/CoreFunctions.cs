@@ -37,7 +37,7 @@ namespace MathCommandLine.Functions
                 MapList(evaluator),
                 ReduceList(evaluator),
                 CreateRangeList(evaluator),
-                JoinLists(evaluator),
+                ConcatLists(evaluator),
 
                 Get(evaluator),
                 Set(evaluator),
@@ -304,7 +304,7 @@ namespace MathCommandLine.Functions
                 (args, env) =>
                 {
                     return MValue.Number(MList.IndexOfCustom(args.Get(0).Value.ListValue, args.Get(1).Value, 
-                        args.Get(2).Value.ClosureValue, evaluator));
+                        args.Get(2).Value.ClosureValue, evaluator, env));
                 },
                 new MParameters(
                     new MParameter(MDataType.List, "list"),
@@ -321,7 +321,8 @@ namespace MathCommandLine.Functions
                 "_map", 
                 (args, env) =>
                 {
-                    return MValue.List(MList.Map(args.Get(0).Value.ListValue, args.Get(1).Value.ClosureValue, evaluator));
+                    return MValue.List(MList.Map(args.Get(0).Value.ListValue, 
+                        args.Get(1).Value.ClosureValue, evaluator, env));
                 },
                 new MParameters(
                     new MParameter(MDataType.List, "list"),
@@ -336,7 +337,8 @@ namespace MathCommandLine.Functions
                 "_reduce", 
                 (args, env) =>
                 {
-                    return MList.Reduce(args.Get(0).Value.ListValue, args.Get(1).Value.ClosureValue, args.Get(2).Value, evaluator);
+                    return MList.Reduce(args.Get(0).Value.ListValue, args.Get(1).Value.ClosureValue, 
+                        args.Get(2).Value, evaluator, env);
                 },
                 new MParameters(
                     new MParameter(MDataType.List, "list"),
@@ -361,13 +363,13 @@ namespace MathCommandLine.Functions
                 "Creates a list of integers from 0 to 'max', exclusive (i.e. 'max' is not included in the result list)."
             );
         }
-        public static MFunction JoinLists(IInterpreter evaluator)
+        public static MFunction ConcatLists(IInterpreter evaluator)
         {
             return new MFunction(
-                "_join", 
+                "_concat", 
                 (args, env) =>
                 {
-                    return MValue.List(MList.Join(args.Get(0).Value.ListValue, args.Get(1).Value.ListValue));
+                    return MValue.List(MList.Concat(args.Get(0).Value.ListValue, args.Get(1).Value.ListValue));
                 },
                 new MParameters(
                     new MParameter(MDataType.List, "list1"),
