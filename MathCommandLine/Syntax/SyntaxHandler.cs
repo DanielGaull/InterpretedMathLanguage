@@ -2,6 +2,7 @@
 using MathCommandLine.Exceptions;
 using MathCommandLine.Functions;
 using MathCommandLine.Structure;
+using MathCommandLine.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,12 +28,21 @@ namespace MathCommandLine.Syntax
             {
                 return new SyntaxMatchResult(false);
             }
+            // Make sure that parentheses/braces are handled properly when we split these
+            // If there is an opening brace or paren in one part of the split, it has to have a corresponding
+            // closing one, and vice versa
             Dictionary<string, SyntaxArgument> varDict = new Dictionary<string, SyntaxArgument>();
             List<SyntaxDefSymbol> varSymbols = def.GetParameterSymbols();
             for (int i = 0; i < varSymbols.Count; i++)
             {
                 SyntaxParameter symbol = varSymbols[i].ParameterArg;
                 string literalValue = result.Groups[i + 1].Value;
+                if (literalValue.CountChar('(') != literalValue.CountChar(')') ||
+                    literalValue.CountChar('{') != literalValue.CountChar('}'))
+                {
+                    // Paren/brace imbalance, so we actually don't have a match
+                    return new SyntaxMatchResult(false);
+                }
                 varDict.Add(symbol.Name, new SyntaxArgument(symbol, literalValue));
             }
             return new SyntaxMatchResult(true, varDict);

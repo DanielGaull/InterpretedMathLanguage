@@ -42,86 +42,87 @@ namespace MathCommandLine
             evaluator.Initialize(dtDict, parser);
 
             // SYNTAX TESTING
-            //SyntaxDef def = new SyntaxDef(new List<SyntaxDefSymbol> {
-            //    new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Number, "a"))),
-            //    new SyntaxDefSymbol("+"),
-            //    new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Number, "b")))
-            //}, new List<SyntaxResultSymbol>() {
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, "_add("),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "a"),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ","),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "b"),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ")")
-            //});
-            //SyntaxDef mulDef = new SyntaxDef(new List<SyntaxDefSymbol> {
-            //    new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Number, "a"))),
-            //    new SyntaxDefSymbol("*"),
-            //    new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Number, "b")))
-            //}, new List<SyntaxResultSymbol>() {
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, "_mul("),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "a"),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ","),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "b"),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ")")
-            //});
-            //// Syntax definition for variable declarations
-            //SyntaxDef def2 = new SyntaxDef(new List<SyntaxDefSymbol> {
-            //    new SyntaxDefSymbol("var"),
-            //    new SyntaxDefSymbol(),
-            //    new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.String, "name"), true, false)),
-            //    new SyntaxDefSymbol("="),
-            //    new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Any, "value")))
-            //}, new List<SyntaxResultSymbol>() {
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, "_declare("),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "name"),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ","),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "value"),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ",TRUE,TRUE,TRUE)")
-            //});
-            //SyntaxDef def3 = new SyntaxDef(new List<SyntaxDefSymbol> {
-            //    new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.String, "name"), true, false)),
-            //    new SyntaxDefSymbol("="),
-            //    new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Any, "value")))
-            //}, new List<SyntaxResultSymbol>() {
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, "_assign(_ref("),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "name"),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, "),"),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "value"),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ")")
-            //});
-            //SyntaxDef def4 = new SyntaxDef(new List<SyntaxDefSymbol> {
-            //    new SyntaxDefSymbol("["),
-            //    new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Closure, "code"), false, true)),
-            //    new SyntaxDefSymbol("]")
-            //}, new List<SyntaxResultSymbol>() {
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "code")
-            //});
-            //List<SyntaxDef> definitions = new List<SyntaxDef>() {
-            //    def4, def, mulDef, def2, def3
-            //};
-            //SyntaxHandler sh = new SyntaxHandler(parser);
-            ////var m = sh.Match(def, "1+2");
-            //var x = sh.Convert(def, "1+2");
-            //var z = sh.Convert(def2, "var x=7");
-            //var w = sh.Convert(def3, "x=7");
-            //var a = sh.Convert(def4, "[_add(5,2)]");
-            //Console.WriteLine(x);
-            //Console.WriteLine(z);
-            //Console.WriteLine(w);
-            //Console.WriteLine(a);
+            SyntaxDef def = new SyntaxDef(new List<SyntaxDefSymbol> {
+                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Number, "a"))),
+                new SyntaxDefSymbol("+"),
+                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Number, "b")))
+            }, new List<SyntaxResultSymbol>() {
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, "_add("),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "a"),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ","),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "b"),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ")")
+            });
+            SyntaxDef mulDef = new SyntaxDef(new List<SyntaxDefSymbol> {
+                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Number, "a"))),
+                new SyntaxDefSymbol("*"),
+                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Number, "b")))
+            }, new List<SyntaxResultSymbol>() {
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, "_mul("),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "a"),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ","),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "b"),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ")")
+            });
+            // Syntax definition for variable declarations
+            SyntaxDef def2 = new SyntaxDef(new List<SyntaxDefSymbol> {
+                new SyntaxDefSymbol("var"),
+                new SyntaxDefSymbol(),
+                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.String, "name"), true, false)),
+                new SyntaxDefSymbol("="),
+                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Any, "value")))
+            }, new List<SyntaxResultSymbol>() {
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, "_declare("),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "name"),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ","),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "value"),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ",TRUE,TRUE,TRUE)")
+            });
+            SyntaxDef def3 = new SyntaxDef(new List<SyntaxDefSymbol> {
+                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.String, "name"), true, false)),
+                new SyntaxDefSymbol("="),
+                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Any, "value")))
+            }, new List<SyntaxResultSymbol>() {
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, "_assign(_ref("),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "name"),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, "),"),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "value"),
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ")")
+            });
+            SyntaxDef def4 = new SyntaxDef(new List<SyntaxDefSymbol> {
+                new SyntaxDefSymbol("["),
+                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Closure, "code"), false, true)),
+                new SyntaxDefSymbol("]")
+            }, new List<SyntaxResultSymbol>() {
+                new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "code")
+            });
+            List<SyntaxDef> definitions = new List<SyntaxDef>() {
+                def4, def, mulDef, def2, def3
+            };
+            SyntaxHandler sh = new SyntaxHandler(parser);
+            //var m = sh.Match(def, "1+2");
+            var x = sh.Convert(def, "1+2");
+            var z = sh.Convert(def2, "var x=7");
+            var w = sh.Convert(def3, "x=7");
+            var a = sh.Convert(def4, "[_add(5,2)]");
+            Console.WriteLine(x);
+            Console.WriteLine(z);
+            Console.WriteLine(w);
+            Console.WriteLine(a);
 
-            ////var b = sh.FullConvert(definitions, "[5+2]");
-            ////Console.WriteLine(b);
+            //var b = sh.FullConvert(definitions, "[5+2]");
+            //Console.WriteLine(b);
 
-            //while (true)
-            //{
-            //    string input = Console.ReadLine();
-            //    var output = sh.FullConvert(definitions, input);
-            //    Console.WriteLine(output);
-            //}
+            while (true)
+            {
+                string input = Console.ReadLine();
+                var output = sh.FullConvert(definitions, input);
+                MValue result = evaluator.Evaluate(output, baseEnv);
+                Console.WriteLine(result.ToLongString());
+            }
 
-            //Console.ReadLine();
-            //return;
+            Console.ReadLine();
+            return;
 
             // Simple reading for now
             while (true)
