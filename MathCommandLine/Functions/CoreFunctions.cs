@@ -71,7 +71,7 @@ namespace MathCommandLine.Functions
         public static MFunction Add(IInterpreter evaluator) {
             return new MFunction(
                 "_add", 
-                (args) =>
+                (args, env) =>
                 {
                     return MValue.Number(args.Get(0).Value.NumberValue + args.Get(1).Value.NumberValue);
                 },
@@ -86,7 +86,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_mul", 
-                (args) =>
+                (args, env) =>
                 {
                     return MValue.Number(args.Get(0).Value.NumberValue * args.Get(1).Value.NumberValue);
                 },
@@ -101,7 +101,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_add_inv", 
-                (args) =>
+                (args, env) =>
                 {
                     return MValue.Number(-args.Get(0).Value.NumberValue);
                 },
@@ -115,7 +115,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_mul_inv", 
-                (args) =>
+                (args, env) =>
                 {
                     double arg = args.Get(0).Value.NumberValue;
                     if (arg == 0)
@@ -134,7 +134,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_pow", 
-                (args) =>
+                (args, env) =>
                 {
                     return MValue.Number(Math.Pow(args.Get(0).Value.NumberValue, args.Get(1).Value.NumberValue));
                 },
@@ -150,7 +150,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_i", 
-                (args) =>
+                (args, env) =>
                 {
                     return MValue.Number(Math.Floor(args.Get(0).Value.NumberValue));
                 },
@@ -166,7 +166,7 @@ namespace MathCommandLine.Functions
             // TODO: Hyperbolic trig functions
             return new MFunction(
                 "_trig", 
-                (args) =>
+                (args, env) =>
                 {
                     double op = args.Get(1).Value.NumberValue;
                     double arg = args.Get(0).Value.NumberValue;
@@ -205,7 +205,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_ln", 
-                (args) =>
+                (args, env) =>
                 {
                     return MValue.Number(Math.Log(args.Get(0).Value.NumberValue));
                 },
@@ -221,7 +221,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_len", 
-                (args) =>
+                (args, env) =>
                 {
                     return MValue.Number(MList.Length(args.Get(0).Value.ListValue));
                 },
@@ -235,7 +235,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_getl", 
-                (args) =>
+                (args, env) =>
                 {
                     // TODO: Handle index out of range errors
                     return MList.Get(args.Get(0).Value.ListValue, (int)args.Get(1).Value.NumberValue);
@@ -251,7 +251,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_insertl", 
-                (args) =>
+                (args, env) =>
                 {
                     // TODO: Handle index out of range errors
                     return MValue.List(MList.Insert(args.Get(0).Value.ListValue, (int)args.Get(1).Value.NumberValue, args.Get(2).Value));
@@ -268,7 +268,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_removel", 
-                (args) =>
+                (args, env) =>
                 {
                     // TODO: Handle index out of range errors
                     return MValue.List(MList.Remove(args.Get(0).Value.ListValue, (int)args.Get(1).Value.NumberValue));
@@ -284,7 +284,7 @@ namespace MathCommandLine.Functions
         { 
             return new MFunction(
                 "_indexl", 
-                (args) =>
+                (args, env) =>
                 {
                     return MValue.Number(MList.IndexOf(args.Get(0).Value.ListValue, args.Get(1).Value));
                 },
@@ -300,7 +300,7 @@ namespace MathCommandLine.Functions
             // TODO: Attempt to cast result of equality evaluation to number
             return new MFunction(
                 "_indexlc", 
-                (args) =>
+                (args, env) =>
                 {
                     return MValue.Number(MList.IndexOfCustom(args.Get(0).Value.ListValue, args.Get(1).Value, 
                         args.Get(2).Value.ClosureValue, evaluator));
@@ -318,7 +318,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_map", 
-                (args) =>
+                (args, env) =>
                 {
                     return MValue.List(MList.Map(args.Get(0).Value.ListValue, args.Get(1).Value.ClosureValue, evaluator));
                 },
@@ -333,7 +333,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_reduce", 
-                (args) =>
+                (args, env) =>
                 {
                     return MList.Reduce(args.Get(0).Value.ListValue, args.Get(1).Value.ClosureValue, args.Get(2).Value, evaluator);
                 },
@@ -350,7 +350,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_crange", 
-                (args) =>
+                (args, env) =>
                 {
                     return MValue.List(MList.CreateRange((int) args.Get(0).Value.NumberValue));
                 },
@@ -364,7 +364,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_join", 
-                (args) =>
+                (args, env) =>
                 {
                     return MValue.List(MList.Join(args.Get(0).Value.ListValue, args.Get(1).Value.ListValue));
                 },
@@ -381,7 +381,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_get", 
-                (args) =>
+                (args, env) =>
                 {
                     int refAddr = args[0].Value.AddrValue;
                     VariableManager varManager = null;// interpreter.GetVariableManager();
@@ -405,7 +405,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_set", 
-                (args) =>
+                (args, env) =>
                 {
                     int refAddr = args[0].Value.AddrValue;
                     MValue value = args[1].Value;
@@ -440,7 +440,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_declare", 
-                (args) =>
+                (args, env) =>
                 {
                     string refName = args[0].Value.GetStringValue();
                     bool can_get = args[2].Value.BoolValue;
@@ -475,7 +475,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_delete", 
-                (args) =>
+                (args, env) =>
                 {
                     int refValue = args[0].Value.AddrValue;
                     VariableManager varManager = null;// interpreter.GetVariableManager();
@@ -513,7 +513,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_type_of", 
-                (args) =>
+                (args, env) =>
                 {
                     return MValue.Type(args.Get(0).Value.DataType);
                 },
@@ -527,7 +527,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_cmp", 
-                (args) =>
+                (args, env) =>
                 {
                     double first = args.Get(0).Value.NumberValue;
                     double second = args.Get(0).Value.NumberValue;
@@ -544,7 +544,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_case", 
-                (args) =>
+                (args, env) =>
                 {
                     MValue value = args[0].Value;
                     MValue defaultValue = args[3].Value;
@@ -572,7 +572,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_gv", 
-                (args) =>
+                (args, env) =>
                 {
                     MValue original = args[0].Value;
                     string key = args[1].Value.GetStringValue();
@@ -590,7 +590,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_cast", 
-                (args) =>
+                (args, env) =>
                 {
                     // TODO: Write this once casts are added to the evaluator
                     return MValue.Error(ErrorCodes.INVALID_CAST);
@@ -607,7 +607,7 @@ namespace MathCommandLine.Functions
             // TODO: Apply arg restrictions
             return new MFunction(
                 "_error", 
-                (args) =>
+                (args, env) =>
                 {
                     int code = (int)args[0].Value.NumberValue;
                     string msg = args[1].Value.GetStringValue();
@@ -628,7 +628,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_str", 
-                (args) =>
+                (args, env) =>
                 {
                     return MValue.String(args[0].Value.ListValue);
                 },
@@ -643,7 +643,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_display", 
-                (args) =>
+                (args, env) =>
                 {
                     Console.WriteLine(args[0].Value.GetStringValue());
                     return MValue.Void();
@@ -659,7 +659,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_ref", 
-                (args) =>
+                (args, env) =>
                 {
                     VariableManager varManager = null;
                     string name = args[0].Value.GetStringValue();
@@ -676,7 +676,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_type", 
-                (args) =>
+                (args, env) =>
                 {
                     string typeName = args[0].Value.GetStringValue();
                     MDataType type = interpreter.GetDataType(typeName);
@@ -701,7 +701,7 @@ namespace MathCommandLine.Functions
 
             return new MFunction(
                 "_time", 
-                (args) =>
+                (args, env) =>
                 {
                     DateTimeOffset now = DateTimeOffset.UtcNow;
                     long unixTimeMilliseconds = now.ToUnixTimeMilliseconds();
@@ -716,7 +716,7 @@ namespace MathCommandLine.Functions
         {
             return new MFunction(
                 "_c", 
-                (args) =>
+                (args, env) =>
                 {
                     List<MValue> pairs = args[0].Value.ListValue.InternalList;
                     for (int i = 0; i < pairs.Count; i++)
@@ -755,7 +755,7 @@ namespace MathCommandLine.Functions
 
             return new MFunction(
                 "_and", 
-                (args) =>
+                (args, env) =>
                 {
                     bool b1 = args[0].Value.IsTruthy();
                     bool b2 = args[1].Value.IsTruthy();
@@ -773,7 +773,7 @@ namespace MathCommandLine.Functions
 
             return new MFunction(
                 "_or", 
-                (args) =>
+                (args, env) =>
                 {
                     bool b1 = args[0].Value.IsTruthy();
                     bool b2 = args[1].Value.IsTruthy();
@@ -791,7 +791,7 @@ namespace MathCommandLine.Functions
 
             return new MFunction(
                 "_not", 
-                (args) =>
+                (args, env) =>
                 {
                     bool b = args[0].Value.IsTruthy();
                     return MValue.Bool(!b);
@@ -807,7 +807,7 @@ namespace MathCommandLine.Functions
 
             return new MFunction(
                 "_and_e", 
-                (args) =>
+                (args, env) =>
                 {
                     MClosure b1 = args[0].Value.ClosureValue;
                     MClosure b2 = args[1].Value.ClosureValue;
@@ -831,7 +831,7 @@ namespace MathCommandLine.Functions
 
             return new MFunction(
                 "_or_e", 
-                (args) =>
+                (args, env) =>
                 {
                     MClosure b1 = args[0].Value.ClosureValue;
                     MClosure b2 = args[1].Value.ClosureValue;
@@ -856,7 +856,7 @@ namespace MathCommandLine.Functions
 
             return new MFunction(
                 "_eq", 
-                (args) =>
+                (args, env) =>
                 {
                     MValue item1 = args[0].Value;
                     MValue item2 = args[1].Value;
@@ -874,7 +874,7 @@ namespace MathCommandLine.Functions
 
             return new MFunction(
                 "_lt", 
-                (args) =>
+                (args, env) =>
                 {
                     double item1 = args[0].Value.NumberValue;
                     double item2 = args[1].Value.NumberValue;

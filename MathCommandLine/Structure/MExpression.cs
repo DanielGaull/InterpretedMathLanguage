@@ -1,11 +1,12 @@
-﻿using MathCommandLine.Functions;
+﻿using MathCommandLine.Environments;
+using MathCommandLine.Functions;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace MathCommandLine.Structure
 {
-    public delegate MValue NativeExpression(MArguments args);
+    public delegate MValue NativeExpression(MArguments args, MEnvironment env);
     public class MExpression
     {
         public string Expression { get; private set; }

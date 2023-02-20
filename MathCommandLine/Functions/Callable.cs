@@ -59,7 +59,7 @@ namespace MathCommandLine.Functions
                 }
             }
             // It appears that the arguments passed to this function are valid, so time to run the evaluation
-            return evaluator.Evaluate(Expression, args);
+            return evaluator.Evaluate(Expression, args, null);
         }
     }
 }

@@ -15,32 +15,29 @@ namespace MathCommandLine.Evaluation
         StringEvaluator stringEvaluator;
 
         DataTypeDict dtDict;
-        MEnvironment initEnv;
 
         public Interpreter()
         {
         }
 
-        public void Initialize(DataTypeDict dtDict, Parser parser, MEnvironment initEnv)
+        public void Initialize(DataTypeDict dtDict, Parser parser)
         {
             this.dtDict = dtDict;
 
             nativeEvaluator = new NativeEvaluator();
 
             stringEvaluator = new StringEvaluator(this, parser, dtDict);
-
-            this.initEnv = initEnv;
         }
 
-        public MValue Evaluate(MExpression expression, MArguments args)
+        public MValue Evaluate(MExpression expression, MArguments args, MEnvironment env)
         {
             if (expression.IsNativeExpression)
             {
-                return nativeEvaluator.Evaluate(expression, args);
+                return nativeEvaluator.Evaluate(expression, args, env);
             }
             else
             {
-                return stringEvaluator.Evaluate(expression, initEnv);
+                return stringEvaluator.Evaluate(expression, env);
             }
         }
 

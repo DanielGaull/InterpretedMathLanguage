@@ -38,7 +38,7 @@ namespace MathCommandLine
                 MDataType.Type, MDataType.Error, MDataType.Reference, MDataType.String, MDataType.Void,
                 MDataType.Boolean, MDataType.Null, MDataType.Any);
             Parser parser = new Parser();
-            evaluator.Initialize(dtDict, parser, baseEnv);
+            evaluator.Initialize(dtDict, parser);
 
             // SYNTAX TESTING
             //SyntaxDef def = new SyntaxDef(new List<SyntaxDefSymbol> {
@@ -127,7 +127,7 @@ namespace MathCommandLine
             {
                 Console.Write("Enter Expression: ");
                 string input = Console.ReadLine();
-                MValue result = evaluator.Evaluate(new MExpression(input), MArguments.Empty);
+                MValue result = evaluator.Evaluate(new MExpression(input), MArguments.Empty, baseEnv);
                 if (result.DataType != MDataType.Void)
                 {
                     // Never output void as a result, since we're typically running a function
