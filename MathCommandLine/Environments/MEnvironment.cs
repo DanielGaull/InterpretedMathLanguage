@@ -18,19 +18,19 @@ namespace MathCommandLine.Environments
             this.parent = parent;
         }
 
-        public void AddValue(string name, MValue value, bool canGet, bool canSet, bool canDelete)
+        public void AddValue(string name, MValue value, bool canGet, bool canSet)
         {
-            values.Add(name, new MBoxedValue(value, canGet, canSet, canDelete));
+            values.Add(name, new MBoxedValue(value, canGet, canSet));
         }
 
         public void AddVariable(string name, MValue value)
         {
-            AddValue(name, value, true, true, true);
+            AddValue(name, value, true, true);
         }
 
         public void AddConstant(string name, MValue value)
         {
-            AddValue(name, value, true, false, false);
+            AddValue(name, value, true, false);
         }
 
         public bool Has(string name)

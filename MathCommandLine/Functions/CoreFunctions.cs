@@ -25,7 +25,7 @@ namespace MathCommandLine.Functions
                 Negate(evaluator),
                 MulInverse(evaluator),
                 Pow(evaluator),
-                GetIntPart(evaluator),
+                FloorFunction(evaluator),
                 TrigFunction(evaluator),
                 NaturalLog(evaluator),
 
@@ -49,7 +49,6 @@ namespace MathCommandLine.Functions
                 CompareFunction(evaluator),
                 CaseFunction(evaluator),
                 GetValue(evaluator),
-                CastFunction(evaluator),
                 CreateErrorFunction(evaluator),
                 CreateStringFunction(evaluator),
                 DisplayFunction(evaluator),
@@ -148,10 +147,10 @@ namespace MathCommandLine.Functions
                 "Returns the value of 'base' raised to the power of 'exponent'."
             );
         }
-        public static MFunction GetIntPart(IInterpreter evaluator)
+        public static MFunction FloorFunction(IInterpreter evaluator)
         {
             return new MFunction(
-                "_i", 
+                "_flr", 
                 (args, env) =>
                 {
                     return MValue.Number(Math.Floor(args.Get(0).Value.NumberValue));
@@ -159,7 +158,7 @@ namespace MathCommandLine.Functions
                 new MParameters(
                     new MParameter(MDataType.Number, "a")
                 ),
-                "Returns the integer part of 'a'."
+                "Returns the floor of 'a'."
             );
         }
         public static MFunction TrigFunction(IInterpreter evaluator)
@@ -263,7 +262,8 @@ namespace MathCommandLine.Functions
                     new MParameter(MDataType.Number, "index"),
                     new MParameter(MDataType.Any, "value")
                 ),
-                "Returns a new list with the elements of 'list' containing 'value' inserted at 'index'. May return error if 'index' is >= the length of 'list'."
+                "Returns a new list with the elements of 'list' containing 'value' inserted at 'index'. " +
+                "May return error if 'index' is >= the length of 'list'."
             );
         }
         public static MFunction RemoveFromList(IInterpreter evaluator)
@@ -327,9 +327,10 @@ namespace MathCommandLine.Functions
                 },
                 new MParameters(
                     new MParameter(MDataType.List, "list"),
-                    new MParameter(MDataType.Closure, "evaluator")
+                    new MParameter(MDataType.Closure, "mapper")
                 ),
-                "Executes 'evaluator' on each element of 'list', passing in the element and index, putting the results into a new list and returning it."
+                "Executes 'mapper' on each element of 'list', passing in the element, " +
+                "putting the results into a new list and returning it."
             );
         }
         public static MFunction ReduceList(IInterpreter evaluator)
@@ -346,8 +347,9 @@ namespace MathCommandLine.Functions
                     new MParameter(MDataType.Closure, "reducer"),
                     new MParameter(MDataType.Any, "init_value")
                 ),
-                "Runs 'reducer' on each element of 'list', passing in (previous, current). 'previous' is the result of the previous iteration (for first element, " +
-                "'previous' is 'init_value'. 'current' is the current element."
+                "Runs 'reducer' on each element of 'list', passing in (previous, current). " +
+                "'previous' is the result of the previous iteration (for first element, " +
+                "'previous' is 'init_value'). 'current' is the current element."
             );
         }
         public static MFunction CreateRangeList(IInterpreter evaluator)
@@ -389,15 +391,6 @@ namespace MathCommandLine.Functions
                 {
                     MBoxedValue box = args[0].Value.RefValue;
                     return box.GetValue();
-                    //if (env.Has(refAddr))
-                    //{
-                    //    return varManager.GetValue(refAddr);
-                    //}
-                    //else
-                    //{
-                    //    return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST,
-                    //        $"Variable or argument @ \"{refAddr}\" does not exist.", MList.Empty);
-                    //}
                 },
                 new MParameters(
                     new MParameter(MDataType.Reference, "ref")
@@ -414,24 +407,6 @@ namespace MathCommandLine.Functions
                     MBoxedValue refAddr = args[0].Value.RefValue;
                     MValue value = args[1].Value;
                     return refAddr.SetValue(value);
-                    //VariableManager varManager = null;// interpreter.GetVariableManager();
-                    //if (varManager.HasValue(refAddr))
-                    //{
-                    //    if (varManager.CanModifyValue(refAddr, value))
-                    //    {
-                    //        varManager.SetValue(refAddr, value);
-                    //        return MValue.Void();
-                    //    }
-                    //    else
-                    //    {
-                    //        return MValue.Error(ErrorCodes.CANNOT_ASSIGN, $"Cannot assign {value} to @\"{refAddr}\".");
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST,
-                    //        $"Variable or argument @\"{refAddr}\" does not exist.", MList.Empty);
-                    //}
                 },
                 new MParameters(
                     new MParameter(MDataType.Reference, "ref"),
@@ -449,7 +424,6 @@ namespace MathCommandLine.Functions
                     string refName = args[0].Value.GetStringValue();
                     bool can_get = args[2].Value.BoolValue;
                     bool can_set = args[3].Value.BoolValue;
-                    bool can_delete = args[4].Value.BoolValue;
                     MValue value = args[1].Value;
                     Regex reg = new Regex("^[a-zA-Z][a-zA-Z0-9_]*$");
                     if (env.Has(refName))
@@ -462,8 +436,7 @@ namespace MathCommandLine.Functions
                     }
                     else
                     {
-                        //varManager.AddNamedValue(refName, new MReferencedValue(value, can_get, can_set, can_delete));
-                        env.AddValue(refName, value, can_get, can_set, can_delete);
+                        env.AddValue(refName, value, can_get, can_set);
                         return MValue.Void();
                     }
                 },
@@ -471,47 +444,39 @@ namespace MathCommandLine.Functions
                     new MParameter(MDataType.String, "nv_name"),
                     new MParameter(MDataType.Any, "value"),
                     new MParameter(MDataType.Boolean, "can_get"),
-                    new MParameter(MDataType.Boolean, "can_set"),
-                    new MParameter(MDataType.Boolean, "can_delete")
+                    new MParameter(MDataType.Boolean, "can_set")
                 ),
                 "Declares the named value 'nv_name' and assigns 'value' to it. If 'can_get' is false, then 'nv_name' " +
                 "cannot be accessed. If 'can_get' is false, then 'nv_name' cannot be modified. " +
-                "If 'can_delete' is false, then 'nv_name' cannot be deleted. " +
-                "Returns CANNOT_DECLARE error if the named value has already been declared."
+                "Returns CANNOT_DECLARE error if the named value has already been declared, or the name is invalid."
             );
         }
-        //public static MFunction Delete(IInterpreter interpreter)
-        //{
-        //    return new MFunction(
-        //        "_delete", 
-        //        (args, env) =>
-        //        {
-        //            MBoxedValue refValue = args[0].Value.RefValue;
-        //            if (varManager.HasValue(refValue))
-        //            {
-        //                if (varManager.CanDelete(refValue))
-        //                {
-        //                    varManager.Delete(refValue);
-        //                }
-        //                else
-        //                {
-        //                    return MValue.Error(ErrorCodes.CANNOT_DELETE,
-        //                        $"Variable or argument @\"{refValue}\" cannot be deleted.", MList.Empty);
-        //                }
-        //                return MValue.Void();
-        //            }
-        //            else
-        //            {
-        //                return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST,
-        //                    $"Variable or argument @\"{refValue}\" does not exist.", MList.Empty);
-        //            }
-        //        },
-        //        new MParameters(
-        //            new MParameter(MDataType.Reference, "ref")
-        //        ),
-        //        "Deletes the named value pointed to by 'ref'. Returns VAR_DOES_NOT_EXIST if the named value does not exist."
-        //    );
-        //}
+
+
+        public static MFunction CreateReferenceFunction(IInterpreter evaluator)
+        {
+            return new MFunction(
+                "_ref",
+                (args, env) =>
+                {
+                    string name = args[0].Value.GetStringValue();
+                    MBoxedValue box = env.GetBox(name);
+                    if (box != null)
+                    {
+                        return MValue.Reference(box);
+                    }
+                    else
+                    {
+                        return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST,
+                                $"Variable \"{name}\" does not exist.", MList.Empty);
+                    }
+                },
+                new MParameters(
+                    new MParameter(MDataType.String, "var_name")
+                ),
+                "Returns a reference to the named value 'var_name'."
+            );
+        }
 
         // Calculation Functions
         // TODO: derivatives/integrals/solve
@@ -545,7 +510,8 @@ namespace MathCommandLine.Functions
                     new MParameter(MDataType.Number, "first"),
                     new MParameter(MDataType.Number, "second")
                 ),
-                "If 'first' is less than 'second', returns -1. If 'first' == 'second', returns 0. If 'first' > 'second', returns 1."
+                "If 'first' is less than 'second', returns -1. If 'first' == 'second', returns 0. " +
+                "If 'first' > 'second', returns 1."
             );
         }
         public static MFunction CaseFunction(IInterpreter evaluator)
@@ -573,7 +539,8 @@ namespace MathCommandLine.Functions
                     new MParameter(MDataType.List, "results"),
                     new MParameter(MDataType.Any, "default")
                 ),
-                "If 'value' appears in 'cases', returns the corresponding value in 'results' (the one with the same index). Otherwise, returns 'default'."
+                "If 'value' appears in 'cases', returns the corresponding value in 'results' " +
+                "(the one with the same index). Otherwise, returns 'default'."
             );
         }
         public static MFunction GetValue(IInterpreter evaluator)
@@ -590,24 +557,9 @@ namespace MathCommandLine.Functions
                     new MParameter(MDataType.Any, "original"),
                     new MParameter(MDataType.String, "key")
                 ),
-                "Attempts to get the value for 'key' from 'original'. Returns NOT_COMPOSITE if 'original' isn't composite, or " + 
+                "Attempts to get the value for 'key' from 'original'. " +
+                "Returns NOT_COMPOSITE if 'original' isn't composite, or " + 
                 "KEY_DOES_NOT_EXIST if the key does not exist in 'original'."
-            );
-        }
-        public static MFunction CastFunction(IInterpreter evaluator)
-        {
-            return new MFunction(
-                "_cast", 
-                (args, env) =>
-                {
-                    // TODO: Write this once casts are added to the evaluator
-                    return MValue.Error(ErrorCodes.INVALID_CAST);
-                },
-                new MParameters(
-                    new MParameter(MDataType.Any, "value"),
-                    new MParameter(MDataType.Type, "type")
-                ),
-                "Attempts to cast 'value' to 'type'. If it cannot be casted, an INVALID_CAST error is returned. The shortest cast path will be chosen."
             );
         }
         public static MFunction CreateErrorFunction(IInterpreter evaluator)
@@ -643,7 +595,7 @@ namespace MathCommandLine.Functions
                 new MParameters(
                     new MParameter(MDataType.List, "chars")
                 ),
-                "Creates a string with the specified char stream."
+                "Creates a string with the specified character stream."
             );
         }
 
@@ -660,32 +612,6 @@ namespace MathCommandLine.Functions
                     new MParameter(MDataType.String, "str")
                 ),
                 "Prints the specified string to the standard output stream"
-            );
-        }
-
-        public static MFunction CreateReferenceFunction(IInterpreter evaluator)
-        {
-            return new MFunction(
-                "_ref", 
-                (args, env) =>
-                {
-                    string name = args[0].Value.GetStringValue();
-                    //return MValue.Reference(varManager.AddressForName(name));
-                    MBoxedValue box = env.GetBox(name);
-                    if (box != null)
-                    {
-                        return MValue.Reference(box);
-                    }
-                    else
-                    {
-                        return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST,
-                                $"Variable \"{name}\" does not exist.", MList.Empty);
-                    }
-                },
-                new MParameters(
-                    new MParameter(MDataType.String, "var_name")
-                ),
-                "Returns a reference to the variable whose name is specified"
             );
         }
 
@@ -707,9 +633,9 @@ namespace MathCommandLine.Functions
                     }
                 },
                 new MParameters(
-                    new MParameter(MDataType.String, "var_name")
+                    new MParameter(MDataType.String, "type_name")
                 ),
-                "Returns a reference to the variable whose name is specified"
+                "Returns a type object for a type with the specified 'type_name'. Returns an error if the type does not exist."
             );
         }
 
@@ -761,8 +687,9 @@ namespace MathCommandLine.Functions
                     new MParameter("pairs", new MTypeRestrictionsEntry(MDataType.List, 
                         ValueRestriction.TypesAllowed(MDataType.List)))
                 ),
-                "Takes in a list of 2-lists of functions with no arguments, evaluating the each element. Once an element returns " +
-                "true, then the corresponding code is run and returned, with no other code being run."
+                "Takes in a list of 2-lists of functions with no arguments, evaluating the each element. " +
+                "Once an element returns true, then the corresponding code is run and returned, " +
+                "with no other code being run."
             );
         }
 
@@ -774,15 +701,17 @@ namespace MathCommandLine.Functions
                 "_and", 
                 (args, env) =>
                 {
-                    bool b1 = args[0].Value.IsTruthy();
-                    bool b2 = args[1].Value.IsTruthy();
-                    return MValue.Bool(b1 && b2);
+                    if (args[0].Value.IsTruthy())
+                    {
+                        return args[1].Value;
+                    }
+                    return args[0].Value;
                 },
                 new MParameters(
                     new MParameter(MDataType.Any, "input1"),
                     new MParameter(MDataType.Any, "input2")
                 ),
-                "Returns true iff both inputs are true"
+                "If 'input1' is truthy, returns 'input2'. Otherwise, returns 'input1'"
             );
         }
         public static MFunction OrFunction(IInterpreter interpreter)
@@ -792,15 +721,17 @@ namespace MathCommandLine.Functions
                 "_or", 
                 (args, env) =>
                 {
-                    bool b1 = args[0].Value.IsTruthy();
-                    bool b2 = args[1].Value.IsTruthy();
-                    return MValue.Bool(b1 || b2);
+                    if (args[0].Value.IsTruthy())
+                    {
+                        return args[0].Value;
+                    }
+                    return args[1].Value;
                 },
                 new MParameters(
                     new MParameter(MDataType.Any, "input1"),
                     new MParameter(MDataType.Any, "input2")
                 ),
-                "Returns true if either input is true"
+                "If 'input1' is truthy, returns 'input1'. Otherwise, returns 'input2'"
             );
         }
         public static MFunction NotFunction(IInterpreter interpreter)
@@ -839,7 +770,7 @@ namespace MathCommandLine.Functions
                     new MParameter(MDataType.Closure, "eval1"),
                     new MParameter(MDataType.Closure, "eval2")
                 ),
-                "If 'eval1' returns truthy, returns the result of 'eval2'. Otherwise, returns false"
+                "If 'eval1' returns truthy, returns the result of 'eval2'. Otherwise, returns result of 'eval1'"
             );
         }
         public static MFunction OreFunction(IInterpreter interpreter)
