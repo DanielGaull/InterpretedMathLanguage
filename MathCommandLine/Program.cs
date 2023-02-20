@@ -15,25 +15,22 @@ namespace MathCommandLine
     class Program
     {
         static Interpreter evaluator;
-        static VariableManager varManager;
         static FunctionDict funcDict;
         static void Main(string[] args)
         {
             evaluator = new Interpreter();
-            varManager = new VariableManager();
 
             // Add core constants
-            varManager.AddConstant("null", MValue.Null(), false);
-            varManager.AddConstant("void", MValue.Void(), false);
-            varManager.AddConstant("TRUE", MValue.Bool(true), false);
-            varManager.AddConstant("FALSE", MValue.Bool(false), false);
             List<MFunction> coreFuncs = CoreFunctions.GenerateCoreFunctions(evaluator);
             MEnvironment baseEnv = new MEnvironment(MEnvironment.Empty);
+            baseEnv.AddConstant("null", MValue.Null());
+            baseEnv.AddConstant("void", MValue.Void());
+            baseEnv.AddConstant("TRUE", MValue.Bool(true));
+            baseEnv.AddConstant("FALSE", MValue.Bool(false));
             for (int i = 0; i < coreFuncs.Count; i++)
             {
                 MValue closure = MValue.Closure(
                     new MClosure(coreFuncs[i].Parameters, MEnvironment.Empty, coreFuncs[i].Expression));
-                varManager.AddConstant(coreFuncs[i].Name, closure, false);
                 baseEnv.AddConstant(coreFuncs[i].Name, closure);
             }
             funcDict = new FunctionDict(coreFuncs);
@@ -41,7 +38,7 @@ namespace MathCommandLine
                 MDataType.Type, MDataType.Error, MDataType.Reference, MDataType.String, MDataType.Void,
                 MDataType.Boolean, MDataType.Null, MDataType.Any);
             Parser parser = new Parser();
-            evaluator.Initialize(dtDict, varManager, parser);
+            evaluator.Initialize(dtDict, parser, baseEnv);
 
             // SYNTAX TESTING
             //SyntaxDef def = new SyntaxDef(new List<SyntaxDefSymbol> {

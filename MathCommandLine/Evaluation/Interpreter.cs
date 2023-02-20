@@ -1,4 +1,5 @@
 ﻿using MathCommandLine.CoreDataTypes;
+using MathCommandLine.Environments;
 using MathCommandLine.Functions;
 using MathCommandLine.Structure;
 using MathCommandLine.Variables;
@@ -14,20 +15,21 @@ namespace MathCommandLine.Evaluation
         StringEvaluator stringEvaluator;
 
         DataTypeDict dtDict;
-        VariableManager variableManager;
+        MEnvironment initEnv;
 
         public Interpreter()
         {
         }
 
-        public void Initialize(DataTypeDict dtDict, VariableManager variableManager, Parser parser)
+        public void Initialize(DataTypeDict dtDict, Parser parser, MEnvironment initEnv)
         {
             this.dtDict = dtDict;
-            this.variableManager = variableManager;
 
             nativeEvaluator = new NativeEvaluator();
 
-            stringEvaluator = new StringEvaluator(this, parser, dtDict, variableManager);
+            stringEvaluator = new StringEvaluator(this, parser, dtDict);
+
+            this.initEnv = initEnv;
         }
 
         public MValue Evaluate(MExpression expression, MArguments args)
@@ -38,7 +40,7 @@ namespace MathCommandLine.Evaluation
             }
             else
             {
-                return stringEvaluator.Evaluate(expression, args);
+                return stringEvaluator.Evaluate(expression, initEnv);
             }
         }
 
@@ -49,11 +51,6 @@ namespace MathCommandLine.Evaluation
                 return dtDict.GetType(typeName);
             }
             return MDataType.Empty;
-        }
-
-        public VariableManager GetVariableManager()
-        {
-            return variableManager;
         }
     }
 }

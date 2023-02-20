@@ -384,7 +384,7 @@ namespace MathCommandLine.Functions
                 (args) =>
                 {
                     int refAddr = args[0].Value.AddrValue;
-                    VariableManager varManager = interpreter.GetVariableManager();
+                    VariableManager varManager = null;// interpreter.GetVariableManager();
                     if (varManager.HasValue(refAddr))
                     {
                         return varManager.GetValue(refAddr);
@@ -409,7 +409,7 @@ namespace MathCommandLine.Functions
                 {
                     int refAddr = args[0].Value.AddrValue;
                     MValue value = args[1].Value;
-                    VariableManager varManager = interpreter.GetVariableManager();
+                    VariableManager varManager = null;// interpreter.GetVariableManager();
                     if (varManager.HasValue(refAddr))
                     {
                         if (varManager.CanModifyValue(refAddr, value))
@@ -447,7 +447,7 @@ namespace MathCommandLine.Functions
                     bool can_set = args[3].Value.BoolValue;
                     bool can_delete = args[4].Value.BoolValue;
                     MValue value = args[1].Value;
-                    VariableManager varManager = interpreter.GetVariableManager();
+                    VariableManager varManager = null;// interpreter.GetVariableManager();
                     if (varManager.HasValue(refName))
                     {
                         return MValue.Error(ErrorCodes.CANNOT_DECLARE, $"Named value \"{refName}\" already exists.");
@@ -478,7 +478,7 @@ namespace MathCommandLine.Functions
                 (args) =>
                 {
                     int refValue = args[0].Value.AddrValue;
-                    VariableManager varManager = interpreter.GetVariableManager();
+                    VariableManager varManager = null;// interpreter.GetVariableManager();
                     if (varManager.HasValue(refValue))
                     {
                         if (varManager.CanDelete(refValue))
@@ -661,7 +661,7 @@ namespace MathCommandLine.Functions
                 "_ref", 
                 (args) =>
                 {
-                    VariableManager varManager = evaluator.GetVariableManager();
+                    VariableManager varManager = null;
                     string name = args[0].Value.GetStringValue();
                     return MValue.Reference(varManager.AddressForName(name));
                 },

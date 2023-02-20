@@ -17,31 +17,28 @@ namespace MathCommandLine.Evaluation
         private IInterpreter superEvaluator;
         private Parser parser;
         private DataTypeDict dtDict;
-        private VariableManager varManager;
 
         private static readonly Regex WHITESPACE_REGEX = new Regex(@"\s+");
 
-        public StringEvaluator(IInterpreter superEvaluator, Parser parser, DataTypeDict dtDict, 
-            VariableManager varManager)
+        public StringEvaluator(IInterpreter superEvaluator, Parser parser, DataTypeDict dtDict)
         {
             this.superEvaluator = superEvaluator;
             this.parser = parser;
             this.dtDict = dtDict;
-            this.varManager = varManager;
         }
 
-        public MValue Evaluate(MExpression mExpression, MArguments variables)
+        public MValue Evaluate(MExpression mExpression, MEnvironment env)
         {
             if (!mExpression.IsNativeExpression)
             {
-                for (int i = 0; i < variables.Length; i++)
-                {
-                    varManager.AddVariable(variables[i].Name, variables[i].Value, false);
-                }
+                //for (int i = 0; i < variables.Length; i++)
+                //{
+                //    varManager.AddVariable(variables[i].Name, variables[i].Value, false);
+                //}
                 string expr = mExpression.Expression;
                 expr = parser.ConvertStringsToLists(expr);
                 expr = CleanWhitespace(expr);
-                return FinalStageEvaluate(expr, variables);
+                return FinalStageEvaluate(expr, env);
             }
             throw new NotImplementedException();
         }
@@ -53,18 +50,18 @@ namespace MathCommandLine.Evaluation
 
         // For the "final stage" in evaluation, when the expression has been whittled down to only
         // functions, variables (i.e. arguments), and literal core values
-        private MValue FinalStageEvaluate(string expression, MArguments variables)
+        private MValue FinalStageEvaluate(string expression, MEnvironment env)
         {
             Ast tree = parser.ParseExpression(expression);
-            return EvaluateAst(tree, variables);
+            return EvaluateAst(tree, env);
         }
 
-        private MValue EvaluateAst(Ast ast, MArguments variables)
+        private MValue EvaluateAst(Ast ast, MEnvironment env)
         {
             switch (ast.Type)
             {
                 case AstTypes.Call:
-                    MValue evaluatedCaller = EvaluateAst(ast.CalledAst, variables);
+                    MValue evaluatedCaller = EvaluateAst(ast.CalledAst, env);
                     // If an error, return that error instead of attempting to call it
                     if (evaluatedCaller.DataType == MDataType.Error)
                     {
@@ -81,7 +78,7 @@ namespace MathCommandLine.Evaluation
                     List<MArgument> argsList = new List<MArgument>();
                     for (int i = 0; i < ast.AstCollectionArg.Length; i++)
                     {
-                        argsList.Add(new MArgument(EvaluateAst(ast.AstCollectionArg[i], variables)));
+                        argsList.Add(new MArgument(EvaluateAst(ast.AstCollectionArg[i], env)));
                     }
                     MArguments args = new MArguments(argsList);
                     // We have a callable type!
@@ -89,15 +86,16 @@ namespace MathCommandLine.Evaluation
                     return MValue.Null();
                 case AstTypes.Variable:
                     // Return the value of the variable with this name
-                    if (varManager.HasValue(ast.Name))
-                    {
-                        return varManager.GetValue(ast.Name);
-                    }
-                    else
-                    {
-                        return MValue.Error(Util.ErrorCodes.VAR_DOES_NOT_EXIST, 
-                            $"Variable or argument \"{ast.Name}\" does not exist.", MList.Empty);
-                    }
+                    return env.Get(ast.Name);
+                    //if ()
+                    //{
+                    //    return varManager.GetValue(ast.Name);
+                    //}
+                    //else
+                    //{
+                    //    return MValue.Error(Util.ErrorCodes.VAR_DOES_NOT_EXIST, 
+                    //        $"Variable or argument \"{ast.Name}\" does not exist.", MList.Empty);
+                    //}
                 case AstTypes.NumberLiteral:
                     return MValue.Number(ast.NumberArg);
                 case AstTypes.ListLiteral:
@@ -105,7 +103,7 @@ namespace MathCommandLine.Evaluation
                     List<MValue> elements = new List<MValue>();
                     foreach (Ast elem in ast.AstCollectionArg)
                     {
-                        elements.Add(EvaluateAst(elem, variables));
+                        elements.Add(EvaluateAst(elem, env));
                     }
                     return MValue.List(new MList(elements));
                 case AstTypes.LambdaLiteral:
@@ -133,7 +131,8 @@ namespace MathCommandLine.Evaluation
                             "Type \"" + ast.Name + "\" is not defined.", MList.Empty);
                     }
                     MParameters parameters = new MParameters(paramArray);
-                    return MValue.Closure(new MClosure(parameters, MEnvironment.Empty, ast.Body));
+                    // Create a closure with this current environment
+                    return MValue.Closure(new MClosure(parameters, env, ast.Body));
             }
             return MValue.Empty;
         }

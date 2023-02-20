@@ -11,7 +11,6 @@ namespace MathCommandLine.Evaluation
     {
         public MValue Evaluate(MExpression expression, MArguments arguments);
         public MDataType GetDataType(string typeName);
-        public VariableManager GetVariableManager();
 
     }
 }
