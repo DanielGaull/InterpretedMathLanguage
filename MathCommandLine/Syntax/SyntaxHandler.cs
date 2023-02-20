@@ -178,6 +178,18 @@ namespace MathCommandLine.Syntax
             }
         }
 
+        public SyntaxDef ParseSyntaxDefinitionLine(string line)
+        {
+            if (line.StartsWith("syntax"))
+            {
+                List<string> tokens = Regex.Matches(line, @"[\""].+?[\""]|[^ ]+")
+                                    .Cast<Match>()
+                                    .Select(m => m.Value)
+                                    .ToList();
+                return ParseSyntaxDefinitionStatement(tokens[1], tokens[2]);
+            }
+            throw new IllegalSyntaxException(line);
+        }
         public SyntaxDef ParseSyntaxDefinitionStatement(string source, string result)
         {
             
@@ -186,7 +198,7 @@ namespace MathCommandLine.Syntax
         private List<SyntaxDefSymbol> ParseSourceString(string source)
         {
             // Source is made up of string literals, and instances of {{ [parameter] }}
-            // The parameter is going to be the standard 
+
             return null;
         }
     }
