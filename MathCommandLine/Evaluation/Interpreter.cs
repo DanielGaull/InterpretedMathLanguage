@@ -4,7 +4,6 @@ using MathCommandLine.Exceptions;
 using MathCommandLine.Functions;
 using MathCommandLine.Structure;
 using MathCommandLine.Util;
-using MathCommandLine.Variables;
 using System;
 using System.Collections.Generic;
 using System.Linq;

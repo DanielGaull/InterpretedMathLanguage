@@ -3,10 +3,8 @@ using MathCommandLine.Environments;
 using MathCommandLine.Evaluation;
 using MathCommandLine.Structure;
 using MathCommandLine.Util;
-using MathCommandLine.Variables;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace MathCommandLine.Functions
