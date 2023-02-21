@@ -241,11 +241,14 @@ namespace MathCommandLine.Syntax
                         if (currentBuilder.Length > 0)
                         {
                             symbolDefs.Add(new SyntaxDefSymbol(currentBuilder.ToString()));
+                            currentBuilder = new StringBuilder();
                         }
                         while (Regex.IsMatch(source[i].ToString(), "\\s"))
                         {
                             i++;
                         }
+                        // Accidentally increase i too much above, so decrease it a single time once we're done
+                        i--; 
                         symbolDefs.Add(new SyntaxDefSymbol());
                     }
                     else

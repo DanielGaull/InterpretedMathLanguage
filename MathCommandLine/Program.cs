@@ -46,33 +46,10 @@ namespace MathCommandLine
             evaluator.Initialize(dtDict, parser);
 
             // Syntax loading; go to the syntax files path, and load in all the files it lists
-            
             SyntaxHandler sh = new SyntaxHandler(parser, "{}(),".ToCharArray().ToList());
             List<SyntaxDef> syntaxDefinitions = ImportSyntax(sh);
 
             // SYNTAX TESTING
-            //SyntaxDef def = new SyntaxDef(new List<SyntaxDefSymbol> {
-            //    new SyntaxDefSymbol(new SyntaxParameter("a")),
-            //    new SyntaxDefSymbol("+"),
-            //    new SyntaxDefSymbol(new SyntaxParameter("b"))
-            //}, new List<SyntaxResultSymbol>() {
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, "_add("),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "a"),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ","),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "b"),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ")")
-            //});
-            //SyntaxDef mulDef = new SyntaxDef(new List<SyntaxDefSymbol> {
-            //    new SyntaxDefSymbol(new SyntaxParameter("a")),
-            //    new SyntaxDefSymbol("*"),
-            //    new SyntaxDefSymbol(new SyntaxParameter("b"))
-            //}, new List<SyntaxResultSymbol>() {
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, "_mul("),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "a"),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ","),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "b"),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ")")
-            //});
             //// Syntax definition for variable declarations
             //SyntaxDef def2 = new SyntaxDef(new List<SyntaxDefSymbol> {
             //    new SyntaxDefSymbol("var"),
@@ -98,30 +75,6 @@ namespace MathCommandLine
             //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "value"),
             //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ")")
             //});
-            //SyntaxDef def4 = new SyntaxDef(new List<SyntaxDefSymbol> {
-            //    new SyntaxDefSymbol("["),
-            //    new SyntaxDefSymbol(new SyntaxParameter("code", false, true)),
-            //    new SyntaxDefSymbol("]")
-            //}, new List<SyntaxResultSymbol>() {
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "code")
-            //});
-            //List<SyntaxDef> definitions = new List<SyntaxDef>() {
-            //    def4, def, mulDef, def2, def3
-            //};
-            ////var m = sh.Match(def, "1+2");
-            //var x = sh.Convert(def, "1+2");
-            //var z = sh.Convert(def2, "var x=7");
-            //var w = sh.Convert(def3, "x=7");
-            //var a = sh.Convert(def4, "[_add(5,2)]");
-            //Console.WriteLine(x);
-            //Console.WriteLine(z);
-            //Console.WriteLine(w);
-            //Console.WriteLine(a);
-
-            //var b = sh.FullConvert(definitions, "[5+2]");
-            //Console.WriteLine(b);
-
-            //sh.ParseSyntaxDefinitionLine("syntax \"{a}+{b}\" \"_add(\"a\",\"b\")\"");
 
             // Simple reading for now
             while (true)
