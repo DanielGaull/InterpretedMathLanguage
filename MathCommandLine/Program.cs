@@ -42,9 +42,9 @@ namespace MathCommandLine
 
             // SYNTAX TESTING
             SyntaxDef def = new SyntaxDef(new List<SyntaxDefSymbol> {
-                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Number, "a"))),
+                new SyntaxDefSymbol(new SyntaxParameter("a")),
                 new SyntaxDefSymbol("+"),
-                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Number, "b")))
+                new SyntaxDefSymbol(new SyntaxParameter("b"))
             }, new List<SyntaxResultSymbol>() {
                 new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, "_add("),
                 new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "a"),
@@ -53,9 +53,9 @@ namespace MathCommandLine
                 new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ")")
             });
             SyntaxDef mulDef = new SyntaxDef(new List<SyntaxDefSymbol> {
-                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Number, "a"))),
+                new SyntaxDefSymbol(new SyntaxParameter("a")),
                 new SyntaxDefSymbol("*"),
-                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Number, "b")))
+                new SyntaxDefSymbol(new SyntaxParameter("b"))
             }, new List<SyntaxResultSymbol>() {
                 new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, "_mul("),
                 new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "a"),
@@ -67,9 +67,9 @@ namespace MathCommandLine
             SyntaxDef def2 = new SyntaxDef(new List<SyntaxDefSymbol> {
                 new SyntaxDefSymbol("var"),
                 new SyntaxDefSymbol(),
-                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.String, "name"), true, false)),
+                new SyntaxDefSymbol(new SyntaxParameter("name", true, false)),
                 new SyntaxDefSymbol("="),
-                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Any, "value")))
+                new SyntaxDefSymbol(new SyntaxParameter("value"))
             }, new List<SyntaxResultSymbol>() {
                 new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, "_declare("),
                 new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "name"),
@@ -78,9 +78,9 @@ namespace MathCommandLine
                 new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ",TRUE,TRUE,TRUE)")
             });
             SyntaxDef def3 = new SyntaxDef(new List<SyntaxDefSymbol> {
-                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.String, "name"), true, false)),
+                new SyntaxDefSymbol(new SyntaxParameter("name", true, false)),
                 new SyntaxDefSymbol("="),
-                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Any, "value")))
+                new SyntaxDefSymbol(new SyntaxParameter("value"))
             }, new List<SyntaxResultSymbol>() {
                 new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, "_assign(_ref("),
                 new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "name"),
@@ -90,7 +90,7 @@ namespace MathCommandLine
             });
             SyntaxDef def4 = new SyntaxDef(new List<SyntaxDefSymbol> {
                 new SyntaxDefSymbol("["),
-                new SyntaxDefSymbol(new SyntaxParameter(new MParameter(MDataType.Closure, "code"), false, true)),
+                new SyntaxDefSymbol(new SyntaxParameter("code", false, true)),
                 new SyntaxDefSymbol("]")
             }, new List<SyntaxResultSymbol>() {
                 new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "code")
@@ -111,6 +111,8 @@ namespace MathCommandLine
 
             //var b = sh.FullConvert(definitions, "[5+2]");
             //Console.WriteLine(b);
+
+            sh.ParseSyntaxDefinitionLine("syntax \"{a}+{b}\" \"_add(\"a\",\"b\")\"");
 
             while (true)
             {

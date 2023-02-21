@@ -188,7 +188,13 @@ namespace MathCommandLine.Syntax
                                     .Cast<Match>()
                                     .Select(m => m.Value)
                                     .ToList();
-                SyntaxDef result = ParseSyntaxDefinitionStatement(tokens[1], tokens[2]);
+                string src = tokens[1];
+                var srcMatch = Regex.Match(src, "\"(.*)\"");
+                if (!srcMatch.Success)
+                {
+                    throw new IllegalSyntaxException(line);
+                }
+                SyntaxDef result = ParseSyntaxDefinitionStatement(srcMatch.Groups[1].Value, tokens[2]);
                 if (result == null)
                 {
                     // Means something went wrong
@@ -200,6 +206,7 @@ namespace MathCommandLine.Syntax
         }
         public SyntaxDef ParseSyntaxDefinitionStatement(string source, string result)
         {
+            List<SyntaxDefSymbol> defSymbols = ParseSourceString(source);
             return null;
         }
         // Returns null if something goes wrong
@@ -212,21 +219,78 @@ namespace MathCommandLine.Syntax
             {
                 if (source[i] != '{')
                 {
-                    currentBuilder.Append(source[i]);
-                }
-                else if (illegalChars.Contains(source[i]))
-                {
-                    return null;
+                    if (illegalChars.Contains(source[i]))
+                    { 
+                        return null;
+                    }
+                    else if (Regex.IsMatch(source[i].ToString(), "\\s"))
+                    {
+                        // Found whitespace. Save off current character, find end of whitespace, and then add a whitespace
+                        if (currentBuilder.Length > 0)
+                        {
+                            symbolDefs.Add(new SyntaxDefSymbol(currentBuilder.ToString()));
+                        }
+                        while (Regex.IsMatch(source[i].ToString(), "\\s"))
+                        {
+                            i++;
+                        }
+                        symbolDefs.Add(new SyntaxDefSymbol());
+                    }
+                    else
+                    {
+                        currentBuilder.Append(source[i]);
+                    }
                 }
                 else
                 {
                     // Look at param definition, save off current string literal
-                    symbolDefs.Add(new SyntaxDefSymbol(currentBuilder.ToString()));
+                    if (currentBuilder.Length > 0)
+                    {
+                        symbolDefs.Add(new SyntaxDefSymbol(currentBuilder.ToString()));
+                    }
                     currentBuilder = new StringBuilder();
 
                     // Get info about param here
-                    // TODO
+                    StringBuilder paramNameBuilder = new StringBuilder();
+                    for (i++; source[i] != '}'; i++)
+                    {
+                        if (i >= source.Length)
+                        {
+                            // No valid closing brace, and we're over the limit of the string
+                            // Error so return null
+                            return null;
+                        }
+                        paramNameBuilder.Append(source[i]);
+                    }
+
+                    // Make sure that this is a valid param name
+                    string paramName = paramNameBuilder.ToString();
+                    bool symbolStr = false;
+                    bool literalCode = false;
+                    if (paramName.StartsWith('$'))
+                    {
+                        symbolStr = true;
+                        paramName = paramName.Substring(1);
+                    }
+                    else if (paramName.StartsWith('^'))
+                    {
+                        literalCode = true;
+                        paramName = paramName.Substring(1);
+                    }
+
+                    if (!Regex.IsMatch(paramName, "^[A-Za-z_][A-Za-z0-9_]*$"))
+                    {
+                        return null;
+                    }
+
+                    // Create and add our new parameter
+                    symbolDefs.Add(new SyntaxDefSymbol(new SyntaxParameter(paramName, symbolStr, literalCode)));
                 }
+            }
+            // Add the last string segment
+            if (currentBuilder.Length > 0)
+            {
+                symbolDefs.Add(new SyntaxDefSymbol(currentBuilder.ToString()));
             }
             return symbolDefs;
         }
