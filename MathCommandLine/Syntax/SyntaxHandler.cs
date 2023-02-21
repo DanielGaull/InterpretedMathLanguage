@@ -350,6 +350,17 @@ namespace MathCommandLine.Syntax
                     }
                 }
             }
+            if (builder.Length > 0)
+            {
+                if (readingLiteral)
+                {
+                    list.Add(new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, builder.ToString()));
+                }
+                else
+                {
+                    list.Add(new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, builder.ToString()));
+                }
+            }
             return list;
         }
     }
