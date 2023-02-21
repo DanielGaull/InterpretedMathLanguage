@@ -12,7 +12,7 @@ namespace MathCommandLine.Evaluation
         public AstTypes Type { get; private set; }
         // For number literals
         public double NumberArg { get; private set; }
-        // Used for invalid ASTs
+        // Used for invalid ASTs (and internally for string ones, but we also have another getter for it
         public string Expression { get; private set; }
         // Used for lambdas
         public Ast Body { get; set; }
@@ -24,11 +24,20 @@ namespace MathCommandLine.Evaluation
         public string Name { get; private set; }
         // Used for Calls
         public Ast CalledAst { get; private set; }
+        // Used for strings (just a wrapper around Expression)
+        public string StringArg
+        {
+            get
+            {
+                return Expression;
+            }
+        }
 
         /* Used:
          * NumberLiteral: NumberArg
          * ListLiteral: AstCollectionArg
          * LambdaLiteral: Parameters, Body
+         * StringLiteral: Expression (StringArg)
          * Variable: Name
          * Call: CalledAst, AstCollectionArg
          * Invalid: Expression
@@ -60,6 +69,10 @@ namespace MathCommandLine.Evaluation
         public static Ast LambdaLiteral(AstParameter[] parameters, Ast body)
         {
             return new Ast(AstTypes.LambdaLiteral, 0, null, null, parameters, null, null, body);
+        }
+        public static Ast StringLiteral(string text)
+        {
+            return new Ast(AstTypes.StringLiteral, 0, null, text, null, null, null, null);
         }
         public static Ast Call(Ast calledAst, params Ast[] args)
         {
@@ -93,6 +106,8 @@ namespace MathCommandLine.Evaluation
                     return CalledAst.ToExpressionString() + "(" + 
                         string.Join(',', AstCollectionArg.Select(x => x.ToExpressionString()).ToArray())
                         + ")";
+                case AstTypes.StringLiteral:
+                    return "\"" + StringArg + "\"";
                 case AstTypes.Invalid:
                     return Expression;
             }
@@ -152,6 +167,8 @@ namespace MathCommandLine.Evaluation
         ListLiteral,
         // A literal lamda, in the format of ([params])=>{[body]}
         LambdaLiteral,
+        // A literal string, in the format of "[text]"
+        StringLiteral,
         // A literal variable, which must be made up of valid characters (A-Z, a-z, 0-9, _)
         // Can only start with a letter
         Variable,

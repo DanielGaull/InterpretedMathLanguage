@@ -31,7 +31,6 @@ namespace MathCommandLine.Evaluation
 
         public MValue Evaluate(string expression, MEnvironment env)
         {
-            expression = parser.ConvertStringsToLists(expression);
             expression = CleanWhitespace(expression);
             return FinalStageEvaluate(expression, env);
         }
@@ -80,6 +79,8 @@ namespace MathCommandLine.Evaluation
                     return env.Get(ast.Name);
                 case AstTypes.NumberLiteral:
                     return MValue.Number(ast.NumberArg);
+                case AstTypes.StringLiteral:
+                    return MValue.String(ast.StringArg);
                 case AstTypes.ListLiteral:
                     // Need to evaluate each element of the list
                     List<MValue> elements = new List<MValue>();

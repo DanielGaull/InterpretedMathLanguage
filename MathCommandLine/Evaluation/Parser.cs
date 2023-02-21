@@ -24,6 +24,7 @@ namespace MathCommandLine.Evaluation
         // Group for the list elements
         private static readonly Regex LIST_REGEX = new Regex(@"^\{(.*)\}$");
         private static readonly Regex LAMBDA_REGEX = new Regex(@"^\((.*?)\)=>\{(.*)\}$");
+        private static readonly Regex STRING_REGEX = new Regex("\"([^\"]*)\"");
 
         // Call parsing values
         private const char CALL_END_WRAPPER = ')';
@@ -57,8 +58,6 @@ namespace MathCommandLine.Evaluation
         private const char LIST_DELIMITER = ',';
         private const char ARG_DELIMITER = ',';
         private static readonly Regex SYMBOL_NAME_REGEX = new Regex(@$"^{SYMBOL_PATTERN}$");
-        // Group to parse out the characters in the string
-        private static readonly Regex STRING_LITERAL_REGEX = new Regex("\"([^\"]*)\"");
 
         public Parser()
         {
@@ -79,20 +78,6 @@ namespace MathCommandLine.Evaluation
             return "(" + 
                 string.Join(',', sourceLambda.Parameters.Select(x => x.ToString()).ToArray()) +
                 ")=>{" + body + "}";
-        }
-
-        /// <summary>
-        /// Converts all string literals appearing in an expression to _str string declarations
-        /// </summary>
-        /// <param name="expression"></param>
-        /// <returns>The modified expression</returns>
-        public string ConvertStringsToLists(string expression)
-        {
-            return STRING_LITERAL_REGEX.Replace(expression, delegate(Match match)
-            {
-                MList list = Utilities.StringToMList(match.Groups[1].Value);
-                return "_str(" + list.ToString() + ")";
-            });
         }
 
         /// <summary>
@@ -140,6 +125,11 @@ namespace MathCommandLine.Evaluation
                 // Parse the double and throw it into the AST
                 double number = double.Parse(expression);
                 return Ast.NumberLiteral(number);
+            }
+            else if (STRING_REGEX.IsMatch(expression))
+            {
+                string str = STRING_REGEX.Match(expression).Groups[1].Value;
+                return Ast.StringLiteral(str);
             }
             else if (LIST_REGEX.IsMatch(expression))
             {
