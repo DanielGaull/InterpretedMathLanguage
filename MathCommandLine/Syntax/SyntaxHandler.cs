@@ -30,6 +30,11 @@ namespace MathCommandLine.Syntax
             {
                 return new SyntaxMatchResult(false);
             }
+            // Matched, but did not match the entire thing
+            if (result.Value != source)
+            {
+                return new SyntaxMatchResult(false);
+            }
             // Make sure that parentheses/braces are handled properly when we split these
             // If there is an opening brace or paren in one part of the split, it has to have a corresponding
             // closing one, and vice versa

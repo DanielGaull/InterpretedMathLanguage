@@ -30,7 +30,7 @@ namespace MathCommandLine.Syntax
         // Generates a regex for testing if a string matches, and also pulling the arguments out of the source
         public Regex GenerateMatchingRegex()
         {
-            StringBuilder regexBuilder = new StringBuilder();
+            StringBuilder regexBuilder = new StringBuilder("^");
             for (int i = 0; i < defSymbols.Count; i++)
             {
                 if (defSymbols[i].Type == SyntaxDefSymbolTypes.LiteralString)
@@ -51,9 +51,13 @@ namespace MathCommandLine.Syntax
                     {
                         regexBuilder.Append("(").Append(SYMBOL_PATTERN).Append(")");
                     }
+                    else if (defSymbols[i].ParameterArg.IsWrappingLambda)
+                    {
+                        regexBuilder.Append(@"(.+?)");
+                    }
                     else
                     {
-                        regexBuilder.Append(@"([^\s]*)");
+                        regexBuilder.Append(@"(.+)");
                     }
                 }
                 else if (defSymbols[i].Type == SyntaxDefSymbolTypes.Whitespace)
@@ -67,6 +71,7 @@ namespace MathCommandLine.Syntax
                     regexBuilder.Append(@"\s*");
                 }
             }
+            regexBuilder.Append("$");
             return new Regex(regexBuilder.ToString());
         }
 
