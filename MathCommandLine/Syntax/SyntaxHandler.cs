@@ -194,7 +194,13 @@ namespace MathCommandLine.Syntax
                 {
                     throw new IllegalSyntaxException(line);
                 }
-                SyntaxDef result = ParseSyntaxDefinitionStatement(srcMatch.Groups[1].Value, tokens[2]);
+                // Combine all the tokens from index 2 onwards into one string
+                string resStr = tokens[2];
+                for (int i = 3; i < tokens.Count; i++)
+                {
+                    resStr += tokens[i];
+                }
+                SyntaxDef result = ParseSyntaxDefinitionStatement(srcMatch.Groups[1].Value, resStr);
                 if (result == null)
                 {
                     // Means something went wrong
@@ -207,8 +213,14 @@ namespace MathCommandLine.Syntax
         public SyntaxDef ParseSyntaxDefinitionStatement(string source, string result)
         {
             List<SyntaxDefSymbol> defSymbols = ParseSourceString(source);
-            return null;
+            List<SyntaxResultSymbol> resSymbols = ParseResultString(result);
+            if (defSymbols == null || resSymbols == null)
+            {
+                return null;
+            }
+            return new SyntaxDef(defSymbols, resSymbols);
         }
+
         // Returns null if something goes wrong
         private List<SyntaxDefSymbol> ParseSourceString(string source)
         {
@@ -293,6 +305,52 @@ namespace MathCommandLine.Syntax
                 symbolDefs.Add(new SyntaxDefSymbol(currentBuilder.ToString()));
             }
             return symbolDefs;
+        }
+        // Also returns null if something went wrong
+        private List<SyntaxResultSymbol> ParseResultString(string result)
+        {
+            List<SyntaxResultSymbol> list = new List<SyntaxResultSymbol>();
+            // When true, we're reading in a literal string part
+            // When false, we're reading in a variable that should be concatenated
+            bool readingLiteral = false;
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < result.Length; i++)
+            {
+                if (result[i] == '"')
+                {
+                    // Switch modes & add current one
+                    if (builder.Length > 0)
+                    {
+                        if (readingLiteral)
+                        {
+                            list.Add(new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, builder.ToString()));
+                        }
+                        else
+                        {
+                            list.Add(new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, builder.ToString()));
+                        }
+                        builder = new StringBuilder();
+                    }
+                    readingLiteral = !readingLiteral;
+                }
+                else
+                {
+                    if (result[i] == '\\')
+                    {
+                        // Get next character and add it literally, whatever it is
+                        i++;
+                        if (i < result.Length)
+                        {
+                            builder.Append(result[i]);
+                        }
+                    }
+                    else
+                    {
+                        builder.Append(result[i]);
+                    }
+                }
+            }
+            return list;
         }
     }
 }
