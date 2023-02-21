@@ -45,7 +45,39 @@ namespace MathCommandLine.Evaluation
         private MValue FinalStageEvaluate(string expression, MEnvironment env)
         {
             Ast tree = parser.ParseExpression(expression);
+            EnsureValidity(tree);
             return EvaluateAst(tree, env);
+        }
+
+        // Throws an invalid syntax exception if it finds any invalid syntax
+        private void EnsureValidity(Ast ast)
+        {
+            switch (ast.Type)
+            {
+                case AstTypes.Call:
+                    EnsureValidity(ast.CalledAst);
+                    foreach (var child in ast.AstCollectionArg)
+                    {
+                        EnsureValidity(child);
+                    }
+                    break;
+                case AstTypes.Invalid:
+                    throw new InvalidParseException(ast.Expression);
+                case AstTypes.NumberLiteral:
+                case AstTypes.StringLiteral:
+                case AstTypes.Variable:
+                    // Do nothing, this is perfectly legal always
+                    break;
+                case AstTypes.ListLiteral:
+                    foreach (var child in ast.AstCollectionArg)
+                    {
+                        EnsureValidity(child);
+                    }
+                    break;
+                case AstTypes.LambdaLiteral:
+                    EnsureValidity(ast.Body);
+                    break;
+            }
         }
 
         private MValue EvaluateAst(Ast ast, MEnvironment env)
@@ -114,6 +146,11 @@ namespace MathCommandLine.Evaluation
                             "Type \"" + ast.Name + "\" is not defined.", MList.Empty);
                     }
                     MParameters parameters = new MParameters(paramArray);
+                    // Make sure the body is valid
+                    if (ast.Body.Type == AstTypes.Invalid)
+                    {
+                        throw new InvalidParseException(ast.Body.Expression);
+                    }
                     // Create a closure with this current environment
                     return MValue.Closure(new MClosure(parameters, env, ast.Body));
                 case AstTypes.Invalid:
