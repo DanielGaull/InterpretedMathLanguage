@@ -148,7 +148,7 @@ namespace MathCommandLine.Syntax
                     }
                     else
                     {
-                        body = result.Body.ToString();
+                        body = result.Body.ToExpressionString();
                     }
                     return parser.LambdaToString(result, body);
                 case AstTypes.Invalid:
