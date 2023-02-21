@@ -12,20 +12,30 @@ namespace MathCommandLine.Syntax
         public string StringArg { get; private set; }
         public SyntaxParameter ParameterArg { get; private set; }
 
-        public SyntaxDefSymbol(string literal)
+        public SyntaxDefSymbol(SyntaxDefSymbolTypes type, string literal, SyntaxParameter param)
         {
-            Type = SyntaxDefSymbolTypes.LiteralString;
+            Type = type;
             StringArg = literal;
-        }
-        public SyntaxDefSymbol(SyntaxParameter param)
-        {
-            Type = SyntaxDefSymbolTypes.SyntaxParam;
             ParameterArg = param;
         }
-        public SyntaxDefSymbol()
+
+        public static SyntaxDefSymbol Literal(string literal)
         {
-            Type = SyntaxDefSymbolTypes.Whitespace;
+            return new SyntaxDefSymbol(SyntaxDefSymbolTypes.LiteralString, literal, null);
         }
+        public static SyntaxDefSymbol Parameter(SyntaxParameter param)
+        {
+            return new SyntaxDefSymbol(SyntaxDefSymbolTypes.SyntaxParam, null, param);
+        }
+        public static SyntaxDefSymbol Whitespace()
+        {
+            return new SyntaxDefSymbol(SyntaxDefSymbolTypes.Whitespace, null, null);
+        }
+        public static SyntaxDefSymbol OptionalWhitespace()
+        {
+            return new SyntaxDefSymbol(SyntaxDefSymbolTypes.OptionalWhitespace, null, null);
+        }
+
     }
 
     public enum SyntaxDefSymbolTypes
@@ -33,5 +43,6 @@ namespace MathCommandLine.Syntax
         LiteralString,
         SyntaxParam,
         Whitespace,
+        OptionalWhitespace,
     }
 }

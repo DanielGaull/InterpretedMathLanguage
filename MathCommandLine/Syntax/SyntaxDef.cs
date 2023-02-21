@@ -53,13 +53,18 @@ namespace MathCommandLine.Syntax
                     }
                     else
                     {
-                        regexBuilder.Append(@"(.*)");
+                        regexBuilder.Append(@"([^\s]*)");
                     }
                 }
                 else if (defSymbols[i].Type == SyntaxDefSymbolTypes.Whitespace)
                 {
                     // Allow variable whitespace, but require it
                     regexBuilder.Append(@"\s+");
+                }
+                else if (defSymbols[i].Type == SyntaxDefSymbolTypes.OptionalWhitespace)
+                {
+                    // Can have a whitespace here, but not required
+                    regexBuilder.Append(@"\s*");
                 }
             }
             return new Regex(regexBuilder.ToString());

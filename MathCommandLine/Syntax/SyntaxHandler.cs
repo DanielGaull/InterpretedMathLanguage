@@ -240,7 +240,8 @@ namespace MathCommandLine.Syntax
                         // Found whitespace. Save off current character, find end of whitespace, and then add a whitespace
                         if (currentBuilder.Length > 0)
                         {
-                            symbolDefs.Add(new SyntaxDefSymbol(currentBuilder.ToString()));
+                            //symbolDefs.Add(new SyntaxDefSymbol(currentBuilder.ToString()));
+                            symbolDefs.Add(SyntaxDefSymbol.Literal(currentBuilder.ToString()));
                             currentBuilder = new StringBuilder();
                         }
                         while (Regex.IsMatch(source[i].ToString(), "\\s"))
@@ -248,8 +249,8 @@ namespace MathCommandLine.Syntax
                             i++;
                         }
                         // Accidentally increase i too much above, so decrease it a single time once we're done
-                        i--; 
-                        symbolDefs.Add(new SyntaxDefSymbol());
+                        i--;
+                        symbolDefs.Add(SyntaxDefSymbol.Whitespace());
                     }
                     else
                     {
@@ -261,7 +262,7 @@ namespace MathCommandLine.Syntax
                     // Look at param definition, save off current string literal
                     if (currentBuilder.Length > 0)
                     {
-                        symbolDefs.Add(new SyntaxDefSymbol(currentBuilder.ToString()));
+                        symbolDefs.Add(SyntaxDefSymbol.Literal(currentBuilder.ToString()));
                     }
                     currentBuilder = new StringBuilder();
 
@@ -293,19 +294,27 @@ namespace MathCommandLine.Syntax
                         paramName = paramName.Substring(1);
                     }
 
-                    if (!Regex.IsMatch(paramName, "^[A-Za-z_][A-Za-z0-9_]*$"))
+                    if (paramName == "~")
                     {
-                        return null;
+                        // Optional whitespace
+                        symbolDefs.Add(SyntaxDefSymbol.OptionalWhitespace());
                     }
+                    else
+                    {
+                        if (!Regex.IsMatch(paramName, "^[A-Za-z_][A-Za-z0-9_]*$"))
+                        {
+                            return null;
+                        }
 
-                    // Create and add our new parameter
-                    symbolDefs.Add(new SyntaxDefSymbol(new SyntaxParameter(paramName, symbolStr, literalCode)));
+                        // Create and add our new parameter
+                        symbolDefs.Add(SyntaxDefSymbol.Parameter(new SyntaxParameter(paramName, symbolStr, literalCode)));
+                    }
                 }
             }
             // Add the last string segment
             if (currentBuilder.Length > 0)
             {
-                symbolDefs.Add(new SyntaxDefSymbol(currentBuilder.ToString()));
+                symbolDefs.Add(SyntaxDefSymbol.Literal(currentBuilder.ToString()));
             }
             return symbolDefs;
         }
