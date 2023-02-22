@@ -18,19 +18,27 @@ namespace MathCommandLine.Environments
             this.parent = parent;
         }
 
-        public void AddValue(string name, MValue value, bool canGet, bool canSet)
+        public void AddValue(string name, MValue value, bool canGet, bool canSet, string desc)
         {
-            values.Add(name, new MBoxedValue(value, canGet, canSet));
+            values.Add(name, new MBoxedValue(value, canGet, canSet, desc));
         }
 
         public void AddVariable(string name, MValue value)
         {
-            AddValue(name, value, true, true);
+            AddVariable(name, value, null);
+        }
+        public void AddVariable(string name, MValue value, string desc)
+        {
+            AddValue(name, value, true, true, desc);
         }
 
         public void AddConstant(string name, MValue value)
         {
-            AddValue(name, value, true, false);
+            AddConstant(name, value, null);
+        }
+        public void AddConstant(string name, MValue value, string desc)
+        {
+            AddValue(name, value, true, false, desc);
         }
 
         public bool Has(string name)
@@ -50,7 +58,7 @@ namespace MathCommandLine.Environments
         {
             if (this == Empty)
             {
-                return null;//MValue.Error(Util.ErrorCodes.VAR_DOES_NOT_EXIST);
+                return null;
             }
 
             if (values.ContainsKey(name))

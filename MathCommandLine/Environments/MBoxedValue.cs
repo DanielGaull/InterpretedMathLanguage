@@ -11,12 +11,14 @@ namespace MathCommandLine.Environments
         private MValue value;
         public bool CanGet { get; private set; }
         public bool CanSet { get; private set; }
+        public string Description { get; set; }
 
-        public MBoxedValue(MValue value, bool canGet, bool canSet)
+        public MBoxedValue(MValue value, bool canGet, bool canSet, string desc)
         {
             this.value = value;
             CanGet = canGet;
             CanSet = canSet;
+            Description = desc;
         }
 
         public MValue GetValue()

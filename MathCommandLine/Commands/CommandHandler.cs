@@ -65,7 +65,7 @@ namespace MathCommandLine.Commands
             {
                 MValue closure = MValue.Closure(
                     new MClosure(coreFuncs[i].Parameters, MEnvironment.Empty, coreFuncs[i].Expression));
-                baseEnv.AddConstant(coreFuncs[i].Name, closure);
+                baseEnv.AddConstant(coreFuncs[i].Name, closure, coreFuncs[i].Description);
             }
             FunctionDict funcDict = new FunctionDict(coreFuncs);
             DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, MDataType.Closure,

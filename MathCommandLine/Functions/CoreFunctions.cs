@@ -41,7 +41,8 @@ namespace MathCommandLine.Functions
                 Get(evaluator),
                 Set(evaluator),
                 Declare(evaluator),
-                //Delete(evaluator),
+                GetDesc(evaluator),
+                SetDesc(evaluator),
 
                 TypeOf(evaluator),
                 CompareFunction(evaluator),
@@ -436,7 +437,7 @@ namespace MathCommandLine.Functions
                     }
                     else
                     {
-                        env.AddValue(refName, value, can_get, can_set);
+                        env.AddValue(refName, value, can_get, can_set, null);
                         return MValue.Void();
                     }
                 },
@@ -451,7 +452,46 @@ namespace MathCommandLine.Functions
                 "Returns CANNOT_DECLARE error if the named value has already been declared, or the name is invalid."
             );
         }
-
+        public static MFunction GetDesc(IInterpreter interpreter)
+        {
+            return new MFunction(
+                "_gd",
+                (args, env) =>
+                {
+                    MBoxedValue refAddr = args[0].Value.RefValue;
+                    if (refAddr.Description == null)
+                    {
+                        return MValue.Null();
+                    }
+                    else
+                    {
+                        return MValue.String(refAddr.Description);
+                    }
+                },
+                new MParameters(
+                    new MParameter(MDataType.Reference, "ref")
+                ),
+                "Gets and returns the description for 'ref'. If there is no description, returns null."
+            );
+        }
+        public static MFunction SetDesc(IInterpreter interpreter)
+        {
+            return new MFunction(
+                "_sd",
+                (args, env) =>
+                {
+                    MBoxedValue refAddr = args[0].Value.RefValue;
+                    string newDesc = args[1].Value.GetStringValue();
+                    refAddr.Description = newDesc;
+                    return MValue.Void();
+                },
+                new MParameters(
+                    new MParameter(MDataType.Reference, "ref"),
+                    new MParameter(MDataType.String, "desc")
+                ),
+                "Assigns a new description to 'ref'."
+            );
+        }
 
         public static MFunction CreateReferenceFunction(IInterpreter evaluator)
         {
