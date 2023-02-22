@@ -16,6 +16,7 @@ namespace MathCommandLine.Evaluation
     {
         DataTypeDict dtDict;
         Parser parser;
+        Action exitAction;
 
         private static readonly Regex WHITESPACE_REGEX = new Regex(@"\s+");
 
@@ -23,10 +24,16 @@ namespace MathCommandLine.Evaluation
         {
         }
 
-        public void Initialize(DataTypeDict dtDict, Parser parser)
+        public void Initialize(DataTypeDict dtDict, Parser parser, Action exitAction)
         {
             this.dtDict = dtDict;
             this.parser = parser;
+            this.exitAction = exitAction;
+        }
+
+        public void Exit()
+        {
+            exitAction?.Invoke();
         }
 
         public MValue Evaluate(string expression, MEnvironment env)

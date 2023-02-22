@@ -53,6 +53,8 @@ namespace MathCommandLine.Functions
                 CreateTypeFunction(evaluator),
                 TimeFunction(evaluator),
                 CheckFunction(evaluator),
+                ExitFunction(evaluator),
+                ReadFunction(evaluator),
 
                 CreateReferenceFunction(evaluator),
 
@@ -688,6 +690,34 @@ namespace MathCommandLine.Functions
                 "Takes in a list of 2-lists of functions with no arguments, evaluating the each element. " +
                 "Once an element returns true, then the corresponding code is run and returned, " +
                 "with no other code being run."
+            );
+        }
+        public static MFunction ExitFunction(IInterpreter interpreter)
+        {
+            return new MFunction(
+                "_exit",
+                (args, env) =>
+                {
+                    interpreter.Exit();
+                    return MValue.Void();
+                },
+                new MParameters(),
+                "Exits the program immediately (returns null)"
+            );
+        }
+        public static MFunction ReadFunction(IInterpreter interpreter)
+        {
+            return new MFunction(
+                "_read",
+                (args, env) =>
+                {
+                    string prompt = args[0].Value.GetStringValue();
+                    Console.Write(prompt);
+                    string input = Console.ReadLine();
+                    return MValue.String(input);
+                },
+                new MParameters(new MParameter(MDataType.String, "prompt")),
+                "Reads in and returns a single string line from the user using the standard input stream"
             );
         }
 

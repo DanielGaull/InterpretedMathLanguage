@@ -43,7 +43,10 @@ namespace MathCommandLine
                 MDataType.Type, MDataType.Error, MDataType.Reference, MDataType.String, MDataType.Void,
                 MDataType.Boolean, MDataType.Null, MDataType.Any);
             Parser parser = new Parser();
-            evaluator.Initialize(dtDict, parser);
+            bool running = true;
+            evaluator.Initialize(dtDict, parser, () => {
+                running = false;
+            });
 
             // Syntax loading; go to the syntax files path, and load in all the files it lists
             SyntaxHandler sh = new SyntaxHandler(parser, "{}(),".ToCharArray().ToList());
@@ -77,7 +80,7 @@ namespace MathCommandLine
             //});
 
             // Simple reading for now
-            while (true)
+            while (running)
             {
                 Console.Write("Enter Expression: ");
                 string input = Console.ReadLine();
