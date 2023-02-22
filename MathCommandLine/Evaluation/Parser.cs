@@ -34,6 +34,10 @@ namespace MathCommandLine.Evaluation
         private const char GENERIC_END_WRAPPER = ')';
         private const char GENERIC_START_WRAPPER = '(';
 
+        // List parsing values
+        private const char LIST_START_WRAPPER = '{';
+        private const char LIST_END_WRAPPER = '}';
+
         // Parameter parsing regexes
         private const char PARAM_DELIMITER = ',';
         private const char PARAM_TYPES_DELIMITER = '|';
@@ -131,7 +135,7 @@ namespace MathCommandLine.Evaluation
                 string str = STRING_REGEX.Match(expression).Groups[1].Value;
                 return Ast.StringLiteral(str);
             }
-            else if (LIST_REGEX.IsMatch(expression))
+            else if (MatchesList(expression)) //LIST_REGEX.IsMatch(expression))
             {
                 // Extract the elements of the list
                 string elements = LIST_REGEX.Match(expression).Groups[1].Value;
@@ -356,7 +360,6 @@ namespace MathCommandLine.Evaluation
             int parenCounter = 0;
             int braceCounter = 0;
             List<string> substrings = new List<string>();
-            // TODO: Finish
             StringBuilder currentString = new StringBuilder();
             for (int i = 0; i < expr.Length; i++)
             {
@@ -379,19 +382,19 @@ namespace MathCommandLine.Evaluation
                 {
                     // Add the character to our current string, update the counts as necessary
                     currentString.Append(c);
-                    if (c == '(')
+                    if (c == GENERIC_START_WRAPPER)
                     {
                         parenCounter++;
                     }
-                    else if (c == ')')
+                    else if (c == GENERIC_END_WRAPPER)
                     {
                         parenCounter--;
                     }
-                    else if (c == '{')
+                    else if (c == LIST_START_WRAPPER)
                     {
                         braceCounter++;
                     }
-                    else if (c == '}')
+                    else if (c == LIST_END_WRAPPER)
                     {
                         braceCounter--;
                     }
@@ -402,6 +405,61 @@ namespace MathCommandLine.Evaluation
             return substrings.ToArray();
         }
         
+        /// <summary>
+        /// Returns true if the expression is a list, or false if not
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <returns></returns>
+        private bool MatchesList(string expression)
+        {
+            if (expression.Length < 2)
+            {
+                return false;
+            }
+            if (expression[0] != LIST_START_WRAPPER)
+            {
+                return false;
+            }
+            if (expression[expression.Length - 1] != LIST_END_WRAPPER)
+            {
+                return false;
+            }
+            int listLevels = 0;
+            for (int i = 1; i < expression.Length - 1; i++)
+            {
+                char c = expression[i];
+                if (c == GENERIC_START_WRAPPER)
+                {
+                    // We want to jump to the end of the list parenthesis
+                    while (c != GENERIC_END_WRAPPER)
+                    {
+                        c = expression[i];
+                        i++;
+                        if (i >= expression.Length - 1)
+                        {
+                            // If no end to the paren, we have bigger problems
+                            return false;
+                        }
+                    }
+                }
+                else if (c == LIST_START_WRAPPER)
+                {
+                    listLevels++;
+                }
+                else if (c == LIST_END_WRAPPER)
+                {
+                    // If we're closing the current list, then that's a problem
+                    if (listLevels == 0)
+                    {
+                        return false;
+                    }
+                    listLevels--;
+                }
+            }
+            // If we haven't failed yet, then just return
+            return true;
+        }
+
         /// <summary>
         /// Attempts to match this expression to a "call", returning if the match succeeded, and the
         /// caller/arguments
