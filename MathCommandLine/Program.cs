@@ -52,33 +52,6 @@ namespace MathCommandLine
             SyntaxHandler sh = new SyntaxHandler(parser, "{}(),".ToCharArray().ToList());
             List<SyntaxDef> syntaxDefinitions = ImportSyntax(sh);
 
-            // SYNTAX TESTING
-            //// Syntax definition for variable declarations
-            //SyntaxDef def2 = new SyntaxDef(new List<SyntaxDefSymbol> {
-            //    new SyntaxDefSymbol("var"),
-            //    new SyntaxDefSymbol(),
-            //    new SyntaxDefSymbol(new SyntaxParameter("name", true, false)),
-            //    new SyntaxDefSymbol("="),
-            //    new SyntaxDefSymbol(new SyntaxParameter("value"))
-            //}, new List<SyntaxResultSymbol>() {
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, "_declare("),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "name"),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ","),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "value"),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ",TRUE,TRUE,TRUE)")
-            //});
-            //SyntaxDef def3 = new SyntaxDef(new List<SyntaxDefSymbol> {
-            //    new SyntaxDefSymbol(new SyntaxParameter("name", true, false)),
-            //    new SyntaxDefSymbol("="),
-            //    new SyntaxDefSymbol(new SyntaxParameter("value"))
-            //}, new List<SyntaxResultSymbol>() {
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, "_assign(_ref("),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "name"),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, "),"),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.Argument, "value"),
-            //    new SyntaxResultSymbol(SyntaxResultSymbolTypes.ExpressionPiece, ")")
-            //});
-
             // Simple reading for now
             while (running)
             {
