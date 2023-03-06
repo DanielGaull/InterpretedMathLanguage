@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace MathCommandLine.Commands
 {
@@ -47,7 +48,7 @@ namespace MathCommandLine.Commands
             }
             else
             {
-                RunCommand(args[0]);
+                RunCommand(string.Join(' ', args));
             }
         }
 
@@ -55,12 +56,23 @@ namespace MathCommandLine.Commands
         // Returns 1 if entire program should exit
         private int RunCommand(string cmd)
         {
-            string cmdStarter = cmd.IndexOf(' ') >= 0 ? cmd.Substring(0, cmd.IndexOf(' ')) : cmd;
+            int spaceIndex = cmd.IndexOf(' ');
+            string cmdStarter = spaceIndex >= 0 ? cmd.Substring(0, spaceIndex) : cmd;
             switch (cmdStarter)
             {
                 case "eval":
                 case "e":
                     RunInterpreter();
+                    break;
+                case "run":
+                case "r":
+                    string fp = cmd.Substring(spaceIndex + 1);
+                    if (fp.Length <= 0 || spaceIndex < 0)
+                    {
+                        PrintError("Must provide a file path to run");
+                        return 0;
+                    }
+                    RunFile(fp);
                     break;
                 case "help":
                 case "h":
@@ -81,10 +93,19 @@ namespace MathCommandLine.Commands
             return 0;
         }
 
-        private void RunInterpreter()
+        private Interpreter CreateInterpreter(Parser parser, Action exitAction)
         {
             Interpreter evaluator = new Interpreter();
 
+            //FunctionDict funcDict = new FunctionDict(coreFuncs);
+            DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, MDataType.Closure,
+                MDataType.Type, MDataType.Error, MDataType.Reference, MDataType.String, MDataType.Void,
+                MDataType.Boolean, MDataType.Null, MDataType.Any);
+            evaluator.Initialize(dtDict, parser, exitAction);
+            return evaluator;
+        }
+        private MEnvironment CreateBaseEnv(Interpreter evaluator)
+        {
             // Add core constants
             List<MFunction> coreFuncs = CoreFunctions.GenerateCoreFunctions(evaluator);
             MEnvironment baseEnv = new MEnvironment(MEnvironment.Empty);
@@ -98,15 +119,62 @@ namespace MathCommandLine.Commands
                     new MClosure(coreFuncs[i].Parameters, MEnvironment.Empty, coreFuncs[i].Expression));
                 baseEnv.AddConstant(coreFuncs[i].Name, closure, coreFuncs[i].Description);
             }
-            FunctionDict funcDict = new FunctionDict(coreFuncs);
-            DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, MDataType.Closure,
-                MDataType.Type, MDataType.Error, MDataType.Reference, MDataType.String, MDataType.Void,
-                MDataType.Boolean, MDataType.Null, MDataType.Any);
+            return baseEnv;
+        }
+
+        private MValue RunLine(MEnvironment env, SyntaxHandler handler,
+            List<SyntaxDef> syntaxDefs, Interpreter evaluator, string line)
+        {
+            string syntaxHandled = handler.FullConvert(syntaxDefs, line);
+            MValue result = evaluator.Evaluate(syntaxHandled, env);
+            return result;
+        }
+
+        private void RunFile(string filePath)
+        {
+            string text = File.ReadAllText(filePath);
+
             Parser parser = new Parser();
+
             bool running = true;
-            evaluator.Initialize(dtDict, parser, () => {
+            Interpreter evaluator = CreateInterpreter(parser, () =>
+            {
                 running = false;
             });
+
+            MEnvironment baseEnv = CreateBaseEnv(evaluator);
+
+            // Syntax loading; go to the syntax files path, and load in all the files it lists
+            SyntaxHandler sh = new SyntaxHandler(parser, "{}(),".ToCharArray().ToList());
+            List<SyntaxDef> syntaxDefinitions = ImportSyntax(sh);
+
+            // Simple reading for now
+            string[] lines = Regex.Split(text, "(?:\r\n|\r|\n)+");
+            foreach (string line in lines)
+            {
+                if (line.Length <= 0)
+                {
+                    continue;
+                }
+                if (!running)
+                {
+                    return;
+                }
+                RunLine(baseEnv, sh, syntaxDefinitions, evaluator, line);
+            }
+        }
+
+        private void RunInterpreter()
+        {
+            Parser parser = new Parser();
+
+            bool running = true;
+            Interpreter evaluator = CreateInterpreter(parser, () =>
+            {
+                running = false;
+            });
+
+            MEnvironment baseEnv = CreateBaseEnv(evaluator);
 
             // Syntax loading; go to the syntax files path, and load in all the files it lists
             SyntaxHandler sh = new SyntaxHandler(parser, "{}(),".ToCharArray().ToList());
@@ -115,17 +183,15 @@ namespace MathCommandLine.Commands
             // Simple reading for now
             while (running)
             {
-                Console.Write("  Enter Expression: ");
+                Console.Write(" Enter Expression: ");
                 string input = Console.ReadLine();
                 if (input.Length <= 0)
                 {
                     continue;
                 }
-                MValue result;
                 try
                 {
-                    string syntaxHandled = sh.FullConvert(syntaxDefinitions, input);
-                    result = evaluator.Evaluate(syntaxHandled, baseEnv);
+                    MValue result = RunLine(baseEnv, sh, syntaxDefinitions, evaluator, input);
                     if (result.DataType != MDataType.Void)
                     {
                         // Never output void as a result, since we're typically running a function
@@ -135,9 +201,7 @@ namespace MathCommandLine.Commands
                 }
                 catch (InvalidParseException ex)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(ex.Message);
-                    Console.ForegroundColor = ConsoleColor.Gray;
+                    PrintError(ex.Message);
                 }
             }
         }
@@ -174,6 +238,13 @@ namespace MathCommandLine.Commands
                 }
             }
             return defs;
+        }
+
+        private void PrintError(string msg)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(msg);
+            Console.ForegroundColor = ConsoleColor.Gray;
         }
     }
 }
