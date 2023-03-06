@@ -1,0 +1,28 @@
+C:\Users\gaulldj\Documents\MTool\InterpretedMathLanguage\MathCommandLine\obj\Debug\netcoreapp3.1\MathCommandLine.csproj.AssemblyReference.cache
+C:\Users\gaulldj\Documents\MTool\InterpretedMathLanguage\MathCommandLine\obj\Debug\netcoreapp3.1\MathCommandLine.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\gaulldj\Documents\MTool\InterpretedMathLanguage\MathCommandLine\obj\Debug\netcoreapp3.1\MathCommandLine.AssemblyInfoInputs.cache
+C:\Users\gaulldj\Documents\MTool\InterpretedMathLanguage\MathCommandLine\obj\Debug\netcoreapp3.1\MathCommandLine.AssemblyInfo.cs
+C:\Users\gaulldj\Documents\MTool\InterpretedMathLanguage\MathCommandLine\obj\Debug\netcoreapp3.1\MathCommandLine.csproj.CoreCompileInputs.cache
+C:\Users\gaulldj\Documents\MTool\InterpretedMathLanguage\MathCommandLine\bin\Debug\netcoreapp3.1\MathCommandLine.exe
+C:\Users\gaulldj\Documents\MTool\InterpretedMathLanguage\MathCommandLine\bin\Debug\netcoreapp3.1\MathCommandLine.deps.json
+C:\Users\gaulldj\Documents\MTool\InterpretedMathLanguage\MathCommandLine\bin\Debug\netcoreapp3.1\MathCommandLine.runtimeconfig.json
+C:\Users\gaulldj\Documents\MTool\InterpretedMathLanguage\MathCommandLine\bin\Debug\netcoreapp3.1\MathCommandLine.runtimeconfig.dev.json
+C:\Users\gaulldj\Documents\MTool\InterpretedMathLanguage\MathCommandLine\bin\Debug\netcoreapp3.1\MathCommandLine.dll
+C:\Users\gaulldj\Documents\MTool\InterpretedMathLanguage\MathCommandLine\bin\Debug\netcoreapp3.1\MathCommandLine.pdb
+C:\Users\gaulldj\Documents\MTool\InterpretedMathLanguage\MathCommandLine\obj\Debug\netcoreapp3.1\MathCommandLine.dll
+C:\Users\gaulldj\Documents\MTool\InterpretedMathLanguage\MathCommandLine\obj\Debug\netcoreapp3.1\MathCommandLine.pdb
+C:\Users\gaulldj\Documents\MTool\InterpretedMathLanguage\MathCommandLine\obj\Debug\netcoreapp3.1\MathCommandLine.genruntimeconfig.cache
+C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\MathCommandLine\bin\Debug\netcoreapp3.1\MathCommandLine.exe
+C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\MathCommandLine\bin\Debug\netcoreapp3.1\MathCommandLine.deps.json
+C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\MathCommandLine\bin\Debug\netcoreapp3.1\MathCommandLine.runtimeconfig.json
+C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\MathCommandLine\bin\Debug\netcoreapp3.1\MathCommandLine.runtimeconfig.dev.json
+C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\MathCommandLine\bin\Debug\netcoreapp3.1\MathCommandLine.dll
+C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\MathCommandLine\bin\Debug\netcoreapp3.1\MathCommandLine.pdb
+C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\MathCommandLine\obj\Debug\netcoreapp3.1\MathCommandLine.csproj.AssemblyReference.cache
+C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\MathCommandLine\obj\Debug\netcoreapp3.1\MathCommandLine.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\MathCommandLine\obj\Debug\netcoreapp3.1\MathCommandLine.AssemblyInfoInputs.cache
+C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\MathCommandLine\obj\Debug\netcoreapp3.1\MathCommandLine.AssemblyInfo.cs
+C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\MathCommandLine\obj\Debug\netcoreapp3.1\MathCommandLine.csproj.CoreCompileInputs.cache
+C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\MathCommandLine\obj\Debug\netcoreapp3.1\MathCommandLine.dll
+C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\MathCommandLine\obj\Debug\netcoreapp3.1\MathCommandLine.pdb
+C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\MathCommandLine\obj\Debug\netcoreapp3.1\MathCommandLine.genruntimeconfig.cache
