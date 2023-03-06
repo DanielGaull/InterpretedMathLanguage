@@ -59,8 +59,8 @@ namespace MathCommandLine.Commands
             MEnvironment baseEnv = new MEnvironment(MEnvironment.Empty);
             baseEnv.AddConstant("null", MValue.Null());
             baseEnv.AddConstant("void", MValue.Void());
-            baseEnv.AddConstant("TRUE", MValue.Bool(true));
-            baseEnv.AddConstant("FALSE", MValue.Bool(false));
+            baseEnv.AddConstant("true", MValue.Bool(true));
+            baseEnv.AddConstant("false", MValue.Bool(false));
             for (int i = 0; i < coreFuncs.Count; i++)
             {
                 MValue closure = MValue.Closure(
