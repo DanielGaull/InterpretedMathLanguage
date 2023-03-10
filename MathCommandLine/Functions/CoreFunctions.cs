@@ -56,6 +56,7 @@ namespace MathCommandLine.Functions
                 CheckFunction(evaluator),
                 ExitFunction(evaluator),
                 ReadFunction(evaluator),
+                DoFunction(evaluator),
 
                 CreateReferenceFunction(evaluator),
 
@@ -758,6 +759,31 @@ namespace MathCommandLine.Functions
                 },
                 new MParameters(new MParameter(MDataType.String, "prompt")),
                 "Reads in and returns a single string line from the user using the standard input stream"
+            );
+        }
+        public static MFunction DoFunction(IInterpreter interpreter)
+        {
+
+            return new MFunction(
+                "_do",
+                (args, env) =>
+                {
+                    List<MValue> funcs = args[0].Value.ListValue.InternalList;
+                    MValue returnValue = MValue.Void();
+                    for (int i = 0; i < funcs.Count; i++)
+                    {
+                        MClosure closure = funcs[i].ClosureValue;
+                        returnValue = interpreter.PerformCall(closure, MArguments.Empty, env);
+                    }
+                    return returnValue;
+                },
+                new MParameters(
+                    new MParameter("code", new MTypeRestrictionsEntry(MDataType.List, 
+                    new ValueRestriction(ValueRestriction.ValueRestrictionTypes.LTypesAllowed, -1, 
+                        new List<MDataType>() { MDataType.Closure })))
+                ),
+                "Executes the series of functions in 'code'. These functions should take no parameters. " +
+                "Functions are executed in order. Returns the return value of the last function."
             );
         }
 
