@@ -84,7 +84,7 @@ namespace MathCommandLine.Syntax
                     }
                     else if (arg.DefiningParameter.IsWrappingLambda)
                     {
-                        literal = "()=>{" + literal + "}";
+                        literal = "()~>{" + literal + "}";
                     }
                     result.Append(literal);
                 }

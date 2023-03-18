@@ -16,14 +16,14 @@ namespace MathCommandLine.Evaluation
     public class Parser
     {
         // Regexes for common necessities
-        private const string NUMBER_REGEX_PATTERN = @"[+-]?[0-9]+(\.[0-9]*)?";
+        private const string NUMBER_REGEX_PATTERN = @"[+-]?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))";
         private const string SYMBOL_PATTERN = @"[a-zA-Z_][a-zA-Z0-9_]*";
 
         // Regexes for matching language symbols
         private static readonly Regex NUMBER_REGEX = new Regex("^" + NUMBER_REGEX_PATTERN + "$");
         // Group for the list elements
         private static readonly Regex LIST_REGEX = new Regex(@"^\{(.*)\}$");
-        private static readonly Regex LAMBDA_REGEX = new Regex(@"^\((.*?)\)=>\{(.*)\}$");
+        private static readonly Regex LAMBDA_REGEX = new Regex(@"^\((.*?)\)([=~])>\{(.*)\}$");
         private static readonly Regex STRING_REGEX = new Regex("^\"([^\"]*)\"$");
 
         // Call parsing values
@@ -81,7 +81,7 @@ namespace MathCommandLine.Evaluation
             // TODO: Move string fragments to constants
             return "(" + 
                 string.Join(',', sourceLambda.Parameters.Select(x => x.ToString()).ToArray()) +
-                ")=>{" + body + "}";
+                ")" + (sourceLambda.CreatesEnv ? "=>" : "~>") + "{" + body + "}";
         }
 
         /// <summary>
@@ -150,10 +150,11 @@ namespace MathCommandLine.Evaluation
             }
             else if (LAMBDA_REGEX.IsMatch(expression))
             {
-                // Two parts: The expression, and the parameters
+                // Three parts: The expression, the parameters, and the type of lambda (environment/no environment)
                 var groups = LAMBDA_REGEX.Match(expression).Groups;
                 string paramsString = groups[1].Value;
-                string exprString = groups[2].Value;
+                string arrowBit = groups[2].Value;
+                string exprString = groups[3].Value;
 
                 // Parse Parameters
                 AstParameter[] parsedParams = paramsString.Length > 0 ? 
@@ -164,7 +165,7 @@ namespace MathCommandLine.Evaluation
 
                 Ast body = ParseExpression(exprString);
 
-                return Ast.LambdaLiteral(parsedParams, body);
+                return Ast.LambdaLiteral(parsedParams, body, arrowBit == "=");
             }
             else if (SYMBOL_NAME_REGEX.IsMatch(expression))
             {

@@ -159,7 +159,7 @@ namespace MathCommandLine.Evaluation
                         throw new InvalidParseException(ast.Body.Expression);
                     }
                     // Create a closure with this current environment
-                    return MValue.Closure(new MClosure(parameters, env, ast.Body));
+                    return MValue.Closure(new MClosure(parameters, env, ast.Body, ast.CreatesEnv));
                 case AstTypes.Invalid:
                     throw new InvalidParseException(ast.Expression);
             }

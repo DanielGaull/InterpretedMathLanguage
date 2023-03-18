@@ -16,13 +16,15 @@ namespace MathCommandLine.CoreDataTypes
         public Ast AstBody { get; private set; }
         public NativeExpression NativeBody { get; private set; }
         public bool IsNativeBody { get; private set; }
+        public bool CreatesEnv { get; private set; }
 
-        public MClosure(MParameters parameters, MEnvironment env, Ast body)
+        public MClosure(MParameters parameters, MEnvironment env, Ast body, bool createsEnv)
         {
             Parameters = parameters;
             Environment = env;
             AstBody = body;
             IsNativeBody = false;
+            CreatesEnv = createsEnv;
         }
         public MClosure(MParameters parameters, MEnvironment env, NativeExpression nativeBody)
         {
@@ -32,7 +34,7 @@ namespace MathCommandLine.CoreDataTypes
             IsNativeBody = true;
         }
 
-        public static MClosure Empty = new MClosure(MParameters.Empty, null, Ast.Invalid(null));
+        public static MClosure Empty = new MClosure(MParameters.Empty, null, Ast.Invalid(null), false);
 
         public override string ToString()
         {
@@ -40,7 +42,8 @@ namespace MathCommandLine.CoreDataTypes
             {
                 return "<empty>";
             }
-            return "(" + Parameters.ToString() + ")=>{" + (IsNativeBody ? "<function>" : AstBody.ToExpressionString()) + "}";
+            return "(" + Parameters.ToString() + ")" + (CreatesEnv ? "=>" : "~>") + "{" + 
+                (IsNativeBody ? "<function>" : AstBody.ToExpressionString()) + "}";
         }
     }
 }
