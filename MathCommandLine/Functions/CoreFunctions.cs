@@ -58,6 +58,8 @@ namespace MathCommandLine.Functions
                 ReadFunction(evaluator),
                 DoFunction(evaluator),
 
+                RegisterDataType(evaluator),
+
                 CreateReferenceFunction(evaluator),
 
                 AndFunction(evaluator),
@@ -784,6 +786,30 @@ namespace MathCommandLine.Functions
                 ),
                 "Executes the series of functions in 'code'. These functions should take no parameters. " +
                 "Functions are executed in order. Returns the return value of the last function."
+            );
+        }
+
+        public static MFunction RegisterDataType(IInterpreter interpreter)
+        {
+
+            return new MFunction(
+                "_rdt",
+                (args, env) =>
+                {
+                    string typeName = args[0].Value.GetStringValue();
+                    MClosure providedConstructorFunction = args[1].Value.ClosureValue;
+
+                    // TODO: Allow composite types to have variable fields. Build the constructor function in here
+
+                    return MValue.Void();
+                },
+                new MParameters(
+                    new MParameter(MDataType.String, "type_name"),
+                    new MParameter(MDataType.Closure, "constructor_function")
+                ),
+                "Registers a data type, with the specified constructor function. The special function _cf, _sf, and _gf " +
+                "are defined in the context of the constructor function. Returns the constructor function for the " +
+                "newly-created type."
             );
         }
 
