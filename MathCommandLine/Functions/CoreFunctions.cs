@@ -791,7 +791,6 @@ namespace MathCommandLine.Functions
 
         public static MFunction RegisterDataType(IInterpreter interpreter)
         {
-
             return new MFunction(
                 "_rdt",
                 (args, env) =>
@@ -799,7 +798,46 @@ namespace MathCommandLine.Functions
                     string typeName = args[0].Value.GetStringValue();
                     MClosure providedConstructorFunction = args[1].Value.ClosureValue;
 
-                    // TODO: Allow composite types to have variable fields. Build the constructor function in here
+                    // TODO: build the constructor function in here and return it
+
+                    // Build the environment that has the field functions defined (_cf, _hf, _sf, _gf)
+                    MEnvironment constructorEnvironment = new MEnvironment(env);
+                    constructorEnvironment.AddConstant("_cf",
+                        MValue.Closure(new MClosure(
+                            new MParameters(),
+                            env,
+                            (args, env) =>
+                            {
+                                return MValue.Void();
+                            }
+                        )));
+                    constructorEnvironment.AddConstant("_hf",
+                        MValue.Closure(new MClosure(
+                            new MParameters(),
+                            env,
+                            (args, env) =>
+                            {
+                                return MValue.Void();
+                            }
+                        )));
+                    constructorEnvironment.AddConstant("_gf",
+                        MValue.Closure(new MClosure(
+                            new MParameters(),
+                            env,
+                            (args, env) =>
+                            {
+                                return MValue.Void();
+                            }
+                        )));
+                    constructorEnvironment.AddConstant("_sf",
+                        MValue.Closure(new MClosure(
+                            new MParameters(),
+                            env,
+                            (args, env) =>
+                            {
+                                return MValue.Void();
+                            }
+                        )));
 
                     return MValue.Void();
                 },
