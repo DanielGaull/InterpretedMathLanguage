@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 
 namespace MathCommandLine.Structure
 {
@@ -17,33 +14,19 @@ namespace MathCommandLine.Structure
         public string Name;
         // True for primitive types (number, list, lambda, big_int, big_decimal, type)
         public bool IsPrimitive;
-        // List of tuples containing the name of the key and the type of the value stored in that key
-        public List<Tuple<string, MDataType>> keysAndValues;
 
-        public MDataType(string name, bool isPrimitive, List<Tuple<string, MDataType>> keysAndValues)
+        public MDataType(string name, bool isPrimitive)
         {
             internalId = internalIdTracker++;
             Name = name;
             IsPrimitive = isPrimitive;
-            this.keysAndValues = keysAndValues;
         }
         private MDataType(int internalId, string name)
         {
             this.internalId = internalId;
             Name = name;
             IsPrimitive = true;
-            keysAndValues = null;
         }
-
-        // Creates a primitive data type
-        public MDataType(string name)
-            : this(name, true, null)
-        {}
-
-        // Creates a composite data type
-        public MDataType(string name, params Tuple<string, MDataType>[] keysAndValues)
-            : this(name, false, keysAndValues.ToList())
-        {}
 
         public static MDataType Empty = new MDataType();
 
@@ -57,22 +40,18 @@ namespace MathCommandLine.Structure
 
         // Core data types
         public static MDataType Any = new MDataType(ANY_TYPE_ID, "any");
-        public static MDataType Number = new MDataType("number");
-        public static MDataType List = new MDataType("list");
-        public static MDataType Closure = new MDataType("function");
-        public static MDataType Type = new MDataType("type");
-        public static MDataType BigInt = new MDataType("big_int");
-        public static MDataType BigDecimal = new MDataType("big_decimal");
-        public static MDataType Error = new MDataType("error",
-            Tuple.Create("code", Number),
-            Tuple.Create("message", String),
-            Tuple.Create("data", List));
-        public static MDataType Reference = new MDataType("reference");
-        public static MDataType String = new MDataType("string",
-            Tuple.Create("chars", List));
-        public static MDataType Void = new MDataType("void");
-        public static MDataType Boolean = new MDataType("bool");
-        public static MDataType Null = new MDataType("null");
+        public static MDataType Number = new MDataType("number", true);
+        public static MDataType List = new MDataType("list", true);
+        public static MDataType Closure = new MDataType("function", true);
+        public static MDataType Type = new MDataType("type", true);
+        public static MDataType BigInt = new MDataType("big_int", true);
+        public static MDataType BigDecimal = new MDataType("big_decimal", true);
+        public static MDataType Error = new MDataType("error", false);
+        public static MDataType Reference = new MDataType("reference", true);
+        public static MDataType String = new MDataType("string", false);
+        public static MDataType Void = new MDataType("void", true);
+        public static MDataType Boolean = new MDataType("bool", true);
+        public static MDataType Null = new MDataType("null", true);
 
         public static bool operator ==(MDataType dt1, MDataType dt2)
         {
