@@ -19,11 +19,11 @@ namespace MathCommandLine.Structure
         public MDataType TypeValue; // For the type type (that represents an actual data type)
         public MBoxedValue RefValue; // For the reference value
         public bool BoolValue; // For the boolean type
-        public Dictionary<string, MValue> DataValues; // The Data Values for composite types (maps name => value)
+        public Dictionary<string, MField> DataValues; // The Data Values for composite types (maps name => value)
         public MDataType DataType;
 
         public MValue(MDataType dataType, double numberValue, MList listValue, MClosure closureValue, decimal bigDecimalValue, 
-            long bigIntValue, MDataType typeValue, MBoxedValue refValue, bool boolValue, Dictionary<string, MValue> dataValues)
+            long bigIntValue, MDataType typeValue, MBoxedValue refValue, bool boolValue, Dictionary<string, MField> dataValues)
         {
             DataType = dataType;
             NumberValue = numberValue;
@@ -87,7 +87,7 @@ namespace MathCommandLine.Structure
             return new MValue(MDataType.Null, 0, MList.Empty, MClosure.Empty, 0, 0, MDataType.Empty, null,
                 false, null);
         }
-        public static MValue Composite(MDataType type, Dictionary<string, MValue> values)
+        public static MValue Composite(MDataType type, Dictionary<string, MField> values)
         {
             return new MValue(type, 0, MList.Empty, MClosure.Empty, 0, 0, MDataType.Empty, null, false, values);
         }
@@ -100,7 +100,7 @@ namespace MathCommandLine.Structure
         {
             if (DataType == MDataType.String)
             {
-                return Utilities.MListToString(GetValueByName("chars").ListValue);
+                return Utilities.MListToString(GetValueByName("chars", true).ListValue);
             }
             return null;
         }
@@ -108,11 +108,11 @@ namespace MathCommandLine.Structure
         // Errors are a core composite type, so they are not primitive but still exist in core code
         public static MValue Error(ErrorCodes code, string message, MList data)
         {
-            Dictionary<string, MValue> values = new Dictionary<string, MValue>()
+            Dictionary<string, MField> values = new Dictionary<string, MField>()
             {
-                { "code", Number((int) code) },
-                { "message", String(message) },
-                { "data", List(data) }
+                { "code", new MField(Number((int) code), MField.PUBLIC, MField.PRIVATE) },
+                { "message", new MField(String(message), MField.PUBLIC, MField.PRIVATE) },
+                { "data", new MField(List(data), MField.PUBLIC, MField.PRIVATE) }
             };
             return Composite(MDataType.Error, values);
         }
@@ -130,23 +130,30 @@ namespace MathCommandLine.Structure
         }
         public static MValue String(MList value)
         {
-            Dictionary<string, MValue> values = new Dictionary<string, MValue>()
+            Dictionary<string, MField> values = new Dictionary<string, MField>()
             {
-                { "chars", List(value) }
+                { "chars", new MField(List(value), MField.PUBLIC, MField.PRIVATE) }
             };
             return Composite(MDataType.String, values);
         }
 
-        public MValue GetValueByName(string name)
+        public MValue GetValueByName(string name, bool isSelfAccessing)
         {
             if (DataValues != null)
             {
                 if (DataValues.ContainsKey(name))
                 {
-                    return DataValues[name];
+                    MField field = DataValues[name];
+                    if (!isSelfAccessing && field.ReadPermission != MField.PUBLIC)
+                    {
+                        return Error(ErrorCodes.KEY_DOES_NOT_EXIST,
+                            "The key \"" + name + "\" does not exist in this data value, or the field is not accessible.",
+                            MList.Empty);
+                    }
+                    return field.Value;
                 }
                 return Error(ErrorCodes.KEY_DOES_NOT_EXIST, 
-                    "The key \"" + name + "\" does not exist in this data value.", 
+                    "The key \"" + name + "\" does not exist in this data value, or the field is not accessible.", 
                     MList.Empty);
             }
             return Error(ErrorCodes.NOT_COMPOSITE);
@@ -196,7 +203,7 @@ namespace MathCommandLine.Structure
             else if (DataType == MDataType.String)
             {
                 StringBuilder builder = new StringBuilder("\"");
-                builder.Append(Utilities.MListToString(GetValueByName("chars").ListValue));
+                builder.Append(Utilities.MListToString(GetValueByName("chars", true).ListValue));
                 builder.Append("\"");
                 return builder.ToString();
             }
@@ -222,11 +229,11 @@ namespace MathCommandLine.Structure
             else if (DataType == MDataType.Error)
             {
                 StringBuilder builder = new StringBuilder("Error: #");
-                MValue codeValue = GetValueByName("code");
+                MValue codeValue = GetValueByName("code", true);
                 builder.Append(codeValue.ToShortString());
                 builder.Append(" (").Append(((ErrorCodes)codeValue.NumberValue).ToString()).Append(")");
-                builder.Append(" '").Append(GetValueByName("message").GetStringValue()).Append("' Data: ");
-                builder.Append(GetValueByName("data").ListValue.ToString());
+                builder.Append(" '").Append(GetValueByName("message", true).GetStringValue()).Append("' Data: ");
+                builder.Append(GetValueByName("data", true).ListValue.ToString());
                 return builder.ToString();
             }
             else
@@ -234,15 +241,19 @@ namespace MathCommandLine.Structure
                 // Some sort of composite type
                 StringBuilder builder = new StringBuilder("( ");
                 bool first = true;
-                foreach (KeyValuePair<string, MValue> kv in DataValues)
+                foreach (KeyValuePair<string, MField> kv in DataValues)
                 {
+                    if (kv.Value.ReadPermission != MField.PUBLIC)
+                    {
+                        continue;
+                    }
                     if (!first)
                     {
                         builder.Append(", ");
                         first = false;
                     }
                     builder.Append(kv.Key).Append(": ");
-                    builder.Append(kv.Value.ToString());
+                    builder.Append(kv.Value.Value.ToString());
                 }
                 builder.Append(" )");
                 return builder.ToString();
@@ -294,9 +305,9 @@ namespace MathCommandLine.Structure
                 {
                     return false;
                 }
-                foreach (KeyValuePair<string, MValue> kv in v1.DataValues)
+                foreach (KeyValuePair<string, MField> kv in v1.DataValues)
                 {
-                    if (kv.Value != v2.DataValues[kv.Key])
+                    if (kv.Value.Value != v2.DataValues[kv.Key].Value)
                     {
                         return false;
                     }

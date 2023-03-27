@@ -594,7 +594,7 @@ namespace MathCommandLine.Functions
                 {
                     MValue original = args[0].Value;
                     string key = args[1].Value.GetStringValue();
-                    return original.GetValueByName(key);
+                    return original.GetValueByName(key, false);
                 },
                 new MParameters(
                     new MParameter(MDataType.Any, "original"),
