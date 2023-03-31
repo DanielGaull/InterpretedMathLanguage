@@ -798,16 +798,37 @@ namespace MathCommandLine.Functions
                     string typeName = args[0].Value.GetStringValue();
                     MClosure providedConstructorFunction = args[1].Value.ClosureValue;
 
+                    // Create the new data type
+                    MDataType t = interpreter.AddDataType(typeName);
+
                     // TODO: build the constructor function in here and return it
 
-                    // Build the environment that has the field functions defined (_cf, _hf, _sf, _gf)
+                    // Build the environment that has the field functions defined (_cf, _hf, _sf, _gf),
+                    // and hidden value "this"
                     MEnvironment constructorEnvironment = new MEnvironment(env);
+                    // Keep a reference to the dictionary of values, so we can modify it
+                    Dictionary<string, MField> fields = new Dictionary<string, MField>();
+                    constructorEnvironment.AddHiddenValue("this", MValue.Composite(t, fields));
                     constructorEnvironment.AddConstant("_cf",
                         MValue.Closure(new MClosure(
-                            new MParameters(),
+                            new MParameters(
+                                new MParameter(MDataType.String, "name"),
+                                new MParameter(MDataType.Any, "value"),
+                                new MParameter("read_modifier", new MTypeRestrictionsEntry(MDataType.Number, 
+                                    new ValueRestriction(ValueRestriction.ValueRestrictionTypes.LessThanOrEqualTo, 1, null),
+                                    new ValueRestriction(ValueRestriction.ValueRestrictionTypes.GreaterThanOrEqualTo, 0, null))),
+                                new MParameter("write_modifier", new MTypeRestrictionsEntry(MDataType.Number,
+                                    new ValueRestriction(ValueRestriction.ValueRestrictionTypes.LessThanOrEqualTo, 1, null),
+                                    new ValueRestriction(ValueRestriction.ValueRestrictionTypes.GreaterThanOrEqualTo, 0, null)))
+                            ),
                             env,
                             (args, env) =>
                             {
+                                string name = args[0].Value.GetStringValue();
+                                MValue value = args[1].Value;
+                                int readMod = (int) args[2].Value.NumberValue;
+                                int writeMod = (int)args[3].Value.NumberValue;
+                                fields.Add(name, new MField(value, readMod, writeMod));
                                 return MValue.Void();
                             }
                         )));
@@ -817,7 +838,9 @@ namespace MathCommandLine.Functions
                             env,
                             (args, env) =>
                             {
-                                return MValue.Void();
+                                string name = args[0].Value.GetStringValue();
+                                bool has = fields.ContainsKey(name);
+                                return MValue.Bool(has);
                             }
                         )));
                     constructorEnvironment.AddConstant("_gf",
@@ -826,7 +849,13 @@ namespace MathCommandLine.Functions
                             env,
                             (args, env) =>
                             {
-                                return MValue.Void();
+                                string name = args[0].Value.GetStringValue();
+                                if (!fields.ContainsKey(name))
+                                {
+                                    return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST, "Variable " + name + " does not exist",
+                                        Utilities.StringToMList(name));
+                                }
+                                return fields[name].Value;
                             }
                         )));
                     constructorEnvironment.AddConstant("_sf",
@@ -835,6 +864,14 @@ namespace MathCommandLine.Functions
                             env,
                             (args, env) =>
                             {
+                                string name = args[0].Value.GetStringValue();
+                                if (!fields.ContainsKey(name))
+                                {
+                                    return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST, "Variable " + name + " does not exist",
+                                        Utilities.StringToMList(name));
+                                }
+                                MValue value = args[1].Value;
+                                fields[name].SetValue(value);
                                 return MValue.Void();
                             }
                         )));

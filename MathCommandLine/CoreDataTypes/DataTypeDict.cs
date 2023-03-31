@@ -20,6 +20,13 @@ namespace MathCommandLine.CoreDataTypes
             AddTypes(types);
         }
 
+        public MDataType CreateAndRegisterType(string name)
+        {
+            MDataType t = new MDataType(name, false);
+            internalDict.Add(name, t);
+            return t;
+        }
+
         public void AddTypes(List<MDataType> types)
         {
             for (int i = 0; i < types.Count; i++)

@@ -238,5 +238,15 @@ namespace MathCommandLine.Evaluation
             }
             return MDataType.Empty;
         }
+
+        public MDataType AddDataType(string typeName)
+        {
+            if (dtDict.Contains(typeName))
+            {
+                return MDataType.Empty;
+            }
+            MDataType t = dtDict.CreateAndRegisterType(typeName);
+            return t;
+        }
     }
 }

@@ -20,5 +20,10 @@ namespace MathCommandLine.CoreDataTypes
             this.ReadPermission = readPerm;
             this.WritePermission = writePerm;
         }
+        
+        public void SetValue(MValue value)
+        {
+            Value = value;
+        }
     }
 }
