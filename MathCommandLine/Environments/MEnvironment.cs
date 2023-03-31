@@ -11,11 +11,22 @@ namespace MathCommandLine.Environments
         public static MEnvironment Empty = new MEnvironment(null);
 
         Dictionary<string, MBoxedValue> values = new Dictionary<string, MBoxedValue>();
+        // Hidden values in an environment are only available to the interpreter
+        Dictionary<string, MBoxedValue> hiddenValues = new Dictionary<string, MBoxedValue>();
         MEnvironment parent;
 
         public MEnvironment(MEnvironment parent)
         {
             this.parent = parent;
+        }
+
+        public void AddHiddenValue(string name, MValue value, bool canGet, bool canSet)
+        {
+            hiddenValues.Add(name, new MBoxedValue(value, canGet, canSet, ""));
+        }
+        public void AddHiddenValue(string name, MValue value)
+        {
+            AddHiddenValue(name, value, true, true);
         }
 
         public void AddValue(string name, MValue value, bool canGet, bool canSet, string desc)
@@ -102,6 +113,40 @@ namespace MathCommandLine.Environments
             else
             {
                 return parent.Set(name, value);
+            }
+        }
+
+        public MValue GetHidden(string name)
+        {
+            if (this == Empty)
+            {
+                return MValue.Error(Util.ErrorCodes.VAR_DOES_NOT_EXIST);
+            }
+
+            if (hiddenValues.ContainsKey(name))
+            {
+                return hiddenValues[name].GetValue();
+            }
+            else
+            {
+                return parent.GetHidden(name);
+            }
+        }
+
+        public MValue SetHidden(string name, MValue value)
+        {
+            if (this == Empty)
+            {
+                return MValue.Error(Util.ErrorCodes.VAR_DOES_NOT_EXIST);
+            }
+
+            if (hiddenValues.ContainsKey(name))
+            {
+                return hiddenValues[name].SetValue(value);
+            }
+            else
+            {
+                return parent.SetHidden(name, value);
             }
         }
     }
