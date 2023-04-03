@@ -801,20 +801,16 @@ namespace MathCommandLine.Functions
                     // Create the new data type
                     MDataType t = interpreter.AddDataType(typeName);
 
-                    // TODO: build the constructor function in here and return it
-
-                    // Build the environment that has the field functions defined (_cf, _hf, _sf, _gf),
-                    // and hidden value "this"
-                    MEnvironment constructorEnvironment = new MEnvironment(env);
-                    // Keep a reference to the dictionary of values, so we can modify it
-                    Dictionary<string, MField> fields = new Dictionary<string, MField>();
-                    constructorEnvironment.AddHiddenValue("this", MValue.Composite(t, fields));
-                    constructorEnvironment.AddConstant("_cf",
-                        MValue.Closure(new MClosure(
+                    MClosure constructorFunction = new MClosure(providedConstructorFunction.Parameters, MEnvironment.Empty,
+                        (args, env) =>
+                        {
+                            // Keep a reference to the dictionary of values, so we can modify it
+                            Dictionary<string, MField> fields = new Dictionary<string, MField>();
+                            MValue cf = MValue.Closure(new MClosure(
                             new MParameters(
                                 new MParameter(MDataType.String, "name"),
                                 new MParameter(MDataType.Any, "value"),
-                                new MParameter("read_modifier", new MTypeRestrictionsEntry(MDataType.Number, 
+                                new MParameter("read_modifier", new MTypeRestrictionsEntry(MDataType.Number,
                                     new ValueRestriction(ValueRestriction.ValueRestrictionTypes.LessThanOrEqualTo, 1, null),
                                     new ValueRestriction(ValueRestriction.ValueRestrictionTypes.GreaterThanOrEqualTo, 0, null))),
                                 new MParameter("write_modifier", new MTypeRestrictionsEntry(MDataType.Number,
@@ -826,57 +822,71 @@ namespace MathCommandLine.Functions
                             {
                                 string name = args[0].Value.GetStringValue();
                                 MValue value = args[1].Value;
-                                int readMod = (int) args[2].Value.NumberValue;
+                                int readMod = (int)args[2].Value.NumberValue;
                                 int writeMod = (int)args[3].Value.NumberValue;
                                 fields.Add(name, new MField(value, readMod, writeMod));
                                 return MValue.Void();
                             }
-                        )));
-                    constructorEnvironment.AddConstant("_hf",
-                        MValue.Closure(new MClosure(
-                            new MParameters(),
-                            env,
-                            (args, env) =>
-                            {
-                                string name = args[0].Value.GetStringValue();
-                                bool has = fields.ContainsKey(name);
-                                return MValue.Bool(has);
-                            }
-                        )));
-                    constructorEnvironment.AddConstant("_gf",
-                        MValue.Closure(new MClosure(
-                            new MParameters(),
-                            env,
-                            (args, env) =>
-                            {
-                                string name = args[0].Value.GetStringValue();
-                                if (!fields.ContainsKey(name))
-                                {
-                                    return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST, "Variable " + name + " does not exist",
-                                        Utilities.StringToMList(name));
-                                }
-                                return fields[name].Value;
-                            }
-                        )));
-                    constructorEnvironment.AddConstant("_sf",
-                        MValue.Closure(new MClosure(
-                            new MParameters(),
-                            env,
-                            (args, env) =>
-                            {
-                                string name = args[0].Value.GetStringValue();
-                                if (!fields.ContainsKey(name))
-                                {
-                                    return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST, "Variable " + name + " does not exist",
-                                        Utilities.StringToMList(name));
-                                }
-                                MValue value = args[1].Value;
-                                fields[name].SetValue(value);
-                                return MValue.Void();
-                            }
-                        )));
+                        ));
+                            MValue hf = MValue.Closure(new MClosure(
+                                    new MParameters(),
+                                    env,
+                                    (args, env) =>
+                                    {
+                                        string name = args[0].Value.GetStringValue();
+                                        bool has = fields.ContainsKey(name);
+                                        return MValue.Bool(has);
+                                    }
+                                ));
+                            MValue gf = MValue.Closure(new MClosure(
+                                    new MParameters(),
+                                    env,
+                                    (args, env) =>
+                                    {
+                                        string name = args[0].Value.GetStringValue();
+                                        if (!fields.ContainsKey(name))
+                                        {
+                                            return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST, "Variable " + name + " does not exist",
+                                                Utilities.StringToMList(name));
+                                        }
+                                        return fields[name].Value;
+                                    }
+                                ));
+                            MValue sf = MValue.Closure(new MClosure(
+                                    new MParameters(),
+                                    env,
+                                    (args, env) =>
+                                    {
+                                        string name = args[0].Value.GetStringValue();
+                                        if (!fields.ContainsKey(name))
+                                        {
+                                            return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST, "Variable " + name + " does not exist",
+                                                Utilities.StringToMList(name));
+                                        }
+                                        MValue value = args[1].Value;
+                                        fields[name].SetValue(value);
+                                        return MValue.Void();
+                                    }
+                                ));
 
-                    return MValue.Void();
+                            MEnvironment constructorEnvironment = new MEnvironment(env);
+                            constructorEnvironment.AddConstant("_cf", cf);
+                            constructorEnvironment.AddConstant("_hf", hf);
+                            constructorEnvironment.AddConstant("_gf", gf);
+                            constructorEnvironment.AddConstant("_sf", sf);
+                            MClosure newSubConstFunc = 
+                                providedConstructorFunction.CloneWithNewEnvironment(constructorEnvironment);
+                            MValue callResult = interpreter.PerformCall(newSubConstFunc, args, env);
+                            if (callResult.DataType == MDataType.Error)
+                            {
+                                // Error means we should return it rather than continue
+                                return callResult;
+                            }
+                            return MValue.Composite(t, fields);
+                        }
+                    );
+
+                    return MValue.Closure(constructorFunction);
                 },
                 new MParameters(
                     new MParameter(MDataType.String, "type_name"),
