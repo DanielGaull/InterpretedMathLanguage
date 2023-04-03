@@ -250,8 +250,8 @@ namespace MathCommandLine.Structure
                     if (!first)
                     {
                         builder.Append(", ");
-                        first = false;
                     }
+                    first = false;
                     builder.Append(kv.Key).Append(": ");
                     builder.Append(kv.Value.Value.ToString());
                 }
