@@ -84,6 +84,11 @@ namespace MathCommandLine.Commands
                 case "close":
                 case "q":
                     return 1;
+                case "test":
+                case "tests":
+                case "t":
+                    RunTests();
+                    break;
                 default:
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Command not recognized");
@@ -197,6 +202,9 @@ namespace MathCommandLine.Commands
                         // Never output void as a result, since we're typically running a function
                         string resultString = "  " + result.ToLongString();
                         Console.WriteLine(resultString);
+
+                        // TEST: output the unparsed exp
+                        Console.WriteLine(parser.Unparse(parser.ParseExpression(input)));
                     }
                 }
                 catch (InvalidParseException ex)
@@ -204,6 +212,53 @@ namespace MathCommandLine.Commands
                     PrintError(ex.Message);
                 }
             }
+        }
+
+        private void RunTests()
+        {
+            // TODO: This is duplicated with the RunInterpreter code
+            Parser parser = new Parser();
+
+            bool stopped = false;
+            Interpreter evaluator = CreateInterpreter(parser, () =>
+            {
+                // On exit we just flag that we've exited; shouldn't really be used
+                stopped = true;
+            });
+
+            MEnvironment baseEnv = CreateBaseEnv(evaluator);
+
+            SyntaxHandler sh = new SyntaxHandler(parser, "{}(),".ToCharArray().ToList());
+            List<SyntaxDef> syntaxDefinitions = ImportSyntax(sh);
+
+            List<Tuple<string, string>> tests = GetTests();
+            int passed = 0;
+            foreach (var test in tests)
+            {
+                string input = test.Item1;
+                string expected = test.Item2;
+                string syntaxHandled = sh.FullConvert(syntaxDefinitions, input);
+                string output;
+                bool success;
+                try
+                {
+                    MValue result = evaluator.Evaluate(syntaxHandled, baseEnv);
+                    output = result.ToLongString();
+                    success = expected == output;
+                }
+                catch (Exception ex)
+                {
+                    success = false;
+                    output = "Exception";
+                }
+                if (success)
+                {
+                    passed++;
+                }
+                PrintTestResult(input, output, expected, success);
+            }
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("Passed " + passed + "/" + tests.Count + " tests.");
         }
 
         private List<SyntaxDef> ImportSyntax(SyntaxHandler sh)
@@ -245,6 +300,52 @@ namespace MathCommandLine.Commands
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(msg);
             Console.ForegroundColor = ConsoleColor.Gray;
+        }
+
+        private void PrintTestResult(string input, string output, string expected, bool success)
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write(input);
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.Write(" --> ");
+            if (success)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+            }
+            Console.Write(output);
+            Console.ForegroundColor = ConsoleColor.Gray;
+            if (!success)
+            {
+                Console.Write(" (Expected: '" + expected + "')\n");
+            }
+            Console.Write("\n");
+        }
+
+        private List<Tuple<string, string>> GetTests()
+        {
+            return new List<Tuple<string, string>>() { 
+                new Tuple<string, string>("_c({{()=>{TRUE},()=>{1}},{()=>{TRUE},()=>{2}}})", "(number) 1"),
+                new Tuple<string, string>("_c({{()=>{null},()=>{1}},{()=>{TRUE},()=>{2}}})", "(number) 2"),
+                new Tuple<string, string>("_add(1,2)", "(number) 3"),
+                new Tuple<string, string>("(()=>{(()=>{1})()})()", "(number) 1"),
+                new Tuple<string, string>("(()=>{2})()", "(number) 2"),
+                new Tuple<string, string>("(()=>{()=>{3}})()()", "(number) 3"),
+                new Tuple<string, string>("_map({1,2,3},(x)=>{_add(x,1)})", "(list) { 2, 3, 4 }"),
+                new Tuple<string, string>("_reduce({1,2,3,4,5},(prev,current)=>{_add(prev,current)},0)", "(number) 15"),
+                new Tuple<string, string>("_map(_crange(5),(x)=>{_add(x,5)})", "(list) { 5, 6, 7, 8, 9 }"),
+                new Tuple<string, string>("_or_e(()=>{1},()=>{4})", "(number) 1"),
+                new Tuple<string, string>("_or_e(()=>{null},()=>{4})", "(number) 4"),
+                new Tuple<string, string>("_and_e(()=>{null},()=>{4})", "(null) null"),
+                new Tuple<string, string>("_and_e(()=>{1},()=>{4})", "(number) 4"),
+                new Tuple<string, string>("_do({()=>{var x = 5},()=>{var y = &x},()=>{_set(y,3)},()=>{x}})", "(number) 3"),
+                new Tuple<string, string>("_map({1,2},(x)=>{_exit})", "(list) { ()~>{<function>}, ()~>{<function>} }"),
+                new Tuple<string, string>("5*(2+3)", "(number) 25"),
+                new Tuple<string, string>("(2+3)*5", "(number) 25")
+            };
         }
     }
 }

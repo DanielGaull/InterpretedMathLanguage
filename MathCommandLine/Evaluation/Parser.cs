@@ -28,7 +28,8 @@ namespace MathCommandLine.Evaluation
 
         // Call parsing values
         private const char CALL_END_WRAPPER = ')';
-        private const char CALL_START_WRAPPER = '(';
+        private const char CALL_START_WRAPPER = '('; 
+        private const char ARG_DELIMITER = ',';
 
         // Param parsing values
         private const char GENERIC_END_WRAPPER = ')';
@@ -37,6 +38,11 @@ namespace MathCommandLine.Evaluation
         // List parsing values
         private const char LIST_START_WRAPPER = '{';
         private const char LIST_END_WRAPPER = '}';
+        private const char LIST_DELIMITER = ',';
+
+        // String parsing values
+        private const char STRING_START_WRAPPER = '"';
+        private const char STRING_END_WRAPPER = '"';
 
         // Parameter parsing regexes
         private const char PARAM_DELIMITER = ',';
@@ -59,8 +65,6 @@ namespace MathCommandLine.Evaluation
         private static readonly Regex VALUE_REST_LEN_EQ = new Regex(@"$l=\(([+]?[0-9]*)\)^");
 
         // Other useful regexes
-        private const char LIST_DELIMITER = ',';
-        private const char ARG_DELIMITER = ',';
         private static readonly Regex SYMBOL_NAME_REGEX = new Regex(@$"^{SYMBOL_PATTERN}$");
 
         public Parser()
@@ -179,6 +183,50 @@ namespace MathCommandLine.Evaluation
                 return Ast.Invalid(expression);
             }
             //throw new InvalidParseException(expression);
+        }
+
+        public string Unparse(Ast ast)
+        {
+            StringBuilder builder = new StringBuilder();
+            switch (ast.Type)
+            {
+                case AstTypes.NumberLiteral:
+                    return ast.NumberArg.ToString();
+                case AstTypes.ListLiteral:
+                    builder.Append(LIST_START_WRAPPER);
+                    for (int i = 0; i < ast.AstCollectionArg.Length; i++)
+                    {
+                        builder.Append(Unparse(ast.AstCollectionArg[i]));
+                        if (i + 1 < ast.AstCollectionArg.Length)
+                        {
+                            builder.Append(LIST_DELIMITER);
+                        }
+                    }
+                    builder.Append(LIST_END_WRAPPER);
+                    return builder.ToString();
+                case AstTypes.StringLiteral:
+                    builder.Append(STRING_START_WRAPPER);
+                    builder.Append(ast.Expression);
+                    builder.Append(STRING_END_WRAPPER);
+                    return builder.ToString();
+                case AstTypes.Variable:
+                    return ast.Name;
+                case AstTypes.Call:
+                    builder.Append(Unparse(ast.CalledAst));
+                    builder.Append(CALL_START_WRAPPER);
+                    for (int i = 0; i < ast.AstCollectionArg.Length; i++)
+                    {
+                        builder.Append(Unparse(ast.AstCollectionArg[i]));
+                        if (i + 1 < ast.AstCollectionArg.Length)
+                        {
+                            builder.Append(ARG_DELIMITER);
+                        }
+                    }
+                    builder.Append(CALL_END_WRAPPER);
+                    return builder.ToString();
+                    
+            }
+            return "";
         }
 
         /// <summary>
