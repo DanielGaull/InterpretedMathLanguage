@@ -226,7 +226,8 @@ namespace MathCommandLine.Evaluation
                     return builder.ToString();
                 case AstTypes.Invalid:
                     return ast.Expression;
-                    // TODO: AstTypes.LambdaLiteral
+                // TODO: AstTypes.LambdaLiteral
+                // Need a way to unparse parameters
             }
             return "";
         }
