@@ -224,7 +224,9 @@ namespace MathCommandLine.Evaluation
                     }
                     builder.Append(CALL_END_WRAPPER);
                     return builder.ToString();
-                    
+                case AstTypes.Invalid:
+                    return ast.Expression;
+                    // TODO: AstTypes.LambdaLiteral
             }
             return "";
         }
