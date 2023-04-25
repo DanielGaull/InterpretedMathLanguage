@@ -127,8 +127,7 @@ namespace MathCommandLine.Commands
             return baseEnv;
         }
 
-        private MValue RunLine(MEnvironment env, SyntaxParser sp,
-            List<SyntaxDef> syntaxDefs, Interpreter evaluator, string line)
+        private MValue RunLine(MEnvironment env, SyntaxParser sp, Interpreter evaluator, string line)
         {
             string syntaxHandled = sp.Unparse(sp.Parse(line));
             MValue result = evaluator.Evaluate(syntaxHandled, env);
@@ -166,7 +165,7 @@ namespace MathCommandLine.Commands
                 {
                     return;
                 }
-                RunLine(baseEnv, sp, syntaxDefinitions, evaluator, line);
+                RunLine(baseEnv, sp, evaluator, line);
             }
         }
 
@@ -198,7 +197,7 @@ namespace MathCommandLine.Commands
                 }
                 try
                 {
-                    MValue result = RunLine(baseEnv, sp, syntaxDefinitions, evaluator, input);
+                    MValue result = RunLine(baseEnv, sp, evaluator, input);
                     if (result.DataType != MDataType.Void)
                     {
                         // Never output void as a result, since we're typically running a function

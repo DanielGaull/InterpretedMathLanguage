@@ -86,6 +86,7 @@ namespace MathCommandLine.Evaluation
             {
                 // Pull out the expression without the first and last characters
                 expression = expression.Substring(1, expression.Length - 2);
+                return Parse(expression);
             }
 
             // 'expression' is either a call, variable, or literal
