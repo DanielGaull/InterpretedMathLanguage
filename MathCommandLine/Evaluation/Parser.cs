@@ -77,7 +77,7 @@ namespace MathCommandLine.Evaluation
         /// </summary>
         /// <param name="expression"></param>
         /// <returns></returns>
-        public Ast ParseExpression(string expression)
+        public virtual Ast Parse(string expression)
         {
             // TODO: Add support for big_decimal and big_int (require D or L at the end of the number literal, i.e. 750L or 0.642D)
 
@@ -98,7 +98,7 @@ namespace MathCommandLine.Evaluation
                 string callerString = attempedCallMatch.Caller;
                 string argsString = attempedCallMatch.Args;
 
-                Ast caller = ParseExpression(callerString);
+                Ast caller = Parse(callerString);
                 if (caller.Type == AstTypes.Invalid)
                 {
                     // Invalid caller means we need to return an invalid overall, instead of a valid call
@@ -107,7 +107,7 @@ namespace MathCommandLine.Evaluation
 
                 string[] argStrings = argsString.Length > 0 ? SplitByDelimiter(argsString, ARG_DELIMITER) : new string[0];
                 // Parse all the arguments
-                Ast[] args = argStrings.Select(ParseExpression).ToArray();
+                Ast[] args = argStrings.Select(Parse).ToArray();
 
                 return Ast.Call(caller, args);
             }
@@ -131,7 +131,7 @@ namespace MathCommandLine.Evaluation
                 List<Ast> elementAsts = new List<Ast>();
                 foreach (string str in elementStrings)
                 {
-                    elementAsts.Add(ParseExpression(str));
+                    elementAsts.Add(Parse(str));
                 }
                 return Ast.ListLiteral(elementAsts.ToArray());
             }
@@ -144,13 +144,13 @@ namespace MathCommandLine.Evaluation
                 string exprString = groups[3].Value;
 
                 // Parse Parameters
-                AstParameter[] parsedParams = paramsString.Length > 0 ? 
+                AstParameter[] parsedParams = paramsString.Length > 0 ?
                     (SplitByDelimiter(paramsString, PARAM_DELIMITER).Select((paramString) =>
-                    {  
+                    {
                         return ParseParameter(paramString);
                     }).ToArray()) : new AstParameter[0];
 
-                Ast body = ParseExpression(exprString);
+                Ast body = Parse(exprString);
 
                 return Ast.LambdaLiteral(parsedParams, body, arrowBit == "=");
             }
@@ -165,7 +165,6 @@ namespace MathCommandLine.Evaluation
                 // Someone else will either handle it or throw an error
                 return Ast.Invalid(expression);
             }
-            //throw new InvalidParseException(expression);
         }
 
         public string Unparse(Ast ast)

@@ -127,10 +127,10 @@ namespace MathCommandLine.Commands
             return baseEnv;
         }
 
-        private MValue RunLine(MEnvironment env, SyntaxHandler handler,
+        private MValue RunLine(MEnvironment env, SyntaxParser sp,
             List<SyntaxDef> syntaxDefs, Interpreter evaluator, string line)
         {
-            string syntaxHandled = handler.FullConvert(syntaxDefs, line);
+            string syntaxHandled = sp.Unparse(sp.Parse(line));
             MValue result = evaluator.Evaluate(syntaxHandled, env);
             return result;
         }
@@ -152,6 +152,7 @@ namespace MathCommandLine.Commands
             // Syntax loading; go to the syntax files path, and load in all the files it lists
             SyntaxHandler sh = new SyntaxHandler(parser, "{}(),".ToCharArray().ToList());
             List<SyntaxDef> syntaxDefinitions = ImportSyntax(sh);
+            SyntaxParser sp = new SyntaxParser(syntaxDefinitions);
 
             // Simple reading for now
             string[] lines = Regex.Split(text, "(?:\r\n|\r|\n)+");
@@ -165,7 +166,7 @@ namespace MathCommandLine.Commands
                 {
                     return;
                 }
-                RunLine(baseEnv, sh, syntaxDefinitions, evaluator, line);
+                RunLine(baseEnv, sp, syntaxDefinitions, evaluator, line);
             }
         }
 
@@ -184,6 +185,7 @@ namespace MathCommandLine.Commands
             // Syntax loading; go to the syntax files path, and load in all the files it lists
             SyntaxHandler sh = new SyntaxHandler(parser, "{}(),".ToCharArray().ToList());
             List<SyntaxDef> syntaxDefinitions = ImportSyntax(sh);
+            SyntaxParser sp = new SyntaxParser(syntaxDefinitions);
 
             // Simple reading for now
             while (running)
@@ -196,7 +198,7 @@ namespace MathCommandLine.Commands
                 }
                 try
                 {
-                    MValue result = RunLine(baseEnv, sh, syntaxDefinitions, evaluator, input);
+                    MValue result = RunLine(baseEnv, sp, syntaxDefinitions, evaluator, input);
                     if (result.DataType != MDataType.Void)
                     {
                         // Never output void as a result, since we're typically running a function
@@ -204,7 +206,7 @@ namespace MathCommandLine.Commands
                         Console.WriteLine(resultString);
 
                         // TEST: output the unparsed exp
-                        Console.WriteLine(parser.Unparse(parser.ParseExpression(input)));
+                        Console.WriteLine(parser.Unparse(parser.Parse(input)));
                     }
                 }
                 catch (InvalidParseException ex)
@@ -230,6 +232,7 @@ namespace MathCommandLine.Commands
 
             SyntaxHandler sh = new SyntaxHandler(parser, "{}(),".ToCharArray().ToList());
             List<SyntaxDef> syntaxDefinitions = ImportSyntax(sh);
+            SyntaxParser sp = new SyntaxParser(syntaxDefinitions);
 
             List<Tuple<string, string>> tests = GetTests();
             int passed = 0;
@@ -237,11 +240,11 @@ namespace MathCommandLine.Commands
             {
                 string input = test.Item1;
                 string expected = test.Item2;
-                string syntaxHandled = sh.FullConvert(syntaxDefinitions, input);
                 string output;
                 bool success;
                 try
                 {
+                    string syntaxHandled = sp.Unparse(sp.Parse(input));
                     MValue result = evaluator.Evaluate(syntaxHandled, baseEnv);
                     output = result.ToLongString();
                     success = expected == output;

@@ -51,7 +51,7 @@ namespace MathCommandLine.Evaluation
         // functions, variables (i.e. arguments), and literal core values
         private MValue FinalStageEvaluate(string expression, MEnvironment env)
         {
-            Ast tree = parser.ParseExpression(expression);
+            Ast tree = parser.Parse(expression);
             EnsureValidity(tree);
             return EvaluateAst(tree, env);
         }

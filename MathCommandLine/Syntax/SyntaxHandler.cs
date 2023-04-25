@@ -58,104 +58,104 @@ namespace MathCommandLine.Syntax
         // Converts one string to another using a single syntax definition
         // Performs only a single conversion
         // ** This is used as one step of a full conversion
-        public string Convert(SyntaxDef def, string source)
-        {
-            SyntaxMatchResult match = Match(def, source);
-            if (!match.IsMatch)
-            {
-                // TODO: Add an exception here because syntax is attempting to be handled when it can't be
-                return null;
-            }
-            // This is nice because we already have all of the variable string representations
-            // However, need to handle string/lambda cases
-            StringBuilder result = new StringBuilder();
-            for (int i = 0; i < def.GetResultSymbolCount(); i++)
-            {
-                SyntaxResultSymbol sym = def.GetResultSymbol(i);
-                if (sym.Type == SyntaxResultSymbolTypes.Argument)
-                {
-                    // Need to grab the string rep of this and possibly extend upon it
-                    string name = sym.ArgName;
-                    SyntaxArgument arg = match.GetValue(name);
-                    string literal = arg.LiteralValue;
-                    if (arg.DefiningParameter.IsStringSymbol)
-                    {
-                        literal = "\"" + literal + "\"";
-                    }
-                    else if (arg.DefiningParameter.IsWrappingLambda)
-                    {
-                        literal = "()~>{" + literal + "}";
-                    }
-                    result.Append(literal);
-                }
-                else if (sym.Type == SyntaxResultSymbolTypes.ExpressionPiece)
-                {
-                    result.Append(sym.ExpressionArg);
-                }
-            }
-            return result.ToString();
-        }
+        //public string Convert(SyntaxDef def, string source)
+        //{
+        //    SyntaxMatchResult match = Match(def, source);
+        //    if (!match.IsMatch)
+        //    {
+        //        // TODO: Add an exception here because syntax is attempting to be handled when it can't be
+        //        return null;
+        //    }
+        //    // This is nice because we already have all of the variable string representations
+        //    // However, need to handle string/lambda cases
+        //    StringBuilder result = new StringBuilder();
+        //    for (int i = 0; i < def.GetResultSymbolCount(); i++)
+        //    {
+        //        SyntaxResultSymbol sym = def.GetResultSymbol(i);
+        //        if (sym.Type == SyntaxResultSymbolTypes.Argument)
+        //        {
+        //            // Need to grab the string rep of this and possibly extend upon it
+        //            string name = sym.ArgName;
+        //            SyntaxArgument arg = match.GetValue(name);
+        //            string literal = arg.LiteralValue;
+        //            if (arg.DefiningParameter.IsStringSymbol)
+        //            {
+        //                literal = "\"" + literal + "\"";
+        //            }
+        //            else if (arg.DefiningParameter.IsWrappingLambda)
+        //            {
+        //                literal = "()~>{" + literal + "}";
+        //            }
+        //            result.Append(literal);
+        //        }
+        //        else if (sym.Type == SyntaxResultSymbolTypes.ExpressionPiece)
+        //        {
+        //            result.Append(sym.ExpressionArg);
+        //        }
+        //    }
+        //    return result.ToString();
+        //}
 
-        // Recursively performs conversions to completely convert a source string
-        // to pure core language using the provided definitions
-        // ** This is a full conversion
-        public string FullConvert(List<SyntaxDef> definitions, string source)
-        {
-            Ast result = parser.ParseExpression(source);
-            return FullConvert(definitions, result);
-        }
+        //// Recursively performs conversions to completely convert a source string
+        //// to pure core language using the provided definitions
+        //// ** This is a full conversion
+        //public string FullConvert(List<SyntaxDef> definitions, string source)
+        //{
+        //    Ast result = parser.Parse(source);
+        //    return FullConvert(definitions, result);
+        //}
 
-        private string FullConvert(List<SyntaxDef> definitions, Ast ast)
-        {
-            switch (ast.Type)
-            {
-                case AstTypes.ListLiteral:
-                    // Need to syntax-handle each element
-                    string[] results = ast.AstCollectionArg.Select(elem =>
-                    {
-                        return FullConvert(definitions, elem);
-                    }).ToArray();
-                    return "";// parser.ListToString(results);
-                case AstTypes.Call:
-                    // Need to syntax-handle the callee and each element
-                    string callee = FullConvert(definitions, ast.CalledAst);
-                    string[] args = ast.AstCollectionArg.Select(elem =>
-                    {
-                        return FullConvert(definitions, elem);
-                    }).ToArray();
-                    return ""; // parser.CallToString(callee, args);
-                case AstTypes.LambdaLiteral:
-                    // Need to syntax-handle the body
-                    string body = FullConvert(definitions, ast.Body);
-                    return "";//parser.LambdaToString(ast, body);
-                case AstTypes.Invalid:
-                    // Check if any syntax matches this expression
-                    SyntaxDef matchingDef = null;
-                    for (int i = 0; i < definitions.Count; i++)
-                    {
-                        SyntaxMatchResult match = Match(definitions[i], ast.Expression);
-                        if (match.IsMatch)
-                        {
-                            matchingDef = definitions[i];
-                            break;
-                        }
-                    }
-                    if (matchingDef != null)
-                    {
-                        // We've got a match
-                        // Need to Convert this expression, then recurse over that result
-                        string res = Convert(matchingDef, ast.Expression);
-                        return FullConvert(definitions, res);
-                    }
-                    else
-                    {
-                        // No match, so we have an error
-                        throw new InvalidParseException(ast.Expression);
-                    }
-                default:
-                    return "";
-            }
-        }
+        //private string FullConvert(List<SyntaxDef> definitions, Ast ast)
+        //{
+        //    switch (ast.Type)
+        //    {
+        //        case AstTypes.ListLiteral:
+        //            // Need to syntax-handle each element
+        //            string[] results = ast.AstCollectionArg.Select(elem =>
+        //            {
+        //                return FullConvert(definitions, elem);
+        //            }).ToArray();
+        //            return "";// parser.ListToString(results);
+        //        case AstTypes.Call:
+        //            // Need to syntax-handle the callee and each element
+        //            string callee = FullConvert(definitions, ast.CalledAst);
+        //            string[] args = ast.AstCollectionArg.Select(elem =>
+        //            {
+        //                return FullConvert(definitions, elem);
+        //            }).ToArray();
+        //            return ""; // parser.CallToString(callee, args);
+        //        case AstTypes.LambdaLiteral:
+        //            // Need to syntax-handle the body
+        //            string body = FullConvert(definitions, ast.Body);
+        //            return "";//parser.LambdaToString(ast, body);
+        //        case AstTypes.Invalid:
+        //            // Check if any syntax matches this expression
+        //            SyntaxDef matchingDef = null;
+        //            for (int i = 0; i < definitions.Count; i++)
+        //            {
+        //                SyntaxMatchResult match = Match(definitions[i], ast.Expression);
+        //                if (match.IsMatch)
+        //                {
+        //                    matchingDef = definitions[i];
+        //                    break;
+        //                }
+        //            }
+        //            if (matchingDef != null)
+        //            {
+        //                // We've got a match
+        //                // Need to Convert this expression, then recurse over that result
+        //                string res = Convert(matchingDef, ast.Expression);
+        //                return FullConvert(definitions, res);
+        //            }
+        //            else
+        //            {
+        //                // No match, so we have an error
+        //                throw new InvalidParseException(ast.Expression);
+        //            }
+        //        default:
+        //            return "";
+        //    }
+        //}
 
         public SyntaxDef ParseSyntaxDefinitionLine(string line)
         {
