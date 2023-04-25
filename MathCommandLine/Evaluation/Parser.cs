@@ -227,9 +227,6 @@ namespace MathCommandLine.Evaluation
                 case AstTypes.Invalid:
                     return ast.Expression;
                 case AstTypes.LambdaLiteral:
-                    // TODO: Need to unparse the parameters in here!
-                    // Then remove the ListToString/LambdaToString methods in here, remove the
-                    // Ast.ToExpressionString methods, and fix everything up so it runs
                     return "(" + string.Join(',', ast.Parameters.Select(x => UnparseParameter(x)).ToArray()) + ")" +
                         (ast.CreatesEnv ? "=>" : "~>") + "{" +
                         Unparse(ast.Body) + "}";
@@ -367,7 +364,8 @@ namespace MathCommandLine.Evaluation
         public string UnparseParameter(AstParameter parameter)
         {
             return parameter.Name + ":" + string.Join('|', 
-                parameter.TypeEntries.Select(x => "[" + string.Join(',', x.ValueRestrictions) + "]" + x.DataTypeName).ToArray());
+                parameter.TypeEntries.Select(x => 
+                    "[" + string.Join(',', x.ValueRestrictions) + "]" + x.DataTypeName).ToArray());
         }
 
         /// <summary>
