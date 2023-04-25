@@ -42,8 +42,7 @@ namespace MathCommandLine.CoreDataTypes
             {
                 return "<empty>";
             }
-            return "(" + Parameters.ToString() + ")" + (CreatesEnv ? "=>" : "~>") + "{" + 
-                (IsNativeBody ? "<function>" : AstBody.ToExpressionString()) + "}";
+            return "(" + Parameters.ToString() + ")" + (CreatesEnv ? "=>" : "~>") + "{ <function> }";
         }
 
         public MClosure CloneWithNewEnvironment(MEnvironment env)

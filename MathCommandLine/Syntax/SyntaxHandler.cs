@@ -115,7 +115,7 @@ namespace MathCommandLine.Syntax
                     {
                         return FullConvert(definitions, elem);
                     }).ToArray();
-                    return parser.ListToString(results);
+                    return "";// parser.ListToString(results);
                 case AstTypes.Call:
                     // Need to syntax-handle the callee and each element
                     string callee = FullConvert(definitions, ast.CalledAst);
@@ -123,11 +123,11 @@ namespace MathCommandLine.Syntax
                     {
                         return FullConvert(definitions, elem);
                     }).ToArray();
-                    return parser.CallToString(callee, args);
+                    return ""; // parser.CallToString(callee, args);
                 case AstTypes.LambdaLiteral:
                     // Need to syntax-handle the body
                     string body = FullConvert(definitions, ast.Body);
-                    return parser.LambdaToString(ast, body);
+                    return "";//parser.LambdaToString(ast, body);
                 case AstTypes.Invalid:
                     // Check if any syntax matches this expression
                     SyntaxDef matchingDef = null;
@@ -153,7 +153,7 @@ namespace MathCommandLine.Syntax
                         throw new InvalidParseException(ast.Expression);
                     }
                 default:
-                    return ast.ToExpressionString();
+                    return "";
             }
         }
 

@@ -91,32 +91,6 @@ namespace MathCommandLine.Evaluation
         }
 
         #endregion
-
-        public string ToExpressionString()
-        {
-            switch (Type) 
-            {
-                case AstTypes.NumberLiteral:
-                    return NumberArg.ToString();
-                case AstTypes.ListLiteral:
-                    return "{" + string.Join(',', AstCollectionArg.Select(x => x.ToExpressionString()).ToArray()) + "}";
-                case AstTypes.LambdaLiteral:
-                    return "(" + string.Join(',', Parameters.Select(x => x.ToString()).ToArray()) + ")" + 
-                        (CreatesEnv ? "=>" : "~>") + "{" + 
-                        Body.ToExpressionString() + "}";
-                case AstTypes.Variable:
-                    return Name;
-                case AstTypes.Call:
-                    return CalledAst.ToExpressionString() + "(" + 
-                        string.Join(',', AstCollectionArg.Select(x => x.ToExpressionString()).ToArray())
-                        + ")";
-                case AstTypes.StringLiteral:
-                    return "\"" + StringArg + "\"";
-                case AstTypes.Invalid:
-                    return Expression;
-            }
-            return "";
-        }
     }
 
     public class AstParameter
@@ -134,13 +108,6 @@ namespace MathCommandLine.Evaluation
         {
 
         }
-
-        public override string ToString()
-        {
-            // Ex)
-            // my_var_name:[>(0)]number|list
-            return Name + ":" + string.Join('|', TypeEntries.Select(x => x.ToString()).ToArray());
-        }
     }
     public class AstParameterTypeEntry
     {
@@ -155,11 +122,6 @@ namespace MathCommandLine.Evaluation
         public AstParameterTypeEntry(string dataTypeName)
             : this(dataTypeName, new ValueRestriction[0])
         {
-        }
-
-        public override string ToString()
-        {
-            return "[" + string.Join(',', ValueRestrictions) + "]" + DataTypeName;
         }
     }
 

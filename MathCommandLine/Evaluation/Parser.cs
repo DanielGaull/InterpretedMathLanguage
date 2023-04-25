@@ -71,23 +71,6 @@ namespace MathCommandLine.Evaluation
         {
         }
 
-        public string ListToString(string[] elements)
-        {
-            // TODO: Move the braces into constants
-            return "{" + string.Join(LIST_DELIMITER, elements) + "}";
-        }
-        public string CallToString(string callee, string[] args)
-        {
-            return callee + CALL_START_WRAPPER + string.Join(ARG_DELIMITER, args) + CALL_END_WRAPPER;
-        }
-        public string LambdaToString(Ast sourceLambda, string body)
-        {
-            // TODO: Move string fragments to constants
-            return "(" + 
-                string.Join(',', sourceLambda.Parameters.Select(x => x.ToString()).ToArray()) +
-                ")" + (sourceLambda.CreatesEnv ? "=>" : "~>") + "{" + body + "}";
-        }
-
         /// <summary>
         /// Parses a finalized expression into an AST
         /// Recall: Finalized expressions consist only of functions, literals, and variables
