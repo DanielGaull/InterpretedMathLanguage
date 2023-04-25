@@ -90,6 +90,10 @@ namespace MathCommandLine.Functions
 
         public override string ToString()
         {
+            if (parameters == null)
+            {
+                return "";
+            }
             return string.Join(',', parameters);
         }
     }
