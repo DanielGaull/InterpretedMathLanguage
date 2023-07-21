@@ -23,31 +23,36 @@ namespace MathCommandLine.Syntax
             // If result is not valid, then we want to do our syntax evaluation stuff on it
             if (result.Type == AstTypes.Invalid)
             {
-                // Check if any syntax matches this expression
-                SyntaxDef matchingDef = null;
-                for (int i = 0; i < definitions.Count; i++)
-                {
-                    SyntaxMatchResult match = Match(definitions[i], expression);
-                    if (match.IsMatch)
-                    {
-                        matchingDef = definitions[i];
-                        break;
-                    }
-                }
-                if (matchingDef != null)
-                {
-                    // We've got a match
-                    // Need to Convert this expression, then recurse over that result
-                    string res = Convert(matchingDef, expression);
-                    return Parse(res);
-                }
-                else
-                {
-                    // No match, so we have an error
-                    throw new InvalidParseException(expression);
-                }
+                return ParseSyntax(expression);
             }
             return result;
+        }
+
+        private Ast ParseSyntax(string expression)
+        {
+            // Check if any syntax matches this expression
+            SyntaxDef matchingDef = null;
+            for (int i = 0; i < definitions.Count; i++)
+            {
+                SyntaxMatchResult match = Match(definitions[i], expression);
+                if (match.IsMatch)
+                {
+                    matchingDef = definitions[i];
+                    break;
+                }
+            }
+            if (matchingDef != null)
+            {
+                // We've got a match
+                // Need to Convert this expression, then recurse over that result
+                string res = Convert(matchingDef, expression);
+                return Parse(res);
+            }
+            else
+            {
+                // No match, so we have an error
+                throw new InvalidParseException(expression);
+            }
         }
 
         // Converts one string to another using a single syntax definition

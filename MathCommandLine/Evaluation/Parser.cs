@@ -79,91 +79,98 @@ namespace MathCommandLine.Evaluation
         /// <returns></returns>
         public virtual Ast Parse(string expression)
         {
-            // TODO: Add support for big_decimal and big_int (require D or L at the end of the number literal, i.e. 750L or 0.642D)
-
-            // Initially, attempt to extract an expression from parentheses
-            while (IsParamWrapped(expression))
+            try
             {
-                // Pull out the expression without the first and last characters
-                expression = expression.Substring(1, expression.Length - 2);
-                return Parse(expression);
-            }
+                // TODO: Add support for big_decimal and big_int (require D or L at the end of the number literal, i.e. 750L or 0.642D)
 
-            // 'expression' is either a call, variable, or literal
-            // May be something that is wrapped entirely in parenthesis
-            CallMatch attempedCallMatch = MatchCall(expression);
-
-            if (attempedCallMatch.IsMatch)
-            {
-                // Performing some sort of call
-                string callerString = attempedCallMatch.Caller;
-                string argsString = attempedCallMatch.Args;
-
-                Ast caller = Parse(callerString);
-                if (caller.Type == AstTypes.Invalid)
+                // Initially, attempt to extract an expression from parentheses
+                while (IsParamWrapped(expression))
                 {
-                    // Invalid caller means we need to return an invalid overall, instead of a valid call
+                    // Pull out the expression without the first and last characters
+                    expression = expression.Substring(1, expression.Length - 2);
+                    return Parse(expression);
+                }
+
+                // 'expression' is either a call, variable, or literal
+                // May be something that is wrapped entirely in parenthesis
+                CallMatch attempedCallMatch = MatchCall(expression);
+
+                if (attempedCallMatch.IsMatch)
+                {
+                    // Performing some sort of call
+                    string callerString = attempedCallMatch.Caller;
+                    string argsString = attempedCallMatch.Args;
+
+                    Ast caller = Parse(callerString);
+                    if (caller.Type == AstTypes.Invalid)
+                    {
+                        // Invalid caller means we need to return an invalid overall, instead of a valid call
+                        return Ast.Invalid(expression);
+                    }
+
+                    string[] argStrings = argsString.Length > 0 ? SplitByDelimiter(argsString, ARG_DELIMITER) : new string[0];
+                    // Parse all the arguments
+                    Ast[] args = argStrings.Select(Parse).ToArray();
+
+                    return Ast.Call(caller, args);
+                }
+                else if (NUMBER_REGEX.IsMatch(expression))
+                {
+                    // Parse the double and throw it into the AST
+                    double number = double.Parse(expression);
+                    return Ast.NumberLiteral(number);
+                }
+                else if (STRING_REGEX.IsMatch(expression))
+                {
+                    string str = STRING_REGEX.Match(expression).Groups[1].Value;
+                    return Ast.StringLiteral(str);
+                }
+                else if (MatchesList(expression)) //LIST_REGEX.IsMatch(expression))
+                {
+                    // Extract the elements of the list
+                    string elements = LIST_REGEX.Match(expression).Groups[1].Value;
+                    // Separate by the list delimiter
+                    string[] elementStrings = elements.Length > 0 ? SplitByDelimiter(elements, LIST_DELIMITER) : new string[0];
+                    List<Ast> elementAsts = new List<Ast>();
+                    foreach (string str in elementStrings)
+                    {
+                        elementAsts.Add(Parse(str));
+                    }
+                    return Ast.ListLiteral(elementAsts.ToArray());
+                }
+                else if (LAMBDA_REGEX.IsMatch(expression))
+                {
+                    // Three parts: The expression, the parameters, and the type of lambda (environment/no environment)
+                    var groups = LAMBDA_REGEX.Match(expression).Groups;
+                    string paramsString = groups[1].Value;
+                    string arrowBit = groups[2].Value;
+                    string exprString = groups[3].Value;
+
+                    // Parse Parameters
+                    AstParameter[] parsedParams = paramsString.Length > 0 ?
+                        (SplitByDelimiter(paramsString, PARAM_DELIMITER).Select((paramString) =>
+                        {
+                            return ParseParameter(paramString);
+                        }).ToArray()) : new AstParameter[0];
+
+                    Ast body = Parse(exprString);
+
+                    return Ast.LambdaLiteral(parsedParams, body, arrowBit == "=");
+                }
+                else if (SYMBOL_NAME_REGEX.IsMatch(expression))
+                {
+                    // We've got a variable
+                    return Ast.Variable(expression);
+                }
+                else
+                {
+                    // We don't recognize this, so call it "invalid" and chuck it in here
+                    // Someone else will either handle it or throw an error
                     return Ast.Invalid(expression);
                 }
-
-                string[] argStrings = argsString.Length > 0 ? SplitByDelimiter(argsString, ARG_DELIMITER) : new string[0];
-                // Parse all the arguments
-                Ast[] args = argStrings.Select(Parse).ToArray();
-
-                return Ast.Call(caller, args);
             }
-            else if (NUMBER_REGEX.IsMatch(expression))
+            catch (InvalidParseException)
             {
-                // Parse the double and throw it into the AST
-                double number = double.Parse(expression);
-                return Ast.NumberLiteral(number);
-            }
-            else if (STRING_REGEX.IsMatch(expression))
-            {
-                string str = STRING_REGEX.Match(expression).Groups[1].Value;
-                return Ast.StringLiteral(str);
-            }
-            else if (MatchesList(expression)) //LIST_REGEX.IsMatch(expression))
-            {
-                // Extract the elements of the list
-                string elements = LIST_REGEX.Match(expression).Groups[1].Value;
-                // Separate by the list delimiter
-                string[] elementStrings = elements.Length > 0 ? SplitByDelimiter(elements, LIST_DELIMITER) : new string[0];
-                List<Ast> elementAsts = new List<Ast>();
-                foreach (string str in elementStrings)
-                {
-                    elementAsts.Add(Parse(str));
-                }
-                return Ast.ListLiteral(elementAsts.ToArray());
-            }
-            else if (LAMBDA_REGEX.IsMatch(expression))
-            {
-                // Three parts: The expression, the parameters, and the type of lambda (environment/no environment)
-                var groups = LAMBDA_REGEX.Match(expression).Groups;
-                string paramsString = groups[1].Value;
-                string arrowBit = groups[2].Value;
-                string exprString = groups[3].Value;
-
-                // Parse Parameters
-                AstParameter[] parsedParams = paramsString.Length > 0 ?
-                    (SplitByDelimiter(paramsString, PARAM_DELIMITER).Select((paramString) =>
-                    {
-                        return ParseParameter(paramString);
-                    }).ToArray()) : new AstParameter[0];
-
-                Ast body = Parse(exprString);
-
-                return Ast.LambdaLiteral(parsedParams, body, arrowBit == "=");
-            }
-            else if (SYMBOL_NAME_REGEX.IsMatch(expression))
-            {
-                // We've got a variable
-                return Ast.Variable(expression);
-            }
-            else
-            {
-                // We don't recognize this, so call it "invalid" and chuck it in here
-                // Someone else will either handle it or throw an error
                 return Ast.Invalid(expression);
             }
         }

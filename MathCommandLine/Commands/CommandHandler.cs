@@ -330,8 +330,8 @@ namespace MathCommandLine.Commands
         private List<Tuple<string, string>> GetTests()
         {
             return new List<Tuple<string, string>>() { 
-                new Tuple<string, string>("_c({{()=>{TRUE},()=>{1}},{()=>{TRUE},()=>{2}}})", "(number) 1"),
-                new Tuple<string, string>("_c({{()=>{null},()=>{1}},{()=>{TRUE},()=>{2}}})", "(number) 2"),
+                new Tuple<string, string>("_c({{()=>{true},()=>{1}},{()=>{true},()=>{2}}})", "(number) 1"),
+                new Tuple<string, string>("_c({{()=>{null},()=>{1}},{()=>{true},()=>{2}}})", "(number) 2"),
                 new Tuple<string, string>("_add(1,2)", "(number) 3"),
                 new Tuple<string, string>("(()=>{(()=>{1})()})()", "(number) 1"),
                 new Tuple<string, string>("(()=>{2})()", "(number) 2"),
@@ -343,8 +343,8 @@ namespace MathCommandLine.Commands
                 new Tuple<string, string>("_or_e(()=>{null},()=>{4})", "(number) 4"),
                 new Tuple<string, string>("_and_e(()=>{null},()=>{4})", "(null) null"),
                 new Tuple<string, string>("_and_e(()=>{1},()=>{4})", "(number) 4"),
-                new Tuple<string, string>("_do({()=>{var x = 5},()=>{var y = &x},()=>{_set(y,3)},()=>{x}})", "(number) 3"),
-                new Tuple<string, string>("_map({1,2},(x)=>{_exit})", "(list) { ()~>{<function>}, ()~>{<function>} }"),
+                new Tuple<string, string>("_do({()~>{var x = 5},()~>{var y = &x},()~>{_set(y,3)},()~>{x}})", "(number) 3"),
+                new Tuple<string, string>("_map({1,2},(x)=>{_exit})", "(list) { ()~>{ <function> }, ()~>{ <function> } }"),
                 new Tuple<string, string>("5*(2+3)", "(number) 25"),
                 new Tuple<string, string>("(2+3)*5", "(number) 25")
             };

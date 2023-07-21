@@ -219,14 +219,18 @@ namespace MathCommandLine.Evaluation
             }
             else
             {
-                // Step 1: Create the new environment
+                // Step 1: Create the new environment (if the closure creates a new one)
+                MEnvironment envToUse = closure.CreatesEnv ? new MEnvironment(closure.Environment) : currentEnv;
                 // Step 2: Evaluate the body with that new environment
-                MEnvironment newEnv = new MEnvironment(closure.Environment);
-                for (int i = 0; i < args.Length; i++)
+                // Only add args if the closure creates a new env; closures that don't create envs can't have params
+                if (closure.CreatesEnv)
                 {
-                    newEnv.AddVariable(args[i].Name, args[i].Value);
+                    for (int i = 0; i < args.Length; i++)
+                    {
+                        envToUse.AddVariable(args[i].Name, args[i].Value);
+                    }
                 }
-                return EvaluateAst(closure.AstBody, newEnv);
+                return EvaluateAst(closure.AstBody, envToUse);
             }
         }
 

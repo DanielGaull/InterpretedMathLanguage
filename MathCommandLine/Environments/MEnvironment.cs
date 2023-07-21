@@ -1,4 +1,6 @@
-﻿using MathCommandLine.Structure;
+﻿using MathCommandLine.CoreDataTypes;
+using MathCommandLine.Exceptions;
+using MathCommandLine.Structure;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -86,12 +88,20 @@ namespace MathCommandLine.Environments
         {
             if (this == Empty)
             {
-                return MValue.Error(Util.ErrorCodes.VAR_DOES_NOT_EXIST);
+                return MValue.Error(Util.ErrorCodes.VAR_DOES_NOT_EXIST, $"Variable \"{name}\" does not exist.", MList.Empty);
             }
 
             if (values.ContainsKey(name))
             {
-                return values[name].GetValue();
+                try
+                {
+                    return values[name].GetValue();
+                }
+                catch (BoxedValueException)
+                {
+                    return MValue.Error(Util.ErrorCodes.VAR_DOES_NOT_EXIST, 
+                        $"Variable \"{name}\" does not exist.", MList.Empty);
+                }
             }
             else
             {
@@ -103,12 +113,20 @@ namespace MathCommandLine.Environments
         {
             if (this == Empty)
             {
-                return MValue.Error(Util.ErrorCodes.VAR_DOES_NOT_EXIST);
+                return MValue.Error(Util.ErrorCodes.VAR_DOES_NOT_EXIST, $"Variable \"{name}\" does not exist.", MList.Empty);
             }
 
             if (values.ContainsKey(name))
             {
-                return values[name].SetValue(value);
+                try
+                {
+                    return values[name].SetValue(value);
+                }
+                catch (BoxedValueException)
+                {
+                    return MValue.Error(Util.ErrorCodes.CANNOT_ASSIGN,
+                        $"Variable \"{name}\" cannot be assigned to.", MList.Empty);
+                }
             }
             else
             {
@@ -120,12 +138,20 @@ namespace MathCommandLine.Environments
         {
             if (this == Empty)
             {
-                return MValue.Error(Util.ErrorCodes.VAR_DOES_NOT_EXIST);
+                return MValue.Error(Util.ErrorCodes.VAR_DOES_NOT_EXIST, $"Variable \"{name}\" does not exist.", MList.Empty);
             }
 
             if (hiddenValues.ContainsKey(name))
             {
-                return hiddenValues[name].GetValue();
+                try
+                {
+                    return hiddenValues[name].GetValue();
+                }
+                catch (BoxedValueException)
+                {
+                    return MValue.Error(Util.ErrorCodes.VAR_DOES_NOT_EXIST,
+                        $"Variable \"{name}\" does not exist.", MList.Empty);
+                }
             }
             else
             {
@@ -137,12 +163,20 @@ namespace MathCommandLine.Environments
         {
             if (this == Empty)
             {
-                return MValue.Error(Util.ErrorCodes.VAR_DOES_NOT_EXIST);
+                return MValue.Error(Util.ErrorCodes.VAR_DOES_NOT_EXIST, $"Variable \"{name}\" does not exist.", MList.Empty);
             }
 
             if (hiddenValues.ContainsKey(name))
             {
-                return hiddenValues[name].SetValue(value);
+                try
+                {
+                    return hiddenValues[name].SetValue(value);
+                }
+                catch (BoxedValueException)
+                {
+                    return MValue.Error(Util.ErrorCodes.CANNOT_ASSIGN, 
+                        $"Variable \"{name}\" cannot be assigned to.", MList.Empty);
+                }
             }
             else
             {

@@ -715,6 +715,10 @@ namespace MathCommandLine.Functions
                         }
                         MClosure cond = pair[0].ClosureValue;
                         MValue condValue = interpreter.PerformCall(cond, MArguments.Empty, env);
+                        if (condValue.DataType == MDataType.Error)
+                        {
+                            return condValue;
+                        }
                         // Everything is truthy except the "false" value, "void", and "null"
                         if (condValue.IsTruthy())
                         {
@@ -964,6 +968,10 @@ namespace MathCommandLine.Functions
                     MClosure b1 = args[0].Value.ClosureValue;
                     MClosure b2 = args[1].Value.ClosureValue;
                     MValue result1 = interpreter.PerformCall(b1, MArguments.Empty, env);
+                    if (result1.DataType == MDataType.Error)
+                    {
+                        return result1;
+                    }
                     if (result1.IsTruthy())
                     {
                         // Simply return the second value
@@ -988,6 +996,10 @@ namespace MathCommandLine.Functions
                     MClosure b1 = args[0].Value.ClosureValue;
                     MClosure b2 = args[1].Value.ClosureValue;
                     MValue result1 = interpreter.PerformCall(b1, MArguments.Empty, env);
+                    if (result1.DataType == MDataType.Error)
+                    {
+                        return result1;
+                    }
                     if (!result1.IsTruthy())
                     {
                         // Simply return the second value

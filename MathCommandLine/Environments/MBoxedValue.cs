@@ -1,4 +1,5 @@
-﻿using MathCommandLine.Structure;
+﻿using MathCommandLine.Exceptions;
+using MathCommandLine.Structure;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -27,7 +28,8 @@ namespace MathCommandLine.Environments
             {
                 return value;
             }
-            return MValue.Error(Util.ErrorCodes.VAR_DOES_NOT_EXIST);
+            throw new BoxedValueException("Cannot get");
+            //return MValue.Error(Util.ErrorCodes.VAR_DOES_NOT_EXIST);
         }
 
         public MValue SetValue(MValue value)
@@ -37,7 +39,8 @@ namespace MathCommandLine.Environments
                 this.value = value;
                 return MValue.Void();
             }
-            return MValue.Error(Util.ErrorCodes.CANNOT_ASSIGN);
+            throw new BoxedValueException("Cannot assign");
+            //return MValue.Error(Util.ErrorCodes.CANNOT_ASSIGN);
         }
 
         public override string ToString()
