@@ -205,7 +205,7 @@ namespace MathCommandLine.Commands
                         Console.WriteLine(resultString);
 
                         // TEST: output the unparsed exp
-                        Console.WriteLine(parser.Unparse(parser.Parse(input)));
+                        // Console.WriteLine(parser.Unparse(parser.Parse(input)));
                     }
                 }
                 catch (InvalidParseException ex)
