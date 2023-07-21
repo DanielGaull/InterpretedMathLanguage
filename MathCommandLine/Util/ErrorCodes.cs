@@ -21,5 +21,6 @@ namespace MathCommandLine.Util
         CANNOT_ASSIGN = 12,
         CANNOT_DECLARE = 13,
         INVALID_ARGUMENT = 14,
+        ILLEGAL_LAMBDA = 15,
     }
 }

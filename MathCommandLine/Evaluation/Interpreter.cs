@@ -129,6 +129,14 @@ namespace MathCommandLine.Evaluation
                     }
                     return MValue.List(new MList(elements));
                 case AstTypes.LambdaLiteral:
+                    // Immediately check to make sure we aren't allowing any parameters if the closure
+                    // doesn't create an environment
+                    // Environment-less closures (i.e. ()~>{...}) cannot have parameters
+                    if (ast.Parameters.Length > 0 && !ast.CreatesEnv)
+                    {
+                        return MValue.Error(ErrorCodes.ILLEGAL_LAMBDA,
+                            "Lambdas that don't create environments (~>) cannot have parameters", MList.Empty);
+                    }
                     MParameter[] paramArray = ast.Parameters.Select((astParam) =>
                     {
                         string name = astParam.Name;

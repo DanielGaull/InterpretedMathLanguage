@@ -346,7 +346,10 @@ namespace MathCommandLine.Commands
                 new Tuple<string, string>("_do({()~>{var x = 5},()~>{var y = &x},()~>{_set(y,3)},()~>{x}})", "(number) 3"),
                 new Tuple<string, string>("_map({1,2},(x)=>{_exit})", "(list) { ()~>{ <function> }, ()~>{ <function> } }"),
                 new Tuple<string, string>("5*(2+3)", "(number) 25"),
-                new Tuple<string, string>("(2+3)*5", "(number) 25")
+                new Tuple<string, string>("(2+3)*5", "(number) 25"),
+                new Tuple<string, string>("(x)~>{x}", 
+                    "(error) Error: #15 (ILLEGAL_LAMBDA) 'Lambdas that don't create environments (~>)" + 
+                    " cannot have parameters' Data: {  }")
             };
         }
     }
