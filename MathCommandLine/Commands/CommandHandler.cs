@@ -239,6 +239,8 @@ namespace MathCommandLine.Commands
             int passed = 0;
             foreach (var test in tests)
             {
+                // Reset the environment after every test
+                baseEnv = CreateBaseEnv(evaluator);
                 string input = test.Item1;
                 string expected = test.Item2;
                 string output;
@@ -354,7 +356,11 @@ namespace MathCommandLine.Commands
                 new Tuple<string, string>("(2+3)*5", "(number) 25"),
                 new Tuple<string, string>("(x)~>{x}", 
                     "(error) Error: #15 (ILLEGAL_LAMBDA) 'Lambdas that don't create environments (~>)" + 
-                    " cannot have parameters' Data: {  }")
+                    " cannot have parameters' Data: {  }"),
+                new Tuple<string, string>("var x=7", "(number) 7"),
+                new Tuple<string, string>("_do({()~>{var y=3},()~>{y=4}})", "(number) 4"),
+                new Tuple<string, string>("_do({()~>{const z=3},()~>{z=4}})",
+                "(error) Error: #12 (CANNOT_ASSIGN) 'Cannot assign value to constant \"z\"' Data: {  }"),
             };
         }
     }
