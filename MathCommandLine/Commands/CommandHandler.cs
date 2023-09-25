@@ -334,6 +334,9 @@ namespace MathCommandLine.Commands
             return new List<Tuple<string, string>>() { 
                 new Tuple<string, string>("_c({{()=>{true},()=>{1}},{()=>{true},()=>{2}}})", "(number) 1"),
                 new Tuple<string, string>("_c({{()=>{null},()=>{1}},{()=>{true},()=>{2}}})", "(number) 2"),
+                new Tuple<string, string>("&true", "(reference) <ref -> (bool) TRUE>"),
+                new Tuple<string, string>("&varnotexist", 
+                    "(error) Error: #11 (VAR_DOES_NOT_EXIST) 'Variable \"varnotexist\" does not exist.' Data: {  }"),
                 new Tuple<string, string>("_add(1,2)", "(number) 3"),
                 new Tuple<string, string>("(()=>{(()=>{1})()})()", "(number) 1"),
                 new Tuple<string, string>("(()=>{2})()", "(number) 2"),
