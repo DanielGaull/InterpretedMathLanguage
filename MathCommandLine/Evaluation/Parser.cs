@@ -1,4 +1,5 @@
 ﻿using MathCommandLine.CoreDataTypes;
+using MathCommandLine.Environments;
 using MathCommandLine.Exceptions;
 using MathCommandLine.Functions;
 using MathCommandLine.Structure;
@@ -57,6 +58,11 @@ namespace MathCommandLine.Evaluation
         private const string ASSIGNMENT_TOKEN = "=";
         private const string DECLARATION_VAR_KEYWORD = "var";
         private const string DECLARATION_CONST_KEYWORD = "const";
+        private static readonly Regex DECLARATION_REGEX = 
+            new Regex($@"^({DECLARATION_VAR_KEYWORD}|{DECLARATION_CONST_KEYWORD})\s+({SYMBOL_PATTERN})\s*" + 
+                $@"{ASSIGNMENT_TOKEN}\s*(.*)$");
+        private static readonly Regex ASSIGMENT_REGEX = new Regex(
+            $@"^({SYMBOL_PATTERN})\s*{ASSIGNMENT_TOKEN}\s*(.*)$");
 
         // Value restriction regexes
         private static readonly Regex VALUE_REST_INTEGER = new Regex(@"%");
@@ -166,6 +172,54 @@ namespace MathCommandLine.Evaluation
                     Ast body = Parse(exprString);
 
                     return Ast.LambdaLiteral(parsedParams, body, arrowBit == "=");
+                }
+                else if (ASSIGMENT_REGEX.IsMatch(expression))
+                {
+                    var groups = ASSIGMENT_REGEX.Match(expression).Groups;
+                    string varName = groups[1].Value;
+                    string assignedExpr = groups[2].Value;
+                    // Make sure the variable name isn't reserved
+                    if (RESERVED_KEYWORDS.Contains(varName))
+                    {
+                        // Attempting to use a reserved keyword as a variable
+                        throw new InvalidParseException(expression);
+                    }
+                    // Parse the assigned expression
+                    Ast assigned = Parse(assignedExpr);
+                    // TODO: Add operator-assignments, ex. +=, &&=, etc.
+                    // Should be valid for ANY operator; even doing something like !== or === should work,
+                    // though they'd be pretty rare to want to do
+                    return Ast.VariableAssignment(varName, assigned);
+                }
+                else if (DECLARATION_REGEX.IsMatch(expression))
+                {
+                    var groups = DECLARATION_REGEX.Match(expression).Groups;
+                    string varName = groups[2].Value;
+                    // Make sure the variable name isn't reserved
+                    if (RESERVED_KEYWORDS.Contains(varName))
+                    {
+                        // Attempting to use a reserved keyword as a variable
+                        throw new InvalidParseException(expression);
+                    }
+                    string declarationType = groups[1].Value;
+                    VariableType varType = (VariableType)0;
+                    if (declarationType == DECLARATION_VAR_KEYWORD)
+                    {
+                        varType = VariableType.Variable;
+                    }
+                    else if (declarationType == DECLARATION_CONST_KEYWORD)
+                    {
+                        varType = VariableType.Constant;
+                    }
+                    else
+                    {
+                        // Should never get here, we'd have not matched the regex
+                        throw new InvalidParseException(expression);
+                    }
+                    string assignedExpr = groups[3].Value;
+                    Ast assigned = Parse(assignedExpr);
+
+                    return Ast.VariableDeclaration(varName, assigned, varType);
                 }
                 else if (SYMBOL_NAME_REGEX.IsMatch(expression))
                 {

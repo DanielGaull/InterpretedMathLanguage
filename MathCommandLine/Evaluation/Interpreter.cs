@@ -38,7 +38,8 @@ namespace MathCommandLine.Evaluation
 
         public MValue Evaluate(string expression, MEnvironment env)
         {
-            expression = CleanWhitespace(expression);
+            // TODO: Intelligently handle whitespace in the parser, rather than removing it here
+            //expression = CleanWhitespace(expression);
             return FinalStageEvaluate(expression, env);
         }
 
