@@ -59,8 +59,6 @@ namespace MathCommandLine.Functions
 
                 RegisterDataType(evaluator),
 
-                CreateReferenceFunction(evaluator),
-
                 AndFunction(evaluator),
                 AndeFunction(evaluator),
                 OrFunction(evaluator),
@@ -456,31 +454,6 @@ namespace MathCommandLine.Functions
                     new MParameter(MDataType.String, "desc")
                 ),
                 "Assigns a new description to 'ref'."
-            );
-        }
-
-        public static MFunction CreateReferenceFunction(IInterpreter evaluator)
-        {
-            return new MFunction(
-                "_ref",
-                (args, env) =>
-                {
-                    string name = args[0].Value.GetStringValue();
-                    MBoxedValue box = env.GetBox(name);
-                    if (box != null)
-                    {
-                        return MValue.Reference(box);
-                    }
-                    else
-                    {
-                        return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST,
-                                $"Variable \"{name}\" does not exist.", MList.Empty);
-                    }
-                },
-                new MParameters(
-                    new MParameter(MDataType.String, "var_name")
-                ),
-                "Returns a reference to the named value 'var_name'."
             );
         }
 

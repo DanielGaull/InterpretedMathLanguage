@@ -121,6 +121,17 @@ namespace MathCommandLine.Evaluation
                     return MValue.Number(ast.NumberArg);
                 case AstTypes.StringLiteral:
                     return MValue.String(ast.StringArg);
+                case AstTypes.ReferenceLiteral:
+                    MBoxedValue box = env.GetBox(ast.Name);
+                    if (box != null)
+                    {
+                        return MValue.Reference(box);
+                    }
+                    else
+                    {
+                        return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST,
+                                $"Variable \"{ast.Name}\" does not exist.", MList.Empty);
+                    }
                 case AstTypes.ListLiteral:
                     // Need to evaluate each element of the list
                     List<MValue> elements = new List<MValue>();
@@ -196,12 +207,12 @@ namespace MathCommandLine.Evaluation
                     {
                         return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST, $"Variable \"{varName}\" does not exist.");
                     }
-                    MBoxedValue box = env.GetBox(varName);
-                    if (!box.CanSet)
+                    MBoxedValue boxToAssign = env.GetBox(varName);
+                    if (!boxToAssign.CanSet)
                     {
                         return MValue.Error(ErrorCodes.CANNOT_ASSIGN, $"Cannot assign value to constant \"{varName}\"");
                     }
-                    box.SetValue(assignValue);
+                    boxToAssign.SetValue(assignValue);
                     return assignValue;
                 case AstTypes.Invalid:
                     throw new InvalidParseException(ast.Expression);

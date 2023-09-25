@@ -23,7 +23,7 @@ namespace MathCommandLine.Evaluation
         public AstParameter[] Parameters { get; private set; }
         // Array of ASTs, used for: Arguments -> Functions, Elements -> Lists
         public Ast[] AstCollectionArg { get; private set; }
-        // Used for Variable & TypeLiteral types, and declaration/assignments
+        // Used for Variable, ReferenceLiteral types, and declaration/assignments
         public string Name { get; private set; }
         // Used for Calls
         public Ast CalledAst { get; private set; }
@@ -54,6 +54,7 @@ namespace MathCommandLine.Evaluation
          * ListLiteral: AstCollectionArg
          * LambdaLiteral: Parameters, Body
          * StringLiteral: Expression (StringArg)
+         * ReferenceLiteral: Name
          * Variable: Name
          * Call: CalledAst, AstCollectionArg
          * VariableDeclaration: Name, Body, EnumArg (VariableType)
@@ -93,6 +94,10 @@ namespace MathCommandLine.Evaluation
         public static Ast StringLiteral(string text)
         {
             return new Ast(AstTypes.StringLiteral, 0, null, text, null, null, null, null, false, -1);
+        }
+        public static Ast ReferenceLiteral(string refName)
+        {
+            return new Ast(AstTypes.ReferenceLiteral, 0, null, null, null, refName, null, null, false, -1);
         }
         public static Ast Call(Ast calledAst, params Ast[] args)
         {
@@ -160,6 +165,8 @@ namespace MathCommandLine.Evaluation
         LambdaLiteral,
         // A literal string, in the format of "[text]"
         StringLiteral,
+        // A literal reference, in the format of "&[varname]"
+        ReferenceLiteral,
         // A literal variable, which must be made up of valid characters (A-Z, a-z, 0-9, _)
         // Can only start with a letter
         Variable,

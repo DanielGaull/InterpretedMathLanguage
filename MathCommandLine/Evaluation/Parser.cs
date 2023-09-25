@@ -22,6 +22,7 @@ namespace MathCommandLine.Evaluation
 
         // Regexes for matching language symbols
         private static readonly Regex NUMBER_REGEX = new Regex("^" + NUMBER_REGEX_PATTERN + "$");
+        private static readonly Regex REFERENCE_REGEX = new Regex(@"^\&(" + SYMBOL_PATTERN + ")$");
         // Group for the list elements
         private static readonly Regex LIST_REGEX = new Regex(@"^\{(.*)\}$");
         private static readonly Regex LAMBDA_REGEX = new Regex(@"^\((.*?)\)([=~])>\{(.*)\}$");
@@ -140,6 +141,11 @@ namespace MathCommandLine.Evaluation
                 {
                     string str = STRING_REGEX.Match(expression).Groups[1].Value;
                     return Ast.StringLiteral(str);
+                }
+                else if (REFERENCE_REGEX.IsMatch(expression))
+                {
+                    string varName = REFERENCE_REGEX.Match(expression).Groups[1].Value;
+                    return Ast.ReferenceLiteral(varName);
                 }
                 else if (MatchesList(expression)) //LIST_REGEX.IsMatch(expression))
                 {
