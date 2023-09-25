@@ -169,6 +169,40 @@ namespace MathCommandLine.Evaluation
                     }
                     // Create a closure with this current environment
                     return MValue.Closure(new MClosure(parameters, env, ast.Body, ast.CreatesEnv));
+                // Var declaration & assignment both return the value of the variable after the operation
+                // This means that assignments such as "x += 5" will return the new value of x
+                case AstTypes.VariableDeclaration:
+                    string newVarName = ast.Name;
+                    MValue newVarValue = EvaluateAst(ast.Body, env);
+                    bool canSet = ast.VariableType == VariableType.Variable;
+                    Regex reg = new Regex("^[a-zA-Z][a-zA-Z0-9_]*$");
+                    if (env.Has(newVarName))
+                    {
+                        return MValue.Error(ErrorCodes.CANNOT_DECLARE, $"Named value \"{newVarName}\" already exists.");
+                    }
+                    else if (!reg.IsMatch(newVarName))
+                    {
+                        return MValue.Error(ErrorCodes.CANNOT_DECLARE, $"The name \"{newVarName}\" is an invalid name.");
+                    }
+                    else
+                    {
+                        env.AddValue(newVarName, newVarValue, true, canSet, null);
+                        return newVarValue;
+                    }
+                case AstTypes.VariableAssignment:
+                    string varName = ast.Name;
+                    MValue assignValue = EvaluateAst(ast.Body, env);
+                    if (!env.Has(varName))
+                    {
+                        return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST, $"Variable \"{varName}\" does not exist.");
+                    }
+                    MBoxedValue box = env.GetBox(varName);
+                    if (!box.CanSet)
+                    {
+                        return MValue.Error(ErrorCodes.CANNOT_ASSIGN, $"Cannot assign value to constant \"{varName}\"");
+                    }
+                    box.SetValue(assignValue);
+                    return assignValue;
                 case AstTypes.Invalid:
                     throw new InvalidParseException(ast.Expression);
             }
