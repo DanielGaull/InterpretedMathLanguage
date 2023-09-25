@@ -53,6 +53,11 @@ namespace MathCommandLine.Evaluation
         // Group for restrictions, and for type name
         private static readonly Regex PARAM_TYPE_RESTS_REGEX = new Regex(@"(?:\[(.*)\])?([a-zA-Z_][a-zA-Z0-9_]*)");
 
+        // Variable declaration and assigment syntax
+        private const string ASSIGNMENT_TOKEN = "=";
+        private const string DECLARATION_VAR_KEYWORD = "var";
+        private const string DECLARATION_CONST_KEYWORD = "const";
+
         // Value restriction regexes
         private static readonly Regex VALUE_REST_INTEGER = new Regex(@"%");
         private static readonly Regex VALUE_REST_POSITIVE = new Regex(@"\+");
@@ -66,6 +71,11 @@ namespace MathCommandLine.Evaluation
 
         // Other useful regexes
         private static readonly Regex SYMBOL_NAME_REGEX = new Regex(@$"^{SYMBOL_PATTERN}$");
+        private static readonly List<string> RESERVED_KEYWORDS = new List<string>()
+        {
+            DECLARATION_VAR_KEYWORD,
+            DECLARATION_CONST_KEYWORD,
+        };
 
         public Parser()
         {
@@ -159,7 +169,13 @@ namespace MathCommandLine.Evaluation
                 }
                 else if (SYMBOL_NAME_REGEX.IsMatch(expression))
                 {
-                    // We've got a variable
+                    // We've got a variable, or an attempt at one
+                    if (RESERVED_KEYWORDS.Contains(expression))
+                    {
+                        // Attempting to use a reserved keyword as a variable
+                        throw new InvalidParseException(expression);
+                    }
+                    // Valid variable
                     return Ast.Variable(expression);
                 }
                 else

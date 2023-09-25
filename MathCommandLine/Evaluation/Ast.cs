@@ -1,4 +1,5 @@
-﻿using MathCommandLine.Functions;
+﻿using MathCommandLine.Environments;
+using MathCommandLine.Functions;
 using MathCommandLine.Structure;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ namespace MathCommandLine.Evaluation
         public double NumberArg { get; private set; }
         // Used for invalid ASTs (and internally for string ones, but we also have another getter for it
         public string Expression { get; private set; }
-        // Used for lambdas
+        // Used for lambdas, and the right-hand expression for assignment/declarations
         public Ast Body { get; set; }
         // Used for lambdas
         public bool CreatesEnv { get; set; }
@@ -22,10 +23,15 @@ namespace MathCommandLine.Evaluation
         public AstParameter[] Parameters { get; private set; }
         // Array of ASTs, used for: Arguments -> Functions, Elements -> Lists
         public Ast[] AstCollectionArg { get; private set; }
-        // Used for Variable & TypeLiteral types
+        // Used for Variable & TypeLiteral types, and declaration/assignments
         public string Name { get; private set; }
         // Used for Calls
         public Ast CalledAst { get; private set; }
+        // Used for Var Declarations
+        // Casted to & from enum
+        public int EnumArg { get; private set; }
+
+        // Wrappers around existing properties, for readability
         // Used for strings (just a wrapper around Expression)
         public string StringArg
         {
@@ -34,6 +40,14 @@ namespace MathCommandLine.Evaluation
                 return Expression;
             }
         }
+        public VariableType VariableType
+        {
+            get
+            {
+                return (VariableType)EnumArg;
+            }
+        }
+        
 
         /* Used:
          * NumberLiteral: NumberArg
@@ -42,11 +56,13 @@ namespace MathCommandLine.Evaluation
          * StringLiteral: Expression (StringArg)
          * Variable: Name
          * Call: CalledAst, AstCollectionArg
+         * VariableDeclaration: Name, Body, EnumArg (VariableType)
+         * VariableAssignment: Name, Body
          * Invalid: Expression
          */
 
         public Ast(AstTypes type, double numberArg, Ast[] astCollectionArg, string expression, AstParameter[] parameters,
-            string name, Ast calledAst, Ast body, bool createsEnv)
+            string name, Ast calledAst, Ast body, bool createsEnv, int enumArg)
         {
             Type = type;
             NumberArg = numberArg;
@@ -57,37 +73,46 @@ namespace MathCommandLine.Evaluation
             CalledAst = calledAst;
             Body = body;
             CreatesEnv = createsEnv;
+            EnumArg = enumArg;
         }
 
         #region Constructor Functions
 
         public static Ast NumberLiteral(double value)
         {
-            return new Ast(AstTypes.NumberLiteral, value, null, null, null, null, null, null, false);
+            return new Ast(AstTypes.NumberLiteral, value, null, null, null, null, null, null, false, -1);
         }
         public static Ast ListLiteral(Ast[] elements)
         {
-            return new Ast(AstTypes.ListLiteral, 0, elements, null, null, null, null, null, false);
+            return new Ast(AstTypes.ListLiteral, 0, elements, null, null, null, null, null, false, -1);
         }
         public static Ast LambdaLiteral(AstParameter[] parameters, Ast body, bool createsEnv)
         {
-            return new Ast(AstTypes.LambdaLiteral, 0, null, null, parameters, null, null, body, createsEnv);
+            return new Ast(AstTypes.LambdaLiteral, 0, null, null, parameters, null, null, body, createsEnv, -1);
         }
         public static Ast StringLiteral(string text)
         {
-            return new Ast(AstTypes.StringLiteral, 0, null, text, null, null, null, null, false);
+            return new Ast(AstTypes.StringLiteral, 0, null, text, null, null, null, null, false, -1);
         }
         public static Ast Call(Ast calledAst, params Ast[] args)
         {
-            return new Ast(AstTypes.Call, 0, args, null, null, null, calledAst, null, false);
+            return new Ast(AstTypes.Call, 0, args, null, null, null, calledAst, null, false, -1);
         }
         public static Ast Variable(string name)
         {
-            return new Ast(AstTypes.Variable, 0, null, null, null, name, null, null, false);
+            return new Ast(AstTypes.Variable, 0, null, null, null, name, null, null, false, -1);
+        }
+        public static Ast VariableDeclaration(string name, Ast value, VariableType type)
+        {
+            return new Ast(AstTypes.VariableDeclaration, 0, null, null, null, name, null, value, false, (int) type);
+        }
+        public static Ast VariableAssignment(string name, Ast value)
+        {
+            return new Ast(AstTypes.VariableAssignment, 0, null, null, null, name, null, value, false, -1);
         }
         public static Ast Invalid(string expr)
         {
-            return new Ast(AstTypes.Invalid, 0, null, expr, null, null, null, null, false);
+            return new Ast(AstTypes.Invalid, 0, null, expr, null, null, null, null, false, -1);
         }
 
         #endregion
@@ -142,6 +167,14 @@ namespace MathCommandLine.Evaluation
         // i.e. _add(1, 2)
         // Format is: [callee]([arg0],[arg1],...)
         Call,
+        // A variable declaration
+        // TODO: Add in type declarations to variables
+        // Example: var x: number = 7
+        VariableDeclaration,
+        // A variable assignment
+        // May or may not include a binary operator, too
+        // Example: x = 7; x += 5; b &&= a || c;
+        VariableAssignment,
         // Anything that doesn't fit into the above definitions
         // Used in syntax handling, but if it appears when parsing some final expression,
         // then there's an error

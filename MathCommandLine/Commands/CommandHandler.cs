@@ -129,7 +129,9 @@ namespace MathCommandLine.Commands
 
         private MValue RunLine(MEnvironment env, SyntaxParser sp, Interpreter evaluator, string line)
         {
-            string syntaxHandled = sp.Unparse(sp.Parse(line));
+            // TODO: Re-add syntax handling. For now, we're just going to remove it to focus on core features
+            // When syntax is re-added (if ever), it should be added under the name of "transformations"
+            string syntaxHandled = line;//sp.Unparse(sp.Parse(line));
             MValue result = evaluator.Evaluate(syntaxHandled, env);
             return result;
         }
