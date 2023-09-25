@@ -40,7 +40,6 @@ namespace MathCommandLine.Functions
 
                 Get(evaluator),
                 Set(evaluator),
-                Declare(evaluator),
                 GetDesc(evaluator),
                 SetDesc(evaluator),
 
@@ -417,42 +416,6 @@ namespace MathCommandLine.Functions
                     new MParameter(MDataType.Any, "value")
                 ),
                 "Assigns the value for 'ref' to 'value'. Returns CAN_NOT_ASSIGN if reference variable is constant."
-            );
-        }
-        public static MFunction Declare(IInterpreter interpreter)
-        {
-            return new MFunction(
-                "_declare", 
-                (args, env) =>
-                {
-                    string refName = args[0].Value.GetStringValue();
-                    bool can_get = args[2].Value.BoolValue;
-                    bool can_set = args[3].Value.BoolValue;
-                    MValue value = args[1].Value;
-                    Regex reg = new Regex("^[a-zA-Z][a-zA-Z0-9_]*$");
-                    if (env.Has(refName))
-                    {
-                        return MValue.Error(ErrorCodes.CANNOT_DECLARE, $"Named value \"{refName}\" already exists.");
-                    }
-                    else if (!reg.IsMatch(refName))
-                    {
-                        return MValue.Error(ErrorCodes.CANNOT_DECLARE, $"The name \"{refName}\" is an invalid name.");
-                    }
-                    else
-                    {
-                        env.AddValue(refName, value, can_get, can_set, null);
-                        return MValue.Void();
-                    }
-                },
-                new MParameters(
-                    new MParameter(MDataType.String, "nv_name"),
-                    new MParameter(MDataType.Any, "value"),
-                    new MParameter(MDataType.Boolean, "can_get"),
-                    new MParameter(MDataType.Boolean, "can_set")
-                ),
-                "Declares the named value 'nv_name' and assigns 'value' to it. If 'can_get' is false, then 'nv_name' " +
-                "cannot be accessed. If 'can_get' is false, then 'nv_name' cannot be modified. " +
-                "Returns CANNOT_DECLARE error if the named value has already been declared, or the name is invalid."
             );
         }
         public static MFunction GetDesc(IInterpreter interpreter)

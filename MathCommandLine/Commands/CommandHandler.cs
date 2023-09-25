@@ -245,7 +245,7 @@ namespace MathCommandLine.Commands
                 bool success;
                 try
                 {
-                    string syntaxHandled = sp.Unparse(sp.Parse(input));
+                    string syntaxHandled = input;// sp.Unparse(sp.Parse(input));
                     MValue result = evaluator.Evaluate(syntaxHandled, baseEnv);
                     output = result.ToLongString();
                     success = expected == output;
