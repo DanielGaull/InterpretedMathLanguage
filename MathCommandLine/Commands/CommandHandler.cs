@@ -365,6 +365,7 @@ namespace MathCommandLine.Commands
                     "(error) Error: #12 (CANNOT_ASSIGN) 'Cannot assign value to constant \"z\"' Data: {  }"),
                 new Tuple<string, string>("[5]()", "(number) 5"),
                 new Tuple<string, string>("_do({[var x=false],[x]})", "(bool) FALSE"),
+                new Tuple<string, string>("\"hi\".chars", "(list) { 104, 105 }"),
             };
         }
     }
