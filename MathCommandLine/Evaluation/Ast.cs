@@ -118,7 +118,7 @@ namespace MathCommandLine.Evaluation
         }
         public static Ast MemberAccess(Ast parent, string name)
         {
-            return new Ast(AstTypes.VariableAssignment, 0, null, null, null, name, parent, null, false, -1);
+            return new Ast(AstTypes.MemberAccess, 0, null, null, null, name, parent, null, false, -1);
         }
         public static Ast Invalid(string expr)
         {

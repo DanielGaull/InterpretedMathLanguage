@@ -214,6 +214,10 @@ namespace MathCommandLine.Evaluation
                     }
                     boxToAssign.SetValue(assignValue);
                     return assignValue;
+                case AstTypes.MemberAccess:
+                    MValue original = EvaluateAst(ast.ParentAst, env);
+                    string key = ast.Name;
+                    return original.GetValueByName(key, false);
                 case AstTypes.Invalid:
                     throw new InvalidParseException(ast.Expression);
             }
