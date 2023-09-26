@@ -25,6 +25,7 @@ namespace MathCommandLine.Evaluation
         private static readonly Regex REFERENCE_REGEX = new Regex(@"^\&(" + SYMBOL_PATTERN + ")$");
         // Group for the list elements
         private static readonly Regex LIST_REGEX = new Regex(@"^\{(.*)\}$");
+        private static readonly Regex SIMPLE_LAMBDA_REGEX = new Regex(@"^\[(.*)\]$");
         private static readonly Regex LAMBDA_REGEX = new Regex(@"^\((.*?)\)([=~])>\{(.*)\}$");
         private static readonly Regex STRING_REGEX = new Regex("^\"([^\"]*)\"$");
 
@@ -36,6 +37,10 @@ namespace MathCommandLine.Evaluation
         // Param parsing values
         private const char GENERIC_END_WRAPPER = ')';
         private const char GENERIC_START_WRAPPER = '(';
+
+        // Simple lambda parsing values
+        private const char SIMPLE_LAMBDA_START_WRAPPER = '[';
+        private const char SIMPLE_LAMBDA_END_WRAPPER = ']';
 
         // List parsing values
         private const char LIST_START_WRAPPER = '{';
@@ -101,7 +106,7 @@ namespace MathCommandLine.Evaluation
                 // TODO: Add support for big_decimal and big_int (require D or L at the end of the number literal, i.e. 750L or 0.642D)
 
                 // Initially, attempt to extract an expression from parentheses
-                while (IsParamWrapped(expression))
+                while (IsParenWrapped(expression))
                 {
                     // Pull out the expression without the first and last characters
                     expression = expression.Substring(1, expression.Length - 2);
@@ -156,7 +161,7 @@ namespace MathCommandLine.Evaluation
                     List<Ast> elementAsts = new List<Ast>();
                     foreach (string str in elementStrings)
                     {
-                        elementAsts.Add(Parse(str));
+                        elementAsts.Add(Parse(str.Trim()));
                     }
                     return Ast.ListLiteral(elementAsts.ToArray());
                 }
@@ -178,6 +183,13 @@ namespace MathCommandLine.Evaluation
                     Ast body = Parse(exprString);
 
                     return Ast.LambdaLiteral(parsedParams, body, arrowBit == "=");
+                }
+                else if (MatchesSimpleLambda(expression))
+                {
+                    // Simple lambda; no params, does not create body
+                    string contents = SIMPLE_LAMBDA_REGEX.Match(expression).Groups[1].Value;
+                    Ast body = Parse(contents);
+                    return Ast.LambdaLiteral(new AstParameter[0], body, false);
                 }
                 else if (ASSIGMENT_REGEX.IsMatch(expression))
                 {
@@ -439,7 +451,7 @@ namespace MathCommandLine.Evaluation
         /// </summary>
         /// <param name="expression"></param>
         /// <returns></returns>
-        private bool IsParamWrapped(string expression)
+        private bool IsParenWrapped(string expression)
         {
             if (expression[0] != GENERIC_START_WRAPPER || expression[expression.Length - 1] != GENERIC_END_WRAPPER)
             {
@@ -531,6 +543,84 @@ namespace MathCommandLine.Evaluation
             substrings.Add(currentString.ToString());
             return substrings.ToArray();
         }
+
+        private bool IsWrappedBy(string expression, char start, char end)
+        {
+            if (expression.Length < 2)
+            {
+                return false;
+            }
+            if (expression[0] != start)
+            {
+                return false;
+            }
+            if (expression[expression.Length - 1] != end)
+            {
+                return false;
+            }
+            int levels = 0;
+            for (int i = 1; i < expression.Length - 1; i++)
+            {
+                char c = expression[i];
+                if (c == GENERIC_START_WRAPPER && start != GENERIC_START_WRAPPER)
+                {
+                    // We want to jump to the end of the list parenthesis
+                    while (c != GENERIC_END_WRAPPER)
+                    {
+                        c = expression[i];
+                        if (i >= expression.Length - 1)
+                        {
+                            // If no end to the paren, we have bigger problems
+                            return false;
+                        }
+                        i++;
+                    }
+                }
+                else if (c == SIMPLE_LAMBDA_START_WRAPPER && start != SIMPLE_LAMBDA_START_WRAPPER)
+                {
+                    // We want to jump to the end of the square brackets
+                    while (c != SIMPLE_LAMBDA_END_WRAPPER)
+                    {
+                        c = expression[i];
+                        if (i >= expression.Length - 1)
+                        {
+                            // If no end to the bracket, we have bigger problems
+                            return false;
+                        }
+                        i++;
+                    }
+                }
+                else if (c == LIST_START_WRAPPER && start != LIST_START_WRAPPER)
+                {
+                    // We want to jump to the end of the list
+                    while (c != LIST_END_WRAPPER)
+                    {
+                        c = expression[i];
+                        if (i >= expression.Length - 1)
+                        {
+                            // If no end to the brace, we have bigger problems
+                            return false;
+                        }
+                        i++;
+                    }
+                }
+                else if (c == start)
+                {
+                    levels++;
+                }
+                else if (c == end)
+                {
+                    // If we're closing the current "thing", then that's a problem
+                    if (levels == 0)
+                    {
+                        return false;
+                    }
+                    levels--;
+                }
+            }
+            // If we haven't failed yet, then just return
+            return true;
+        }
         
         /// <summary>
         /// Returns true if the expression is a list, or false if not
@@ -539,52 +629,12 @@ namespace MathCommandLine.Evaluation
         /// <returns></returns>
         private bool MatchesList(string expression)
         {
-            if (expression.Length < 2)
-            {
-                return false;
-            }
-            if (expression[0] != LIST_START_WRAPPER)
-            {
-                return false;
-            }
-            if (expression[expression.Length - 1] != LIST_END_WRAPPER)
-            {
-                return false;
-            }
-            int listLevels = 0;
-            for (int i = 1; i < expression.Length - 1; i++)
-            {
-                char c = expression[i];
-                if (c == GENERIC_START_WRAPPER)
-                {
-                    // We want to jump to the end of the list parenthesis
-                    while (c != GENERIC_END_WRAPPER)
-                    {
-                        c = expression[i];
-                        i++;
-                        if (i >= expression.Length - 1)
-                        {
-                            // If no end to the paren, we have bigger problems
-                            return false;
-                        }
-                    }
-                }
-                else if (c == LIST_START_WRAPPER)
-                {
-                    listLevels++;
-                }
-                else if (c == LIST_END_WRAPPER)
-                {
-                    // If we're closing the current list, then that's a problem
-                    if (listLevels == 0)
-                    {
-                        return false;
-                    }
-                    listLevels--;
-                }
-            }
-            // If we haven't failed yet, then just return
-            return true;
+            return IsWrappedBy(expression, LIST_START_WRAPPER, LIST_END_WRAPPER);
+        }
+
+        private bool MatchesSimpleLambda(string expression)
+        {
+            return IsWrappedBy(expression, SIMPLE_LAMBDA_START_WRAPPER, SIMPLE_LAMBDA_END_WRAPPER);
         }
 
         /// <summary>

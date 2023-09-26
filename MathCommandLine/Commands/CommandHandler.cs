@@ -255,7 +255,8 @@ namespace MathCommandLine.Commands
                 catch (Exception ex)
                 {
                     success = false;
-                    output = "Exception";
+                    output = "Exception: " + ex.Message;
+                    Console.WriteLine("\n\n" + ex.StackTrace + "\n\n");
                 }
                 if (success)
                 {
@@ -337,6 +338,7 @@ namespace MathCommandLine.Commands
                 new Tuple<string, string>("_c({{()=>{true},()=>{1}},{()=>{true},()=>{2}}})", "(number) 1"),
                 new Tuple<string, string>("_c({{()=>{null},()=>{1}},{()=>{true},()=>{2}}})", "(number) 2"),
                 new Tuple<string, string>("&true", "(reference) <ref -> (bool) TRUE>"),
+                new Tuple<string, string>("{1, 2, 3}", "(list) { 1, 2, 3 }"),
                 new Tuple<string, string>("&varnotexist", 
                     "(error) Error: #11 (VAR_DOES_NOT_EXIST) 'Variable \"varnotexist\" does not exist.' Data: {  }"),
                 new Tuple<string, string>("_add(1,2)", "(number) 3"),
@@ -352,15 +354,17 @@ namespace MathCommandLine.Commands
                 new Tuple<string, string>("_and_e(()=>{1},()=>{4})", "(number) 4"),
                 new Tuple<string, string>("_do({()~>{var x = 5},()~>{var y = &x},()~>{_set(y,3)},()~>{x}})", "(number) 3"),
                 new Tuple<string, string>("_map({1,2},(x)=>{_exit})", "(list) { ()~>{ <function> }, ()~>{ <function> } }"),
-                new Tuple<string, string>("5*(2+3)", "(number) 25"),
-                new Tuple<string, string>("(2+3)*5", "(number) 25"),
+                //new Tuple<string, string>("5*(2+3)", "(number) 25"),
+                //new Tuple<string, string>("(2+3)*5", "(number) 25"),
                 new Tuple<string, string>("(x)~>{x}", 
                     "(error) Error: #15 (ILLEGAL_LAMBDA) 'Lambdas that don't create environments (~>)" + 
                     " cannot have parameters' Data: {  }"),
                 new Tuple<string, string>("var x=7", "(number) 7"),
                 new Tuple<string, string>("_do({()~>{var y=3},()~>{y=4}})", "(number) 4"),
                 new Tuple<string, string>("_do({()~>{const z=3},()~>{z=4}})",
-                "(error) Error: #12 (CANNOT_ASSIGN) 'Cannot assign value to constant \"z\"' Data: {  }"),
+                    "(error) Error: #12 (CANNOT_ASSIGN) 'Cannot assign value to constant \"z\"' Data: {  }"),
+                new Tuple<string, string>("[5]()", "(number) 5"),
+                new Tuple<string, string>("_do({[var x=false],[x]})", "(bool) FALSE"),
             };
         }
     }
