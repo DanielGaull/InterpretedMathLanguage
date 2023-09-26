@@ -23,11 +23,11 @@ namespace MathCommandLine.Evaluation
         // Regexes for matching language symbols
         private static readonly Regex NUMBER_REGEX = new Regex("^" + NUMBER_REGEX_PATTERN + "$");
         private static readonly Regex REFERENCE_REGEX = new Regex(@"^\&(" + SYMBOL_PATTERN + ")$");
-        // Group for the list elements
         private static readonly Regex LIST_REGEX = new Regex(@"^\{(.*)\}$");
         private static readonly Regex SIMPLE_LAMBDA_REGEX = new Regex(@"^\[(.*)\]$");
         private static readonly Regex LAMBDA_REGEX = new Regex(@"^\((.*?)\)([=~])>\{(.*)\}$");
         private static readonly Regex STRING_REGEX = new Regex("^\"([^\"]*)\"$");
+        private static readonly Regex MEMBER_ACCESS_REGEX = new Regex(@"^(.*)\.(" + SYMBOL_PATTERN + ")$");
 
         // Call parsing values
         private const char CALL_END_WRAPPER = ')';
@@ -191,6 +191,14 @@ namespace MathCommandLine.Evaluation
                     Ast body = Parse(contents);
                     return Ast.LambdaLiteral(new AstParameter[0], body, false);
                 }
+                else if (MEMBER_ACCESS_REGEX.IsMatch(expression))
+                {
+                    var groups = MEMBER_ACCESS_REGEX.Match(expression).Groups;
+                    string parentStr = groups[1].Value;
+                    string name = groups[2].Value;
+                    Ast parent = Parse(parentStr);
+                    return Ast.MemberAccess(parent, name);
+                }
                 else if (ASSIGMENT_REGEX.IsMatch(expression))
                 {
                     var groups = ASSIGMENT_REGEX.Match(expression).Groups;
@@ -290,7 +298,7 @@ namespace MathCommandLine.Evaluation
                 case AstTypes.Variable:
                     return ast.Name;
                 case AstTypes.Call:
-                    builder.Append(Unparse(ast.CalledAst));
+                    builder.Append(Unparse(ast.ParentAst));
                     builder.Append(CALL_START_WRAPPER);
                     for (int i = 0; i < ast.AstCollectionArg.Length; i++)
                     {

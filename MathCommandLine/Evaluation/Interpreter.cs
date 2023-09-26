@@ -63,7 +63,7 @@ namespace MathCommandLine.Evaluation
             switch (ast.Type)
             {
                 case AstTypes.Call:
-                    EnsureValidity(ast.CalledAst);
+                    EnsureValidity(ast.ParentAst);
                     foreach (var child in ast.AstCollectionArg)
                     {
                         EnsureValidity(child);
@@ -93,7 +93,7 @@ namespace MathCommandLine.Evaluation
             switch (ast.Type)
             {
                 case AstTypes.Call:
-                    MValue evaluatedCaller = EvaluateAst(ast.CalledAst, env);
+                    MValue evaluatedCaller = EvaluateAst(ast.ParentAst, env);
                     // If an error, return that error instead of attempting to call it
                     if (evaluatedCaller.DataType == MDataType.Error)
                     {

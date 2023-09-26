@@ -23,10 +23,10 @@ namespace MathCommandLine.Evaluation
         public AstParameter[] Parameters { get; private set; }
         // Array of ASTs, used for: Arguments -> Functions, Elements -> Lists
         public Ast[] AstCollectionArg { get; private set; }
-        // Used for Variable, ReferenceLiteral types, and declaration/assignments
+        // Used for Variable, ReferenceLiteral types, declaration/assignments, member access
         public string Name { get; private set; }
-        // Used for Calls
-        public Ast CalledAst { get; private set; }
+        // Used for Calls & Dot access
+        public Ast ParentAst { get; private set; }
         // Used for Var Declarations
         // Casted to & from enum
         public int EnumArg { get; private set; }
@@ -56,14 +56,15 @@ namespace MathCommandLine.Evaluation
          * StringLiteral: Expression (StringArg)
          * ReferenceLiteral: Name
          * Variable: Name
-         * Call: CalledAst, AstCollectionArg
+         * Call: ParentAst, AstCollectionArg
          * VariableDeclaration: Name, Body, EnumArg (VariableType)
          * VariableAssignment: Name, Body
+         * MemberAccess: ParentAst, Name
          * Invalid: Expression
          */
 
         public Ast(AstTypes type, double numberArg, Ast[] astCollectionArg, string expression, AstParameter[] parameters,
-            string name, Ast calledAst, Ast body, bool createsEnv, int enumArg)
+            string name, Ast parentAst, Ast body, bool createsEnv, int enumArg)
         {
             Type = type;
             NumberArg = numberArg;
@@ -71,7 +72,7 @@ namespace MathCommandLine.Evaluation
             Expression = expression;
             Parameters = parameters;
             Name = name;
-            CalledAst = calledAst;
+            ParentAst = parentAst;
             Body = body;
             CreatesEnv = createsEnv;
             EnumArg = enumArg;
@@ -114,6 +115,10 @@ namespace MathCommandLine.Evaluation
         public static Ast VariableAssignment(string name, Ast value)
         {
             return new Ast(AstTypes.VariableAssignment, 0, null, null, null, name, null, value, false, -1);
+        }
+        public static Ast MemberAccess(Ast parent, string name)
+        {
+            return new Ast(AstTypes.VariableAssignment, 0, null, null, null, name, parent, null, false, -1);
         }
         public static Ast Invalid(string expr)
         {
@@ -170,6 +175,9 @@ namespace MathCommandLine.Evaluation
         // A literal variable, which must be made up of valid characters (A-Z, a-z, 0-9, _)
         // Can only start with a letter
         Variable,
+        // Used when accessing a member of an object
+        // Ex. "str".chars
+        MemberAccess,
         // An instance in which an invokation is being performed on some other object
         // i.e. _add(1, 2)
         // Format is: [callee]([arg0],[arg1],...)
