@@ -73,6 +73,7 @@ namespace MathCommandLine.Evaluation
                     throw new InvalidParseException(ast.Expression);
                 case AstTypes.NumberLiteral:
                 case AstTypes.StringLiteral:
+                case AstTypes.ReferenceLiteral:
                 case AstTypes.Variable:
                     // Do nothing, this is perfectly legal always
                     break;
@@ -85,6 +86,14 @@ namespace MathCommandLine.Evaluation
                 case AstTypes.LambdaLiteral:
                     EnsureValidity(ast.Body);
                     break;
+                case AstTypes.MemberAccess:
+                    EnsureValidity(ast.ParentAst);
+                    break;
+                case AstTypes.VariableAssignment:
+                case AstTypes.VariableDeclaration:
+                    EnsureValidity(ast.Body);
+                    break;
+
             }
         }
 
