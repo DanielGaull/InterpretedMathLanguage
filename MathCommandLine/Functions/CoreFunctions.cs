@@ -46,7 +46,6 @@ namespace MathCommandLine.Functions
                 TypeOf(evaluator),
                 CompareFunction(evaluator),
                 CaseFunction(evaluator),
-                GetValue(evaluator),
                 CreateErrorFunction(evaluator),
                 CreateStringFunction(evaluator),
                 DisplayFunction(evaluator),
@@ -520,25 +519,6 @@ namespace MathCommandLine.Functions
                 ),
                 "If 'value' appears in 'cases', returns the corresponding value in 'results' " +
                 "(the one with the same index). Otherwise, returns 'default'."
-            );
-        }
-        public static MFunction GetValue(IInterpreter evaluator)
-        {
-            return new MFunction(
-                "_gv", 
-                (args, env) =>
-                {
-                    MValue original = args[0].Value;
-                    string key = args[1].Value.GetStringValue();
-                    return original.GetValueByName(key, false);
-                },
-                new MParameters(
-                    new MParameter(MDataType.Any, "original"),
-                    new MParameter(MDataType.String, "key")
-                ),
-                "Attempts to get the value for 'key' from 'original'. " +
-                "Returns NOT_COMPOSITE if 'original' isn't composite, or " + 
-                "KEY_DOES_NOT_EXIST if the key does not exist in 'original'."
             );
         }
         public static MFunction CreateErrorFunction(IInterpreter evaluator)
