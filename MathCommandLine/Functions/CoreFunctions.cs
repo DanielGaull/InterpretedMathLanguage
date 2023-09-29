@@ -27,14 +27,9 @@ namespace MathCommandLine.Functions
                 TrigFunction(),
                 NaturalLog(),
 
-                ListLength(),
-                GetFromList(),
                 InsertInList(),
                 RemoveFromList(),
-                IndexOfList(),
                 IndexOfListCustom(),
-                MapList(),
-                ReduceList(),
                 CreateRangeList(),
                 ConcatLists(),
 
@@ -218,36 +213,6 @@ namespace MathCommandLine.Functions
         }
 
         // List Functions
-        public static MFunction ListLength()
-        {
-            return new MFunction(
-                "_len", 
-                (args, env, interpreter) =>
-                {
-                    return MValue.Number(MList.Length(args.Get(0).Value.ListValue));
-                },
-                new MParameters(
-                    new MParameter(MDataType.List, "list")
-                ),
-                "Returns the number of elements in 'list'."
-            );
-        }
-        public static MFunction GetFromList()
-        {
-            return new MFunction(
-                "_getl", 
-                (args, env, interpreter) =>
-                {
-                    // TODO: Handle index out of range errors
-                    return MList.Get(args.Get(0).Value.ListValue, (int)args.Get(1).Value.NumberValue);
-                },
-                new MParameters(
-                    new MParameter(MDataType.List, "list"),
-                    new MParameter(MDataType.Number, "index")
-                ),
-                "Returns the element at index 'index' in 'list'. May return error if 'index' is >= the length of 'list'."
-            );
-        }
         public static MFunction InsertInList()
         {
             return new MFunction(
@@ -282,21 +247,6 @@ namespace MathCommandLine.Functions
                 "Returns a new list with the elements of 'list' without the value at 'index'. May return error if 'index' is >= the length of 'list'."
             );
         }
-        public static MFunction IndexOfList()
-        { 
-            return new MFunction(
-                "_indexl", 
-                (args, env, interpreter) =>
-                {
-                    return MValue.Number(MList.IndexOf(args.Get(0).Value.ListValue, args.Get(1).Value));
-                },
-                new MParameters(
-                    new MParameter(MDataType.List, "list"),
-                    new MParameter(MDataType.Any, "element")
-                ),
-                "Returns the index of 'element' in 'list', or -1 if 'element' does not appear in 'list'."
-            );
-        }
         public static MFunction IndexOfListCustom()
         {
             // TODO: Attempt to cast result of equality evaluation to number
@@ -314,42 +264,6 @@ namespace MathCommandLine.Functions
                 ),
                 "Returns the index of 'element' in 'list', or -1 if 'element' does not appear in 'list'. Two elements are considered equal if 'equality_evaluator' " + 
                 "returns a non-zero value when passed in those two elements."
-            );
-        }
-        public static MFunction MapList()
-        {
-            return new MFunction(
-                "_map", 
-                (args, env, interpreter) =>
-                {
-                    return MValue.List(MList.Map(args.Get(0).Value.ListValue, 
-                        args.Get(1).Value.ClosureValue, interpreter, env));
-                },
-                new MParameters(
-                    new MParameter(MDataType.List, "list"),
-                    new MParameter(MDataType.Closure, "mapper")
-                ),
-                "Executes 'mapper' on each element of 'list', passing in the element, " +
-                "putting the results into a new list and returning it."
-            );
-        }
-        public static MFunction ReduceList()
-        {
-            return new MFunction(
-                "_reduce", 
-                (args, env, interpreter) =>
-                {
-                    return MList.Reduce(args.Get(0).Value.ListValue, args.Get(1).Value.ClosureValue, 
-                        args.Get(2).Value, interpreter, env);
-                },
-                new MParameters(
-                    new MParameter(MDataType.List, "list"),
-                    new MParameter(MDataType.Closure, "reducer"),
-                    new MParameter(MDataType.Any, "init_value")
-                ),
-                "Runs 'reducer' on each element of 'list', passing in (previous, current). " +
-                "'previous' is the result of the previous iteration (for first element, " +
-                "'previous' is 'init_value'). 'current' is the current element."
             );
         }
         public static MFunction CreateRangeList()

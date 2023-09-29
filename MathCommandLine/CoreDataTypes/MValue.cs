@@ -398,14 +398,26 @@ namespace MathCommandLine.Structure
                 },
                 {
                     "map",
-                    new MField(Closure(new MClosure(MParameters.Empty,
+                    new MField(Closure(new MClosure(new MParameters(new MParameter(MDataType.Closure, "mapper")),
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
-                            return List(MList.Map(args.Get(0).Value.ListValue,
-                                args.Get(1).Value.ClosureValue, interpreter, env));
+                            return List(MList.Map(list,
+                                args.Get(0).Value.ClosureValue, interpreter, env));
                         })), 1, 0)
                 },
+                {
+                    "reduce",
+                    new MField(Closure(new MClosure(new MParameters(
+                            new MParameter(MDataType.Closure, "reducer"),
+                            new MParameter(MDataType.Any, "init_value")),
+                        MEnvironment.Empty,
+                        (args, env, interpreter) =>
+                        {
+                            return MList.Reduce(list, args.Get(0).Value.ClosureValue,
+                                args.Get(1).Value, interpreter, env);
+                        })), 1, 0)
+                }
             };
         }
     }
