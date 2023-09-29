@@ -56,7 +56,7 @@ namespace MathCommandLine.Functions
                 ReadFunction(evaluator),
                 DoFunction(evaluator),
 
-                RegisterDataType(evaluator),
+                //RegisterDataType(evaluator),
 
                 AndFunction(evaluator),
                 AndeFunction(evaluator),
@@ -709,114 +709,114 @@ namespace MathCommandLine.Functions
             );
         }
 
-        public static MFunction RegisterDataType(IInterpreter interpreter)
-        {
-            return new MFunction(
-                "_rdt",
-                (args, env) =>
-                {
-                    string typeName = args[0].Value.GetStringValue();
-                    MClosure providedConstructorFunction = args[1].Value.ClosureValue;
+        //public static MFunction RegisterDataType(IInterpreter interpreter)
+        //{
+        //    return new MFunction(
+        //        "_rdt",
+        //        (args, env) =>
+        //        {
+        //            string typeName = args[0].Value.GetStringValue();
+        //            MClosure providedConstructorFunction = args[1].Value.ClosureValue;
 
-                    // Create the new data type
-                    MDataType t = interpreter.AddDataType(typeName);
+        //            // Create the new data type
+        //            MDataType t = interpreter.AddDataType(typeName);
 
-                    MClosure constructorFunction = new MClosure(providedConstructorFunction.Parameters, MEnvironment.Empty,
-                        (args, env) =>
-                        {
-                            // Keep a reference to the dictionary of values, so we can modify it
-                            Dictionary<string, MField> fields = new Dictionary<string, MField>();
-                            MValue cf = MValue.Closure(new MClosure(
-                            new MParameters(
-                                new MParameter(MDataType.String, "name"),
-                                new MParameter(MDataType.Any, "value"),
-                                new MParameter("read_modifier", new MTypeRestrictionsEntry(MDataType.Number,
-                                    new ValueRestriction(ValueRestriction.ValueRestrictionTypes.LessThanOrEqualTo, 1, null),
-                                    new ValueRestriction(ValueRestriction.ValueRestrictionTypes.GreaterThanOrEqualTo, 0, null))),
-                                new MParameter("write_modifier", new MTypeRestrictionsEntry(MDataType.Number,
-                                    new ValueRestriction(ValueRestriction.ValueRestrictionTypes.LessThanOrEqualTo, 1, null),
-                                    new ValueRestriction(ValueRestriction.ValueRestrictionTypes.GreaterThanOrEqualTo, 0, null)))
-                            ),
-                            env,
-                            (args, env) =>
-                            {
-                                string name = args[0].Value.GetStringValue();
-                                MValue value = args[1].Value;
-                                int readMod = (int)args[2].Value.NumberValue;
-                                int writeMod = (int)args[3].Value.NumberValue;
-                                fields.Add(name, new MField(value, readMod, writeMod));
-                                return MValue.Void();
-                            }
-                        ));
-                            MValue hf = MValue.Closure(new MClosure(
-                                    new MParameters(),
-                                    env,
-                                    (args, env) =>
-                                    {
-                                        string name = args[0].Value.GetStringValue();
-                                        bool has = fields.ContainsKey(name);
-                                        return MValue.Bool(has);
-                                    }
-                                ));
-                            MValue gf = MValue.Closure(new MClosure(
-                                    new MParameters(),
-                                    env,
-                                    (args, env) =>
-                                    {
-                                        string name = args[0].Value.GetStringValue();
-                                        if (!fields.ContainsKey(name))
-                                        {
-                                            return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST, "Variable " + name + " does not exist",
-                                                Utilities.StringToMList(name));
-                                        }
-                                        return fields[name].Value;
-                                    }
-                                ));
-                            MValue sf = MValue.Closure(new MClosure(
-                                    new MParameters(),
-                                    env,
-                                    (args, env) =>
-                                    {
-                                        string name = args[0].Value.GetStringValue();
-                                        if (!fields.ContainsKey(name))
-                                        {
-                                            return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST, "Variable " + name + " does not exist",
-                                                Utilities.StringToMList(name));
-                                        }
-                                        MValue value = args[1].Value;
-                                        fields[name].SetValue(value);
-                                        return MValue.Void();
-                                    }
-                                ));
+        //            MClosure constructorFunction = new MClosure(providedConstructorFunction.Parameters, MEnvironment.Empty,
+        //                (args, env) =>
+        //                {
+        //                    // Keep a reference to the dictionary of values, so we can modify it
+        //                    Dictionary<string, MField> fields = new Dictionary<string, MField>();
+        //                    MValue cf = MValue.Closure(new MClosure(
+        //                    new MParameters(
+        //                        new MParameter(MDataType.String, "name"),
+        //                        new MParameter(MDataType.Any, "value"),
+        //                        new MParameter("read_modifier", new MTypeRestrictionsEntry(MDataType.Number,
+        //                            new ValueRestriction(ValueRestriction.ValueRestrictionTypes.LessThanOrEqualTo, 1, null),
+        //                            new ValueRestriction(ValueRestriction.ValueRestrictionTypes.GreaterThanOrEqualTo, 0, null))),
+        //                        new MParameter("write_modifier", new MTypeRestrictionsEntry(MDataType.Number,
+        //                            new ValueRestriction(ValueRestriction.ValueRestrictionTypes.LessThanOrEqualTo, 1, null),
+        //                            new ValueRestriction(ValueRestriction.ValueRestrictionTypes.GreaterThanOrEqualTo, 0, null)))
+        //                    ),
+        //                    env,
+        //                    (args, env) =>
+        //                    {
+        //                        string name = args[0].Value.GetStringValue();
+        //                        MValue value = args[1].Value;
+        //                        int readMod = (int)args[2].Value.NumberValue;
+        //                        int writeMod = (int)args[3].Value.NumberValue;
+        //                        fields.Add(name, new MField(value, readMod, writeMod));
+        //                        return MValue.Void();
+        //                    }
+        //                ));
+        //                    MValue hf = MValue.Closure(new MClosure(
+        //                            new MParameters(),
+        //                            env,
+        //                            (args, env) =>
+        //                            {
+        //                                string name = args[0].Value.GetStringValue();
+        //                                bool has = fields.ContainsKey(name);
+        //                                return MValue.Bool(has);
+        //                            }
+        //                        ));
+        //                    MValue gf = MValue.Closure(new MClosure(
+        //                            new MParameters(),
+        //                            env,
+        //                            (args, env) =>
+        //                            {
+        //                                string name = args[0].Value.GetStringValue();
+        //                                if (!fields.ContainsKey(name))
+        //                                {
+        //                                    return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST, "Variable " + name + " does not exist",
+        //                                        Utilities.StringToMList(name));
+        //                                }
+        //                                return fields[name].Value;
+        //                            }
+        //                        ));
+        //                    MValue sf = MValue.Closure(new MClosure(
+        //                            new MParameters(),
+        //                            env,
+        //                            (args, env) =>
+        //                            {
+        //                                string name = args[0].Value.GetStringValue();
+        //                                if (!fields.ContainsKey(name))
+        //                                {
+        //                                    return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST, "Variable " + name + " does not exist",
+        //                                        Utilities.StringToMList(name));
+        //                                }
+        //                                MValue value = args[1].Value;
+        //                                fields[name].SetValue(value);
+        //                                return MValue.Void();
+        //                            }
+        //                        ));
 
-                            MEnvironment constructorEnvironment = new MEnvironment(env);
-                            constructorEnvironment.AddConstant("_cf", cf);
-                            constructorEnvironment.AddConstant("_hf", hf);
-                            constructorEnvironment.AddConstant("_gf", gf);
-                            constructorEnvironment.AddConstant("_sf", sf);
-                            MClosure newSubConstFunc = 
-                                providedConstructorFunction.CloneWithNewEnvironment(constructorEnvironment);
-                            MValue callResult = interpreter.PerformCall(newSubConstFunc, args, env);
-                            if (callResult.DataType == MDataType.Error)
-                            {
-                                // Error means we should return it rather than continue
-                                return callResult;
-                            }
-                            return MValue.Composite(t, fields);
-                        }
-                    );
+        //                    MEnvironment constructorEnvironment = new MEnvironment(env);
+        //                    constructorEnvironment.AddConstant("_cf", cf);
+        //                    constructorEnvironment.AddConstant("_hf", hf);
+        //                    constructorEnvironment.AddConstant("_gf", gf);
+        //                    constructorEnvironment.AddConstant("_sf", sf);
+        //                    MClosure newSubConstFunc = 
+        //                        providedConstructorFunction.CloneWithNewEnvironment(constructorEnvironment);
+        //                    MValue callResult = interpreter.PerformCall(newSubConstFunc, args, env);
+        //                    if (callResult.DataType == MDataType.Error)
+        //                    {
+        //                        // Error means we should return it rather than continue
+        //                        return callResult;
+        //                    }
+        //                    return MValue.Composite(t, fields);
+        //                }
+        //            );
 
-                    return MValue.Closure(constructorFunction);
-                },
-                new MParameters(
-                    new MParameter(MDataType.String, "type_name"),
-                    new MParameter(MDataType.Closure, "constructor_function")
-                ),
-                "Registers a data type, with the specified constructor function. The special function _cf, _sf, and _gf " +
-                "are defined in the context of the constructor function. Returns the constructor function for the " +
-                "newly-created type."
-            );
-        }
+        //            return MValue.Closure(constructorFunction);
+        //        },
+        //        new MParameters(
+        //            new MParameter(MDataType.String, "type_name"),
+        //            new MParameter(MDataType.Closure, "constructor_function")
+        //        ),
+        //        "Registers a data type, with the specified constructor function. The special function _cf, _sf, and _gf " +
+        //        "are defined in the context of the constructor function. Returns the constructor function for the " +
+        //        "newly-created type."
+        //    );
+        //}
 
         // Boolean functions
         public static MFunction AndFunction(IInterpreter interpreter)
