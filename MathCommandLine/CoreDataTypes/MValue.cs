@@ -388,6 +388,17 @@ namespace MathCommandLine.Structure
                         })), 1, 0)
                 },
                 {
+                    "indexc",
+                    new MField(Closure(new MClosure(new MParameters(
+                            new MParameter(MDataType.Any, "element"),
+                            new MParameter(MDataType.Closure, "equality_evaluator")),
+                        MEnvironment.Empty,
+                        (args, env, interpreter) => {
+                            return MValue.Number(MList.IndexOfCustom(list, args.Get(0).Value,
+                                args.Get(1).Value.ClosureValue, interpreter, env));
+                        })), 1, 0)
+                },
+                {
                     "length",
                     new MField(Closure(new MClosure(MParameters.Empty,
                         MEnvironment.Empty,

@@ -366,6 +366,9 @@ namespace MathCommandLine.Commands
                 new Tuple<string, string>("[5]()", "(number) 5"),
                 new Tuple<string, string>("_do({[var x=false],[x]})", "(bool) FALSE"),
                 new Tuple<string, string>("\"hi\".chars", "(list) { 104, 105 }"),
+                new Tuple<string, string>("_do({[var list={1,2,3}],[list.indexc(2,(a,b)=>{_eq(a,b)})]})", 
+                    "(number) 1"),
+                new Tuple<string, string>("_do({[var list={1,2,3}],[list.index(2)]})", "(number) 1"),
             };
         }
     }

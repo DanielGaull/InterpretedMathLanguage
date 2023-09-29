@@ -29,7 +29,6 @@ namespace MathCommandLine.Functions
 
                 InsertInList(),
                 RemoveFromList(),
-                IndexOfListCustom(),
                 CreateRangeList(),
                 ConcatLists(),
 
@@ -245,25 +244,6 @@ namespace MathCommandLine.Functions
                     new MParameter(MDataType.Number, "index")
                 ),
                 "Returns a new list with the elements of 'list' without the value at 'index'. May return error if 'index' is >= the length of 'list'."
-            );
-        }
-        public static MFunction IndexOfListCustom()
-        {
-            // TODO: Attempt to cast result of equality evaluation to number
-            return new MFunction(
-                "_indexlc", 
-                (args, env, interpreter) =>
-                {
-                    return MValue.Number(MList.IndexOfCustom(args.Get(0).Value.ListValue, args.Get(1).Value, 
-                        args.Get(2).Value.ClosureValue, interpreter, env));
-                },
-                new MParameters(
-                    new MParameter(MDataType.List, "list"),
-                    new MParameter(MDataType.Any, "element"),
-                    new MParameter(MDataType.Closure, "equality_evaluator")
-                ),
-                "Returns the index of 'element' in 'list', or -1 if 'element' does not appear in 'list'. Two elements are considered equal if 'equality_evaluator' " + 
-                "returns a non-zero value when passed in those two elements."
             );
         }
         public static MFunction CreateRangeList()
