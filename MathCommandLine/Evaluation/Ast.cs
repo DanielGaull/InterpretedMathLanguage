@@ -23,8 +23,10 @@ namespace MathCommandLine.Evaluation
         public AstParameter[] Parameters { get; private set; }
         // Array of ASTs, used for: Arguments -> Functions, Elements -> Lists
         public Ast[] AstCollectionArg { get; private set; }
-        // Used for Variable, ReferenceLiteral types, declaration/assignments, member access
+        // Used for Variable, ReferenceLiteral types, declaration, member access
         public string Name { get; private set; }
+        // Used for assignment
+        public IdentifierAst Identifier { get; private set; }
         // Used for Calls & Dot access
         public Ast ParentAst { get; private set; }
         // Used for Var Declarations
@@ -58,13 +60,14 @@ namespace MathCommandLine.Evaluation
          * Variable: Name
          * Call: ParentAst, AstCollectionArg
          * VariableDeclaration: Name, Body, EnumArg (VariableType)
-         * VariableAssignment: Name, Body
+         * VariableAssignment: Identifier, Body
          * MemberAccess: ParentAst, Name
          * Invalid: Expression
          */
 
         public Ast(AstTypes type, double numberArg, Ast[] astCollectionArg, string expression, AstParameter[] parameters,
-            string name, Ast parentAst, Ast body, bool createsEnv, int enumArg)
+            string name, Ast parentAst, Ast body, bool createsEnv, int enumArg, 
+            IdentifierAst identifier)
         {
             Type = type;
             NumberArg = numberArg;
@@ -76,53 +79,54 @@ namespace MathCommandLine.Evaluation
             Body = body;
             CreatesEnv = createsEnv;
             EnumArg = enumArg;
+            Identifier = identifier;
         }
 
         #region Constructor Functions
 
         public static Ast NumberLiteral(double value)
         {
-            return new Ast(AstTypes.NumberLiteral, value, null, null, null, null, null, null, false, -1);
+            return new Ast(AstTypes.NumberLiteral, value, null, null, null, null, null, null, false, -1, null);
         }
         public static Ast ListLiteral(Ast[] elements)
         {
-            return new Ast(AstTypes.ListLiteral, 0, elements, null, null, null, null, null, false, -1);
+            return new Ast(AstTypes.ListLiteral, 0, elements, null, null, null, null, null, false, -1, null);
         }
         public static Ast LambdaLiteral(AstParameter[] parameters, Ast body, bool createsEnv)
         {
-            return new Ast(AstTypes.LambdaLiteral, 0, null, null, parameters, null, null, body, createsEnv, -1);
+            return new Ast(AstTypes.LambdaLiteral, 0, null, null, parameters, null, null, body, createsEnv, -1, null);
         }
         public static Ast StringLiteral(string text)
         {
-            return new Ast(AstTypes.StringLiteral, 0, null, text, null, null, null, null, false, -1);
+            return new Ast(AstTypes.StringLiteral, 0, null, text, null, null, null, null, false, -1, null);
         }
         public static Ast ReferenceLiteral(string refName)
         {
-            return new Ast(AstTypes.ReferenceLiteral, 0, null, null, null, refName, null, null, false, -1);
+            return new Ast(AstTypes.ReferenceLiteral, 0, null, null, null, refName, null, null, false, -1, null);
         }
         public static Ast Call(Ast calledAst, params Ast[] args)
         {
-            return new Ast(AstTypes.Call, 0, args, null, null, null, calledAst, null, false, -1);
+            return new Ast(AstTypes.Call, 0, args, null, null, null, calledAst, null, false, -1, null);
         }
         public static Ast Variable(string name)
         {
-            return new Ast(AstTypes.Variable, 0, null, null, null, name, null, null, false, -1);
+            return new Ast(AstTypes.Variable, 0, null, null, null, name, null, null, false, -1, null);
         }
         public static Ast VariableDeclaration(string name, Ast value, VariableType type)
         {
-            return new Ast(AstTypes.VariableDeclaration, 0, null, null, null, name, null, value, false, (int) type);
+            return new Ast(AstTypes.VariableDeclaration, 0, null, null, null, name, null, value, false, (int) type, null);
         }
-        public static Ast VariableAssignment(string name, Ast value)
+        public static Ast VariableAssignment(IdentifierAst identifier, Ast value)
         {
-            return new Ast(AstTypes.VariableAssignment, 0, null, null, null, name, null, value, false, -1);
+            return new Ast(AstTypes.VariableAssignment, 0, null, null, null, null, null, value, false, -1, identifier);
         }
         public static Ast MemberAccess(Ast parent, string name)
         {
-            return new Ast(AstTypes.MemberAccess, 0, null, null, null, name, parent, null, false, -1);
+            return new Ast(AstTypes.MemberAccess, 0, null, null, null, name, parent, null, false, -1, null);
         }
         public static Ast Invalid(string expr)
         {
-            return new Ast(AstTypes.Invalid, 0, null, expr, null, null, null, null, false, -1);
+            return new Ast(AstTypes.Invalid, 0, null, expr, null, null, null, null, false, -1, null);
         }
 
         #endregion

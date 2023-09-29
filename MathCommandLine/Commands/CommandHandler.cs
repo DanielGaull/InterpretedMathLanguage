@@ -256,7 +256,7 @@ namespace MathCommandLine.Commands
                 {
                     success = false;
                     output = "Exception: " + ex.Message;
-                    Console.WriteLine("\n\n" + ex.StackTrace + "\n\n");
+                    //Console.WriteLine("\n\n" + ex.StackTrace + "\n\n");
                 }
                 if (success)
                 {

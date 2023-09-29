@@ -19,6 +19,7 @@ namespace MathCommandLine.Evaluation
         // Regexes for common necessities
         private const string NUMBER_REGEX_PATTERN = @"[+-]?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))";
         private const string SYMBOL_PATTERN = @"[a-zA-Z_][a-zA-Z0-9_]*";
+        private static readonly char MEMBER_ACCESS_TOKEN = '.';
 
         // Regexes for matching language symbols
         private static readonly Regex NUMBER_REGEX = new Regex("^" + NUMBER_REGEX_PATTERN + "$");
@@ -27,7 +28,7 @@ namespace MathCommandLine.Evaluation
         private static readonly Regex SIMPLE_LAMBDA_REGEX = new Regex(@"^\[(.*)\]$");
         private static readonly Regex LAMBDA_REGEX = new Regex(@"^\((.*?)\)([=~])>\{(.*)\}$");
         private static readonly Regex STRING_REGEX = new Regex("^\"([^\"]*)\"$");
-        private static readonly Regex MEMBER_ACCESS_REGEX = new Regex(@"^(.*)\.(" + SYMBOL_PATTERN + ")$");
+        private static readonly Regex MEMBER_ACCESS_REGEX = new Regex(@$"^(.*)\{MEMBER_ACCESS_TOKEN}(" + SYMBOL_PATTERN + ")$");
 
         // Call parsing values
         private const char CALL_END_WRAPPER = ')';
@@ -61,14 +62,12 @@ namespace MathCommandLine.Evaluation
         private static readonly Regex PARAM_TYPE_RESTS_REGEX = new Regex(@"(?:\[(.*)\])?([a-zA-Z_][a-zA-Z0-9_]*)");
 
         // Variable declaration and assigment syntax
-        private const string ASSIGNMENT_TOKEN = "=";
+        private const char ASSIGNMENT_TOKEN = '=';
         private const string DECLARATION_VAR_KEYWORD = "var";
         private const string DECLARATION_CONST_KEYWORD = "const";
         private static readonly Regex DECLARATION_REGEX = 
             new Regex($@"^({DECLARATION_VAR_KEYWORD}|{DECLARATION_CONST_KEYWORD})\s+({SYMBOL_PATTERN})\s*" + 
-                $@"{ASSIGNMENT_TOKEN}\s*(.*)$");
-        private static readonly Regex ASSIGMENT_REGEX = new Regex(
-            $@"^({SYMBOL_PATTERN})\s*{ASSIGNMENT_TOKEN}\s*(.*)$");
+                $@"\{ASSIGNMENT_TOKEN}\s*(.*)$");
 
         // Value restriction regexes
         private static readonly Regex VALUE_REST_INTEGER = new Regex(@"%");
@@ -116,6 +115,7 @@ namespace MathCommandLine.Evaluation
                 // 'expression' is either a call, variable, or literal
                 // May be something that is wrapped entirely in parenthesis
                 CallMatch attempedCallMatch = MatchCall(expression);
+                int attemptedAssignmentMatchIndex = TryMatchAssignment(expression);
 
                 if (attempedCallMatch.IsMatch)
                 {
@@ -199,23 +199,19 @@ namespace MathCommandLine.Evaluation
                     Ast parent = Parse(parentStr);
                     return Ast.MemberAccess(parent, name);
                 }
-                else if (ASSIGMENT_REGEX.IsMatch(expression))
+                else if (attemptedAssignmentMatchIndex >= 0)
                 {
-                    var groups = ASSIGMENT_REGEX.Match(expression).Groups;
-                    string varName = groups[1].Value;
-                    string assignedExpr = groups[2].Value;
-                    // Make sure the variable name isn't reserved
-                    if (RESERVED_KEYWORDS.Contains(varName))
-                    {
-                        // Attempting to use a reserved keyword as a variable
-                        throw new InvalidParseException(expression);
-                    }
+                    string identifierExpr = expression.Substring(0, attemptedAssignmentMatchIndex).Trim();
+                    string assignedExpr = expression.Substring(attemptedAssignmentMatchIndex + 1,
+                        expression.Length - attemptedAssignmentMatchIndex - 1).Trim();
                     // Parse the assigned expression
                     Ast assigned = Parse(assignedExpr);
+                    // Parse the identifier
+                    IdentifierAst identifier = ParseIdentifier(identifierExpr);
                     // TODO: Add operator-assignments, ex. +=, &&=, etc.
                     // Should be valid for ANY operator; even doing something like !== or === should work,
                     // though they'd be pretty rare to want to do
-                    return Ast.VariableAssignment(varName, assigned);
+                    return Ast.VariableAssignment(identifier, assigned);
                 }
                 else if (DECLARATION_REGEX.IsMatch(expression))
                 {
@@ -269,6 +265,43 @@ namespace MathCommandLine.Evaluation
             {
                 return Ast.Invalid(expression);
             }
+        }
+
+        public IdentifierAst ParseIdentifier(string expression)
+        {
+            // Check if this is just a symbol string
+            if (SYMBOL_NAME_REGEX.IsMatch(expression))
+            {
+                if (RESERVED_KEYWORDS.Contains(expression))
+                {
+                    // Attempting to use a reserved keyword as a variable
+                    throw new InvalidParseException(expression);
+                }
+                return IdentifierAst.RawVariable(expression);
+            }
+
+            // Try to do a dereference or member access, depending on what we find first
+            // If we find things wrapped in parentheses, braces, or brackets, then skip those
+            for (int i = 0; i < expression.Length; i++)
+            {
+                char c = expression[i];
+                if (c == GENERIC_START_WRAPPER)
+                {
+                    // Go to end
+
+                }
+                else if (c == SIMPLE_LAMBDA_START_WRAPPER)
+                {
+
+                }
+                else if (c == LIST_START_WRAPPER)
+                {
+
+                }
+            }
+
+            int lastDotIndex = expression.LastIndexOf(MEMBER_ACCESS_TOKEN);
+            return null;
         }
 
         public string Unparse(Ast ast)
@@ -572,45 +605,48 @@ namespace MathCommandLine.Evaluation
                 char c = expression[i];
                 if (c == GENERIC_START_WRAPPER && start != GENERIC_START_WRAPPER)
                 {
-                    // We want to jump to the end of the list parenthesis
-                    while (c != GENERIC_END_WRAPPER)
+                    // We want to jump to the end of the parentheses
+                    int newI = GetBracketEndIndex(expression, i, GENERIC_START_WRAPPER, GENERIC_END_WRAPPER);
+                    if (newI < 0)
                     {
-                        c = expression[i];
-                        if (i >= expression.Length - 1)
-                        {
-                            // If no end to the paren, we have bigger problems
-                            return false;
-                        }
-                        i++;
+                        // If no end to the paren, we have bigger problems
+                        return false;
                     }
+                    i = newI;
                 }
                 else if (c == SIMPLE_LAMBDA_START_WRAPPER && start != SIMPLE_LAMBDA_START_WRAPPER)
                 {
-                    // We want to jump to the end of the square brackets
-                    while (c != SIMPLE_LAMBDA_END_WRAPPER)
+                    int newI = GetBracketEndIndex(expression, i, SIMPLE_LAMBDA_START_WRAPPER, 
+                        SIMPLE_LAMBDA_END_WRAPPER);
+                    // We want to jump to the end of the brackets
+                    if (newI < 0)
                     {
-                        c = expression[i];
-                        if (i >= expression.Length - 1)
-                        {
-                            // If no end to the bracket, we have bigger problems
-                            return false;
-                        }
-                        i++;
+                        // If no end to the bracket, we have bigger problems
+                        return false;
                     }
+                    i = newI;
                 }
                 else if (c == LIST_START_WRAPPER && start != LIST_START_WRAPPER)
                 {
+                    int newI = GetBracketEndIndex(expression, i, LIST_START_WRAPPER, LIST_END_WRAPPER);
                     // We want to jump to the end of the list
-                    while (c != LIST_END_WRAPPER)
+                    if (newI < 0)
                     {
-                        c = expression[i];
-                        if (i >= expression.Length - 1)
-                        {
-                            // If no end to the brace, we have bigger problems
-                            return false;
-                        }
-                        i++;
+                        // If no end to the brace, we have bigger problems
+                        return false;
                     }
+                    i = newI;
+                }
+                else if (c == STRING_START_WRAPPER && start != STRING_START_WRAPPER)
+                {
+                    int newI = GetBracketEndIndex(expression, i, STRING_START_WRAPPER, STRING_END_WRAPPER);
+                    // We want to jump to the end of the string
+                    if (newI < 0)
+                    {
+                        // If no end to the string, we have bigger problems
+                        return false;
+                    }
+                    i = newI;
                 }
                 else if (c == start)
                 {
@@ -629,6 +665,27 @@ namespace MathCommandLine.Evaluation
             // If we haven't failed yet, then just return
             return true;
         }
+
+        private int GetBracketEndIndex(string str, int idx, char start, char end)
+        {
+            int level = 0;
+            for (int i = idx; i < str.Length; i++)
+            {
+                if (str[i] == start)
+                {
+                    level++;
+                }
+                if (str[i] == end)
+                {
+                    level--;
+                    if (level == 0)
+                    {
+                        return i;
+                    }
+                }
+            }
+            return -1;
+        }
         
         /// <summary>
         /// Returns true if the expression is a list, or false if not
@@ -643,6 +700,58 @@ namespace MathCommandLine.Evaluation
         private bool MatchesSimpleLambda(string expression)
         {
             return IsWrappedBy(expression, SIMPLE_LAMBDA_START_WRAPPER, SIMPLE_LAMBDA_END_WRAPPER);
+        }
+
+        // Returns index of the '='
+        private int TryMatchAssignment(string expression)
+        {
+            // Check that there is an '=' that is at the bottom level
+            for (int i = 0; i < expression.Length; i++)
+            {
+                char c = expression[i];
+                if (c == GENERIC_START_WRAPPER)
+                {
+                    int newI = GetBracketEndIndex(expression, i, GENERIC_START_WRAPPER, GENERIC_END_WRAPPER);
+                    if (newI < 0)
+                    {
+                        return -1;
+                    }
+                    i = newI;
+                }
+                else if (c == SIMPLE_LAMBDA_START_WRAPPER)
+                {
+                    int newI = GetBracketEndIndex(expression, i, SIMPLE_LAMBDA_START_WRAPPER, 
+                        SIMPLE_LAMBDA_END_WRAPPER);
+                    if (newI < 0)
+                    {
+                        return -1;
+                    }
+                    i = newI;
+                }
+                else if (c == LIST_START_WRAPPER)
+                {
+                    int newI = GetBracketEndIndex(expression, i, LIST_START_WRAPPER, LIST_END_WRAPPER);
+                    if (newI < 0)
+                    {
+                        return -1;
+                    }
+                    i = newI;
+                }
+                else if (c == STRING_START_WRAPPER)
+                {
+                    int newI = GetBracketEndIndex(expression, i, STRING_START_WRAPPER, STRING_END_WRAPPER);
+                    if (newI < 0)
+                    {
+                        return -1;
+                    }
+                    i = newI;
+                }
+                else if (c == ASSIGNMENT_TOKEN)
+                {
+                    return i;
+                }
+            }
+            return -1;
         }
 
         /// <summary>
