@@ -43,39 +43,42 @@ namespace MathCommandLine.Structure
         public static MValue Number(double numberValue)
         {
             return new MValue(MDataType.Number, numberValue, MList.Empty, MClosure.Empty, 0, 0, MDataType.Empty, null, 
-                false, null);
+                false, new Dictionary<string, MField>());
         }
         public static MValue List(MList list)
         {
-            return new MValue(MDataType.List, 0, list, MClosure.Empty, 0, 0, MDataType.Empty, null, false, null);
+            return new MValue(MDataType.List, 0, list, MClosure.Empty, 0, 0, MDataType.Empty, null, false,
+                new Dictionary<string, MField>());
         }
         public static MValue Closure(MClosure closure)
         {
-            return new MValue(MDataType.Closure, 0, MList.Empty, closure, 0, 0, MDataType.Empty, null, false, null);
+            return new MValue(MDataType.Closure, 0, MList.Empty, closure, 0, 0, MDataType.Empty, null, false,
+                new Dictionary<string, MField>());
         }
         public static MValue BigDecimal(decimal bigDecimal)
         {
             return new MValue(MDataType.BigDecimal, 0, MList.Empty, MClosure.Empty, bigDecimal, 0, MDataType.Empty, null, 
-                false, null);
+                false, new Dictionary<string, MField>());
         }
         public static MValue BigInt(long bigInt)
         {
             return new MValue(MDataType.BigInt, 0, MList.Empty, MClosure.Empty, 0, bigInt, MDataType.Empty, null, 
-                false, null);
+                false, new Dictionary<string, MField>());
         }
         public static MValue Type(MDataType type)
         {
-            return new MValue(MDataType.Type, 0, MList.Empty, MClosure.Empty, 0, 0, type, null, false, null);
+            return new MValue(MDataType.Type, 0, MList.Empty, MClosure.Empty, 0, 0, type, null, false,
+                new Dictionary<string, MField>());
         }
         public static MValue Reference(MBoxedValue refValue)
         {
             return new MValue(MDataType.Reference, 0, MList.Empty, MClosure.Empty, 0, 0, MDataType.Empty, refValue, 
-                false, null);
+                false, new Dictionary<string, MField>());
         }
         public static MValue Bool(bool boolValue)
         {
             return new MValue(MDataType.Boolean, 0, MList.Empty, MClosure.Empty, 0, 0, MDataType.Empty, null,
-                boolValue, null);
+                boolValue, new Dictionary<string, MField>());
         }
         public static MValue Void()
         {
