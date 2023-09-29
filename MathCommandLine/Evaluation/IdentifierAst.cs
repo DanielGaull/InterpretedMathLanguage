@@ -26,9 +26,9 @@ namespace MathCommandLine.Evaluation
         {
             return new IdentifierAst(IdentifierAstTypes.RawVar, null, name, null);
         }
-        public static IdentifierAst DotAccess(Ast parent, string name)
+        public static IdentifierAst MemberAccess(Ast parent, string name)
         {
-            return new IdentifierAst(IdentifierAstTypes.DotAccess, parent, name, null);
+            return new IdentifierAst(IdentifierAstTypes.MemberAccess, parent, name, null);
         }
         public static IdentifierAst Dereference(Ast reference)
         {
@@ -39,7 +39,7 @@ namespace MathCommandLine.Evaluation
     public enum IdentifierAstTypes
     {
         RawVar,
-        DotAccess,
+        MemberAccess,
         Dereference,
     }
 }

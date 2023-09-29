@@ -69,6 +69,8 @@ namespace MathCommandLine.Evaluation
             new Regex($@"^({DECLARATION_VAR_KEYWORD}|{DECLARATION_CONST_KEYWORD})\s+({SYMBOL_PATTERN})\s*" + 
                 $@"\{ASSIGNMENT_TOKEN}\s*(.*)$");
 
+        private const string DEREFERENCE_TOKEN = "*";
+
         // Value restriction regexes
         private static readonly Regex VALUE_REST_INTEGER = new Regex(@"%");
         private static readonly Regex VALUE_REST_POSITIVE = new Regex(@"\+");
@@ -267,43 +269,6 @@ namespace MathCommandLine.Evaluation
             }
         }
 
-        public IdentifierAst ParseIdentifier(string expression)
-        {
-            // Check if this is just a symbol string
-            if (SYMBOL_NAME_REGEX.IsMatch(expression))
-            {
-                if (RESERVED_KEYWORDS.Contains(expression))
-                {
-                    // Attempting to use a reserved keyword as a variable
-                    throw new InvalidParseException(expression);
-                }
-                return IdentifierAst.RawVariable(expression);
-            }
-
-            // Try to do a dereference or member access, depending on what we find first
-            // If we find things wrapped in parentheses, braces, or brackets, then skip those
-            for (int i = 0; i < expression.Length; i++)
-            {
-                char c = expression[i];
-                if (c == GENERIC_START_WRAPPER)
-                {
-                    // Go to end
-
-                }
-                else if (c == SIMPLE_LAMBDA_START_WRAPPER)
-                {
-
-                }
-                else if (c == LIST_START_WRAPPER)
-                {
-
-                }
-            }
-
-            int lastDotIndex = expression.LastIndexOf(MEMBER_ACCESS_TOKEN);
-            return null;
-        }
-
         public string Unparse(Ast ast)
         {
             StringBuilder builder = new StringBuilder();
@@ -487,6 +452,47 @@ namespace MathCommandLine.Evaluation
                     "[" + string.Join(',', x.ValueRestrictions) + "]" + x.DataTypeName).ToArray());
         }
 
+        public IdentifierAst ParseIdentifier(string expression)
+        {
+            if (IsParenWrapped(expression))
+            {
+                // Pull out the expression without the first and last characters
+                expression = expression.Substring(1, expression.Length - 2);
+                return ParseIdentifier(expression);
+            }
+
+            // Check if this is just a symbol string
+            if (SYMBOL_NAME_REGEX.IsMatch(expression))
+            {
+                if (RESERVED_KEYWORDS.Contains(expression))
+                {
+                    // Attempting to use a reserved keyword as a variable
+                    throw new InvalidParseException(expression);
+                }
+                return IdentifierAst.RawVariable(expression);
+            }
+
+            // Try to do a dereference, if the string starts with it
+            if (expression.StartsWith(DEREFERENCE_TOKEN))
+            {
+                // Everything else gets turned into the AST
+                Ast r = Parse(expression.Substring(DEREFERENCE_TOKEN.Length));
+                return IdentifierAst.Dereference(r);
+            }
+            
+            // Try to do member access
+            if (MEMBER_ACCESS_REGEX.IsMatch(expression))
+            {
+                var groups = MEMBER_ACCESS_REGEX.Match(expression).Groups;
+                string parentExpr = groups[1].Value;
+                string varName = groups[2].Value;
+                Ast parent = Parse(parentExpr);
+                return IdentifierAst.MemberAccess(parent, varName);
+            }
+
+            throw new InvalidParseException(expression);
+        }
+
         /// <summary>
         /// Returns true if the expression is wrapped in a pair of matching parentheses
         /// </summary>
@@ -614,7 +620,7 @@ namespace MathCommandLine.Evaluation
                     }
                     i = newI;
                 }
-                else if (c == SIMPLE_LAMBDA_START_WRAPPER && start != SIMPLE_LAMBDA_START_WRAPPER)
+                if (c == SIMPLE_LAMBDA_START_WRAPPER && start != SIMPLE_LAMBDA_START_WRAPPER)
                 {
                     int newI = GetBracketEndIndex(expression, i, SIMPLE_LAMBDA_START_WRAPPER, 
                         SIMPLE_LAMBDA_END_WRAPPER);
@@ -626,7 +632,7 @@ namespace MathCommandLine.Evaluation
                     }
                     i = newI;
                 }
-                else if (c == LIST_START_WRAPPER && start != LIST_START_WRAPPER)
+                if (c == LIST_START_WRAPPER && start != LIST_START_WRAPPER)
                 {
                     int newI = GetBracketEndIndex(expression, i, LIST_START_WRAPPER, LIST_END_WRAPPER);
                     // We want to jump to the end of the list
@@ -637,7 +643,7 @@ namespace MathCommandLine.Evaluation
                     }
                     i = newI;
                 }
-                else if (c == STRING_START_WRAPPER && start != STRING_START_WRAPPER)
+                if (c == STRING_START_WRAPPER && start != STRING_START_WRAPPER)
                 {
                     int newI = GetBracketEndIndex(expression, i, STRING_START_WRAPPER, STRING_END_WRAPPER);
                     // We want to jump to the end of the string
@@ -648,11 +654,11 @@ namespace MathCommandLine.Evaluation
                     }
                     i = newI;
                 }
-                else if (c == start)
+                if (c == start)
                 {
                     levels++;
                 }
-                else if (c == end)
+                if (c == end)
                 {
                     // If we're closing the current "thing", then that's a problem
                     if (levels == 0)
@@ -718,7 +724,7 @@ namespace MathCommandLine.Evaluation
                     }
                     i = newI;
                 }
-                else if (c == SIMPLE_LAMBDA_START_WRAPPER)
+                if (c == SIMPLE_LAMBDA_START_WRAPPER)
                 {
                     int newI = GetBracketEndIndex(expression, i, SIMPLE_LAMBDA_START_WRAPPER, 
                         SIMPLE_LAMBDA_END_WRAPPER);
@@ -728,7 +734,7 @@ namespace MathCommandLine.Evaluation
                     }
                     i = newI;
                 }
-                else if (c == LIST_START_WRAPPER)
+                if (c == LIST_START_WRAPPER)
                 {
                     int newI = GetBracketEndIndex(expression, i, LIST_START_WRAPPER, LIST_END_WRAPPER);
                     if (newI < 0)
@@ -737,7 +743,7 @@ namespace MathCommandLine.Evaluation
                     }
                     i = newI;
                 }
-                else if (c == STRING_START_WRAPPER)
+                if (c == STRING_START_WRAPPER)
                 {
                     int newI = GetBracketEndIndex(expression, i, STRING_START_WRAPPER, STRING_END_WRAPPER);
                     if (newI < 0)
@@ -746,7 +752,7 @@ namespace MathCommandLine.Evaluation
                     }
                     i = newI;
                 }
-                else if (c == ASSIGNMENT_TOKEN)
+                if (c == ASSIGNMENT_TOKEN)
                 {
                     return i;
                 }
