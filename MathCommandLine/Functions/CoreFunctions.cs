@@ -14,65 +14,65 @@ namespace MathCommandLine.Functions
      */
     public static class CoreFunctions
     {
-        public static List<MFunction> GenerateCoreFunctions(IInterpreter evaluator)
+        public static List<MFunction> GenerateCoreFunctions()
         {
             return new List<MFunction>()
             {
-                Add(evaluator),
-                Multiply(evaluator),
-                Negate(evaluator),
-                MulInverse(evaluator),
-                Pow(evaluator),
-                FloorFunction(evaluator),
-                TrigFunction(evaluator),
-                NaturalLog(evaluator),
+                Add(),
+                Multiply(),
+                Negate(),
+                MulInverse(),
+                Pow(),
+                FloorFunction(),
+                TrigFunction(),
+                NaturalLog(),
 
-                ListLength(evaluator),
-                GetFromList(evaluator),
-                InsertInList(evaluator),
-                RemoveFromList(evaluator),
-                IndexOfList(evaluator),
-                IndexOfListCustom(evaluator),
-                MapList(evaluator),
-                ReduceList(evaluator),
-                CreateRangeList(evaluator),
-                ConcatLists(evaluator),
+                ListLength(),
+                GetFromList(),
+                InsertInList(),
+                RemoveFromList(),
+                IndexOfList(),
+                IndexOfListCustom(),
+                MapList(),
+                ReduceList(),
+                CreateRangeList(),
+                ConcatLists(),
 
-                Get(evaluator),
-                Set(evaluator),
-                GetDesc(evaluator),
-                SetDesc(evaluator),
+                Get(),
+                Set(),
+                GetDesc(),
+                SetDesc(),
 
-                TypeOf(evaluator),
-                CompareFunction(evaluator),
-                CaseFunction(evaluator),
-                CreateErrorFunction(evaluator),
-                CreateStringFunction(evaluator),
-                DisplayFunction(evaluator),
-                CreateTypeFunction(evaluator),
-                TimeFunction(evaluator),
-                CheckFunction(evaluator),
-                ExitFunction(evaluator),
-                ReadFunction(evaluator),
-                DoFunction(evaluator),
+                TypeOf(),
+                CompareFunction(),
+                CaseFunction(),
+                CreateErrorFunction(),
+                CreateStringFunction(),
+                DisplayFunction(),
+                CreateTypeFunction(),
+                TimeFunction(),
+                CheckFunction(),
+                ExitFunction(),
+                ReadFunction(),
+                DoFunction(),
 
-                //RegisterDataType(evaluator),
+                //RegisterDataType(),
 
-                AndFunction(evaluator),
-                AndeFunction(evaluator),
-                OrFunction(evaluator),
-                OreFunction(evaluator),
-                NotFunction(evaluator),
-                EqFunction(evaluator),
-                LtFunction(evaluator)
+                AndFunction(),
+                AndeFunction(),
+                OrFunction(),
+                OreFunction(),
+                NotFunction(),
+                EqFunction(),
+                LtFunction()
             };
         }
 
         // Numerical Functions
-        public static MFunction Add(IInterpreter evaluator) {
+        public static MFunction Add() {
             return new MFunction(
                 "_add", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     return MValue.Number(args.Get(0).Value.NumberValue + args.Get(1).Value.NumberValue);
                 },
@@ -83,11 +83,11 @@ namespace MathCommandLine.Functions
                 "Returns the sum of 'a' and 'b' (a + b)."
             );
         }
-        public static MFunction Multiply(IInterpreter evaluator)
+        public static MFunction Multiply()
         {
             return new MFunction(
                 "_mul", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     return MValue.Number(args.Get(0).Value.NumberValue * args.Get(1).Value.NumberValue);
                 },
@@ -98,11 +98,11 @@ namespace MathCommandLine.Functions
                 "Returns the product of 'a' and 'b' (a * b)."
             );
         }
-        public static MFunction Negate(IInterpreter evaluator)
+        public static MFunction Negate()
         {
             return new MFunction(
                 "_add_inv", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     return MValue.Number(-args.Get(0).Value.NumberValue);
                 },
@@ -112,11 +112,11 @@ namespace MathCommandLine.Functions
                 "Returns the additive inverse of 'a'."
             );
         }
-        public static MFunction MulInverse(IInterpreter evaluator)
+        public static MFunction MulInverse()
         {
             return new MFunction(
                 "_mul_inv", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     double arg = args.Get(0).Value.NumberValue;
                     if (arg == 0)
@@ -131,11 +131,11 @@ namespace MathCommandLine.Functions
                 "Returns the multiplicative inverse of 'a'."
             );
         }
-        public static MFunction Pow(IInterpreter evaluator)
+        public static MFunction Pow()
         {
             return new MFunction(
                 "_pow", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     return MValue.Number(Math.Pow(args.Get(0).Value.NumberValue, args.Get(1).Value.NumberValue));
                 },
@@ -147,11 +147,11 @@ namespace MathCommandLine.Functions
                 "Returns the value of 'base' raised to the power of 'exponent'."
             );
         }
-        public static MFunction FloorFunction(IInterpreter evaluator)
+        public static MFunction FloorFunction()
         {
             return new MFunction(
                 "_flr", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     return MValue.Number(Math.Floor(args.Get(0).Value.NumberValue));
                 },
@@ -161,13 +161,13 @@ namespace MathCommandLine.Functions
                 "Returns the floor of 'a'."
             );
         }
-        public static MFunction TrigFunction(IInterpreter evaluator)
+        public static MFunction TrigFunction()
         {
             // TODO: Add parameter restrictions, and make the op here have to be a number from 0-5
             // TODO: Hyperbolic trig functions
             return new MFunction(
                 "_trig", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     double op = args.Get(1).Value.NumberValue;
                     double arg = args.Get(0).Value.NumberValue;
@@ -202,11 +202,11 @@ namespace MathCommandLine.Functions
                 "Performs a trigonometric function. (Op Codes: 0-sin, 1-cos, 2-tan, 3-arcsin, 4-arccos, 5-arctan)"
             );
         }
-        public static MFunction NaturalLog(IInterpreter evaluator)
+        public static MFunction NaturalLog()
         {
             return new MFunction(
                 "_ln", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     return MValue.Number(Math.Log(args.Get(0).Value.NumberValue));
                 },
@@ -218,11 +218,11 @@ namespace MathCommandLine.Functions
         }
 
         // List Functions
-        public static MFunction ListLength(IInterpreter evaluator)
+        public static MFunction ListLength()
         {
             return new MFunction(
                 "_len", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     return MValue.Number(MList.Length(args.Get(0).Value.ListValue));
                 },
@@ -232,11 +232,11 @@ namespace MathCommandLine.Functions
                 "Returns the number of elements in 'list'."
             );
         }
-        public static MFunction GetFromList(IInterpreter evaluator)
+        public static MFunction GetFromList()
         {
             return new MFunction(
                 "_getl", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     // TODO: Handle index out of range errors
                     return MList.Get(args.Get(0).Value.ListValue, (int)args.Get(1).Value.NumberValue);
@@ -248,11 +248,11 @@ namespace MathCommandLine.Functions
                 "Returns the element at index 'index' in 'list'. May return error if 'index' is >= the length of 'list'."
             );
         }
-        public static MFunction InsertInList(IInterpreter evaluator)
+        public static MFunction InsertInList()
         {
             return new MFunction(
                 "_insertl", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     // TODO: Handle index out of range errors
                     return MValue.List(MList.Insert(args.Get(0).Value.ListValue, (int)args.Get(1).Value.NumberValue, args.Get(2).Value));
@@ -266,11 +266,11 @@ namespace MathCommandLine.Functions
                 "May return error if 'index' is >= the length of 'list'."
             );
         }
-        public static MFunction RemoveFromList(IInterpreter evaluator)
+        public static MFunction RemoveFromList()
         {
             return new MFunction(
                 "_removel", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     // TODO: Handle index out of range errors
                     return MValue.List(MList.Remove(args.Get(0).Value.ListValue, (int)args.Get(1).Value.NumberValue));
@@ -282,11 +282,11 @@ namespace MathCommandLine.Functions
                 "Returns a new list with the elements of 'list' without the value at 'index'. May return error if 'index' is >= the length of 'list'."
             );
         }
-        public static MFunction IndexOfList(IInterpreter evaluator)
+        public static MFunction IndexOfList()
         { 
             return new MFunction(
                 "_indexl", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     return MValue.Number(MList.IndexOf(args.Get(0).Value.ListValue, args.Get(1).Value));
                 },
@@ -297,15 +297,15 @@ namespace MathCommandLine.Functions
                 "Returns the index of 'element' in 'list', or -1 if 'element' does not appear in 'list'."
             );
         }
-        public static MFunction IndexOfListCustom(IInterpreter evaluator)
+        public static MFunction IndexOfListCustom()
         {
             // TODO: Attempt to cast result of equality evaluation to number
             return new MFunction(
                 "_indexlc", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     return MValue.Number(MList.IndexOfCustom(args.Get(0).Value.ListValue, args.Get(1).Value, 
-                        args.Get(2).Value.ClosureValue, evaluator, env));
+                        args.Get(2).Value.ClosureValue, interpreter, env));
                 },
                 new MParameters(
                     new MParameter(MDataType.List, "list"),
@@ -316,14 +316,14 @@ namespace MathCommandLine.Functions
                 "returns a non-zero value when passed in those two elements."
             );
         }
-        public static MFunction MapList(IInterpreter evaluator)
+        public static MFunction MapList()
         {
             return new MFunction(
                 "_map", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     return MValue.List(MList.Map(args.Get(0).Value.ListValue, 
-                        args.Get(1).Value.ClosureValue, evaluator, env));
+                        args.Get(1).Value.ClosureValue, interpreter, env));
                 },
                 new MParameters(
                     new MParameter(MDataType.List, "list"),
@@ -333,14 +333,14 @@ namespace MathCommandLine.Functions
                 "putting the results into a new list and returning it."
             );
         }
-        public static MFunction ReduceList(IInterpreter evaluator)
+        public static MFunction ReduceList()
         {
             return new MFunction(
                 "_reduce", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     return MList.Reduce(args.Get(0).Value.ListValue, args.Get(1).Value.ClosureValue, 
-                        args.Get(2).Value, evaluator, env);
+                        args.Get(2).Value, interpreter, env);
                 },
                 new MParameters(
                     new MParameter(MDataType.List, "list"),
@@ -352,11 +352,11 @@ namespace MathCommandLine.Functions
                 "'previous' is 'init_value'). 'current' is the current element."
             );
         }
-        public static MFunction CreateRangeList(IInterpreter evaluator)
+        public static MFunction CreateRangeList()
         {
             return new MFunction(
                 "_crange", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     return MValue.List(MList.CreateRange((int) args.Get(0).Value.NumberValue));
                 },
@@ -366,11 +366,11 @@ namespace MathCommandLine.Functions
                 "Creates a list of integers from 0 to 'max', exclusive (i.e. 'max' is not included in the result list)."
             );
         }
-        public static MFunction ConcatLists(IInterpreter evaluator)
+        public static MFunction ConcatLists()
         {
             return new MFunction(
                 "_concat", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     return MValue.List(MList.Concat(args.Get(0).Value.ListValue, args.Get(1).Value.ListValue));
                 },
@@ -383,11 +383,11 @@ namespace MathCommandLine.Functions
         }
 
         // Reference/var manipulation functions
-        public static MFunction Get(IInterpreter interpreter) 
+        public static MFunction Get() 
         {
             return new MFunction(
                 "_get", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     MBoxedValue box = args[0].Value.RefValue;
                     return box.GetValue();
@@ -398,11 +398,11 @@ namespace MathCommandLine.Functions
                 "Returns the value stored in 'ref'."
             );
         }
-        public static MFunction Set(IInterpreter interpreter)
+        public static MFunction Set()
         {
             return new MFunction(
                 "_set", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     MBoxedValue refAddr = args[0].Value.RefValue;
                     MValue value = args[1].Value;
@@ -415,11 +415,11 @@ namespace MathCommandLine.Functions
                 "Assigns the value for 'ref' to 'value'. Returns CAN_NOT_ASSIGN if reference variable is constant."
             );
         }
-        public static MFunction GetDesc(IInterpreter interpreter)
+        public static MFunction GetDesc()
         {
             return new MFunction(
                 "_gd",
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     MBoxedValue refAddr = args[0].Value.RefValue;
                     if (refAddr.Description == null)
@@ -437,11 +437,11 @@ namespace MathCommandLine.Functions
                 "Gets and returns the description for 'ref'. If there is no description, returns null."
             );
         }
-        public static MFunction SetDesc(IInterpreter interpreter)
+        public static MFunction SetDesc()
         {
             return new MFunction(
                 "_sd",
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     MBoxedValue refAddr = args[0].Value.RefValue;
                     string newDesc = args[1].Value.GetStringValue();
@@ -460,11 +460,11 @@ namespace MathCommandLine.Functions
         // TODO: derivatives/integrals/solve
 
         // Utility Functions
-        public static MFunction TypeOf(IInterpreter evaluator)
+        public static MFunction TypeOf()
         {
             return new MFunction(
                 "_type_of", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     return MValue.Type(args.Get(0).Value.DataType);
                 },
@@ -474,11 +474,11 @@ namespace MathCommandLine.Functions
                 "Returns the type of 'value'."
             );
         }
-        public static MFunction CompareFunction(IInterpreter evaluator)
+        public static MFunction CompareFunction()
         {
             return new MFunction(
                 "_cmp", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     double first = args.Get(0).Value.NumberValue;
                     double second = args.Get(0).Value.NumberValue;
@@ -492,11 +492,11 @@ namespace MathCommandLine.Functions
                 "If 'first' > 'second', returns 1."
             );
         }
-        public static MFunction CaseFunction(IInterpreter evaluator)
+        public static MFunction CaseFunction()
         {
             return new MFunction(
                 "_case", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     MValue value = args[0].Value;
                     MValue defaultValue = args[3].Value;
@@ -521,12 +521,12 @@ namespace MathCommandLine.Functions
                 "(the one with the same index). Otherwise, returns 'default'."
             );
         }
-        public static MFunction CreateErrorFunction(IInterpreter evaluator)
+        public static MFunction CreateErrorFunction()
         {
             // TODO: Apply arg restrictions
             return new MFunction(
                 "_error", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     int code = (int)args[0].Value.NumberValue;
                     string msg = args[1].Value.GetStringValue();
@@ -543,11 +543,11 @@ namespace MathCommandLine.Functions
         }
 
         // TODO: Add restriction
-        public static MFunction CreateStringFunction(IInterpreter evaluator)
+        public static MFunction CreateStringFunction()
         {
             return new MFunction(
                 "_str", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     return MValue.String(args[0].Value.ListValue);
                 },
@@ -558,11 +558,11 @@ namespace MathCommandLine.Functions
             );
         }
 
-        public static MFunction DisplayFunction(IInterpreter evaluator)
+        public static MFunction DisplayFunction()
         {
             return new MFunction(
                 "_display", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     Console.WriteLine(args[0].Value.GetStringValue());
                     return MValue.Void();
@@ -574,11 +574,11 @@ namespace MathCommandLine.Functions
             );
         }
 
-        public static MFunction CreateTypeFunction(IInterpreter interpreter)
+        public static MFunction CreateTypeFunction()
         {
             return new MFunction(
                 "_type", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     string typeName = args[0].Value.GetStringValue();
                     MDataType type = interpreter.GetDataType(typeName);
@@ -598,12 +598,12 @@ namespace MathCommandLine.Functions
             );
         }
 
-        public static MFunction TimeFunction(IInterpreter interpreter)
+        public static MFunction TimeFunction()
         {
 
             return new MFunction(
                 "_time", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     DateTimeOffset now = DateTimeOffset.UtcNow;
                     long unixTimeMilliseconds = now.ToUnixTimeMilliseconds();
@@ -614,11 +614,11 @@ namespace MathCommandLine.Functions
             );
         }
 
-        public static MFunction CheckFunction(IInterpreter interpreter)
+        public static MFunction CheckFunction()
         {
             return new MFunction(
                 "_c", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     List<MValue> pairs = args[0].Value.ListValue.InternalList;
                     for (int i = 0; i < pairs.Count; i++)
@@ -655,11 +655,11 @@ namespace MathCommandLine.Functions
                 "with no other code being run."
             );
         }
-        public static MFunction ExitFunction(IInterpreter interpreter)
+        public static MFunction ExitFunction()
         {
             return new MFunction(
                 "_exit",
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     interpreter.Exit();
                     return MValue.Void();
@@ -668,11 +668,11 @@ namespace MathCommandLine.Functions
                 "Exits the program immediately (returns null)"
             );
         }
-        public static MFunction ReadFunction(IInterpreter interpreter)
+        public static MFunction ReadFunction()
         {
             return new MFunction(
                 "_read",
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     string prompt = args[0].Value.GetStringValue();
                     Console.Write(prompt);
@@ -683,12 +683,12 @@ namespace MathCommandLine.Functions
                 "Reads in and returns a single string line from the user using the standard input stream"
             );
         }
-        public static MFunction DoFunction(IInterpreter interpreter)
+        public static MFunction DoFunction()
         {
 
             return new MFunction(
                 "_do",
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     List<MValue> funcs = args[0].Value.ListValue.InternalList;
                     MValue returnValue = MValue.Void();
@@ -819,12 +819,12 @@ namespace MathCommandLine.Functions
         //}
 
         // Boolean functions
-        public static MFunction AndFunction(IInterpreter interpreter)
+        public static MFunction AndFunction()
         {
 
             return new MFunction(
                 "_and", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     if (args[0].Value.IsTruthy())
                     {
@@ -839,12 +839,12 @@ namespace MathCommandLine.Functions
                 "If 'input1' is truthy, returns 'input2'. Otherwise, returns 'input1'"
             );
         }
-        public static MFunction OrFunction(IInterpreter interpreter)
+        public static MFunction OrFunction()
         {
 
             return new MFunction(
                 "_or", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     if (args[0].Value.IsTruthy())
                     {
@@ -859,12 +859,12 @@ namespace MathCommandLine.Functions
                 "If 'input1' is truthy, returns 'input1'. Otherwise, returns 'input2'"
             );
         }
-        public static MFunction NotFunction(IInterpreter interpreter)
+        public static MFunction NotFunction()
         {
 
             return new MFunction(
                 "_not", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     bool b = args[0].Value.IsTruthy();
                     return MValue.Bool(!b);
@@ -875,11 +875,11 @@ namespace MathCommandLine.Functions
                 "Inverts the input"
             );
         }
-        public static MFunction AndeFunction(IInterpreter interpreter)
+        public static MFunction AndeFunction()
         {
             return new MFunction(
                 "_and_e", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     MClosure b1 = args[0].Value.ClosureValue;
                     MClosure b2 = args[1].Value.ClosureValue;
@@ -902,12 +902,12 @@ namespace MathCommandLine.Functions
                 "If 'eval1' returns truthy, returns the result of 'eval2'. Otherwise, returns result of 'eval1'"
             );
         }
-        public static MFunction OreFunction(IInterpreter interpreter)
+        public static MFunction OreFunction()
         {
 
             return new MFunction(
                 "_or_e", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     MClosure b1 = args[0].Value.ClosureValue;
                     MClosure b2 = args[1].Value.ClosureValue;
@@ -931,12 +931,12 @@ namespace MathCommandLine.Functions
             );
         }
 
-        public static MFunction EqFunction(IInterpreter interpreter)
+        public static MFunction EqFunction()
         {
 
             return new MFunction(
                 "_eq", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     MValue item1 = args[0].Value;
                     MValue item2 = args[1].Value;
@@ -949,12 +949,12 @@ namespace MathCommandLine.Functions
                 "Returns whether or not both items are equal"
             );
         }
-        public static MFunction LtFunction(IInterpreter interpreter)
+        public static MFunction LtFunction()
         {
 
             return new MFunction(
                 "_lt", 
-                (args, env) =>
+                (args, env, interpreter) =>
                 {
                     double item1 = args[0].Value.NumberValue;
                     double item2 = args[1].Value.NumberValue;

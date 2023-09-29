@@ -109,10 +109,10 @@ namespace MathCommandLine.Commands
             evaluator.Initialize(dtDict, parser, exitAction);
             return evaluator;
         }
-        private MEnvironment CreateBaseEnv(Interpreter evaluator)
+        private MEnvironment CreateBaseEnv()
         {
             // Add core constants
-            List<MFunction> coreFuncs = CoreFunctions.GenerateCoreFunctions(evaluator);
+            List<MFunction> coreFuncs = CoreFunctions.GenerateCoreFunctions();
             MEnvironment baseEnv = new MEnvironment(MEnvironment.Empty);
             baseEnv.AddConstant("null", MValue.Null());
             baseEnv.AddConstant("void", MValue.Void());
@@ -148,7 +148,7 @@ namespace MathCommandLine.Commands
                 running = false;
             });
 
-            MEnvironment baseEnv = CreateBaseEnv(evaluator);
+            MEnvironment baseEnv = CreateBaseEnv();
 
             // Syntax loading; go to the syntax files path, and load in all the files it lists
             SyntaxHandler sh = new SyntaxHandler(parser, "{}(),".ToCharArray().ToList());
@@ -181,7 +181,7 @@ namespace MathCommandLine.Commands
                 running = false;
             });
 
-            MEnvironment baseEnv = CreateBaseEnv(evaluator);
+            MEnvironment baseEnv = CreateBaseEnv();
 
             // Syntax loading; go to the syntax files path, and load in all the files it lists
             SyntaxHandler sh = new SyntaxHandler(parser, "{}(),".ToCharArray().ToList());
@@ -229,7 +229,7 @@ namespace MathCommandLine.Commands
                 stopped = true;
             });
 
-            MEnvironment baseEnv = CreateBaseEnv(evaluator);
+            MEnvironment baseEnv = CreateBaseEnv();
 
             SyntaxHandler sh = new SyntaxHandler(parser, "{}(),".ToCharArray().ToList());
             List<SyntaxDef> syntaxDefinitions = ImportSyntax(sh);
@@ -240,7 +240,7 @@ namespace MathCommandLine.Commands
             foreach (var test in tests)
             {
                 // Reset the environment after every test
-                baseEnv = CreateBaseEnv(evaluator);
+                baseEnv = CreateBaseEnv();
                 string input = test.Item1;
                 string expected = test.Item2;
                 string output;

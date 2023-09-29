@@ -367,7 +367,7 @@ namespace MathCommandLine.Structure
                     "get",
                     new MField(Closure(new MClosure(new MParameters(new MParameter(MDataType.Number, "index")), 
                         MEnvironment.Empty, 
-                        (args, env) => {
+                        (args, env, interpreter) => {
                             int index = (int) args[0].Value.NumberValue;
                             int len = MList.Length(list);
                             if (index >= len || index < 0)
@@ -381,7 +381,7 @@ namespace MathCommandLine.Structure
                     "index",
                     new MField(Closure(new MClosure(new MParameters(new MParameter(MDataType.Any, "value")),
                         MEnvironment.Empty,
-                        (args, env) => {
+                        (args, env, interpreter) => {
                             MValue value = args[0].Value;
                             int index = MList.IndexOf(list, value);
                             return Number(index);
@@ -391,11 +391,21 @@ namespace MathCommandLine.Structure
                     "length",
                     new MField(Closure(new MClosure(MParameters.Empty,
                         MEnvironment.Empty,
-                        (args, env) => {
+                        (args, env, interpreter) => {
                             int len = MList.Length(list);
                             return Number(len);
                         })), 1, 0)
-                }
+                },
+                {
+                    "map",
+                    new MField(Closure(new MClosure(MParameters.Empty,
+                        MEnvironment.Empty,
+                        (args, env, interpreter) =>
+                        {
+                            return List(MList.Map(args.Get(0).Value.ListValue,
+                                args.Get(1).Value.ClosureValue, interpreter, env));
+                        })), 1, 0)
+                },
             };
         }
     }

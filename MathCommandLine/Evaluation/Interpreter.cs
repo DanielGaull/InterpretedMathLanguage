@@ -294,7 +294,7 @@ namespace MathCommandLine.Evaluation
             // - Otherwise, need to create a new environment and evaluate the body w/ that environment
             if (closure.IsNativeBody)
             {
-                return closure.NativeBody(args, currentEnv);
+                return closure.NativeBody(args, currentEnv, this);
             }
             else
             {
