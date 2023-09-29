@@ -1,5 +1,6 @@
 ﻿using MathCommandLine.CoreDataTypes;
 using MathCommandLine.Environments;
+using MathCommandLine.Functions;
 using MathCommandLine.Util;
 using System;
 using System.Collections.Generic;
@@ -48,7 +49,7 @@ namespace MathCommandLine.Structure
         public static MValue List(MList list)
         {
             return new MValue(MDataType.List, 0, list, MClosure.Empty, 0, 0, MDataType.Empty, null, false,
-                new Dictionary<string, MField>());
+                ListProperties(list));
         }
         public static MValue Closure(MClosure closure)
         {
@@ -356,6 +357,46 @@ namespace MathCommandLine.Structure
         public override int GetHashCode()
         {
             return base.GetHashCode();
+        }
+
+        private static Dictionary<string, MField> ListProperties(MList list)
+        {
+            return new Dictionary<string, MField>()
+            {
+                {
+                    "get",
+                    new MField(Closure(new MClosure(new MParameters(new MParameter(MDataType.Number, "index")), 
+                        MEnvironment.Empty, 
+                        (args, env) => {
+                            int index = (int) args[0].Value.NumberValue;
+                            int len = MList.Length(list);
+                            if (index >= len || index < 0)
+                            {
+                                return Error(ErrorCodes.I_OUT_OF_RANGE, $"Index {index} out of range for list of length {len}.");
+                            }
+                            return MList.Get(list, index);
+                        })), 1, 0)
+                },
+                {
+                    "index",
+                    new MField(Closure(new MClosure(new MParameters(new MParameter(MDataType.Any, "value")),
+                        MEnvironment.Empty,
+                        (args, env) => {
+                            MValue value = args[0].Value;
+                            int index = MList.IndexOf(list, value);
+                            return Number(index);
+                        })), 1, 0)
+                },
+                {
+                    "length",
+                    new MField(Closure(new MClosure(MParameters.Empty,
+                        MEnvironment.Empty,
+                        (args, env) => {
+                            int len = MList.Length(list);
+                            return Number(len);
+                        })), 1, 0)
+                }
+            };
         }
     }
 }
