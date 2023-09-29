@@ -201,20 +201,6 @@ namespace MathCommandLine.Evaluation
                     Ast parent = Parse(parentStr);
                     return Ast.MemberAccess(parent, name);
                 }
-                else if (attemptedAssignmentMatchIndex >= 0)
-                {
-                    string identifierExpr = expression.Substring(0, attemptedAssignmentMatchIndex).Trim();
-                    string assignedExpr = expression.Substring(attemptedAssignmentMatchIndex + 1,
-                        expression.Length - attemptedAssignmentMatchIndex - 1).Trim();
-                    // Parse the assigned expression
-                    Ast assigned = Parse(assignedExpr);
-                    // Parse the identifier
-                    IdentifierAst identifier = ParseIdentifier(identifierExpr);
-                    // TODO: Add operator-assignments, ex. +=, &&=, etc.
-                    // Should be valid for ANY operator; even doing something like !== or === should work,
-                    // though they'd be pretty rare to want to do
-                    return Ast.VariableAssignment(identifier, assigned);
-                }
                 else if (DECLARATION_REGEX.IsMatch(expression))
                 {
                     var groups = DECLARATION_REGEX.Match(expression).Groups;
@@ -244,6 +230,20 @@ namespace MathCommandLine.Evaluation
                     Ast assigned = Parse(assignedExpr);
 
                     return Ast.VariableDeclaration(varName, assigned, varType);
+                }
+                else if (attemptedAssignmentMatchIndex >= 0)
+                {
+                    string identifierExpr = expression.Substring(0, attemptedAssignmentMatchIndex).Trim();
+                    string assignedExpr = expression.Substring(attemptedAssignmentMatchIndex + 1,
+                        expression.Length - attemptedAssignmentMatchIndex - 1).Trim();
+                    // Parse the assigned expression
+                    Ast assigned = Parse(assignedExpr);
+                    // Parse the identifier
+                    IdentifierAst identifier = ParseIdentifier(identifierExpr);
+                    // TODO: Add operator-assignments, ex. +=, &&=, etc.
+                    // Should be valid for ANY operator; even doing something like !== or === should work,
+                    // though they'd be pretty rare to want to do
+                    return Ast.VariableAssignment(identifier, assigned);
                 }
                 else if (SYMBOL_NAME_REGEX.IsMatch(expression))
                 {

@@ -210,18 +210,30 @@ namespace MathCommandLine.Evaluation
                         return newVarValue;
                     }
                 case AstTypes.VariableAssignment:
-                    string varName = ast.Name;
+                    IdentifierAst identifier = ast.Identifier;
                     MValue assignValue = EvaluateAst(ast.Body, env);
-                    if (!env.Has(varName))
+                    switch (identifier.Type)
                     {
-                        return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST, $"Variable \"{varName}\" does not exist.");
+                        case IdentifierAstTypes.RawVar:
+                            string varName = identifier.Name;
+                            if (!env.Has(varName))
+                            {
+                                return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST, $"Variable \"{varName}\" does not exist.");
+                            }
+                            MBoxedValue boxToAssign = env.GetBox(varName);
+                            if (!boxToAssign.CanSet)
+                            {
+                                return MValue.Error(ErrorCodes.CANNOT_ASSIGN, $"Cannot assign value to constant \"{varName}\"");
+                            }
+                            boxToAssign.SetValue(assignValue);
+                            break;
+                        case IdentifierAstTypes.MemberAccess:
+                            MValue assignParent = EvaluateAst(identifier.Parent, env);
+                            return assignParent.SetValueByName(identifier.Name, assignValue, false);
+                        case IdentifierAstTypes.Dereference:
+                            // TODO
+                            break;
                     }
-                    MBoxedValue boxToAssign = env.GetBox(varName);
-                    if (!boxToAssign.CanSet)
-                    {
-                        return MValue.Error(ErrorCodes.CANNOT_ASSIGN, $"Cannot assign value to constant \"{varName}\"");
-                    }
-                    boxToAssign.SetValue(assignValue);
                     return assignValue;
                 case AstTypes.MemberAccess:
                     MValue original = EvaluateAst(ast.ParentAst, env);

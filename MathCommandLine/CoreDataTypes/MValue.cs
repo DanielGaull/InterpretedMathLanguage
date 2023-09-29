@@ -158,6 +158,28 @@ namespace MathCommandLine.Structure
             }
             return Error(ErrorCodes.NOT_COMPOSITE);
         }
+        public MValue SetValueByName(string name, MValue value, bool isSelfAccessing)
+        {
+            if (DataValues != null)
+            {
+                if (DataValues.ContainsKey(name))
+                {
+                    MField field = DataValues[name];
+                    if (!isSelfAccessing && field.WritePermission != MField.PUBLIC)
+                    {
+                        return Error(ErrorCodes.KEY_DOES_NOT_EXIST,
+                            "The key \"" + name + "\" does not exist in this data value, or the field is not accessible.",
+                            MList.Empty);
+                    }
+                    field.SetValue(value);
+                    return value;
+                }
+                return Error(ErrorCodes.KEY_DOES_NOT_EXIST,
+                    "The key \"" + name + "\" does not exist in this data value, or the field is not accessible.",
+                    MList.Empty);
+            }
+            return Error(ErrorCodes.NOT_COMPOSITE);
+        }
 
         public bool IsTruthy()
         {
