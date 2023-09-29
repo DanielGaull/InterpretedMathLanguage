@@ -508,6 +508,18 @@ namespace MathCommandLine.Structure
                             list.InternalList.RemoveAt(index);
                             return Bool(true);
                         })), 1, 0)
+                },
+                {
+                    "addAll",
+                    new MField(Closure(new MClosure(new MParameters(
+                            new MParameter(MDataType.List, "other")),
+                        MEnvironment.Empty,
+                        (args, env, interpreter) =>
+                        {
+                            MList other = args[0].Value.ListValue;
+                            list.InternalList.AddRange(other.InternalList);
+                            return Void();
+                        })), 1, 0)
                 }
             };
         }

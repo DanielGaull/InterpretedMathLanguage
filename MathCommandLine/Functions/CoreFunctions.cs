@@ -26,9 +26,7 @@ namespace MathCommandLine.Functions
                 FloorFunction(),
                 TrigFunction(),
                 NaturalLog(),
-
                 CreateRangeList(),
-                ConcatLists(),
 
                 Get(),
                 Set(),
@@ -222,21 +220,6 @@ namespace MathCommandLine.Functions
                     new MParameter(MDataType.Number, "max")
                 ),
                 "Creates a list of integers from 0 to 'max', exclusive (i.e. 'max' is not included in the result list)."
-            );
-        }
-        public static MFunction ConcatLists()
-        {
-            return new MFunction(
-                "_concat", 
-                (args, env, interpreter) =>
-                {
-                    return MValue.List(MList.Concat(args.Get(0).Value.ListValue, args.Get(1).Value.ListValue));
-                },
-                new MParameters(
-                    new MParameter(MDataType.List, "list1"),
-                    new MParameter(MDataType.List, "list2")
-                ),
-                "Concatenates the elements of 'list1' and 'list2' into a new list, which is returned."
             );
         }
 

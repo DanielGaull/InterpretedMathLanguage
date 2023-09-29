@@ -377,6 +377,8 @@ namespace MathCommandLine.Commands
                 new Tuple<string, string>("_do({[var list={1,2,3}],[list.remove(2)],[list]})", "(list) { 1, 3 }"),
                 new Tuple<string, string>("_do({[var list={1,2,3}],[list.removec(2,(a,b)=>{_eq(a,b)})],[list]})", 
                     "(list) { 1, 3 }"),
+                new Tuple<string, string>("_do({[var list1={1,2,3}],[var list2={4,5,6}],[list1.addAll(list2)],[list1]})",
+                    "(list) { 1, 2, 3, 4, 5, 6 }"),
             };
         }
     }
