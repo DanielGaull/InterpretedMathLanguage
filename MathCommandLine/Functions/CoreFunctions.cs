@@ -27,8 +27,6 @@ namespace MathCommandLine.Functions
                 TrigFunction(),
                 NaturalLog(),
 
-                InsertInList(),
-                RemoveFromList(),
                 CreateRangeList(),
                 ConcatLists(),
 
@@ -212,40 +210,6 @@ namespace MathCommandLine.Functions
         }
 
         // List Functions
-        public static MFunction InsertInList()
-        {
-            return new MFunction(
-                "_insertl", 
-                (args, env, interpreter) =>
-                {
-                    // TODO: Handle index out of range errors
-                    return MValue.List(MList.Insert(args.Get(0).Value.ListValue, (int)args.Get(1).Value.NumberValue, args.Get(2).Value));
-                },
-                new MParameters(
-                    new MParameter(MDataType.List, "list"),
-                    new MParameter(MDataType.Number, "index"),
-                    new MParameter(MDataType.Any, "value")
-                ),
-                "Returns a new list with the elements of 'list' containing 'value' inserted at 'index'. " +
-                "May return error if 'index' is >= the length of 'list'."
-            );
-        }
-        public static MFunction RemoveFromList()
-        {
-            return new MFunction(
-                "_removel", 
-                (args, env, interpreter) =>
-                {
-                    // TODO: Handle index out of range errors
-                    return MValue.List(MList.Remove(args.Get(0).Value.ListValue, (int)args.Get(1).Value.NumberValue));
-                },
-                new MParameters(
-                    new MParameter(MDataType.List, "list"),
-                    new MParameter(MDataType.Number, "index")
-                ),
-                "Returns a new list with the elements of 'list' without the value at 'index'. May return error if 'index' is >= the length of 'list'."
-            );
-        }
         public static MFunction CreateRangeList()
         {
             return new MFunction(

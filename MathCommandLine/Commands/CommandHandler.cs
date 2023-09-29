@@ -369,6 +369,14 @@ namespace MathCommandLine.Commands
                 new Tuple<string, string>("_do({[var list={1,2,3}],[list.indexc(2,(a,b)=>{_eq(a,b)})]})", 
                     "(number) 1"),
                 new Tuple<string, string>("_do({[var list={1,2,3}],[list.index(2)]})", "(number) 1"),
+                new Tuple<string, string>("_do({[var list={1,2}],[list.add(3)],[list]})", "(list) { 1, 2, 3 }"),
+                new Tuple<string, string>("_do({[var list={1,2}],[list.add(3)],[list.length()]})", "(number) 3"),
+                new Tuple<string, string>("_do({[var list={1,2,3}],[list.removeAt(0)],[list]})", "(list) { 2, 3 }"),
+                new Tuple<string, string>("_do({[var list={1,2,3}],[list.remove(0)]})", "(bool) FALSE"),
+                new Tuple<string, string>("_do({[var list={1,2,3}],[list.remove(2)]})", "(bool) TRUE"),
+                new Tuple<string, string>("_do({[var list={1,2,3}],[list.remove(2)],[list]})", "(list) { 1, 3 }"),
+                new Tuple<string, string>("_do({[var list={1,2,3}],[list.removec(2,(a,b)=>{_eq(a,b)})],[list]})", 
+                    "(list) { 1, 3 }"),
             };
         }
     }

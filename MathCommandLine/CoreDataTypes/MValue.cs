@@ -394,7 +394,7 @@ namespace MathCommandLine.Structure
                             new MParameter(MDataType.Closure, "equality_evaluator")),
                         MEnvironment.Empty,
                         (args, env, interpreter) => {
-                            return MValue.Number(MList.IndexOfCustom(list, args.Get(0).Value,
+                            return Number(MList.IndexOfCustom(list, args.Get(0).Value,
                                 args.Get(1).Value.ClosureValue, interpreter, env));
                         })), 1, 0)
                 },
@@ -427,6 +427,86 @@ namespace MathCommandLine.Structure
                         {
                             return MList.Reduce(list, args.Get(0).Value.ClosureValue,
                                 args.Get(1).Value, interpreter, env);
+                        })), 1, 0)
+                },
+                {
+                    "add",
+                    new MField(Closure(new MClosure(new MParameters(
+                            new MParameter(MDataType.Any, "item")),
+                        MEnvironment.Empty,
+                        (args, env, interpreter) =>
+                        {
+                            list.InternalList.Add(args[0].Value);
+                            return Void();
+                        })), 1, 0)
+                },
+                {
+                    "insert",
+                    new MField(Closure(new MClosure(new MParameters(
+                            new MParameter(MDataType.Any, "item"),
+                            new MParameter(MDataType.Number, "index")),
+                        MEnvironment.Empty,
+                        (args, env, interpreter) =>
+                        {
+                            int index = (int) args[1].Value.NumberValue;
+                            int len = MList.Length(list);
+                            if (index >= len || index < 0)
+                            {
+                                return Error(ErrorCodes.I_OUT_OF_RANGE, $"Index {index} out of range for list of length {len}.");
+                            }
+                            list.InternalList.Insert(index, args[0].Value);
+                            return Void();
+                        })), 1, 0)
+                },
+                {
+                    "removeAt",
+                    new MField(Closure(new MClosure(new MParameters(
+                            new MParameter(MDataType.Number, "index")),
+                        MEnvironment.Empty,
+                        (args, env, interpreter) =>
+                        {
+                            int index = (int) args[0].Value.NumberValue;
+                            int len = MList.Length(list);
+                            if (index >= len || index < 0)
+                            {
+                                return Error(ErrorCodes.I_OUT_OF_RANGE, $"Index {index} out of range for list of length {len}.");
+                            }
+                            list.InternalList.RemoveAt(index);
+                            return Void();
+                        })), 1, 0)
+                },
+                {
+                    "remove",
+                    new MField(Closure(new MClosure(new MParameters(
+                            new MParameter(MDataType.Any, "value")),
+                        MEnvironment.Empty,
+                        (args, env, interpreter) =>
+                        {
+                            int index = MList.IndexOf(list, args[0].Value);
+                            if (index < 0)
+                            {
+                                return Bool(false);
+                            }
+                            list.InternalList.RemoveAt(index);
+                            return Bool(true);
+                        })), 1, 0)
+                },
+                {
+                    "removec",
+                    new MField(Closure(new MClosure(new MParameters(
+                            new MParameter(MDataType.Any, "value"),
+                            new MParameter(MDataType.Closure, "equality_evaluator")),
+                        MEnvironment.Empty,
+                        (args, env, interpreter) =>
+                        {
+                            int index = MList.IndexOfCustom(list, args.Get(0).Value,
+                                args.Get(1).Value.ClosureValue, interpreter, env);
+                            if (index < 0)
+                            {
+                                return Bool(false);
+                            }
+                            list.InternalList.RemoveAt(index);
+                            return Bool(true);
                         })), 1, 0)
                 }
             };
