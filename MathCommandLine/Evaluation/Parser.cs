@@ -241,7 +241,7 @@ namespace MathCommandLine.Evaluation
                     // Parse the identifier
                     IdentifierAst identifier = ParseIdentifier(identifierExpr);
                     // TODO: Add operator-assignments, ex. +=, &&=, etc.
-                    // Should be valid for ANY operator; even doing something like !== or === should work,
+                    // Should be valid for ANY binary operator; even doing something like !== or === should work,
                     // though they'd be pretty rare to want to do
                     return Ast.VariableAssignment(identifier, assigned);
                 }
