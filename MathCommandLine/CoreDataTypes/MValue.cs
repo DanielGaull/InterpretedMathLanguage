@@ -150,17 +150,25 @@ namespace MathCommandLine.Structure
                     MField field = DataValues[name];
                     if (!isSelfAccessing && field.ReadPermission != MField.PUBLIC)
                     {
+                        if (DataType == MDataType.Error)
+                        {
+                            return this;
+                        }
                         return Error(ErrorCodes.KEY_DOES_NOT_EXIST,
-                            "The key \"" + name + "\" does not exist in this data value, or the field is not accessible.",
+                            "The field \"" + name + "\" is not accessible on this data value.",
                             MList.Empty);
                     }
                     return field.Value;
                 }
+                if (DataType == MDataType.Error)
+                {
+                    return this;
+                }
                 return Error(ErrorCodes.KEY_DOES_NOT_EXIST, 
-                    "The key \"" + name + "\" does not exist in this data value, or the field is not accessible.", 
+                    "The key \"" + name + "\" does not exist in this data value.", 
                     MList.Empty);
             }
-            return Error(ErrorCodes.NOT_COMPOSITE);
+            return Error(ErrorCodes.NO_PROPERTIES, $"Cannot read properties of \"{ToShortString()}\"");
         }
         public MValue SetValueByName(string name, MValue value, bool isSelfAccessing)
         {
@@ -171,18 +179,26 @@ namespace MathCommandLine.Structure
                     MField field = DataValues[name];
                     if (!isSelfAccessing && field.WritePermission != MField.PUBLIC)
                     {
+                        if (DataType == MDataType.Error)
+                        {
+                            return this;
+                        }
                         return Error(ErrorCodes.KEY_DOES_NOT_EXIST,
-                            "The key \"" + name + "\" does not exist in this data value, or the field is not accessible.",
+                            "The field \"" + name + "\" is not modifiable on this data value.",
                             MList.Empty);
                     }
                     field.SetValue(value);
                     return value;
                 }
+                if (DataType == MDataType.Error)
+                {
+                    return this;
+                }
                 return Error(ErrorCodes.KEY_DOES_NOT_EXIST,
-                    "The key \"" + name + "\" does not exist in this data value, or the field is not accessible.",
+                    "The key \"" + name + "\" does not exist in this data value.",
                     MList.Empty);
             }
-            return Error(ErrorCodes.NOT_COMPOSITE);
+            return Error(ErrorCodes.NO_PROPERTIES, $"Cannot read properties of \"{ToShortString()}\"");
         }
 
         public bool IsTruthy()

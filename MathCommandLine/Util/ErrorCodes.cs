@@ -7,7 +7,7 @@ namespace MathCommandLine.Util
     public enum ErrorCodes
     {
         FATAL_UNKNOWN = 0,
-        NOT_COMPOSITE = 1,
+        NO_PROPERTIES = 1,
         INVALID_TYPE = 2,
         KEY_DOES_NOT_EXIST = 3,
         NOT_A_STRING = 4,
