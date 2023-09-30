@@ -52,5 +52,23 @@ namespace MathCommandLine.Operators
                 new MOperator("?:", "conditional", 3),
             };
         }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is MOperator))
+            {
+                return false;
+            }
+            MOperator mop = (MOperator)obj;
+            return mop.Name == Name && mop.Tier == Tier && mop.CodeString == CodeString;
+        }
+        public static bool operator ==(MOperator m1, MOperator m2)
+        {
+            return m1.Equals(m2);
+        }
+        public static bool operator !=(MOperator m1, MOperator m2)
+        {
+            return !(m1 == m2);
+        }
     }
 }
