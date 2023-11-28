@@ -334,7 +334,7 @@ namespace MathCommandLine.Commands
 
         private List<Tuple<string, string>> GetTests()
         {
-            return new List<Tuple<string, string>>() { 
+            return new List<Tuple<string, string>>() {
                 new Tuple<string, string>("_c({{()=>{true},()=>{1}},{()=>{true},()=>{2}}})", "(number) 1"),
                 new Tuple<string, string>("_c({{()=>{null},()=>{1}},{()=>{true},()=>{2}}})", "(number) 2"),
                 new Tuple<string, string>("&true", "(reference) <ref -> (bool) TRUE>"),
@@ -379,6 +379,7 @@ namespace MathCommandLine.Commands
                     "(list) { 1, 3 }"),
                 new Tuple<string, string>("_do({[var list1={1,2,3}],[var list2={4,5,6}],[list1.addAll(list2)],[list1]})",
                     "(list) { 1, 2, 3, 4, 5, 6 }"),
+                new Tuple<string, string>("{1,2,3}.map((x)=>{_add(x,1)}).get(0)", "(number) 2"),
             };
         }
     }
