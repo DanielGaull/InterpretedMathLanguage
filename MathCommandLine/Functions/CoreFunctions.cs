@@ -307,7 +307,7 @@ namespace MathCommandLine.Functions
                 "_type_of", 
                 (args, env, interpreter) =>
                 {
-                    return MValue.Type(MDataTypeRestrictionEntry.CreateDataType(args.Get(0).Value.DataType));
+                    return MValue.Type(new MType(MDataTypeRestrictionEntry.CreateDataType(args.Get(0).Value.DataType)));
                 },
                 new MParameters(
                     new MParameter(MDataTypeRestrictionEntry.CreateDataType(MDataType.Any), "value")
@@ -429,7 +429,7 @@ namespace MathCommandLine.Functions
                     }
                     else
                     {
-                        return MValue.Type(MDataTypeRestrictionEntry.CreateDataType(type));
+                        return MValue.Type(new MType(MDataTypeRestrictionEntry.CreateDataType(type)));
                     }
                 },
                 new MParameters(

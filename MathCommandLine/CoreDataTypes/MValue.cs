@@ -17,14 +17,14 @@ namespace MathCommandLine.Structure
         public MClosure ClosureValue; // For the lambda type
         public decimal BigDecimalValue; // For the big_decimal type
         public long BigIntValue; // For the big_int type
-        public MDataTypeRestrictionEntry TypeValue; // For the type type (that represents an actual data type)
+        public MType TypeValue; // For the type type (that represents an actual data type)
         public MBoxedValue RefValue; // For the reference value
         public bool BoolValue; // For the boolean type
         public Dictionary<string, MField> DataValues; // The Data Values for composite types (maps name => value)
         public MDataType DataType;
 
         public MValue(MDataType dataType, double numberValue, MList listValue, MClosure closureValue, decimal bigDecimalValue, 
-            long bigIntValue, MDataTypeRestrictionEntry typeValue, MBoxedValue refValue, bool boolValue, Dictionary<string, MField> dataValues)
+            long bigIntValue, MType typeValue, MBoxedValue refValue, bool boolValue, Dictionary<string, MField> dataValues)
         {
             DataType = dataType;
             NumberValue = numberValue;
@@ -53,7 +53,7 @@ namespace MathCommandLine.Structure
             return new MValue(MDataType.Function, 0, MList.Empty, closure, 0, 0, null, null, false,
                 new Dictionary<string, MField>());
         }
-        public static MValue Type(MDataTypeRestrictionEntry type)
+        public static MValue Type(MType type)
         {
             return new MValue(MDataType.Type, 0, MList.Empty, MClosure.Empty, 0, 0, type, null, false,
                 new Dictionary<string, MField>());

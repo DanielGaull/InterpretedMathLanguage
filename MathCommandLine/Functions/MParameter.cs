@@ -6,32 +6,36 @@ using System.Linq;
 
 namespace MathCommandLine.Functions
 {
-    public struct MParameter
+    public class MParameter
     {
-        public List<MDataTypeRestrictionEntry> TypeEntries;
-        public string Name;
+        public readonly MType Type;
+        public readonly string Name;
         private bool isNotEmpty;
 
-        public MParameter(MDataTypeRestrictionEntry dataType, string name)
+        public MParameter(MType type, string name)
         {
-            TypeEntries = new List<MDataTypeRestrictionEntry> { dataType };
+            Type = type;
             Name = name;
             isNotEmpty = true;
         }
-        public MParameter(string name, params MDataTypeRestrictionEntry[] dataTypes)
+        public MParameter(MDataTypeRestrictionEntry singleEntry, string name)
         {
-            TypeEntries = new List<MDataTypeRestrictionEntry>(dataTypes);
+            Type = new MType(singleEntry);
+            Name = name;
+            isNotEmpty = true;
+        }
+        public MParameter(string name, params MDataTypeRestrictionEntry[] entries)
+        {
+            Type = new MType(entries);
             Name = name;
             isNotEmpty = true;
         }
         public MParameter(string name, List<MDataTypeRestrictionEntry> entries)
         {
-            TypeEntries = entries;
+            Type = new MType(entries);
             Name = name;
             isNotEmpty = true;
         }
-
-        public static MParameter Empty = new MParameter();
 
         public bool IsEmpty
         {
@@ -41,36 +45,21 @@ namespace MathCommandLine.Functions
             }
         }
 
+        // TODO: To string methods
         public override string ToString()
         {
-            return Name + ":" + string.Join('|', TypeEntries);
-        }
-
-        public List<MDataTypeRestrictionEntry> GetDataTypes()
-        {
-            return TypeEntries;
+            return Name;// + ":" + string.Join('|', TypeEntries);
         }
 
         public string DataTypeString()
         {
-            return string.Join('|', GetDataTypes());
+            return "";// string.Join('|', GetDataTypes());
         }
 
         public static bool operator ==(MParameter p1, MParameter p2)
         {
-            // Two parameters are equal as long as their data types and restrictions are equal, their names don't matter
-            if (p1.TypeEntries.Count != p2.TypeEntries.Count)
-            {
-                return false;
-            }
-            for (int i = 0; i < p1.TypeEntries.Count; i++)
-            {
-                if (p1.TypeEntries[i] != p2.TypeEntries[i])
-                {
-                    return false;
-                }
-            }
-            return true;
+            // TODO: Define MParameter Equals
+            return false;
         }
         public static bool operator !=(MParameter p1, MParameter p2)
         {
