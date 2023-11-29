@@ -1,4 +1,5 @@
-﻿using MathCommandLine.Structure;
+﻿using MathCommandLine.CoreDataTypes;
+using MathCommandLine.Structure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,34 +8,25 @@ namespace MathCommandLine.Functions
 {
     public struct MParameter
     {
-        public List<MTypeRestrictionsEntry> TypeEntries;
+        public List<MDataTypeRestrictionEntry> TypeEntries;
         public string Name;
         private bool isNotEmpty;
 
-        public MParameter(MDataType dataType, string name)
+        public MParameter(MDataTypeRestrictionEntry dataType, string name)
         {
-            TypeEntries = new List<MTypeRestrictionsEntry> { new MTypeRestrictionsEntry(dataType) };
+            TypeEntries = new List<MDataTypeRestrictionEntry> { dataType };
             Name = name;
             isNotEmpty = true;
         }
-        public MParameter(string name, params MDataType[] dataTypes)
+        public MParameter(string name, params MDataTypeRestrictionEntry[] dataTypes)
         {
-            TypeEntries = new List<MTypeRestrictionsEntry>(dataTypes.Select((type) =>
-            {
-                return new MTypeRestrictionsEntry(type);
-            }));
+            TypeEntries = new List<MDataTypeRestrictionEntry>(dataTypes);
             Name = name;
             isNotEmpty = true;
         }
-        public MParameter(string name, List<MTypeRestrictionsEntry> entries)
+        public MParameter(string name, List<MDataTypeRestrictionEntry> entries)
         {
             TypeEntries = entries;
-            Name = name;
-            isNotEmpty = true;
-        }
-        public MParameter(string name, params MTypeRestrictionsEntry[] entries)
-        {
-            TypeEntries = new List<MTypeRestrictionsEntry>(entries);
             Name = name;
             isNotEmpty = true;
         }
@@ -54,58 +46,11 @@ namespace MathCommandLine.Functions
             return Name + ":" + string.Join('|', TypeEntries);
         }
 
-        public List<MDataType> GetDataTypes()
+        public List<MDataTypeRestrictionEntry> GetDataTypes()
         {
-            return TypeEntries.Select((entry) => entry.DataType).ToList();
+            return TypeEntries;
         }
 
-        public bool ContainsType(MDataType type)
-        {
-            List<MDataType> types = GetDataTypes();
-            // If types contains this type, or types contains the any type (can't do contains check because all types == any)
-            return types.Contains(type) || types.Where((type) => type.IsAnyType).Count() > 0;
-        }
-        public bool PassesRestrictions(MValue value)
-        {
-            if (value.DataType == MDataType.Number)
-            {
-                // Find the entry for the number type
-                MTypeRestrictionsEntry entry = TypeEntries
-                    .Where((entry) => entry.DataType == MDataType.Number)
-                    .FirstOrDefault();
-                if (entry.IsEmpty)
-                {
-                    // Technically passes all restrictions, since it's the wrong type (we don't allow for numbers here)
-                    return true;
-                }
-                foreach (ValueRestriction restriction in entry.ValueRestrictions)
-                {
-                    if (!restriction.SatisfiesNumRestriction(value.NumberValue))
-                    {
-                        return false;
-                    }
-                }
-            }
-            else if (value.DataType == MDataType.List)
-            {
-                // Grabs the list Type-Restriction entry
-                MTypeRestrictionsEntry entry = TypeEntries
-                    .Where((entry) => entry.DataType == MDataType.List)
-                    .FirstOrDefault();
-                if (entry.IsEmpty)
-                {
-                    return true;
-                }
-                foreach (ValueRestriction restriction in entry.ValueRestrictions)
-                {
-                    if (!restriction.SatisfiesListRestriction(value.ListValue))
-                    {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
         public string DataTypeString()
         {
             return string.Join('|', GetDataTypes());
@@ -136,76 +81,6 @@ namespace MathCommandLine.Functions
             if (obj is MParameter)
             {
                 MParameter value = (MParameter)obj;
-                return value == this;
-            }
-            return false;
-        }
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-    }
-
-    public struct MTypeRestrictionsEntry
-    {
-        private bool isNotEmpty;
-        public MDataType DataType { get; private set; }
-        public ValueRestriction[] ValueRestrictions { get; private set; }
-
-        public MTypeRestrictionsEntry(MDataType dataType, params ValueRestriction[] valueRestrictions)
-        {
-            DataType = dataType;
-            ValueRestrictions = valueRestrictions;
-            isNotEmpty = true;
-        }
-
-        public static MTypeRestrictionsEntry Empty = new MTypeRestrictionsEntry();
-
-        public bool IsEmpty
-        {
-            get
-            {
-                return !isNotEmpty;
-            }
-        }
-
-        public override string ToString()
-        {
-            return "[" + string.Join(',', ValueRestrictions) + "]" + DataType.Name;
-        }
-
-        public static bool operator ==(MTypeRestrictionsEntry p1, MTypeRestrictionsEntry p2)
-        {
-            if (p1.IsEmpty && p2.IsEmpty)
-            {
-                return true;
-            }
-            if (p1.DataType != p2.DataType)
-            {
-                return false;
-            }
-            if (p1.ValueRestrictions.Length != p2.ValueRestrictions.Length)
-            {
-                return false;
-            }
-            for (int i = 0; i < p1.ValueRestrictions.Length; i++)
-            {
-                if (p1.ValueRestrictions[i] != p2.ValueRestrictions[i])
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-        public static bool operator !=(MTypeRestrictionsEntry p1, MTypeRestrictionsEntry p2)
-        {
-            return !(p1 == p2);
-        }
-        public override bool Equals(object obj)
-        {
-            if (obj is MTypeRestrictionsEntry)
-            {
-                MTypeRestrictionsEntry value = (MTypeRestrictionsEntry)obj;
                 return value == this;
             }
             return false;

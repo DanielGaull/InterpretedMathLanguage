@@ -10,21 +10,21 @@ namespace MathCommandLine.Structure
 {
     // Class for a math data value
     // Can represent a primitive data type or a composite data type
-    public struct MValue
+    public class MValue
     {
         public double NumberValue; // For the number type, a 64-bit floating-pt number
         public MList ListValue; // For the list type
         public MClosure ClosureValue; // For the lambda type
         public decimal BigDecimalValue; // For the big_decimal type
         public long BigIntValue; // For the big_int type
-        public MDataType TypeValue; // For the type type (that represents an actual data type)
+        public MDataTypeRestrictionEntry TypeValue; // For the type type (that represents an actual data type)
         public MBoxedValue RefValue; // For the reference value
         public bool BoolValue; // For the boolean type
         public Dictionary<string, MField> DataValues; // The Data Values for composite types (maps name => value)
         public MDataType DataType;
 
         public MValue(MDataType dataType, double numberValue, MList listValue, MClosure closureValue, decimal bigDecimalValue, 
-            long bigIntValue, MDataType typeValue, MBoxedValue refValue, bool boolValue, Dictionary<string, MField> dataValues)
+            long bigIntValue, MDataTypeRestrictionEntry typeValue, MBoxedValue refValue, bool boolValue, Dictionary<string, MField> dataValues)
         {
             DataType = dataType;
             NumberValue = numberValue;
@@ -38,62 +38,49 @@ namespace MathCommandLine.Structure
             BoolValue = boolValue;
         }
 
-        public static readonly MValue Empty = new MValue(MDataType.Empty, 0, MList.Empty, MClosure.Empty, 0, 0, 
-            MDataType.Empty, null, false, null);
-
         public static MValue Number(double numberValue)
         {
-            return new MValue(MDataType.Number, numberValue, MList.Empty, MClosure.Empty, 0, 0, MDataType.Empty, null, 
+            return new MValue(MDataType.Number, numberValue, MList.Empty, MClosure.Empty, 0, 0, null, null, 
                 false, new Dictionary<string, MField>());
         }
         public static MValue List(MList list)
         {
-            return new MValue(MDataType.List, 0, list, MClosure.Empty, 0, 0, MDataType.Empty, null, false,
+            return new MValue(MDataType.List, 0, list, MClosure.Empty, 0, 0, null, null, false,
                 ListProperties(list));
         }
         public static MValue Closure(MClosure closure)
         {
-            return new MValue(MDataType.Closure, 0, MList.Empty, closure, 0, 0, MDataType.Empty, null, false,
+            return new MValue(MDataType.Function, 0, MList.Empty, closure, 0, 0, null, null, false,
                 new Dictionary<string, MField>());
         }
-        public static MValue BigDecimal(decimal bigDecimal)
-        {
-            return new MValue(MDataType.BigDecimal, 0, MList.Empty, MClosure.Empty, bigDecimal, 0, MDataType.Empty, null, 
-                false, new Dictionary<string, MField>());
-        }
-        public static MValue BigInt(long bigInt)
-        {
-            return new MValue(MDataType.BigInt, 0, MList.Empty, MClosure.Empty, 0, bigInt, MDataType.Empty, null, 
-                false, new Dictionary<string, MField>());
-        }
-        public static MValue Type(MDataType type)
+        public static MValue Type(MDataTypeRestrictionEntry type)
         {
             return new MValue(MDataType.Type, 0, MList.Empty, MClosure.Empty, 0, 0, type, null, false,
                 new Dictionary<string, MField>());
         }
         public static MValue Reference(MBoxedValue refValue)
         {
-            return new MValue(MDataType.Reference, 0, MList.Empty, MClosure.Empty, 0, 0, MDataType.Empty, refValue, 
+            return new MValue(MDataType.Reference, 0, MList.Empty, MClosure.Empty, 0, 0, null, refValue, 
                 false, new Dictionary<string, MField>());
         }
         public static MValue Bool(bool boolValue)
         {
-            return new MValue(MDataType.Boolean, 0, MList.Empty, MClosure.Empty, 0, 0, MDataType.Empty, null,
+            return new MValue(MDataType.Boolean, 0, MList.Empty, MClosure.Empty, 0, 0, null, null,
                 boolValue, new Dictionary<string, MField>());
         }
         public static MValue Void()
         {
-            return new MValue(MDataType.Void, 0, MList.Empty, MClosure.Empty, 0, 0, MDataType.Empty, null, 
+            return new MValue(MDataType.Void, 0, MList.Empty, MClosure.Empty, 0, 0, null, null, 
                 false, null);
         }
         public static MValue Null()
         {
-            return new MValue(MDataType.Null, 0, MList.Empty, MClosure.Empty, 0, 0, MDataType.Empty, null,
+            return new MValue(MDataType.Null, 0, MList.Empty, MClosure.Empty, 0, 0, null, null,
                 false, null);
         }
         public static MValue Composite(MDataType type, Dictionary<string, MField> values)
         {
-            return new MValue(type, 0, MList.Empty, MClosure.Empty, 0, 0, MDataType.Empty, null, false, values);
+            return new MValue(type, 0, MList.Empty, MClosure.Empty, 0, 0, null, null, false, values);
         }
 
         /// <summary>
@@ -102,7 +89,7 @@ namespace MathCommandLine.Structure
         /// <returns></returns>
         public string GetStringValue()
         {
-            if (DataType == MDataType.String)
+            if (DataType.MatchesTypeExactly(MDataType.String))
             {
                 return Utilities.MListToString(GetValueByName("chars", true).ListValue);
             }
@@ -214,46 +201,38 @@ namespace MathCommandLine.Structure
         }
         public string ToShortString()
         {
-            if (DataType == MDataType.Number)
+            if (DataType.MatchesTypeExactly(MDataType.Number))
             {
                 return NumberValue.ToString();
             }
-            else if (DataType == MDataType.List)
+            else if (DataType.MatchesTypeExactly(MDataType.List))
             {
                 return ListValue.ToString();
             }
-            else if (DataType == MDataType.Closure)
+            else if (DataType.MatchesTypeExactly(MDataType.Function))
             {
                 return ClosureValue.ToString();
             }
-            else if (DataType == MDataType.BigDecimal)
-            {
-                return BigDecimalValue.ToString();
-            }
-            else if (DataType == MDataType.BigInt)
-            {
-                return BigIntValue.ToString();
-            }
-            else if (DataType == MDataType.Type)
+            else if (DataType.MatchesTypeExactly(MDataType.Type))
             {
                 return TypeValue.ToString();
             }
-            else if (DataType == MDataType.Reference)
+            else if (DataType.MatchesTypeExactly(MDataType.Reference))
             {
                 return "<ref -> " + RefValue.ToString() + ">";
             }
-            else if (DataType == MDataType.String)
+            else if (DataType.MatchesTypeExactly(MDataType.String))
             {
                 StringBuilder builder = new StringBuilder("\"");
                 builder.Append(Utilities.MListToString(GetValueByName("chars", true).ListValue));
                 builder.Append("\"");
                 return builder.ToString();
             }
-            else if (DataType == MDataType.Void)
+            else if (DataType.MatchesTypeExactly(MDataType.Void))
             {
                 return "void";
             }
-            else if (DataType == MDataType.Boolean)
+            else if (DataType.MatchesTypeExactly(MDataType.Boolean))
             {
                 if (BoolValue)
                 {
@@ -264,11 +243,11 @@ namespace MathCommandLine.Structure
                     return "FALSE";
                 }
             }
-            else if (DataType == MDataType.Null)
+            else if (DataType.MatchesTypeExactly(MDataType.Null))
             {
                 return "null";
             }
-            else if (DataType == MDataType.Error)
+            else if (DataType.MatchesTypeExactly(MDataType.Error))
             {
                 StringBuilder builder = new StringBuilder("Error: #");
                 MValue codeValue = GetValueByName("code", true);
@@ -315,27 +294,27 @@ namespace MathCommandLine.Structure
                 return false;
             }
             MDataType dt = v1.DataType;
-            if (dt == MDataType.Number)
+            if (dt.MatchesTypeExactly(MDataType.Number))
             {
                 return v1.NumberValue == v2.NumberValue;
             }
-            else if (dt == MDataType.List)
+            else if (dt.MatchesTypeExactly(MDataType.List))
             {
                 return v1.ListValue == v2.ListValue;
             }
-            else if (dt == MDataType.Closure)
+            else if (dt.MatchesTypeExactly(MDataType.Function))
             {
                 return v1.ClosureValue == v2.ClosureValue;
             }
-            else if (dt == MDataType.Type)
+            else if (dt.MatchesTypeExactly(MDataType.Type))
             {
                 return v1.TypeValue == v2.TypeValue;
             }
-            else if (dt == MDataType.Boolean)
+            else if (dt.MatchesTypeExactly(MDataType.Boolean))
             {
                 return v1.BoolValue == v2.BoolValue;
             }
-            else if (dt == MDataType.Reference)
+            else if (dt.MatchesTypeExactly(MDataType.Reference))
             {
                 return v1.RefValue == v2.RefValue;
             }
@@ -381,7 +360,7 @@ namespace MathCommandLine.Structure
             {
                 {
                     "get",
-                    new MField(Closure(new MClosure(new MParameters(new MParameter(MDataType.Number, "index")), 
+                    new MField(Closure(new MClosure(new MParameters(new MParameter(MDataTypeRestrictionEntry.Number, "index")), 
                         MEnvironment.Empty, 
                         (args, env, interpreter) => {
                             int index = (int) args[0].Value.NumberValue;
@@ -395,7 +374,7 @@ namespace MathCommandLine.Structure
                 },
                 {
                     "index",
-                    new MField(Closure(new MClosure(new MParameters(new MParameter(MDataType.Any, "value")),
+                    new MField(Closure(new MClosure(new MParameters(new MParameter(MDataTypeRestrictionEntry.Any, "value")),
                         MEnvironment.Empty,
                         (args, env, interpreter) => {
                             MValue value = args[0].Value;
@@ -406,8 +385,8 @@ namespace MathCommandLine.Structure
                 {
                     "indexc",
                     new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(MDataType.Any, "element"),
-                            new MParameter(MDataType.Closure, "equality_evaluator")),
+                            new MParameter(MDataTypeRestrictionEntry.Any, "element"),
+                            new MParameter(MDataTypeRestrictionEntry.Function, "equality_evaluator")),
                         MEnvironment.Empty,
                         (args, env, interpreter) => {
                             return Number(MList.IndexOfCustom(list, args.Get(0).Value,
@@ -425,7 +404,7 @@ namespace MathCommandLine.Structure
                 },
                 {
                     "map",
-                    new MField(Closure(new MClosure(new MParameters(new MParameter(MDataType.Closure, "mapper")),
+                    new MField(Closure(new MClosure(new MParameters(new MParameter(MDataTypeRestrictionEntry.Function, "mapper")),
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
@@ -436,8 +415,8 @@ namespace MathCommandLine.Structure
                 {
                     "reduce",
                     new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(MDataType.Closure, "reducer"),
-                            new MParameter(MDataType.Any, "init_value")),
+                            new MParameter(MDataTypeRestrictionEntry.Function, "reducer"),
+                            new MParameter(MDataTypeRestrictionEntry.Any, "init_value")),
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
@@ -448,7 +427,7 @@ namespace MathCommandLine.Structure
                 {
                     "add",
                     new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(MDataType.Any, "item")),
+                            new MParameter(MDataTypeRestrictionEntry.Any, "item")),
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
@@ -459,8 +438,8 @@ namespace MathCommandLine.Structure
                 {
                     "insert",
                     new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(MDataType.Any, "item"),
-                            new MParameter(MDataType.Number, "index")),
+                            new MParameter(MDataTypeRestrictionEntry.Any, "item"),
+                            new MParameter(MDataTypeRestrictionEntry.Number, "index")),
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
@@ -477,7 +456,7 @@ namespace MathCommandLine.Structure
                 {
                     "removeAt",
                     new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(MDataType.Number, "index")),
+                            new MParameter(MDataTypeRestrictionEntry.Number, "index")),
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
@@ -494,7 +473,7 @@ namespace MathCommandLine.Structure
                 {
                     "remove",
                     new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(MDataType.Any, "value")),
+                            new MParameter(MDataTypeRestrictionEntry.Any, "value")),
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
@@ -510,8 +489,8 @@ namespace MathCommandLine.Structure
                 {
                     "removec",
                     new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(MDataType.Any, "value"),
-                            new MParameter(MDataType.Closure, "equality_evaluator")),
+                            new MParameter(MDataTypeRestrictionEntry.Any, "value"),
+                            new MParameter(MDataTypeRestrictionEntry.Function, "equality_evaluator")),
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
@@ -528,7 +507,7 @@ namespace MathCommandLine.Structure
                 {
                     "addAll",
                     new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(MDataType.List, "other")),
+                            new MParameter(MDataTypeRestrictionEntry.List, "other")),
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {

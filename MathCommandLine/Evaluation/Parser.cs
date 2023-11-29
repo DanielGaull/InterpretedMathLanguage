@@ -71,17 +71,6 @@ namespace MathCommandLine.Evaluation
 
         private const string DEREFERENCE_TOKEN = "*";
 
-        // Value restriction regexes
-        private static readonly Regex VALUE_REST_INTEGER = new Regex(@"%");
-        private static readonly Regex VALUE_REST_POSITIVE = new Regex(@"\+");
-        private static readonly Regex VALUE_REST_NEGATIVE = new Regex(@"-");
-        private static readonly Regex VALUE_REST_LT = new Regex(@$"<\(({NUMBER_REGEX_PATTERN})\)");
-        private static readonly Regex VALUE_REST_GT = new Regex(@$">\(({NUMBER_REGEX_PATTERN})\)");
-        private static readonly Regex VALUE_REST_LTE = new Regex(@$"<=\(({NUMBER_REGEX_PATTERN})\)");
-        private static readonly Regex VALUE_REST_GTE = new Regex(@$">=\(({NUMBER_REGEX_PATTERN})\)");
-        private static readonly Regex VALUE_REST_TYPES = new Regex(@"$t\((.*)\)^");
-        private static readonly Regex VALUE_REST_LEN_EQ = new Regex(@"$l=\(([+]?[0-9]*)\)^");
-
         // Other useful regexes
         private static readonly Regex SYMBOL_NAME_REGEX = new Regex(@$"^{SYMBOL_PATTERN}$");
         private static readonly List<string> RESERVED_KEYWORDS = new List<string>()
@@ -329,7 +318,7 @@ namespace MathCommandLine.Evaluation
             if (SYMBOL_NAME_REGEX.IsMatch(parameter))
             {
                 // Name is the parameter string, and type is of the any type
-                return new AstParameter(parameter, MDataType.Any.Name);
+                return new AstParameter(parameter, MDataTypeRestrictionEntry.Any.TypeDefinition.Name);
             }
             var groups = PARAM_NAME_TYPE_REGEX.Match(parameter).Groups;
             string nameString = groups[1].Value;
@@ -350,97 +339,7 @@ namespace MathCommandLine.Evaluation
                 string reqsArray = typeGroups[1].Value;
                 string typeName = typeGroups[2].Value;
 
-                ValueRestriction[] reqs = new ValueRestriction[0];
-                // Need to evaluate all of the restrictions
-                if (reqsArray.Length > 0)
-                {
-                    string[] reqDefsStrings = SplitByDelimiter(reqsArray, PARAM_REQS_DELIMITER);
-                    reqs = reqDefsStrings.Select((reqStr) =>
-                    {
-                        if (VALUE_REST_INTEGER.IsMatch(reqStr))
-                        {
-                            return ValueRestriction.Integer();
-                        }
-                        else if (VALUE_REST_POSITIVE.IsMatch(reqStr))
-                        {
-                            return ValueRestriction.Positive();
-                        }
-                        else if (VALUE_REST_NEGATIVE.IsMatch(reqStr))
-                        {
-                            return ValueRestriction.Negative();
-                        }
-                        else if (VALUE_REST_LT.IsMatch(reqStr))
-                        {
-                            var thisReqGroup = VALUE_REST_LT.Match(reqStr).Groups;
-                            string argAsString = thisReqGroup[1].Value;
-                            if (double.TryParse(argAsString, out double arg))
-                            {
-                                return ValueRestriction.LessThan(arg);
-                            }
-                            else
-                            {
-                                // TODO: Invalid input somehow, though Regex should ensure no invalid inputs are provided
-                            }
-                        }
-                        else if (VALUE_REST_LTE.IsMatch(reqStr))
-                        {
-                            var thisReqGroup = VALUE_REST_LTE.Match(reqStr).Groups;
-                            string argAsString = thisReqGroup[1].Value;
-                            if (double.TryParse(argAsString, out double arg))
-                            {
-                                return ValueRestriction.LessThanOrEqualTo(arg);
-                            }
-                            else
-                            {
-                                // TODO: Invalid input somehow, though Regex should ensure no invalid inputs are provided
-                            }
-                        }
-                        else if (VALUE_REST_GT.IsMatch(reqStr))
-                        {
-                            var thisReqGroup = VALUE_REST_GT.Match(reqStr).Groups;
-                            string argAsString = thisReqGroup[1].Value;
-                            if (double.TryParse(argAsString, out double arg))
-                            {
-                                return ValueRestriction.GreaterThan(arg);
-                            }
-                            else
-                            {
-                                // TODO: Invalid input somehow, though Regex should ensure no invalid inputs are provided
-                            }
-                        }
-                        else if (VALUE_REST_GTE.IsMatch(reqStr))
-                        {
-                            var thisReqGroup = VALUE_REST_GTE.Match(reqStr).Groups;
-                            string argAsString = thisReqGroup[1].Value;
-                            if (double.TryParse(argAsString, out double arg))
-                            {
-                                return ValueRestriction.GreaterThanOrEqualTo(arg);
-                            }
-                            else
-                            {
-                                // TODO: Invalid input somehow, though Regex should ensure no invalid inputs are provided
-                            }
-                        }
-                        else if (VALUE_REST_LEN_EQ.IsMatch(reqStr))
-                        {
-                            var thisReqGroup = VALUE_REST_LEN_EQ.Match(reqStr).Groups;
-                            string argAsString = thisReqGroup[1].Value;
-                            if (int.TryParse(argAsString, out int arg))
-                            {
-                                return ValueRestriction.LengthEqual(arg);
-                            }
-                            else
-                            {
-                                // TODO: Invalid input somehow, even though Regex should prevent this
-                            }
-                        }
-
-                        // String is not a valid restriction
-                        throw new InvalidParseException("\"" + reqStr + "\" is an invalid value restriction.", parameter);
-                    }).ToArray();
-                }
-
-                return new AstParameterTypeEntry(typeName, reqs);
+                return new AstParameterTypeEntry(typeName);
             }).ToArray();
             return new AstParameter(nameString, typeEntries);
         }
@@ -449,7 +348,7 @@ namespace MathCommandLine.Evaluation
         {
             return parameter.Name + ":" + string.Join('|', 
                 parameter.TypeEntries.Select(x => 
-                    "[" + string.Join(',', x.ValueRestrictions) + "]" + x.DataTypeName).ToArray());
+                    "[" + "]" + x.DataTypeName).ToArray());
         }
 
         public IdentifierAst ParseIdentifier(string expression)

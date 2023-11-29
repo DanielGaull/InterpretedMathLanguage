@@ -9,7 +9,6 @@ namespace MathCommandLine.Evaluation
     {
         public MValue Evaluate(string expression, MEnvironment env);
         public MDataType GetDataType(string typeName);
-        public MDataType AddDataType(string typeName);
         public MValue PerformCall(MClosure closure, MArguments args, MEnvironment currentEnv);
         public void Exit();
     }

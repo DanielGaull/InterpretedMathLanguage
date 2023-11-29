@@ -151,16 +151,10 @@ namespace MathCommandLine.Evaluation
     public class AstParameterTypeEntry
     {
         public string DataTypeName { get; private set; }
-        public ValueRestriction[] ValueRestrictions { get; private set; }
 
-        public AstParameterTypeEntry(string dataTypeName, ValueRestriction[] valueRestrictions)
+        public AstParameterTypeEntry(string dataTypeName)
         {
             DataTypeName = dataTypeName;
-            ValueRestrictions = valueRestrictions;
-        }
-        public AstParameterTypeEntry(string dataTypeName)
-            : this(dataTypeName, new ValueRestriction[0])
-        {
         }
     }
 

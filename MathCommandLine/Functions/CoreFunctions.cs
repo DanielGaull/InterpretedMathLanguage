@@ -67,8 +67,8 @@ namespace MathCommandLine.Functions
                     return MValue.Number(args.Get(0).Value.NumberValue + args.Get(1).Value.NumberValue);
                 },
                 new MParameters(
-                    new MParameter(MDataType.Number, "a"),
-                    new MParameter(MDataType.Number, "b")
+                    new MParameter(MDataTypeRestrictionEntry.Number, "a"),
+                    new MParameter(MDataTypeRestrictionEntry.Number, "b")
                 ),
                 "Returns the sum of 'a' and 'b' (a + b)."
             );
@@ -82,8 +82,8 @@ namespace MathCommandLine.Functions
                     return MValue.Number(args.Get(0).Value.NumberValue * args.Get(1).Value.NumberValue);
                 },
                 new MParameters(
-                    new MParameter(MDataType.Number, "a"),
-                    new MParameter(MDataType.Number, "b")
+                    new MParameter(MDataTypeRestrictionEntry.Number, "a"),
+                    new MParameter(MDataTypeRestrictionEntry.Number, "b")
                 ),
                 "Returns the product of 'a' and 'b' (a * b)."
             );
@@ -97,7 +97,7 @@ namespace MathCommandLine.Functions
                     return MValue.Number(-args.Get(0).Value.NumberValue);
                 },
                 new MParameters(
-                    new MParameter(MDataType.Number, "a")
+                    new MParameter(MDataTypeRestrictionEntry.Number, "a")
                 ),
                 "Returns the additive inverse of 'a'."
             );
@@ -116,7 +116,7 @@ namespace MathCommandLine.Functions
                     return MValue.Number(1 / arg);
                 },
                 new MParameters(
-                    new MParameter(MDataType.Number, "a")
+                    new MParameter(MDataTypeRestrictionEntry.Number, "a")
                 ),
                 "Returns the multiplicative inverse of 'a'."
             );
@@ -130,8 +130,8 @@ namespace MathCommandLine.Functions
                     return MValue.Number(Math.Pow(args.Get(0).Value.NumberValue, args.Get(1).Value.NumberValue));
                 },
                 new MParameters(
-                    new MParameter(MDataType.Number, "base"),
-                    new MParameter(MDataType.Number, "exponent")
+                    new MParameter(MDataTypeRestrictionEntry.Number, "base"),
+                    new MParameter(MDataTypeRestrictionEntry.Number, "exponent")
 
                 ),
                 "Returns the value of 'base' raised to the power of 'exponent'."
@@ -146,7 +146,7 @@ namespace MathCommandLine.Functions
                     return MValue.Number(Math.Floor(args.Get(0).Value.NumberValue));
                 },
                 new MParameters(
-                    new MParameter(MDataType.Number, "a")
+                    new MParameter(MDataTypeRestrictionEntry.Number, "a")
                 ),
                 "Returns the floor of 'a'."
             );
@@ -186,8 +186,8 @@ namespace MathCommandLine.Functions
                     return MValue.Number(result);
                 },
                 new MParameters(
-                    new MParameter(MDataType.Number, "arg"),
-                    new MParameter(MDataType.Number, "op")
+                    new MParameter(MDataTypeRestrictionEntry.Number, "arg"),
+                    new MParameter(MDataTypeRestrictionEntry.Number, "op")
                 ),
                 "Performs a trigonometric function. (Op Codes: 0-sin, 1-cos, 2-tan, 3-arcsin, 4-arccos, 5-arctan)"
             );
@@ -201,7 +201,7 @@ namespace MathCommandLine.Functions
                     return MValue.Number(Math.Log(args.Get(0).Value.NumberValue));
                 },
                 new MParameters(
-                    new MParameter(MDataType.Number, "arg")
+                    new MParameter(MDataTypeRestrictionEntry.Number, "arg")
                 ),
                 "Returns the natural logarithm of 'arg'."
             );
@@ -217,7 +217,7 @@ namespace MathCommandLine.Functions
                     return MValue.List(MList.CreateRange((int) args.Get(0).Value.NumberValue));
                 },
                 new MParameters(
-                    new MParameter(MDataType.Number, "max")
+                    new MParameter(MDataTypeRestrictionEntry.Number, "max")
                 ),
                 "Creates a list of integers from 0 to 'max', exclusive (i.e. 'max' is not included in the result list)."
             );
@@ -234,7 +234,7 @@ namespace MathCommandLine.Functions
                     return box.GetValue();
                 },
                 new MParameters(
-                    new MParameter(MDataType.Reference, "ref")
+                    new MParameter(MDataTypeRestrictionEntry.Reference, "ref")
                 ),
                 "Returns the value stored in 'ref'."
             );
@@ -250,8 +250,8 @@ namespace MathCommandLine.Functions
                     return refAddr.SetValue(value);
                 },
                 new MParameters(
-                    new MParameter(MDataType.Reference, "ref"),
-                    new MParameter(MDataType.Any, "value")
+                    new MParameter(MDataTypeRestrictionEntry.Reference, "ref"),
+                    new MParameter(MDataTypeRestrictionEntry.Any, "value")
                 ),
                 "Assigns the value for 'ref' to 'value'. Returns CAN_NOT_ASSIGN if reference variable is constant."
             );
@@ -273,7 +273,7 @@ namespace MathCommandLine.Functions
                     }
                 },
                 new MParameters(
-                    new MParameter(MDataType.Reference, "ref")
+                    new MParameter(MDataTypeRestrictionEntry.Reference, "ref")
                 ),
                 "Gets and returns the description for 'ref'. If there is no description, returns null."
             );
@@ -290,8 +290,8 @@ namespace MathCommandLine.Functions
                     return MValue.Void();
                 },
                 new MParameters(
-                    new MParameter(MDataType.Reference, "ref"),
-                    new MParameter(MDataType.String, "desc")
+                    new MParameter(MDataTypeRestrictionEntry.Reference, "ref"),
+                    new MParameter(MDataTypeRestrictionEntry.String, "desc")
                 ),
                 "Assigns a new description to 'ref'."
             );
@@ -307,10 +307,10 @@ namespace MathCommandLine.Functions
                 "_type_of", 
                 (args, env, interpreter) =>
                 {
-                    return MValue.Type(args.Get(0).Value.DataType);
+                    return MValue.Type(MDataTypeRestrictionEntry.CreateDataType(args.Get(0).Value.DataType));
                 },
                 new MParameters(
-                    new MParameter(MDataType.Any, "value")
+                    new MParameter(MDataTypeRestrictionEntry.CreateDataType(MDataType.Any), "value")
                 ),
                 "Returns the type of 'value'."
             );
@@ -326,8 +326,8 @@ namespace MathCommandLine.Functions
                     return MValue.Number((first < second) ? -1 : (first == second ? 0 : 1));
                 },
                 new MParameters(
-                    new MParameter(MDataType.Number, "first"),
-                    new MParameter(MDataType.Number, "second")
+                    new MParameter(MDataTypeRestrictionEntry.Number, "first"),
+                    new MParameter(MDataTypeRestrictionEntry.Number, "second")
                 ),
                 "If 'first' is less than 'second', returns -1. If 'first' == 'second', returns 0. " +
                 "If 'first' > 'second', returns 1."
@@ -353,10 +353,10 @@ namespace MathCommandLine.Functions
                     return defaultValue;
                 },
                 new MParameters(
-                    new MParameter(MDataType.Any, "value"),
-                    new MParameter(MDataType.List, "cases"),
-                    new MParameter(MDataType.List, "results"),
-                    new MParameter(MDataType.Any, "default")
+                    new MParameter(MDataTypeRestrictionEntry.Any, "value"),
+                    new MParameter(MDataTypeRestrictionEntry.List, "cases"),
+                    new MParameter(MDataTypeRestrictionEntry.List, "results"),
+                    new MParameter(MDataTypeRestrictionEntry.Any, "default")
                 ),
                 "If 'value' appears in 'cases', returns the corresponding value in 'results' " +
                 "(the one with the same index). Otherwise, returns 'default'."
@@ -375,9 +375,9 @@ namespace MathCommandLine.Functions
                     return MValue.Error((ErrorCodes)code, msg, info);
                 },
                 new MParameters(
-                    new MParameter(MDataType.Number, "code"),
-                    new MParameter(MDataType.String, "message"),
-                    new MParameter(MDataType.List, "info")
+                    new MParameter(MDataTypeRestrictionEntry.Number, "code"),
+                    new MParameter(MDataTypeRestrictionEntry.String, "message"),
+                    new MParameter(MDataTypeRestrictionEntry.List, "info")
                 ),
                 "Creates and returns an error with the specified code, message, and info list."
             );
@@ -393,7 +393,7 @@ namespace MathCommandLine.Functions
                     return MValue.String(args[0].Value.ListValue);
                 },
                 new MParameters(
-                    new MParameter(MDataType.List, "chars")
+                    new MParameter(MDataTypeRestrictionEntry.List, "chars")
                 ),
                 "Creates a string with the specified character stream."
             );
@@ -409,7 +409,7 @@ namespace MathCommandLine.Functions
                     return MValue.Void();
                 },
                 new MParameters(
-                    new MParameter(MDataType.String, "str")
+                    new MParameter(MDataTypeRestrictionEntry.String, "str")
                 ),
                 "Prints the specified string to the standard output stream"
             );
@@ -423,17 +423,17 @@ namespace MathCommandLine.Functions
                 {
                     string typeName = args[0].Value.GetStringValue();
                     MDataType type = interpreter.GetDataType(typeName);
-                    if (type.IsEmpty())
+                    if (type == null)
                     {
                         return MValue.Error(ErrorCodes.TYPE_DOES_NOT_EXIST, $"Type \"{typeName}\" does not exist.");
                     }
                     else
                     {
-                        return MValue.Type(type);
+                        return MValue.Type(MDataTypeRestrictionEntry.CreateDataType(type));
                     }
                 },
                 new MParameters(
-                    new MParameter(MDataType.String, "type_name")
+                    new MParameter(MDataTypeRestrictionEntry.String, "type_name")
                 ),
                 "Returns a type object for a type with the specified 'type_name'. Returns an error if the type does not exist."
             );
@@ -472,7 +472,7 @@ namespace MathCommandLine.Functions
                         }
                         MClosure cond = pair[0].ClosureValue;
                         MValue condValue = interpreter.PerformCall(cond, MArguments.Empty, env);
-                        if (condValue.DataType == MDataType.Error)
+                        if (condValue.DataType.MatchesTypeExactly(MDataType.Error))
                         {
                             return condValue;
                         }
@@ -488,8 +488,7 @@ namespace MathCommandLine.Functions
                     return MValue.Void();
                 },
                 new MParameters(
-                    new MParameter("pairs", new MTypeRestrictionsEntry(MDataType.List, 
-                        ValueRestriction.TypesAllowed(MDataType.List)))
+                    new MParameter("pairs", MDataTypeRestrictionEntry.List)
                 ),
                 "Takes in a list of 2-lists of functions with no arguments, evaluating the each element. " +
                 "Once an element returns true, then the corresponding code is run and returned, " +
@@ -520,7 +519,7 @@ namespace MathCommandLine.Functions
                     string input = Console.ReadLine();
                     return MValue.String(input);
                 },
-                new MParameters(new MParameter(MDataType.String, "prompt")),
+                new MParameters(new MParameter(MDataTypeRestrictionEntry.String, "prompt")),
                 "Reads in and returns a single string line from the user using the standard input stream"
             );
         }
@@ -541,9 +540,7 @@ namespace MathCommandLine.Functions
                     return returnValue;
                 },
                 new MParameters(
-                    new MParameter("code", new MTypeRestrictionsEntry(MDataType.List, 
-                    new ValueRestriction(ValueRestriction.ValueRestrictionTypes.LTypesAllowed, -1, 
-                        new List<MDataType>() { MDataType.Closure })))
+                    new MParameter("code", MDataTypeRestrictionEntry.List)
                 ),
                 "Executes the series of functions in 'code'. These functions should take no parameters. " +
                 "Functions are executed in order. Returns the return value of the last function."
@@ -674,8 +671,8 @@ namespace MathCommandLine.Functions
                     return args[0].Value;
                 },
                 new MParameters(
-                    new MParameter(MDataType.Any, "input1"),
-                    new MParameter(MDataType.Any, "input2")
+                    new MParameter(MDataTypeRestrictionEntry.Any, "input1"),
+                    new MParameter(MDataTypeRestrictionEntry.Any, "input2")
                 ),
                 "If 'input1' is truthy, returns 'input2'. Otherwise, returns 'input1'"
             );
@@ -694,8 +691,8 @@ namespace MathCommandLine.Functions
                     return args[1].Value;
                 },
                 new MParameters(
-                    new MParameter(MDataType.Any, "input1"),
-                    new MParameter(MDataType.Any, "input2")
+                    new MParameter(MDataTypeRestrictionEntry.Any, "input1"),
+                    new MParameter(MDataTypeRestrictionEntry.Any, "input2")
                 ),
                 "If 'input1' is truthy, returns 'input1'. Otherwise, returns 'input2'"
             );
@@ -711,7 +708,7 @@ namespace MathCommandLine.Functions
                     return MValue.Bool(!b);
                 },
                 new MParameters(
-                    new MParameter(MDataType.Any, "input")
+                    new MParameter(MDataTypeRestrictionEntry.Any, "input")
                 ),
                 "Inverts the input"
             );
@@ -725,7 +722,7 @@ namespace MathCommandLine.Functions
                     MClosure b1 = args[0].Value.ClosureValue;
                     MClosure b2 = args[1].Value.ClosureValue;
                     MValue result1 = interpreter.PerformCall(b1, MArguments.Empty, env);
-                    if (result1.DataType == MDataType.Error)
+                    if (result1.DataType.MatchesTypeExactly(MDataType.Error))
                     {
                         return result1;
                     }
@@ -737,8 +734,8 @@ namespace MathCommandLine.Functions
                     return result1;
                 },
                 new MParameters(
-                    new MParameter(MDataType.Closure, "eval1"),
-                    new MParameter(MDataType.Closure, "eval2")
+                    new MParameter(MDataTypeRestrictionEntry.Function, "eval1"),
+                    new MParameter(MDataTypeRestrictionEntry.Function, "eval2")
                 ),
                 "If 'eval1' returns truthy, returns the result of 'eval2'. Otherwise, returns result of 'eval1'"
             );
@@ -753,7 +750,7 @@ namespace MathCommandLine.Functions
                     MClosure b1 = args[0].Value.ClosureValue;
                     MClosure b2 = args[1].Value.ClosureValue;
                     MValue result1 = interpreter.PerformCall(b1, MArguments.Empty, env);
-                    if (result1.DataType == MDataType.Error)
+                    if (result1.DataType.MatchesTypeExactly(MDataType.Error))
                     {
                         return result1;
                     }
@@ -765,8 +762,8 @@ namespace MathCommandLine.Functions
                     return result1;
                 },
                 new MParameters(
-                    new MParameter(MDataType.Closure, "eval1"),
-                    new MParameter(MDataType.Closure, "eval2")
+                    new MParameter(MDataTypeRestrictionEntry.Function, "eval1"),
+                    new MParameter(MDataTypeRestrictionEntry.Function, "eval2")
                 ),
                 "If 'eval1' returns truthy, returns result. Otherwise, returns result of 'eval2'"
             );
@@ -784,8 +781,8 @@ namespace MathCommandLine.Functions
                     return MValue.Bool(item1 == item2);
                 },
                 new MParameters(
-                    new MParameter(MDataType.Any, "item1"),
-                    new MParameter(MDataType.Any, "item2")
+                    new MParameter(MDataTypeRestrictionEntry.Any, "item1"),
+                    new MParameter(MDataTypeRestrictionEntry.Any, "item2")
                 ),
                 "Returns whether or not both items are equal"
             );
@@ -802,8 +799,8 @@ namespace MathCommandLine.Functions
                     return MValue.Bool(item1 < item2);
                 },
                 new MParameters(
-                    new MParameter(MDataType.Number, "num1"),
-                    new MParameter(MDataType.Number, "num2")
+                    new MParameter(MDataTypeRestrictionEntry.Number, "num1"),
+                    new MParameter(MDataTypeRestrictionEntry.Number, "num2")
                 ),
                 "Returns true if num1 is less than num2"
             );

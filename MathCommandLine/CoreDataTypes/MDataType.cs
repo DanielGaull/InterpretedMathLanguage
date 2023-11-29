@@ -1,92 +1,66 @@
-﻿using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
-namespace MathCommandLine.Structure
+namespace MathCommandLine.CoreDataTypes
 {
-    public struct MDataType
+    public class MDataType
     {
-        // The internal ID for "any" type
+        // This is the abstract definition of a data type,
+        // such as a number or list
+        // It defines the type arguments that are allowed, for example
+
         private const int ANY_TYPE_ID = -1;
-        private static int internalIdTracker = 1;
-        // An internal ID for the data type. This is unique for each data type, and therefore determines whether or not two data types are equal
-        // Start it at 1 since the empty type will use the default value (0) for internal ID
         private int internalId;
-        // The name of this data type. This is the name that is used in-code to refer to this type
-        public string Name;
-        // True for primitive types (number, list, lambda, big_int, big_decimal, type)
-        public bool IsPrimitive;
+        private static int internalIdTracker = 0;
 
-        public MDataType(string name, bool isPrimitive)
+        public string Name { get; private set; }
+        public List<MTypeArgumentDefinition> ValidTypeArguments { get; private set; }
+
+
+        private MDataType(int id, string name, List<MTypeArgumentDefinition> validTypeArguments)
         {
-            internalId = internalIdTracker++;
+            internalId = id;
             Name = name;
-            IsPrimitive = isPrimitive;
+            ValidTypeArguments = validTypeArguments;
         }
-        private MDataType(int internalId, string name)
+        public MDataType(string name, List<MTypeArgumentDefinition> validTypeArguments)
+            : this(internalIdTracker++, name, validTypeArguments)
         {
-            this.internalId = internalId;
-            Name = name;
-            IsPrimitive = true;
         }
 
-        public static MDataType Empty = new MDataType();
+        public static readonly MDataType Any = 
+            new MDataType(ANY_TYPE_ID, "any", new List<MTypeArgumentDefinition>());
+        public static readonly MDataType Number =
+            new MDataType("number", new List<MTypeArgumentDefinition>());
+        public static readonly MDataType List =
+            new MDataType("list", new List<MTypeArgumentDefinition>());
+        public static readonly MDataType Function =
+            new MDataType("function", new List<MTypeArgumentDefinition>());
+        public static readonly MDataType Boolean =
+            new MDataType("boolean", new List<MTypeArgumentDefinition>());
+        public static readonly MDataType Type =
+            new MDataType("type", new List<MTypeArgumentDefinition>());
+        public static readonly MDataType Reference =
+            new MDataType("ref", new List<MTypeArgumentDefinition>());
+        public static readonly MDataType Error =
+            new MDataType("error", new List<MTypeArgumentDefinition>());
+        public static readonly MDataType String =
+            new MDataType("string", new List<MTypeArgumentDefinition>());
+        public static readonly MDataType Null =
+            new MDataType("null", new List<MTypeArgumentDefinition>());
+        public static readonly MDataType Void =
+            new MDataType("void", new List<MTypeArgumentDefinition>());
 
-        public bool IsAnyType
+        public bool MatchesType(MDataType other)
         {
-            get
-            {
-                return internalId == ANY_TYPE_ID;
-            }
+            return other.internalId == internalId || 
+                internalId == ANY_TYPE_ID || 
+                other.internalId == ANY_TYPE_ID;
         }
-
-        // Core data types
-        public static MDataType Any = new MDataType(ANY_TYPE_ID, "any");
-        public static MDataType Number = new MDataType("number", true);
-        public static MDataType List = new MDataType("list", true);
-        public static MDataType Closure = new MDataType("function", true);
-        public static MDataType Type = new MDataType("type", true);
-        public static MDataType BigInt = new MDataType("big_int", true);
-        public static MDataType BigDecimal = new MDataType("big_decimal", true);
-        public static MDataType Error = new MDataType("error", false);
-        public static MDataType Reference = new MDataType("reference", true);
-        public static MDataType String = new MDataType("string", false);
-        public static MDataType Void = new MDataType("void", true);
-        public static MDataType Boolean = new MDataType("bool", true);
-        public static MDataType Null = new MDataType("null", true);
-
-        public static bool operator ==(MDataType dt1, MDataType dt2)
+        public bool MatchesTypeExactly(MDataType other)
         {
-            // The "any" type is equivelant to every other type
-            // Type equality is not transitive
-            return (dt1.internalId == dt2.internalId) || (dt1.internalId == ANY_TYPE_ID) || (dt2.internalId == ANY_TYPE_ID);
-        }
-        public static bool operator !=(MDataType dt1, MDataType dt2)
-        {
-            return (dt1.internalId != dt2.internalId) && (dt1.internalId != ANY_TYPE_ID) && (dt2.internalId != ANY_TYPE_ID);
-        }
-        public override bool Equals(object obj)
-        {
-            if (obj is MDataType)
-            {
-                MDataType dt = (MDataType)obj;
-                return dt == this;
-            }
-            return false;
-        }
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        public bool IsEmpty()
-        {
-            return this == Empty;
-        }
-
-        public override string ToString()
-        {
-            StringBuilder builder = new StringBuilder("#");
-            builder.Append(Name);
-            return builder.ToString();
+            return other.internalId == internalId;
         }
     }
 }

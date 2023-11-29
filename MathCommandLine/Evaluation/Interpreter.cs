@@ -108,7 +108,7 @@ namespace MathCommandLine.Evaluation
                     {
                         return evaluatedCaller;
                     }
-                    if (evaluatedCaller.DataType != MDataType.Closure)
+                    if (evaluatedCaller.DataType != MDataType.Function)
                     {
                         // Not a callable object
                         return MValue.Error(ErrorCodes.NOT_CALLABLE,
@@ -161,20 +161,10 @@ namespace MathCommandLine.Evaluation
                     MParameter[] paramArray = ast.Parameters.Select((astParam) =>
                     {
                         string name = astParam.Name;
-                        MTypeRestrictionsEntry[] entries = astParam.TypeEntries.Select((entry) =>
-                        {
-                            if (!dtDict.Contains(entry.DataTypeName))
-                            {
-                                return new MTypeRestrictionsEntry();
-                            }
-                            return new MTypeRestrictionsEntry(dtDict.GetType(entry.DataTypeName), entry.ValueRestrictions);
-                        }).ToArray();
-                        if (entries.Any((entry) => entry.IsEmpty))
-                        {
-                            return MParameter.Empty;
-                        }
+                        List<MDataTypeRestrictionEntry> dataTypes = new List<MDataTypeRestrictionEntry>();
+                        // TODO: Parse data types here
                         // If any type entries are empty, then return an error (type doesn't exist)
-                        return new MParameter(name, entries);
+                        return new MParameter(name, dataTypes);
                     }).ToArray();
                     if (paramArray.Any((param) => param.IsEmpty))
                     {
@@ -242,7 +232,7 @@ namespace MathCommandLine.Evaluation
                 case AstTypes.Invalid:
                     throw new InvalidParseException(ast.Expression);
             }
-            return MValue.Empty;
+            return null;
         }
 
         public MValue PerformCall(MClosure closure, MArguments args, MEnvironment currentEnv)
@@ -259,7 +249,8 @@ namespace MathCommandLine.Evaluation
             // Now check the types of the arguments to ensure they match. If any errors appear in the arguments, return that immediately
             for (int i = 0; i < args.Length; i++)
             {
-                if (!parameters[i].ContainsType(args[i].Value.DataType))
+                // TODO: Properly check argument types
+                if (false)//!parameters[i].ContainsType(args[i].Value.DataType))
                 {
                     // Improper data type!
                     return MValue.Error(ErrorCodes.INVALID_TYPE,
@@ -267,7 +258,7 @@ namespace MathCommandLine.Evaluation
                             parameters.Get(i).DataTypeString() + "' but received type '" + args[i].Value.DataType + "'.",
                         MList.FromOne(MValue.Number(i)));
                 }
-                else if (!parameters[i].PassesRestrictions(args[i].Value))
+                else if (false)//!parameters[i].PassesRestrictions(args[i].Value))
                 {
                     // Fails restrictions!
                     return MValue.Error(ErrorCodes.FAILS_RESTRICTION,
@@ -319,17 +310,7 @@ namespace MathCommandLine.Evaluation
             {
                 return dtDict.GetType(typeName);
             }
-            return MDataType.Empty;
-        }
-
-        public MDataType AddDataType(string typeName)
-        {
-            if (dtDict.Contains(typeName))
-            {
-                return MDataType.Empty;
-            }
-            MDataType t = dtDict.CreateAndRegisterType(typeName);
-            return t;
+            return null;
         }
     }
 }

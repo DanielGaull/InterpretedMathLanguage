@@ -102,10 +102,10 @@ namespace MathCommandLine.Commands
         {
             Interpreter evaluator = new Interpreter();
 
-            //FunctionDict funcDict = new FunctionDict(coreFuncs);
-            DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, MDataType.Closure,
-                MDataType.Type, MDataType.Error, MDataType.Reference, MDataType.String, MDataType.Void,
-                MDataType.Boolean, MDataType.Null, MDataType.Any);
+            DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, 
+                MDataType.Function, MDataType.Type, MDataType.Error, MDataType.Reference, 
+                MDataType.String, MDataType.Void, MDataType.Boolean, MDataType.Null, 
+                MDataType.Any);
             evaluator.Initialize(dtDict, parser, exitAction);
             return evaluator;
         }
@@ -200,7 +200,7 @@ namespace MathCommandLine.Commands
                 try
                 {
                     MValue result = RunLine(baseEnv, sp, evaluator, input);
-                    if (result.DataType != MDataType.Void)
+                    if (result.DataType.MatchesTypeExactly(MDataType.Void))
                     {
                         // Never output void as a result, since we're typically running a function
                         string resultString = "  " + result.ToLongString();
