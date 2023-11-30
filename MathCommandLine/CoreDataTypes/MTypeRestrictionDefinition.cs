@@ -26,6 +26,12 @@ namespace MathCommandLine.CoreDataTypes
             Name = name;
             VerificationFunction = verificationFunc;
 
+            if (!verificationFunc.CreatesEnv)
+            {
+                // Must create an environment. Cannot use the parent environment here
+                throw new MException("Verification functions for restrictions must create environments");
+            }
+
             // Derive parameters from the verification function
             MParameters givenParams = verificationFunc.Parameters;
             Parameters = new List<Parameter>();
