@@ -1,4 +1,7 @@
-﻿using System;
+﻿using MathCommandLine.Environments;
+using MathCommandLine.Evaluation;
+using MathCommandLine.Structure;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -30,6 +33,30 @@ namespace MathCommandLine.CoreDataTypes
         {
             entries = new List<MDataTypeRestrictionEntry>();
             entries.Add(entry);
+        }
+
+        public bool ValueMatches(MValue value, IInterpreter interpreter, MEnvironment env)
+        {
+            for (int i = 0; i < entries.Count; i++)
+            {
+                if (entries[i].TypeDefinition.MatchesType(value.DataType))
+                {
+                    bool failsRestrictions = false;
+                    foreach (MTypeRestriction rest in entries[i].TypeRestrictions)
+                    {
+                        if (!rest.Definition.IsValid(value, rest, interpreter, env))
+                        {
+                            failsRestrictions = true;
+                            break;
+                        }
+                    }
+                    if (!failsRestrictions)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 }
