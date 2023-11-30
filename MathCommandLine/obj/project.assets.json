@@ -13,9 +13,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\gaulldj\\Documents\\C# Projects\\Revamped Math Command Line\\MathCommandLine\\InterpretedMathLanguage\\MathCommandLine\\MathCommandLine.csproj",
-      "projectName": "MathCommandLine",
-      "projectPath": "C:\\Users\\gaulldj\\Documents\\C# Projects\\Revamped Math Command Line\\MathCommandLine\\InterpretedMathLanguage\\MathCommandLine\\MathCommandLine.csproj",
+      "projectUniqueName": "C:\\Users\\gaulldj\\Documents\\C# Projects\\Revamped Math Command Line\\MathCommandLine\\InterpretedMathLanguage\\MathCommandLine\\IML.csproj",
+      "projectName": "IML",
+      "projectPath": "C:\\Users\\gaulldj\\Documents\\C# Projects\\Revamped Math Command Line\\MathCommandLine\\InterpretedMathLanguage\\MathCommandLine\\IML.csproj",
       "packagesPath": "C:\\Users\\gaulldj\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\gaulldj\\Documents\\C# Projects\\Revamped Math Command Line\\MathCommandLine\\InterpretedMathLanguage\\MathCommandLine\\obj\\",
       "projectStyle": "PackageReference",
