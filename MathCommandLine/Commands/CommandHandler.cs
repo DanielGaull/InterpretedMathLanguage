@@ -84,11 +84,6 @@ namespace MathCommandLine.Commands
                 case "close":
                 case "q":
                     return 1;
-                case "test":
-                case "tests":
-                case "t":
-                    RunTests();
-                    break;
                 default:
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Command not recognized");
@@ -217,57 +212,6 @@ namespace MathCommandLine.Commands
             }
         }
 
-        private void RunTests()
-        {
-            // TODO: This is duplicated with the RunInterpreter code
-            Parser parser = new Parser();
-
-            bool stopped = false;
-            Interpreter evaluator = CreateInterpreter(parser, () =>
-            {
-                // On exit we just flag that we've exited; shouldn't really be used
-                stopped = true;
-            });
-
-            MEnvironment baseEnv = CreateBaseEnv();
-
-            SyntaxHandler sh = new SyntaxHandler(parser, "{}(),".ToCharArray().ToList());
-            List<SyntaxDef> syntaxDefinitions = ImportSyntax(sh);
-            SyntaxParser sp = new SyntaxParser(syntaxDefinitions);
-
-            List<Tuple<string, string>> tests = GetTests();
-            int passed = 0;
-            foreach (var test in tests)
-            {
-                // Reset the environment after every test
-                baseEnv = CreateBaseEnv();
-                string input = test.Item1;
-                string expected = test.Item2;
-                string output;
-                bool success;
-                try
-                {
-                    string syntaxHandled = input;// sp.Unparse(sp.Parse(input));
-                    MValue result = evaluator.Evaluate(syntaxHandled, baseEnv);
-                    output = result.ToLongString();
-                    success = expected == output;
-                }
-                catch (Exception ex)
-                {
-                    success = false;
-                    output = "Exception: " + ex.Message;
-                    //Console.WriteLine("\n\n" + ex.StackTrace + "\n\n");
-                }
-                if (success)
-                {
-                    passed++;
-                }
-                PrintTestResult(input, output, expected, success);
-            }
-            Console.ForegroundColor = ConsoleColor.Gray;
-            Console.WriteLine("Passed " + passed + "/" + tests.Count + " tests.");
-        }
-
         private List<SyntaxDef> ImportSyntax(SyntaxHandler sh)
         {
             string syntaxFiles = File.ReadAllText(SYNTAX_FILES_PATH);
@@ -330,57 +274,6 @@ namespace MathCommandLine.Commands
                 Console.Write(" (Expected: '" + expected + "')\n");
             }
             Console.Write("\n");
-        }
-
-        private List<Tuple<string, string>> GetTests()
-        {
-            return new List<Tuple<string, string>>() {
-                new Tuple<string, string>("_c({{()=>{true},()=>{1}},{()=>{true},()=>{2}}})", "(number) 1"),
-                new Tuple<string, string>("_c({{()=>{null},()=>{1}},{()=>{true},()=>{2}}})", "(number) 2"),
-                new Tuple<string, string>("&true", "(reference) <ref -> (bool) TRUE>"),
-                new Tuple<string, string>("{1, 2, 3}", "(list) { 1, 2, 3 }"),
-                new Tuple<string, string>("&varnotexist", 
-                    "(error) Error: #11 (VAR_DOES_NOT_EXIST) 'Variable \"varnotexist\" does not exist.' Data: {  }"),
-                new Tuple<string, string>("_add(1,2)", "(number) 3"),
-                new Tuple<string, string>("(()=>{(()=>{1})()})()", "(number) 1"),
-                new Tuple<string, string>("(()=>{2})()", "(number) 2"),
-                new Tuple<string, string>("(()=>{()=>{3}})()()", "(number) 3"),
-                new Tuple<string, string>("{1,2,3}.map((x)=>{_add(x,1)})", "(list) { 2, 3, 4 }"),
-                new Tuple<string, string>("{1,2,3,4,5}.reduce((prev,current)=>{_add(prev,current)},0)", "(number) 15"),
-                new Tuple<string, string>("(_crange(5)).map((x)=>{_add(x,5)})", "(list) { 5, 6, 7, 8, 9 }"),
-                new Tuple<string, string>("_or_e(()=>{1},()=>{4})", "(number) 1"),
-                new Tuple<string, string>("_or_e(()=>{null},()=>{4})", "(number) 4"),
-                new Tuple<string, string>("_and_e(()=>{null},()=>{4})", "(null) null"),
-                new Tuple<string, string>("_and_e(()=>{1},()=>{4})", "(number) 4"),
-                new Tuple<string, string>("_do({()~>{var x = 5},()~>{var y = &x},()~>{_set(y,3)},()~>{x}})", "(number) 3"),
-                new Tuple<string, string>("{1,2}.map((x)=>{_exit})", "(list) { ()~>{ <function> }, ()~>{ <function> } }"),
-                //new Tuple<string, string>("5*(2+3)", "(number) 25"),
-                //new Tuple<string, string>("(2+3)*5", "(number) 25"),
-                new Tuple<string, string>("(x)~>{x}", 
-                    "(error) Error: #15 (ILLEGAL_LAMBDA) 'Lambdas that don't create environments (~>)" + 
-                    " cannot have parameters' Data: {  }"),
-                new Tuple<string, string>("var x=7", "(number) 7"),
-                new Tuple<string, string>("_do({()~>{var y=3},()~>{y=4}})", "(number) 4"),
-                new Tuple<string, string>("_do({()~>{const z=3},()~>{z=4}})",
-                    "(error) Error: #12 (CANNOT_ASSIGN) 'Cannot assign value to constant \"z\"' Data: {  }"),
-                new Tuple<string, string>("[5]()", "(number) 5"),
-                new Tuple<string, string>("_do({[var x=false],[x]})", "(bool) FALSE"),
-                new Tuple<string, string>("\"hi\".chars", "(list) { 104, 105 }"),
-                new Tuple<string, string>("_do({[var list={1,2,3}],[list.indexc(2,(a,b)=>{_eq(a,b)})]})", 
-                    "(number) 1"),
-                new Tuple<string, string>("_do({[var list={1,2,3}],[list.index(2)]})", "(number) 1"),
-                new Tuple<string, string>("_do({[var list={1,2}],[list.add(3)],[list]})", "(list) { 1, 2, 3 }"),
-                new Tuple<string, string>("_do({[var list={1,2}],[list.add(3)],[list.length()]})", "(number) 3"),
-                new Tuple<string, string>("_do({[var list={1,2,3}],[list.removeAt(0)],[list]})", "(list) { 2, 3 }"),
-                new Tuple<string, string>("_do({[var list={1,2,3}],[list.remove(0)]})", "(bool) FALSE"),
-                new Tuple<string, string>("_do({[var list={1,2,3}],[list.remove(2)]})", "(bool) TRUE"),
-                new Tuple<string, string>("_do({[var list={1,2,3}],[list.remove(2)],[list]})", "(list) { 1, 3 }"),
-                new Tuple<string, string>("_do({[var list={1,2,3}],[list.removec(2,(a,b)=>{_eq(a,b)})],[list]})", 
-                    "(list) { 1, 3 }"),
-                new Tuple<string, string>("_do({[var list1={1,2,3}],[var list2={4,5,6}],[list1.addAll(list2)],[list1]})",
-                    "(list) { 1, 2, 3, 4, 5, 6 }"),
-                new Tuple<string, string>("{1,2,3}.map((x)=>{_add(x,1)}).get(0)", "(number) 2"),
-            };
         }
     }
 }
