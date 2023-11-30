@@ -14,7 +14,7 @@ namespace IMLTests
     {
         private static Interpreter interpreter;
 
-        [AssemblyInitialize]
+        [ClassInitialize]
         public static void Setup(TestContext context)
         {
             Parser parser = new Parser();

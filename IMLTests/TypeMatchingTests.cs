@@ -16,7 +16,7 @@ namespace IMLTests
         private static Interpreter interpreter;
         private static MEnvironment baseEnv;
 
-        [AssemblyInitialize]
+        [ClassInitialize]
         public static void Setup(TestContext context)
         {
             Parser parser = new Parser();
@@ -91,7 +91,7 @@ namespace IMLTests
         {
             MType type = new MType(MDataTypeRestrictionEntry.String, MDataTypeRestrictionEntry.Number);
             MValue value = MValue.Bool(true);
-            AssertTypes(type, value);
+            AssertTypesFail(type, value);
         }
 
         // TODO: Write some tests involving restrictions
