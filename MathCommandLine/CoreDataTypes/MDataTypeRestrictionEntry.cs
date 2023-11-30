@@ -6,19 +6,19 @@ namespace MathCommandLine.CoreDataTypes
     public class MDataTypeRestrictionEntry
     {
         public MDataType TypeDefinition { get; private set; }
-        public List<MTypeArgument> TypeArguments { get; private set; }
+        public List<MTypeRestriction> TypeRestrictions { get; private set; }
 
-        private MDataTypeRestrictionEntry(MDataType def, List<MTypeArgument> args)
+        private MDataTypeRestrictionEntry(MDataType def, List<MTypeRestriction> restrictions)
         {
             TypeDefinition = def;
-            TypeArguments = args;
+            TypeRestrictions = restrictions;
         }
 
         public static MDataTypeRestrictionEntry CreateDataType(MDataType def)
         {
-            return new MDataTypeRestrictionEntry(def, new List<MTypeArgument>());
+            return new MDataTypeRestrictionEntry(def, new List<MTypeRestriction>());
         }
-        public static MDataTypeRestrictionEntry CreateDataType(MDataType def, List<MTypeArgument> args)
+        public static MDataTypeRestrictionEntry CreateDataType(MDataType def, List<MTypeRestriction> args)
         {
             return new MDataTypeRestrictionEntry(def, args);
         }
