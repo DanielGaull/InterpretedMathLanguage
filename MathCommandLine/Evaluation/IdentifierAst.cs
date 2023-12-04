@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MathCommandLine.Evaluation
+namespace IML.Evaluation
 {
     public class IdentifierAst
     {

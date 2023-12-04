@@ -1,16 +1,16 @@
-﻿using MathCommandLine.CoreDataTypes;
-using MathCommandLine.Environments;
-using MathCommandLine.Exceptions;
-using MathCommandLine.Functions;
-using MathCommandLine.Structure;
-using MathCommandLine.Util;
+﻿using IML.CoreDataTypes;
+using IML.Environments;
+using IML.Exceptions;
+using IML.Functions;
+using IML.Structure;
+using IML.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace MathCommandLine.Evaluation
+namespace IML.Evaluation
 {
     public class Interpreter : IInterpreter
     {

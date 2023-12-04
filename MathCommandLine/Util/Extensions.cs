@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace MathCommandLine.Util
+namespace IML.Util
 {
     public static class Extensions
     {

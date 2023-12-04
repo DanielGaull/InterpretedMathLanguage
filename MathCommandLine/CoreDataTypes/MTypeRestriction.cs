@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MathCommandLine.CoreDataTypes
+namespace IML.CoreDataTypes
 {
     // This represents a single Type Argument/Type Restriction
     // It has a definition where it is defined for a particular data type

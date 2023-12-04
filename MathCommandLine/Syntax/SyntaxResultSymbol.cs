@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MathCommandLine.Syntax
+namespace IML.Syntax
 {
     public class SyntaxResultSymbol
     {

@@ -1,9 +1,9 @@
-﻿using MathCommandLine.CoreDataTypes;
-using MathCommandLine.Environments;
-using MathCommandLine.Functions;
-using MathCommandLine.Structure;
+﻿using IML.CoreDataTypes;
+using IML.Environments;
+using IML.Functions;
+using IML.Structure;
 
-namespace MathCommandLine.Evaluation
+namespace IML.Evaluation
 {
     public interface IInterpreter
     {

@@ -1,11 +1,11 @@
-﻿using MathCommandLine.Environments;
-using MathCommandLine.Evaluation;
-using MathCommandLine.Structure;
+﻿using IML.Environments;
+using IML.Evaluation;
+using IML.Structure;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace MathCommandLine.CoreDataTypes
+namespace IML.CoreDataTypes
 {
     // This represents a parameter or variable type, where we define what the allowed values are
     // This includes unions and restrictions

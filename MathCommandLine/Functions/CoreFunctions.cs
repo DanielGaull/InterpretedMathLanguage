@@ -1,13 +1,13 @@
-﻿using MathCommandLine.CoreDataTypes;
-using MathCommandLine.Environments;
-using MathCommandLine.Evaluation;
-using MathCommandLine.Structure;
-using MathCommandLine.Util;
+﻿using IML.CoreDataTypes;
+using IML.Environments;
+using IML.Evaluation;
+using IML.Structure;
+using IML.Util;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace MathCommandLine.Functions
+namespace IML.Functions
 {
     /**
      * Static class providing the core functions of the language

@@ -1,15 +1,15 @@
-﻿using MathCommandLine.CoreDataTypes;
-using MathCommandLine.Environments;
-using MathCommandLine.Exceptions;
-using MathCommandLine.Functions;
-using MathCommandLine.Structure;
+﻿using IML.CoreDataTypes;
+using IML.Environments;
+using IML.Exceptions;
+using IML.Functions;
+using IML.Structure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace MathCommandLine.Evaluation
+namespace IML.Evaluation
 {
     /// <summary>
     /// Parses strings to ASTs. Capable of parsing many different types of strings, such as expressions and declarations.

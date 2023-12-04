@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MathCommandLine.CoreDataTypes
+namespace IML.CoreDataTypes
 {
     public class MDataType
     {

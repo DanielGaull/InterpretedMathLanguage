@@ -1,18 +1,18 @@
-﻿using MathCommandLine.Commands;
-using MathCommandLine.CoreDataTypes;
-using MathCommandLine.Environments;
-using MathCommandLine.Evaluation;
-using MathCommandLine.Exceptions;
-using MathCommandLine.Functions;
-using MathCommandLine.Structure;
-using MathCommandLine.Syntax;
+﻿using IML.Commands;
+using IML.CoreDataTypes;
+using IML.Environments;
+using IML.Evaluation;
+using IML.Exceptions;
+using IML.Functions;
+using IML.Structure;
+using IML.Syntax;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace MathCommandLine
+namespace IML
 {
     class Program
     {

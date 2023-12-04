@@ -1,8 +1,8 @@
-using MathCommandLine.CoreDataTypes;
-using MathCommandLine.Environments;
-using MathCommandLine.Evaluation;
-using MathCommandLine.Functions;
-using MathCommandLine.Structure;
+using IML.CoreDataTypes;
+using IML.Environments;
+using IML.Evaluation;
+using IML.Functions;
+using IML.Structure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;

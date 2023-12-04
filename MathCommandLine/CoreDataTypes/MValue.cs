@@ -1,12 +1,12 @@
-﻿using MathCommandLine.CoreDataTypes;
-using MathCommandLine.Environments;
-using MathCommandLine.Functions;
-using MathCommandLine.Util;
+﻿using IML.CoreDataTypes;
+using IML.Environments;
+using IML.Functions;
+using IML.Util;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace MathCommandLine.Structure
+namespace IML.Structure
 {
     // Class for a math data value
     // Can represent a primitive data type or a composite data type

@@ -1,14 +1,14 @@
-﻿using MathCommandLine.CoreDataTypes;
-using MathCommandLine.Evaluation;
-using MathCommandLine.Functions;
-using MathCommandLine.Structure;
-using MathCommandLine.Util;
+﻿using IML.CoreDataTypes;
+using IML.Evaluation;
+using IML.Functions;
+using IML.Structure;
+using IML.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace MathCommandLine.Functions
+namespace IML.Functions
 {
     public class MFunction
     {

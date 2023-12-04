@@ -1,11 +1,11 @@
-﻿using MathCommandLine.CoreDataTypes;
-using MathCommandLine.Structure;
+﻿using IML.CoreDataTypes;
+using IML.Structure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace MathCommandLine
+namespace IML
 {
     public static class Utilities
     {

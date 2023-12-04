@@ -1,9 +1,9 @@
-﻿using MathCommandLine.Structure;
+﻿using IML.Structure;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace MathCommandLine.CoreDataTypes
+namespace IML.CoreDataTypes
 {
     public struct MField
     {

@@ -1,10 +1,10 @@
-﻿using MathCommandLine.Exceptions;
-using MathCommandLine.Structure;
+﻿using IML.Exceptions;
+using IML.Structure;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace MathCommandLine.Environments
+namespace IML.Environments
 {
     // Used so that we can have references to the values and not access to the actual values directly
     public class MBoxedValue

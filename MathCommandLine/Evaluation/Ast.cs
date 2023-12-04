@@ -1,12 +1,12 @@
-﻿using MathCommandLine.Environments;
-using MathCommandLine.Functions;
-using MathCommandLine.Structure;
+﻿using IML.Environments;
+using IML.Functions;
+using IML.Structure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace MathCommandLine.Evaluation
+namespace IML.Evaluation
 {
     public class Ast
     {
@@ -132,32 +132,6 @@ namespace MathCommandLine.Evaluation
         #endregion
     }
 
-    public class AstParameter
-    {
-        public AstParameterTypeEntry[] TypeEntries { get; private set; }
-        public string Name { get; private set; }
-
-        public AstParameter(string name, params AstParameterTypeEntry[] typeEntries)
-        {
-            Name = name;
-            TypeEntries = typeEntries;
-        }
-        public AstParameter(string name, params string[] dataTypeNames)
-            : this(name, dataTypeNames.Select(x => new AstParameterTypeEntry(x)).ToArray())
-        {
-
-        }
-    }
-    public class AstParameterTypeEntry
-    {
-        public string DataTypeName { get; private set; }
-
-        public AstParameterTypeEntry(string dataTypeName)
-        {
-            DataTypeName = dataTypeName;
-        }
-    }
-
     public enum AstTypes
     {
         // A literal number, such as 5, -10.2, or 0.6
@@ -181,7 +155,6 @@ namespace MathCommandLine.Evaluation
         // Format is: [callee]([arg0],[arg1],...)
         Call,
         // A variable declaration
-        // TODO: Add in type declarations to variables
         // Example: var x: number = 7
         VariableDeclaration,
         // A variable assignment

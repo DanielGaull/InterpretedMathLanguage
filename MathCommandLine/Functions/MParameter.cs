@@ -1,10 +1,10 @@
-﻿using MathCommandLine.CoreDataTypes;
-using MathCommandLine.Structure;
+﻿using IML.CoreDataTypes;
+using IML.Structure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MathCommandLine.Functions
+namespace IML.Functions
 {
     public class MParameter
     {

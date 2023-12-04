@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MathCommandLine.Util
+namespace IML.Util
 {
     public enum ErrorCodes
     {

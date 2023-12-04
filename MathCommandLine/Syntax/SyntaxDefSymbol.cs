@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MathCommandLine.Syntax
+namespace IML.Syntax
 {
     // Represents a syntax symbol in an input expression to match
     // A symbol can either be a syntax parameter or a literal string

@@ -1,11 +1,11 @@
-﻿using MathCommandLine.CoreDataTypes;
-using MathCommandLine.Exceptions;
-using MathCommandLine.Structure;
+﻿using IML.CoreDataTypes;
+using IML.Exceptions;
+using IML.Structure;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace MathCommandLine.Environments
+namespace IML.Environments
 {
     public class MEnvironment
     {

@@ -1,10 +1,10 @@
-﻿using MathCommandLine.Evaluation;
-using MathCommandLine.Functions;
+﻿using IML.Evaluation;
+using IML.Functions;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace MathCommandLine.Syntax
+namespace IML.Syntax
 {
     // Represents a syntax parameter, which is a normal parameter with extensions for additional
     // options that syntax provides

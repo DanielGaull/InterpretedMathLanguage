@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace MathCommandLine.Functions
+namespace IML.Functions
 {
     public struct MArguments
     {

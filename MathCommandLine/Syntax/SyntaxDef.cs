@@ -1,12 +1,12 @@
-﻿using MathCommandLine.Evaluation;
-using MathCommandLine.Structure;
+﻿using IML.Evaluation;
+using IML.Structure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace MathCommandLine.Syntax
+namespace IML.Syntax
 {
     // Represents an instance of a single syntax definition
     // Contains an ordered list of syntax symbols (should alternate between strings/params)

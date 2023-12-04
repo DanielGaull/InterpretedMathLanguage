@@ -1,12 +1,12 @@
-﻿using MathCommandLine.Evaluation;
-using MathCommandLine.Exceptions;
-using MathCommandLine.Util;
+﻿using IML.Evaluation;
+using IML.Exceptions;
+using IML.Util;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace MathCommandLine.Syntax
+namespace IML.Syntax
 {
     class SyntaxParser : Parser
     {

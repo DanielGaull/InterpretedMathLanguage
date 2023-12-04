@@ -1,12 +1,12 @@
-﻿using MathCommandLine.Environments;
-using MathCommandLine.Evaluation;
-using MathCommandLine.Functions;
-using MathCommandLine.Structure;
+﻿using IML.Environments;
+using IML.Evaluation;
+using IML.Functions;
+using IML.Structure;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace MathCommandLine.CoreDataTypes
+namespace IML.CoreDataTypes
 {
     public delegate MValue NativeExpression(MArguments args, MEnvironment env, IInterpreter evaluator);
     public class MClosure

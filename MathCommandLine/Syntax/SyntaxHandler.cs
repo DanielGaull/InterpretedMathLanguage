@@ -1,15 +1,15 @@
-﻿using MathCommandLine.Evaluation;
-using MathCommandLine.Exceptions;
-using MathCommandLine.Functions;
-using MathCommandLine.Structure;
-using MathCommandLine.Util;
+﻿using IML.Evaluation;
+using IML.Exceptions;
+using IML.Functions;
+using IML.Structure;
+using IML.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace MathCommandLine.Syntax
+namespace IML.Syntax
 {
     public class SyntaxHandler
     {

@@ -1,10 +1,10 @@
-﻿using MathCommandLine.Evaluation;
-using MathCommandLine.Structure;
+﻿using IML.Evaluation;
+using IML.Structure;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace MathCommandLine.CoreDataTypes
+namespace IML.CoreDataTypes
 {
     class DataTypeDeterminer
     {

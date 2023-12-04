@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MathCommandLine.Operators
+namespace IML.Operators
 {
     // Class that represents an operator
     // This is without behavior defined; just that the operator exists

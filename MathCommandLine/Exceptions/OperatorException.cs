@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MathCommandLine.Exceptions
+namespace IML.Exceptions
 {
     class OperatorException : Exception
     {

@@ -1,13 +1,13 @@
-﻿using MathCommandLine.Environments;
-using MathCommandLine.Evaluation;
-using MathCommandLine.Exceptions;
-using MathCommandLine.Functions;
-using MathCommandLine.Structure;
+﻿using IML.Environments;
+using IML.Evaluation;
+using IML.Exceptions;
+using IML.Functions;
+using IML.Structure;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace MathCommandLine.CoreDataTypes
+namespace IML.CoreDataTypes
 {
     public class MTypeRestrictionDefinition
     {

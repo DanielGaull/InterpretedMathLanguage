@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MathCommandLine.Environments
+namespace IML.Environments
 {
     public enum VariableType
     {
