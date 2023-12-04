@@ -161,10 +161,11 @@ namespace MathCommandLine.Evaluation
                     MParameter[] paramArray = ast.Parameters.Select((astParam) =>
                     {
                         string name = astParam.Name;
-                        List<MDataTypeRestrictionEntry> dataTypes = new List<MDataTypeRestrictionEntry>();
+                        List<MDataTypeRestrictionEntry> entries = new List<MDataTypeRestrictionEntry>();
+                        entries.Add(MDataTypeRestrictionEntry.Any);
                         // TODO: Parse data types here
                         // If any type entries are empty, then return an error (type doesn't exist)
-                        return new MParameter(name, dataTypes);
+                        return new MParameter(name, entries);
                     }).ToArray();
                     if (paramArray.Any((param) => param.IsEmpty))
                     {
