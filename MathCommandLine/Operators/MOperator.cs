@@ -70,5 +70,9 @@ namespace MathCommandLine.Operators
         {
             return !(m1 == m2);
         }
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }

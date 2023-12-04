@@ -27,6 +27,43 @@ namespace MathCommandLine.CoreDataTypes
         {
         }
 
+        public static bool operator ==(MTypeRestriction d1, MTypeRestriction d2)
+        {
+            // Just compare on pure equality of the definitions of the type restrictions (& args)
+            if (d1.Definition != d2.Definition)
+            {
+                return false;
+            }
+            if (d1.ArgumentValues.Count != d2.ArgumentValues.Count)
+            {
+                return false;
+            }
+            for (int i = 0; i < d1.ArgumentValues.Count; i++)
+            {
+                if (d1.ArgumentValues[i] != d2.ArgumentValues[i])
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        public static bool operator !=(MTypeRestriction d1, MTypeRestriction d2)
+        {
+            return !(d1 == d2);
+        }
+        public override bool Equals(object obj)
+        {
+            if (obj is MTypeRestriction other)
+            {
+                return this == other;
+            }
+            return false;
+        }
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
         public class Argument
         {
             public RestrictionArgumentType ArgumentType { get; private set; }
@@ -52,6 +89,42 @@ namespace MathCommandLine.CoreDataTypes
             public static Argument Type(MType value)
             {
                 return new Argument(RestrictionArgumentType.String, 0, null, value);
+            }
+
+            public static bool operator ==(Argument a1, Argument a2)
+            {
+                if (a1.ArgumentType != a2.ArgumentType)
+                {
+                    return false;
+                }
+                switch (a1.ArgumentType)
+                {
+                    case RestrictionArgumentType.Number:
+                        return a1.NumberValue == a2.NumberValue;
+                    case RestrictionArgumentType.Type:
+                        return a1.TypeValue == a2.TypeValue;
+                    case RestrictionArgumentType.String:
+                        return a1.StringValue == a2.StringValue;
+                }
+                return false;
+            }
+            public static bool operator !=(Argument a1, Argument a2)
+            {
+                return !(a1 == a2);
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj is Argument arg)
+                {
+                    return this == arg;
+                }
+                return false;
+            }
+
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
             }
         }
     }
