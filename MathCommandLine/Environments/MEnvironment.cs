@@ -9,7 +9,6 @@ namespace MathCommandLine.Environments
 {
     public class MEnvironment
     {
-        // TODO: Write this class
         public static MEnvironment Empty = new MEnvironment(null);
 
         Dictionary<string, MBoxedValue> values = new Dictionary<string, MBoxedValue>();

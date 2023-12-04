@@ -249,8 +249,7 @@ namespace MathCommandLine.Evaluation
             // Now check the types of the arguments to ensure they match. If any errors appear in the arguments, return that immediately
             for (int i = 0; i < args.Length; i++)
             {
-                // TODO: Properly check argument types
-                if (false)//!parameters[i].ContainsType(args[i].Value.DataType))
+                if (!parameters[i].Type.ValueMatches(args[i].Value, this, currentEnv))
                 {
                     // Improper data type!
                     return MValue.Error(ErrorCodes.INVALID_TYPE,
@@ -258,17 +257,9 @@ namespace MathCommandLine.Evaluation
                             parameters.Get(i).DataTypeString() + "' but received type '" + args[i].Value.DataType + "'.",
                         MList.FromOne(MValue.Number(i)));
                 }
-                else if (false)//!parameters[i].PassesRestrictions(args[i].Value))
-                {
-                    // Fails restrictions!
-                    return MValue.Error(ErrorCodes.FAILS_RESTRICTION,
-                        "Argument \"" + parameters.Get(i).Name + "\" fails one or more parameter restrictions.",
-                        MList.FromOne(MValue.Number(i)));
-                }
                 else if (args[i].Value.DataType == MDataType.Error)
                 {
                     // An error was passed as an argument, so simply need to return it
-                    // TODO: Allow a flag that prevents this from happening and allows errors to be fed to functions
                     return args[i].Value;
                 }
                 else

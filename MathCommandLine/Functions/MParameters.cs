@@ -55,38 +55,38 @@ namespace MathCommandLine.Functions
             }
         }
 
-        public static bool operator ==(MParameters p1, MParameters p2)
-        {
-            if (p1.parameters.Count != p2.parameters.Count)
-            {
-                return false;
-            }
-            for (int i = 0; i < p1.parameters.Count; i++)
-            {
-                if (p1.parameters[i] != p2.parameters[i])
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-        public static bool operator !=(MParameters p1, MParameters p2)
-        {
-            return !(p1 == p2);
-        }
-        public override bool Equals(object obj)
-        {
-            if (obj is MParameters)
-            {
-                MParameters value = (MParameters)obj;
-                return value == this;
-            }
-            return false;
-        }
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
+        //public static bool operator ==(MParameters p1, MParameters p2)
+        //{
+        //    if (p1.parameters.Count != p2.parameters.Count)
+        //    {
+        //        return false;
+        //    }
+        //    for (int i = 0; i < p1.parameters.Count; i++)
+        //    {
+        //        if (p1.parameters[i] != p2.parameters[i])
+        //        {
+        //            return false;
+        //        }
+        //    }
+        //    return true;
+        //}
+        //public static bool operator !=(MParameters p1, MParameters p2)
+        //{
+        //    return !(p1 == p2);
+        //}
+        //public override bool Equals(object obj)
+        //{
+        //    if (obj is MParameters)
+        //    {
+        //        MParameters value = (MParameters)obj;
+        //        return value == this;
+        //    }
+        //    return false;
+        //}
+        //public override int GetHashCode()
+        //{
+        //    return base.GetHashCode();
+        //}
 
         public override string ToString()
         {

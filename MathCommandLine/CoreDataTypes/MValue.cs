@@ -287,7 +287,6 @@ namespace MathCommandLine.Structure
 
         public static bool operator ==(MValue v1, MValue v2)
         {
-            // TODO: Handle other number types
             // A big_int(0) should be equal to a number(0)
             if (v1.DataType != v2.DataType)
             {
