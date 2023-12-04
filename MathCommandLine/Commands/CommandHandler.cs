@@ -195,14 +195,11 @@ namespace MathCommandLine.Commands
                 try
                 {
                     MValue result = RunLine(baseEnv, sp, evaluator, input);
-                    if (result.DataType.MatchesTypeExactly(MDataType.Void))
+                    if (!result.DataType.MatchesTypeExactly(MDataType.Void))
                     {
                         // Never output void as a result, since we're typically running a function
                         string resultString = "  " + result.ToLongString();
                         Console.WriteLine(resultString);
-
-                        // TEST: output the unparsed exp
-                        // Console.WriteLine(parser.Unparse(parser.Parse(input)));
                     }
                 }
                 catch (InvalidParseException ex)
