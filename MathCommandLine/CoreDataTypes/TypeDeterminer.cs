@@ -6,10 +6,10 @@ using System.Text;
 
 namespace IML.CoreDataTypes
 {
-    class DataTypeDeterminer
+    class TypeDeterminer
     {
-        // Takes in an expression (AST) and determines the data type of it
-        public MDataTypeRestrictionEntry DetermineDataType(Ast expression)
+        // Takes in an expression (AST) and determines the type of it
+        public MType DetermineDataType(Ast expression)
         {
             return null;
         }
