@@ -17,7 +17,6 @@ namespace IML
 {
     class Program
     {
-        
         static void Main(string[] args)
         {
             CommandHandler cmdHandler = new CommandHandler();
