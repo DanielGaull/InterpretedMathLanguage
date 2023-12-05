@@ -3,6 +3,7 @@ using IML.Environments;
 using IML.Exceptions;
 using IML.Functions;
 using IML.Structure;
+using IML.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,6 +57,9 @@ namespace IML.Evaluation
         private const char PARAM_DELIMITER = ',';
         private const char PARAM_TYPES_DELIMITER = '|';
         private const char PARAM_REQS_DELIMITER = ',';
+        private const char PARAM_REQS_ARGS_DELIMITER = ',';
+        private const string PARAM_RESTRICTIONS_WRAPPERS = "[]";
+        private const string PARAM_RESTRICTIONS_ARGS_WRAPPERS = "()";
         // Group for param name and group for type(s)
         private static readonly Regex PARAM_NAME_TYPE_REGEX = new Regex(@"(.*):(.*)");
         // Group for restrictions, and for type name
@@ -318,37 +322,93 @@ namespace IML.Evaluation
             if (SYMBOL_NAME_REGEX.IsMatch(parameter))
             {
                 // Name is the parameter string, and type is of the any type
-                return new AstParameter(parameter, MDataTypeRestrictionEntry.Any.TypeDefinition.Name);
+                return new AstParameter(parameter, AstParameterType.Any);
             }
-            var groups = PARAM_NAME_TYPE_REGEX.Match(parameter).Groups;
-            string nameString = groups[1].Value;
-            // Note: There can be multiple types, and any type can have restrictions
-            string typesString = groups[2].Value;
-            if (!SYMBOL_NAME_REGEX.IsMatch(nameString))
+            // Need to get the colon to find the name and type
+            int colonIndex = parameter.IndexOf(':');
+            string paramName = parameter.Substring(0, colonIndex - 1);
+            string typeString = parameter.Substring(colonIndex);
+            AstParameterType type = ParseParameterType(typeString);
+            return new AstParameter(paramName, type);
+        }
+        private AstParameterType ParseParameterType(string typeStr)
+        {
+            // typeStr can have unions and restrictions to process
+            // Split the type on pipe (excluding things in brackets [] to avoid types provided to restrictions)
+            string[] types = SplitByDelimiter(typeStr, PARAM_TYPES_DELIMITER, PARAM_RESTRICTIONS_WRAPPERS);
+            // Now for each of these, we need to parse out the datatype + restrictions
+            List<AstParameterTypeEntry> entries = new List<AstParameterTypeEntry>();
+            for (int i = 0; i < types.Length; i++)
             {
-                // Not a valid parameter name
-                throw new InvalidParseException("\"" + nameString + "\" is not a valid parameter name.", parameter);
+                entries.Add(ParseParameterEntry(types[i]));
             }
-            // Start getting out the data types
-            string[] eachTypes = SplitByDelimiter(typesString, PARAM_TYPES_DELIMITER);
-            AstParameterTypeEntry[] typeEntries = eachTypes.Select((typeString) =>
+            return new AstParameterType(entries);
+        }
+        private AstParameterTypeEntry ParseParameterEntry(string entryStr)
+        {
+            // See if we even have restrictions
+            if (!entryStr.Contains(PARAM_RESTRICTIONS_WRAPPERS[0]))
             {
-                // Need to extract the restrictions from this string
-                var typeGroups = PARAM_TYPE_RESTS_REGEX.Match(typeString).Groups;
-                // Don't always have reqs array, but it will always appear as the first group, and be empty if it doesn't exist
-                string reqsArray = typeGroups[1].Value;
-                string typeName = typeGroups[2].Value;
-
-                return new AstParameterTypeEntry(typeName);
-            }).ToArray();
-            return new AstParameter(nameString, typeEntries);
+                // Simply stores a type. We should pass that up.
+                return AstParameterTypeEntry.Simple(entryStr);
+            }
+            // Need to get everything between the first and last brackets
+            int bracketStart = entryStr.IndexOf(PARAM_RESTRICTIONS_WRAPPERS[0]);
+            int bracketEnd = entryStr.LastIndexOf(PARAM_RESTRICTIONS_WRAPPERS[1]);
+            string name = entryStr.Substring(0, bracketStart);
+            string typeRestrictionsString = entryStr.SubstringBetween(bracketStart + 1, bracketEnd);
+            // Now need to split this up
+            string[] restrictions = SplitByDelimiter(typeRestrictionsString, PARAM_REQS_DELIMITER,
+                PARAM_RESTRICTIONS_WRAPPERS, PARAM_RESTRICTIONS_ARGS_WRAPPERS);
+            List<AstParameterTypeRestriction> rests = new List<AstParameterTypeRestriction>();
+            for (int i = 0; i < restrictions.Length; i++)
+            {
+                rests.Add(ParseRestriction(restrictions[i]));
+            }
+            return new AstParameterTypeEntry(name, rests);
+        }
+        private AstParameterTypeRestriction ParseRestriction(string rest)
+        {
+            // Name is from start to first paren
+            int parenStart = rest.IndexOf(PARAM_RESTRICTIONS_ARGS_WRAPPERS[0]);
+            int parenEnd = rest.LastIndexOf(PARAM_RESTRICTIONS_ARGS_WRAPPERS[1]);
+            string name = rest.Substring(0, parenStart);
+            string args = rest.SubstringBetween(parenStart + 1, parenEnd);
+            string[] argSplit = SplitByDelimiter(args, PARAM_REQS_ARGS_DELIMITER, 
+                PARAM_RESTRICTIONS_ARGS_WRAPPERS);
+            List<AstParameterTypeRestriction.Argument> arguments = new List<AstParameterTypeRestriction.Argument>();
+            for (int i = 0; i < argSplit.Length; i++)
+            {
+                arguments.Add(ParseRestrictionArgument(argSplit[i]));
+            }
+            return new AstParameterTypeRestriction(name, arguments);
+        }
+        private AstParameterTypeRestriction.Argument ParseRestrictionArgument(string arg)
+        {
+            // Determine if we've got a number, or string, or a type
+            // We'll just check if it is a valid number. If it is a valid string, it has quotes at the front
+            // If both of those fail, it's a type
+            if (double.TryParse(arg, out double numberValue))
+            {
+                return AstParameterTypeRestriction.Argument.Number(numberValue);
+            }
+            if (arg.StartsWith(STRING_START_WRAPPER))
+            {
+                string strValue = arg.SubstringBetween(1, arg.Length - 2);
+                return AstParameterTypeRestriction.Argument.String(strValue);
+            }
+            // We're looking at a type restriction value
+            AstParameterType type = ParseParameterType(arg);
+            return AstParameterTypeRestriction.Argument.Type(type);
         }
 
         public string UnparseParameter(AstParameter parameter)
         {
-            return parameter.Name + ":" + string.Join('|', 
+            throw new InvalidOperationException("Parser.UnparseParameter is unimplemented");
+            //return parameter.Name;
+            /*+ ":" + string.Join('|', 
                 parameter.TypeEntries.Select(x => 
-                    "[" + "]" + x.DataTypeName).ToArray());
+                    "[" + "]" + x.DataTypeName).ToArray());*/
         }
 
         public IdentifierAst ParseIdentifier(string expression)
@@ -490,7 +550,49 @@ namespace IML.Evaluation
             return substrings.ToArray();
         }
 
-        private bool IsWrappedBy(string expression, char start, char end)
+        // Wrapper pairs in the form of "{}" or "()"
+        private static string[] SplitByDelimiter(string expr, char delimiter, params string[] wrapperPairs)
+        {
+            List<string> substrings = new List<string>();
+            StringBuilder current = new StringBuilder();
+            for (int i = 0; i < expr.Length; i++)
+            {
+                char c = expr[i];
+                if (c == delimiter)
+                {
+                    // Split here
+                    substrings.Add(current.ToString());
+                    current = new StringBuilder();
+                }
+                else
+                {
+                    bool foundWrapper = false;
+                    for (int j = 0; j < wrapperPairs.Length; j++)
+                    {
+                        if (c == wrapperPairs[j][0])
+                        {
+                            foundWrapper = true;
+                            int end = GetBracketEndIndex(expr, i, wrapperPairs[j][0], wrapperPairs[j][1]);
+                            while (i != end)
+                            {
+                                c = expr[i];
+                                current.Append(c);
+                                i++;
+                            }
+                            break;
+                        }
+                    }
+                    if (!foundWrapper)
+                    {
+                        current.Append(c);
+                    }
+                }
+            }
+            substrings.Add(current.ToString());
+            return substrings.ToArray();
+        }
+
+        private static bool IsWrappedBy(string expression, char start, char end)
         {
             if (expression.Length < 2)
             {
@@ -571,7 +673,7 @@ namespace IML.Evaluation
             return true;
         }
 
-        private int GetBracketEndIndex(string str, int idx, char start, char end)
+        private static int GetBracketEndIndex(string str, int idx, char start, char end)
         {
             int level = 0;
             for (int i = idx; i < str.Length; i++)

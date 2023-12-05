@@ -11,5 +11,11 @@ namespace IML.Util
         {
             return str.Count(x => x == toFind);
         }
+
+        public static string SubstringBetween(this string str, int start, int end)
+        {
+            int length = end - start;
+            return str.Substring(start, length);
+        }
     }
 }

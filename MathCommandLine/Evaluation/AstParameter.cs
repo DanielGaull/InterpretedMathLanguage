@@ -25,6 +25,12 @@ namespace IML.Evaluation
         {
             Entries = entries;
         }
+
+        public static readonly AstParameterType Any = 
+            new AstParameterType(new List<AstParameterTypeEntry>()
+            {
+                new AstParameterTypeEntry("any", new List<AstParameterTypeRestriction>())
+            });
     }
     public class AstParameterTypeEntry
     {
@@ -35,6 +41,11 @@ namespace IML.Evaluation
         {
             DataTypeName = dataTypeName;
             Restrictions = restrictions;
+        }
+
+        public static AstParameterTypeEntry Simple(string name)
+        {
+            return new AstParameterTypeEntry(name, new List<AstParameterTypeRestriction>());
         }
     }
     public class AstParameterTypeRestriction
