@@ -60,8 +60,9 @@ namespace IML.Evaluation
         private const char PARAM_REQS_ARGS_DELIMITER = ',';
         private const string PARAM_RESTRICTIONS_WRAPPERS = "[]";
         private const string PARAM_RESTRICTIONS_ARGS_WRAPPERS = "()";
+        private const string PARAM_NAME_TYPE_SEPARATOR = ":";
         // Group for param name and group for type(s)
-        private static readonly Regex PARAM_NAME_TYPE_REGEX = new Regex(@"(.*):(.*)");
+        private static readonly Regex PARAM_NAME_TYPE_REGEX = new Regex(@$"(.*){PARAM_NAME_TYPE_SEPARATOR}(.*)");
         // Group for restrictions, and for type name
         private static readonly Regex PARAM_TYPE_RESTS_REGEX = new Regex(@"(?:\[(.*)\])?([a-zA-Z_][a-zA-Z0-9_]*)");
 
@@ -311,6 +312,7 @@ namespace IML.Evaluation
             return "";
         }
 
+        #region Parsing Parameters
         /// <summary>
         /// Parses a single parameter into an AstParameter object
         /// </summary>
@@ -322,35 +324,35 @@ namespace IML.Evaluation
             if (SYMBOL_NAME_REGEX.IsMatch(parameter))
             {
                 // Name is the parameter string, and type is of the any type
-                return new AstParameter(parameter, AstParameterType.Any);
+                return new AstParameter(parameter, AstType.Any);
             }
             // Need to get the colon to find the name and type
             int colonIndex = parameter.IndexOf(':');
             string paramName = parameter.Substring(0, colonIndex - 1);
             string typeString = parameter.Substring(colonIndex);
-            AstParameterType type = ParseParameterType(typeString);
+            AstType type = ParseType(typeString);
             return new AstParameter(paramName, type);
         }
-        private AstParameterType ParseParameterType(string typeStr)
+        private AstType ParseType(string typeStr)
         {
             // typeStr can have unions and restrictions to process
             // Split the type on pipe (excluding things in brackets [] to avoid types provided to restrictions)
             string[] types = SplitByDelimiter(typeStr, PARAM_TYPES_DELIMITER, PARAM_RESTRICTIONS_WRAPPERS);
             // Now for each of these, we need to parse out the datatype + restrictions
-            List<AstParameterTypeEntry> entries = new List<AstParameterTypeEntry>();
+            List<AstTypeEntry> entries = new List<AstTypeEntry>();
             for (int i = 0; i < types.Length; i++)
             {
                 entries.Add(ParseParameterEntry(types[i]));
             }
-            return new AstParameterType(entries);
+            return new AstType(entries);
         }
-        private AstParameterTypeEntry ParseParameterEntry(string entryStr)
+        private AstTypeEntry ParseParameterEntry(string entryStr)
         {
             // See if we even have restrictions
             if (!entryStr.Contains(PARAM_RESTRICTIONS_WRAPPERS[0]))
             {
                 // Simply stores a type. We should pass that up.
-                return AstParameterTypeEntry.Simple(entryStr);
+                return AstTypeEntry.Simple(entryStr);
             }
             // Need to get everything between the first and last brackets
             int bracketStart = entryStr.IndexOf(PARAM_RESTRICTIONS_WRAPPERS[0]);
@@ -360,14 +362,14 @@ namespace IML.Evaluation
             // Now need to split this up
             string[] restrictions = SplitByDelimiter(typeRestrictionsString, PARAM_REQS_DELIMITER,
                 PARAM_RESTRICTIONS_WRAPPERS, PARAM_RESTRICTIONS_ARGS_WRAPPERS);
-            List<AstParameterTypeRestriction> rests = new List<AstParameterTypeRestriction>();
+            List<AstTypeRestriction> rests = new List<AstTypeRestriction>();
             for (int i = 0; i < restrictions.Length; i++)
             {
                 rests.Add(ParseRestriction(restrictions[i]));
             }
-            return new AstParameterTypeEntry(name, rests);
+            return new AstTypeEntry(name, rests);
         }
-        private AstParameterTypeRestriction ParseRestriction(string rest)
+        private AstTypeRestriction ParseRestriction(string rest)
         {
             // Name is from start to first paren
             int parenStart = rest.IndexOf(PARAM_RESTRICTIONS_ARGS_WRAPPERS[0]);
@@ -376,40 +378,97 @@ namespace IML.Evaluation
             string args = rest.SubstringBetween(parenStart + 1, parenEnd);
             string[] argSplit = SplitByDelimiter(args, PARAM_REQS_ARGS_DELIMITER, 
                 PARAM_RESTRICTIONS_ARGS_WRAPPERS);
-            List<AstParameterTypeRestriction.Argument> arguments = new List<AstParameterTypeRestriction.Argument>();
+            List<AstTypeRestriction.Argument> arguments = new List<AstTypeRestriction.Argument>();
             for (int i = 0; i < argSplit.Length; i++)
             {
                 arguments.Add(ParseRestrictionArgument(argSplit[i]));
             }
-            return new AstParameterTypeRestriction(name, arguments);
+            return new AstTypeRestriction(name, arguments);
         }
-        private AstParameterTypeRestriction.Argument ParseRestrictionArgument(string arg)
+        private AstTypeRestriction.Argument ParseRestrictionArgument(string arg)
         {
             // Determine if we've got a number, or string, or a type
             // We'll just check if it is a valid number. If it is a valid string, it has quotes at the front
             // If both of those fail, it's a type
             if (double.TryParse(arg, out double numberValue))
             {
-                return AstParameterTypeRestriction.Argument.Number(numberValue);
+                return AstTypeRestriction.Argument.Number(numberValue);
             }
             if (arg.StartsWith(STRING_START_WRAPPER))
             {
                 string strValue = arg.SubstringBetween(1, arg.Length - 2);
-                return AstParameterTypeRestriction.Argument.String(strValue);
+                return AstTypeRestriction.Argument.String(strValue);
             }
             // We're looking at a type restriction value
-            AstParameterType type = ParseParameterType(arg);
-            return AstParameterTypeRestriction.Argument.Type(type);
+            AstType type = ParseType(arg);
+            return AstTypeRestriction.Argument.Type(type);
         }
+        #endregion
 
+        #region Unparsing Parameters
         public string UnparseParameter(AstParameter parameter)
         {
-            throw new InvalidOperationException("Parser.UnparseParameter is unimplemented");
-            //return parameter.Name;
-            /*+ ":" + string.Join('|', 
-                parameter.TypeEntries.Select(x => 
-                    "[" + "]" + x.DataTypeName).ToArray());*/
+            return parameter.Name + PARAM_NAME_TYPE_SEPARATOR + UnparseType(parameter.Type);
         }
+        private static string UnparseType(AstType type)
+        {
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < type.Entries.Count; i++)
+            {
+                builder.Append(UnparseTypeEntry(type.Entries[i]));
+                if (i + 1 < type.Entries.Count)
+                {
+                    builder.Append(PARAM_TYPES_DELIMITER);
+                }
+            }
+            return builder.ToString();
+        }
+        private static string UnparseTypeEntry(AstTypeEntry entry)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.Append(entry.DataTypeName);
+            builder.Append(PARAM_RESTRICTIONS_WRAPPERS[0]);
+            for (int i = 0; i < entry.Restrictions.Count; i++)
+            {
+                builder.Append(UnparseTypeRestriction(entry.Restrictions[i]));
+                if (i + 1 < entry.Restrictions.Count)
+                {
+                    builder.Append(PARAM_REQS_DELIMITER);
+                }
+            }
+            builder.Append(PARAM_RESTRICTIONS_WRAPPERS[1]);
+            return builder.ToString();
+        }
+        private static string UnparseTypeRestriction(AstTypeRestriction rest)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.Append(rest.Name);
+            builder.Append(PARAM_RESTRICTIONS_ARGS_WRAPPERS[0]);
+            for (int i = 0; i < rest.Args.Count; i++)
+            {
+                builder.Append(UnparseRestrictionArgument(rest.Args[i]));
+                if (i + 1 < rest.Args.Count)
+                {
+                    builder.Append(PARAM_REQS_ARGS_DELIMITER);
+                }
+            }
+            builder.Append(PARAM_RESTRICTIONS_ARGS_WRAPPERS[1]);
+            return builder.ToString();
+        }
+        private static string UnparseRestrictionArgument(AstTypeRestriction.Argument arg)
+        {
+            switch (arg.ArgType)
+            {
+                case RestrictionArgumentType.Number:
+                    return arg.NumberValue.ToString();
+                case RestrictionArgumentType.String:
+                    return STRING_START_WRAPPER + arg.StringValue + STRING_END_WRAPPER;
+                case RestrictionArgumentType.Type:
+                    return UnparseType(arg.TypeValue);
+            }
+            return null;
+        }
+        #endregion
 
         public IdentifierAst ParseIdentifier(string expression)
         {

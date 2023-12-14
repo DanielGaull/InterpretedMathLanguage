@@ -240,5 +240,10 @@ namespace IMLTests
         {
             AssertInterpreterValues("{1,2,3}.map((x)=>{_add(x,1)}).get(0)", "(number) 2");
         }
+        [TestMethod]
+        public void TestDereference()
+        {
+            AssertInterpreterValues("_do({()~>{var x = 5},()~>{var r = &x},()~>{*r = 2},()~>{x}})", "(number) 2");
+        }
     }
 }

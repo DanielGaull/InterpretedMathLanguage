@@ -8,52 +8,52 @@ namespace IML.Evaluation
 {
     public class AstParameter
     {
-        public AstParameterType Type { get; private set; }
+        public AstType Type { get; private set; }
         public string Name { get; private set; }
 
-        public AstParameter(string name, AstParameterType type)
+        public AstParameter(string name, AstType type)
         {
             Name = name;
             Type = type;
         }
     }
-    public class AstParameterType
+    public class AstType
     {
-        public List<AstParameterTypeEntry> Entries { get; private set; }
+        public List<AstTypeEntry> Entries { get; private set; }
 
-        public AstParameterType(List<AstParameterTypeEntry> entries)
+        public AstType(List<AstTypeEntry> entries)
         {
             Entries = entries;
         }
 
-        public static readonly AstParameterType Any = 
-            new AstParameterType(new List<AstParameterTypeEntry>()
+        public static readonly AstType Any = 
+            new AstType(new List<AstTypeEntry>()
             {
-                new AstParameterTypeEntry("any", new List<AstParameterTypeRestriction>())
+                new AstTypeEntry("any", new List<AstTypeRestriction>())
             });
     }
-    public class AstParameterTypeEntry
+    public class AstTypeEntry
     {
         public string DataTypeName { get; private set; }
-        public List<AstParameterTypeRestriction> Restrictions { get; private set; }
+        public List<AstTypeRestriction> Restrictions { get; private set; }
 
-        public AstParameterTypeEntry(string dataTypeName, List<AstParameterTypeRestriction> restrictions)
+        public AstTypeEntry(string dataTypeName, List<AstTypeRestriction> restrictions)
         {
             DataTypeName = dataTypeName;
             Restrictions = restrictions;
         }
 
-        public static AstParameterTypeEntry Simple(string name)
+        public static AstTypeEntry Simple(string name)
         {
-            return new AstParameterTypeEntry(name, new List<AstParameterTypeRestriction>());
+            return new AstTypeEntry(name, new List<AstTypeRestriction>());
         }
     }
-    public class AstParameterTypeRestriction
+    public class AstTypeRestriction
     {
         public string Name { get; private set; }
         public List<Argument> Args { get; private set; }
 
-        public AstParameterTypeRestriction(string name, List<Argument> args)
+        public AstTypeRestriction(string name, List<Argument> args)
         {
             Name = name;
             Args = args;
@@ -64,9 +64,9 @@ namespace IML.Evaluation
             public RestrictionArgumentType ArgType { get; private set; }
             public double NumberValue { get; private set; }
             public string StringValue { get; private set; }
-            public AstParameterType TypeValue { get; private set; }
+            public AstType TypeValue { get; private set; }
 
-            private Argument(RestrictionArgumentType type, double num, string str, AstParameterType t)
+            private Argument(RestrictionArgumentType type, double num, string str, AstType t)
             {
                 ArgType = type;
                 NumberValue = num;
@@ -82,7 +82,7 @@ namespace IML.Evaluation
             {
                 return new Argument(RestrictionArgumentType.String, 0, v, null);
             }
-            public static Argument Type(AstParameterType v)
+            public static Argument Type(AstType v)
             {
                 return new Argument(RestrictionArgumentType.Number, 0, null, v);
             }
