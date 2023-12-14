@@ -20,6 +20,32 @@ namespace IML.Evaluation
                 new AstTypeEntry("any", new List<AstTypeRestriction>())
             });
     }
+    public class LambdaAstType : AstType
+    {
+        // This special AST type has a return type and argument types
+        // Also need to store if we're forcing a particular environment or a pure function
+
+        public AstType ReturnType { get; private set; }
+        public List<AstType> ArgTypes { get; private set; }
+        public LambdaEnvironmentType EnvironmentType { get; private set; }
+        public bool IsPure { get; private set; }
+
+        public LambdaAstType(AstType returnType, List<AstType> argTypes, LambdaEnvironmentType envType, bool isPure)
+            : base(new List<AstTypeEntry>())
+        {
+            ReturnType = returnType;
+            ArgTypes = argTypes;
+            EnvironmentType = envType;
+            IsPure = isPure;
+        }
+
+        public enum LambdaEnvironmentType
+        {
+            ForceEnvironment, // Ex. ()!=>{}
+            ForceNoEnvironment, // Ex. ()!~>{}
+            AllowAny, // Ex. ()=>{}
+        }
+    }
     public class AstTypeEntry
     {
         public string DataTypeName { get; private set; }
