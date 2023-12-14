@@ -139,7 +139,7 @@ namespace IMLTests
         public void TestLambdaUnionArgsRestrictions()
         {
             AssertParsedType("(number[<(20)]|list[t(string)],string)=>void", 
-                "(number[<(20)]|list[t(string)],string[])=>void[]");
+                "(number[<(20)]|list[t(string[])],string[])=>void[]");
         }
         [TestMethod]
         public void TestLambdaReturnType()
@@ -154,23 +154,23 @@ namespace IMLTests
         [TestMethod]
         public void TestLambdaReturnTypeRestriction()
         {
-            AssertParsedType("()=>number[>(20)]|list[t(string)]");
+            AssertParsedType("()=>number[>(20)]|list[t(string[])]");
         }
         [TestMethod]
         public void TestLambdaReturnTypeRestrictionAndParameters()
         {
-            AssertParsedType("(number[<(20)]|list[t(string)],string[])=>number[>(20)]|list[t(string)]");
+            AssertParsedType("(number[<(20)]|list[t(string[])],string[])=>number[>(20)]|list[t(string[])]");
         }
         [TestMethod]
         public void TestLambdaReturnTypeRestrictionAndParametersNoEnv()
         {
             AssertParsedType("(number[<(20)]|list[t(string)],string[])~>number[>(20)]|list[t(string)]",
-                "(number[<(20)]|list[t(string)],string[])!~>number[>(20)]|list[t(string)]");
+                "(number[<(20)]|list[t(string[])],string[])!~>number[>(20)]|list[t(string[])]");
         }
         [TestMethod]
         public void TestLambdaReturnTypeRestrictionAndParametersForceEnv()
         {
-            AssertParsedType("(number[<(20)]|list[t(string)],string[])!=>number[>(20)]|list[t(string)]");
+            AssertParsedType("(number[<(20)]|list[t(string[])],string[])!=>number[>(20)]|list[t(string[])]");
         }
     }
 }

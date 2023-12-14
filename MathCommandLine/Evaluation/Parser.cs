@@ -438,9 +438,9 @@ namespace IML.Evaluation
         private LambdaAstTypeEntry ParseLambdaTypeEntry(string str)
         {
             // Get the param types, return type, and any requirements on environments/purity
-            int startParen = str[0];
-            int endParen = GetBracketEndIndex(str, 1, LAMBDA_TYPE_PARAM_WRAPPERS[0], LAMBDA_TYPE_PARAM_WRAPPERS[1]);
-            string args = str.SubstringBetween(startParen, endParen);
+            int startParen = 0;
+            int endParen = GetBracketEndIndex(str, 0, LAMBDA_TYPE_PARAM_WRAPPERS[0], LAMBDA_TYPE_PARAM_WRAPPERS[1]);
+            string args = str.SubstringBetween(startParen + 1, endParen);
             string[] paramTypeStrings = SplitByDelimiter(args, LAMBDA_TYPE_PARAM_DELMITER,
                 LAMBDA_TYPE_PARAM_WRAPPERS, TYPE_RESTRICTIONS_ARGS_WRAPPERS, TYPE_RESTRICTIONS_WRAPPERS);
             List<AstType> parameterTypes = new List<AstType>();
@@ -498,7 +498,7 @@ namespace IML.Evaluation
             }
 
             // Finally, we need the return type
-            string returnTypeString = str.Substring(arrowTipIndex);
+            string returnTypeString = str.Substring(arrowTipIndex + 1);
             AstType returnType = ParseType(returnTypeString);
             // Now we can construct this thing and return it
             return new LambdaAstTypeEntry(returnType, parameterTypes, envType, false);
@@ -749,6 +749,11 @@ namespace IML.Evaluation
         // Wrapper pairs in the form of "{}" or "()"
         private static string[] SplitByDelimiter(string expr, char delimiter, params string[] wrapperPairs)
         {
+            if (expr.Length == 0)
+            {
+                return new string[0];
+            }
+
             List<string> substrings = new List<string>();
             StringBuilder current = new StringBuilder();
             for (int i = 0; i < expr.Length; i++)
