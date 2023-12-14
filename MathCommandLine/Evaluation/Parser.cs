@@ -525,6 +525,10 @@ namespace IML.Evaluation
         }
         private static string UnparseTypeEntry(AstTypeEntry entry)
         {
+            if (entry is LambdaAstTypeEntry)
+            {
+                return UnparseLambdaTypeEntry(entry as LambdaAstTypeEntry);
+            }
             StringBuilder builder = new StringBuilder();
             builder.Append(entry.DataTypeName);
             builder.Append(TYPE_RESTRICTIONS_WRAPPERS[0]);
@@ -537,6 +541,39 @@ namespace IML.Evaluation
                 }
             }
             builder.Append(TYPE_RESTRICTIONS_WRAPPERS[1]);
+            return builder.ToString();
+        }
+        private static string UnparseLambdaTypeEntry(LambdaAstTypeEntry entry)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.Append(LAMBDA_TYPE_PARAM_WRAPPERS[0]);
+            for (int i = 0; i < entry.ArgTypes.Count; i++)
+            {
+                builder.Append(UnparseType(entry.ArgTypes[i]));
+                if (i + 1 < entry.ArgTypes.Count)
+                {
+                    builder.Append(LAMBDA_TYPE_PARAM_DELMITER);
+                }
+            }
+            builder.Append(LAMBDA_TYPE_PARAM_WRAPPERS[1]);
+            // Now build the arrow
+            switch (entry.EnvironmentType) 
+            {
+                case LambdaAstTypeEntry.LambdaEnvironmentType.ForceEnvironment:
+                    builder.Append(LAMBDA_TYPE_REQ_ENV_CHARACTER);
+                    builder.Append(LAMBDA_TYPE_CREATES_ENVIRONMENT_LINE);
+                    break;
+                case LambdaAstTypeEntry.LambdaEnvironmentType.ForceNoEnvironment:
+                    builder.Append(LAMBDA_TYPE_REQ_ENV_CHARACTER);
+                    builder.Append(LAMBDA_TYPE_NO_ENVIRONMENT_LINE);
+                    break;
+                case LambdaAstTypeEntry.LambdaEnvironmentType.AllowAny:
+                    builder.Append(LAMBDA_TYPE_CREATES_ENVIRONMENT_LINE);
+                    break;
+            }
+            builder.Append(LAMBDA_TYPE_ARROW_TIP);
+            // Finally, the return type
+            builder.Append(UnparseType(entry.ReturnType));
             return builder.ToString();
         }
         private static string UnparseTypeRestriction(AstTypeRestriction rest)
