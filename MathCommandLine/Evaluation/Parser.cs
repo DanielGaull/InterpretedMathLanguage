@@ -55,16 +55,23 @@ namespace IML.Evaluation
 
         // Parameter parsing regexes
         private const char PARAM_DELIMITER = ',';
-        private const char PARAM_TYPES_DELIMITER = '|';
-        private const char PARAM_REQS_DELIMITER = ',';
-        private const char PARAM_REQS_ARGS_DELIMITER = ',';
-        private const string PARAM_RESTRICTIONS_WRAPPERS = "[]";
-        private const string PARAM_RESTRICTIONS_ARGS_WRAPPERS = "()";
         private const string PARAM_NAME_TYPE_SEPARATOR = ":";
-        // Group for param name and group for type(s)
-        private static readonly Regex PARAM_NAME_TYPE_REGEX = new Regex(@$"(.*){PARAM_NAME_TYPE_SEPARATOR}(.*)");
-        // Group for restrictions, and for type name
-        private static readonly Regex PARAM_TYPE_RESTS_REGEX = new Regex(@"(?:\[(.*)\])?([a-zA-Z_][a-zA-Z0-9_]*)");
+        private const char TYPE_UNION_DELIMITER = '|';
+        private const char TYPE_REQS_DELIMITER = ',';
+        private const char TYPE_REQS_ARGS_DELIMITER = ',';
+        private const string TYPE_RESTRICTIONS_WRAPPERS = "[]";
+        private const string TYPE_RESTRICTIONS_ARGS_WRAPPERS = "()";
+
+        private const char LAMBDA_TYPE_NO_ENVIRONMENT_LINE = '~';
+        private const char LAMBDA_TYPE_CREATES_ENVIRONMENT_LINE = '=';
+        private const char LAMBDA_TYPE_ARROW_TIP = '>';
+        private const char LAMBDA_TYPE_REQ_ENV_CHARACTER = '!'; // Character for requiring lambda to create env
+        private const string LAMBDA_TYPE_PARAM_WRAPPERS = "()";
+        private const char LAMBDA_TYPE_PARAM_DELMITER = ',';
+        private readonly Regex LAMBDA_TYPE_REGEX = 
+            new Regex($"{LAMBDA_TYPE_PARAM_WRAPPERS[0]}(.*){LAMBDA_TYPE_PARAM_WRAPPERS[1]}" + 
+                $"[{LAMBDA_TYPE_REQ_ENV_CHARACTER}]?[{LAMBDA_TYPE_NO_ENVIRONMENT_LINE}|{LAMBDA_TYPE_CREATES_ENVIRONMENT_LINE}]" +
+                $"{LAMBDA_TYPE_ARROW_TIP}(.*)");
 
         // Variable declaration and assigment syntax
         private const char ASSIGNMENT_TOKEN = '=';
@@ -335,36 +342,50 @@ namespace IML.Evaluation
         }
         private AstType ParseType(string typeStr)
         {
+            if (IsParenWrapped(typeStr))
+            {
+                return ParseType(typeStr.SubstringBetween(1, typeStr.Length - 1));
+            }
             // typeStr can have unions and restrictions to process
             // Split the type on pipe (excluding things in brackets [] to avoid types provided to restrictions)
-            string[] types = SplitByDelimiter(typeStr, PARAM_TYPES_DELIMITER, PARAM_RESTRICTIONS_WRAPPERS);
+            string[] types = SplitByDelimiter(typeStr, TYPE_UNION_DELIMITER, 
+                TYPE_RESTRICTIONS_WRAPPERS, LAMBDA_TYPE_PARAM_WRAPPERS);
             // Now for each of these, we need to parse out the datatype + restrictions
             List<AstTypeEntry> entries = new List<AstTypeEntry>();
             for (int i = 0; i < types.Length; i++)
             {
-                entries.Add(ParseParameterEntry(types[i]));
+                entries.Add(ParseTypeEntry(types[i]));
             }
             return new AstType(entries);
         }
-        private AstTypeEntry ParseParameterEntry(string entryStr)
+        private AstTypeEntry ParseTypeEntry(string entryStr)
         {
+            if (IsParenWrapped(entryStr))
+            {
+                return ParseTypeEntry(entryStr.SubstringBetween(1, entryStr.Length - 1));
+            }
+            // Check if this matches the lambda regex; if so, we need to parse it as a lambda type
+            if (LAMBDA_TYPE_REGEX.IsMatch(entryStr))
+            {
+                return ParseLambdaTypeEntry(entryStr);
+            }
             // See if we even have restrictions
-            if (!entryStr.Contains(PARAM_RESTRICTIONS_WRAPPERS[0]))
+            if (!entryStr.Contains(TYPE_RESTRICTIONS_WRAPPERS[0]))
             {
                 // Simply stores a type. We should pass that up.
                 return AstTypeEntry.Simple(entryStr);
             }
             // Need to get everything between the first and last brackets
-            int bracketStart = entryStr.IndexOf(PARAM_RESTRICTIONS_WRAPPERS[0]);
-            int bracketEnd = entryStr.LastIndexOf(PARAM_RESTRICTIONS_WRAPPERS[1]);
+            int bracketStart = entryStr.IndexOf(TYPE_RESTRICTIONS_WRAPPERS[0]);
+            int bracketEnd = entryStr.LastIndexOf(TYPE_RESTRICTIONS_WRAPPERS[1]);
             string name = entryStr.Substring(0, bracketStart);
             string typeRestrictionsString = entryStr.SubstringBetween(bracketStart + 1, bracketEnd);
             List<AstTypeRestriction> rests = new List<AstTypeRestriction>();
             if (typeRestrictionsString.Length > 0)
             {
                 // Now need to split this up
-                string[] restrictions = SplitByDelimiter(typeRestrictionsString, PARAM_REQS_DELIMITER,
-                    PARAM_RESTRICTIONS_WRAPPERS, PARAM_RESTRICTIONS_ARGS_WRAPPERS);
+                string[] restrictions = SplitByDelimiter(typeRestrictionsString, TYPE_REQS_DELIMITER,
+                    TYPE_RESTRICTIONS_WRAPPERS, TYPE_RESTRICTIONS_ARGS_WRAPPERS);
 
                 for (int i = 0; i < restrictions.Length; i++)
                 {
@@ -376,17 +397,17 @@ namespace IML.Evaluation
         private AstTypeRestriction ParseRestriction(string rest)
         {
             // Check if there are parentheses; they can be left out for no arguments
-            if (!rest.Contains(PARAM_RESTRICTIONS_ARGS_WRAPPERS[0]))
+            if (!rest.Contains(TYPE_RESTRICTIONS_ARGS_WRAPPERS[0]))
             {
                 return new AstTypeRestriction(rest, new List<AstTypeRestriction.Argument>());
             }
             // Name is from start to first paren
-            int parenStart = rest.IndexOf(PARAM_RESTRICTIONS_ARGS_WRAPPERS[0]);
-            int parenEnd = rest.LastIndexOf(PARAM_RESTRICTIONS_ARGS_WRAPPERS[1]);
+            int parenStart = rest.IndexOf(TYPE_RESTRICTIONS_ARGS_WRAPPERS[0]);
+            int parenEnd = rest.LastIndexOf(TYPE_RESTRICTIONS_ARGS_WRAPPERS[1]);
             string name = rest.Substring(0, parenStart);
             string args = rest.SubstringBetween(parenStart + 1, parenEnd);
-            string[] argSplit = SplitByDelimiter(args, PARAM_REQS_ARGS_DELIMITER, 
-                PARAM_RESTRICTIONS_ARGS_WRAPPERS);
+            string[] argSplit = SplitByDelimiter(args, TYPE_REQS_ARGS_DELIMITER, 
+                TYPE_RESTRICTIONS_ARGS_WRAPPERS);
             List<AstTypeRestriction.Argument> arguments = new List<AstTypeRestriction.Argument>();
             for (int i = 0; i < argSplit.Length; i++)
             {
@@ -413,6 +434,75 @@ namespace IML.Evaluation
             AstType type = ParseType(arg);
             return AstTypeRestriction.Argument.Type(type);
         }
+
+        private LambdaAstTypeEntry ParseLambdaTypeEntry(string str)
+        {
+            // Get the param types, return type, and any requirements on environments/purity
+            int startParen = str[0];
+            int endParen = GetBracketEndIndex(str, 1, LAMBDA_TYPE_PARAM_WRAPPERS[0], LAMBDA_TYPE_PARAM_WRAPPERS[1]);
+            string args = str.SubstringBetween(startParen, endParen);
+            string[] paramTypeStrings = SplitByDelimiter(args, LAMBDA_TYPE_PARAM_DELMITER,
+                LAMBDA_TYPE_PARAM_WRAPPERS, TYPE_RESTRICTIONS_ARGS_WRAPPERS, TYPE_RESTRICTIONS_WRAPPERS);
+            List<AstType> parameterTypes = new List<AstType>();
+            for (int i = 0; i < paramTypeStrings.Length; i++)
+            {
+                parameterTypes.Add(ParseType(paramTypeStrings[i]));
+            }
+            // Ok, now handle the "arrow" and cover any special behaviors here
+            // Start at end paren in case any lambdas in the params (can't use LastIndexOf either since there could
+            // be one in the return type)
+            int arrowTipIndex = str.IndexOf(LAMBDA_TYPE_ARROW_TIP, endParen);
+            string arrow = str.SubstringBetween(endParen + 1, arrowTipIndex);
+            bool forceEnv = false;
+            bool createsEnv;
+            if (arrow.StartsWith(LAMBDA_TYPE_REQ_ENV_CHARACTER))
+            {
+                forceEnv = true;
+                arrow = arrow.Substring(1); // Pop off first character
+            }
+            if (arrow.StartsWith(LAMBDA_TYPE_CREATES_ENVIRONMENT_LINE))
+            {
+                createsEnv = true;
+            }
+            else if (arrow.StartsWith(LAMBDA_TYPE_NO_ENVIRONMENT_LINE))
+            {
+                createsEnv = false;
+            }
+            else
+            {
+                // Should never get here since we regexed, but just in case...
+                throw new InvalidParseException($"'{str}' could not be parsed to a function type. {arrow[0]} is an invalid " +
+                    "environment specifier.");
+            }
+            LambdaAstTypeEntry.LambdaEnvironmentType envType;
+            if (forceEnv)
+            {
+                if (createsEnv)
+                {
+                    envType = LambdaAstTypeEntry.LambdaEnvironmentType.ForceEnvironment;
+                }
+                else
+                {
+                    envType = LambdaAstTypeEntry.LambdaEnvironmentType.ForceNoEnvironment;
+                }
+            }
+            else if (!forceEnv && !createsEnv)
+            {
+                // Still force no environment, since user specified (like "()~>void")
+                envType = LambdaAstTypeEntry.LambdaEnvironmentType.ForceNoEnvironment;
+            }
+            else
+            {
+                // No env forced at all
+                envType = LambdaAstTypeEntry.LambdaEnvironmentType.AllowAny;
+            }
+
+            // Finally, we need the return type
+            string returnTypeString = str.Substring(arrowTipIndex);
+            AstType returnType = ParseType(returnTypeString);
+            // Now we can construct this thing and return it
+            return new LambdaAstTypeEntry(returnType, parameterTypes, envType, false);
+        }
         #endregion
 
         #region Unparsing Parameters
@@ -428,7 +518,7 @@ namespace IML.Evaluation
                 builder.Append(UnparseTypeEntry(type.Entries[i]));
                 if (i + 1 < type.Entries.Count)
                 {
-                    builder.Append(PARAM_TYPES_DELIMITER);
+                    builder.Append(TYPE_UNION_DELIMITER);
                 }
             }
             return builder.ToString();
@@ -437,32 +527,32 @@ namespace IML.Evaluation
         {
             StringBuilder builder = new StringBuilder();
             builder.Append(entry.DataTypeName);
-            builder.Append(PARAM_RESTRICTIONS_WRAPPERS[0]);
+            builder.Append(TYPE_RESTRICTIONS_WRAPPERS[0]);
             for (int i = 0; i < entry.Restrictions.Count; i++)
             {
                 builder.Append(UnparseTypeRestriction(entry.Restrictions[i]));
                 if (i + 1 < entry.Restrictions.Count)
                 {
-                    builder.Append(PARAM_REQS_DELIMITER);
+                    builder.Append(TYPE_REQS_DELIMITER);
                 }
             }
-            builder.Append(PARAM_RESTRICTIONS_WRAPPERS[1]);
+            builder.Append(TYPE_RESTRICTIONS_WRAPPERS[1]);
             return builder.ToString();
         }
         private static string UnparseTypeRestriction(AstTypeRestriction rest)
         {
             StringBuilder builder = new StringBuilder();
             builder.Append(rest.Name);
-            builder.Append(PARAM_RESTRICTIONS_ARGS_WRAPPERS[0]);
+            builder.Append(TYPE_RESTRICTIONS_ARGS_WRAPPERS[0]);
             for (int i = 0; i < rest.Args.Count; i++)
             {
                 builder.Append(UnparseRestrictionArgument(rest.Args[i]));
                 if (i + 1 < rest.Args.Count)
                 {
-                    builder.Append(PARAM_REQS_ARGS_DELIMITER);
+                    builder.Append(TYPE_REQS_ARGS_DELIMITER);
                 }
             }
-            builder.Append(PARAM_RESTRICTIONS_ARGS_WRAPPERS[1]);
+            builder.Append(TYPE_RESTRICTIONS_ARGS_WRAPPERS[1]);
             return builder.ToString();
         }
         private static string UnparseRestrictionArgument(AstTypeRestriction.Argument arg)
