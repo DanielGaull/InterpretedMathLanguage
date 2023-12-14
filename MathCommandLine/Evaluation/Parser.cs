@@ -340,7 +340,7 @@ namespace IML.Evaluation
             AstType type = ParseType(typeString);
             return new AstParameter(paramName, type);
         }
-        private AstType ParseType(string typeStr)
+        public AstType ParseType(string typeStr)
         {
             if (IsParenWrapped(typeStr))
             {
@@ -510,7 +510,7 @@ namespace IML.Evaluation
         {
             return parameter.Name + PARAM_NAME_TYPE_SEPARATOR + UnparseType(parameter.Type);
         }
-        private static string UnparseType(AstType type)
+        public string UnparseType(AstType type)
         {
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < type.Entries.Count; i++)
@@ -523,7 +523,7 @@ namespace IML.Evaluation
             }
             return builder.ToString();
         }
-        private static string UnparseTypeEntry(AstTypeEntry entry)
+        private string UnparseTypeEntry(AstTypeEntry entry)
         {
             if (entry is LambdaAstTypeEntry)
             {
@@ -543,7 +543,7 @@ namespace IML.Evaluation
             builder.Append(TYPE_RESTRICTIONS_WRAPPERS[1]);
             return builder.ToString();
         }
-        private static string UnparseLambdaTypeEntry(LambdaAstTypeEntry entry)
+        private string UnparseLambdaTypeEntry(LambdaAstTypeEntry entry)
         {
             StringBuilder builder = new StringBuilder();
             builder.Append(LAMBDA_TYPE_PARAM_WRAPPERS[0]);
@@ -576,7 +576,7 @@ namespace IML.Evaluation
             builder.Append(UnparseType(entry.ReturnType));
             return builder.ToString();
         }
-        private static string UnparseTypeRestriction(AstTypeRestriction rest)
+        private string UnparseTypeRestriction(AstTypeRestriction rest)
         {
             StringBuilder builder = new StringBuilder();
             builder.Append(rest.Name);
@@ -592,7 +592,7 @@ namespace IML.Evaluation
             builder.Append(TYPE_RESTRICTIONS_ARGS_WRAPPERS[1]);
             return builder.ToString();
         }
-        private static string UnparseRestrictionArgument(AstTypeRestriction.Argument arg)
+        private string UnparseRestrictionArgument(AstTypeRestriction.Argument arg)
         {
             switch (arg.ArgType)
             {
