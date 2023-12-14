@@ -84,7 +84,7 @@ namespace IML.Evaluation
             }
             public static Argument Type(AstType v)
             {
-                return new Argument(RestrictionArgumentType.Number, 0, null, v);
+                return new Argument(RestrictionArgumentType.Type, 0, null, v);
             }
         }
     }

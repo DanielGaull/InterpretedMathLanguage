@@ -328,8 +328,8 @@ namespace IML.Evaluation
             }
             // Need to get the colon to find the name and type
             int colonIndex = parameter.IndexOf(':');
-            string paramName = parameter.Substring(0, colonIndex - 1);
-            string typeString = parameter.Substring(colonIndex);
+            string paramName = parameter.Substring(0, colonIndex);
+            string typeString = parameter.Substring(colonIndex + 1);
             AstType type = ParseType(typeString);
             return new AstParameter(paramName, type);
         }
@@ -359,18 +359,27 @@ namespace IML.Evaluation
             int bracketEnd = entryStr.LastIndexOf(PARAM_RESTRICTIONS_WRAPPERS[1]);
             string name = entryStr.Substring(0, bracketStart);
             string typeRestrictionsString = entryStr.SubstringBetween(bracketStart + 1, bracketEnd);
-            // Now need to split this up
-            string[] restrictions = SplitByDelimiter(typeRestrictionsString, PARAM_REQS_DELIMITER,
-                PARAM_RESTRICTIONS_WRAPPERS, PARAM_RESTRICTIONS_ARGS_WRAPPERS);
             List<AstTypeRestriction> rests = new List<AstTypeRestriction>();
-            for (int i = 0; i < restrictions.Length; i++)
+            if (typeRestrictionsString.Length > 0)
             {
-                rests.Add(ParseRestriction(restrictions[i]));
+                // Now need to split this up
+                string[] restrictions = SplitByDelimiter(typeRestrictionsString, PARAM_REQS_DELIMITER,
+                    PARAM_RESTRICTIONS_WRAPPERS, PARAM_RESTRICTIONS_ARGS_WRAPPERS);
+
+                for (int i = 0; i < restrictions.Length; i++)
+                {
+                    rests.Add(ParseRestriction(restrictions[i]));
+                }
             }
             return new AstTypeEntry(name, rests);
         }
         private AstTypeRestriction ParseRestriction(string rest)
         {
+            // Check if there are parentheses; they can be left out for no arguments
+            if (!rest.Contains(PARAM_RESTRICTIONS_ARGS_WRAPPERS[0]))
+            {
+                return new AstTypeRestriction(rest, new List<AstTypeRestriction.Argument>());
+            }
             // Name is from start to first paren
             int parenStart = rest.IndexOf(PARAM_RESTRICTIONS_ARGS_WRAPPERS[0]);
             int parenEnd = rest.LastIndexOf(PARAM_RESTRICTIONS_ARGS_WRAPPERS[1]);
@@ -396,7 +405,8 @@ namespace IML.Evaluation
             }
             if (arg.StartsWith(STRING_START_WRAPPER))
             {
-                string strValue = arg.SubstringBetween(1, arg.Length - 2);
+                // TODO: Verify that the syntax is correct
+                string strValue = arg.SubstringBetween(1, arg.Length - 1);
                 return AstTypeRestriction.Argument.String(strValue);
             }
             // We're looking at a type restriction value
@@ -638,6 +648,9 @@ namespace IML.Evaluation
                                 current.Append(c);
                                 i++;
                             }
+                            // Make sure we add the end wrapper, by adding one more character
+                            c = expr[i];
+                            current.Append(c);
                             break;
                         }
                     }
