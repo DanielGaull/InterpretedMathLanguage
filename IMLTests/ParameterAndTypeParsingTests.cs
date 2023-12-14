@@ -96,5 +96,63 @@ namespace IMLTests
         {
             AssertParsedParameter("value:list[t(number[>(0)]|list[t(boolean[])])]");
         }
+
+        [TestMethod]
+        public void TestSimpleLambda()
+        {
+            AssertParsedParameter("()=>void", "()=>void[]");
+        }
+        [TestMethod]
+        public void TestLambdaOneArg()
+        {
+            AssertParsedParameter("(number)=>void", "(number[])=>void[]");
+        }
+        [TestMethod]
+        public void TestLambdaTwoArg()
+        {
+            AssertParsedParameter("(number,string)=>void", "(number[],string[])=>void[]");
+        }
+        [TestMethod]
+        public void TestLambdaUnionArgs()
+        {
+            AssertParsedParameter("(number|list,string)=>void", "(number[]|list[],string[])=>void[]");
+        }
+        [TestMethod]
+        public void TestLambdaUnionArgsRestrictions()
+        {
+            AssertParsedParameter("(number[<(20)]|list[t(string)],string)=>void", 
+                "(number[<(20)]|list[t(string)],string[])=>void[]");
+        }
+        [TestMethod]
+        public void TestLambdaReturnType()
+        {
+            AssertParsedParameter("()=>number[]");
+        }
+        [TestMethod]
+        public void TestLambdaReturnTypeUnion()
+        {
+            AssertParsedParameter("()=>number[]|list[]");
+        }
+        [TestMethod]
+        public void TestLambdaReturnTypeRestriction()
+        {
+            AssertParsedParameter("()=>number[>(20)]|list[t(string)]");
+        }
+        [TestMethod]
+        public void TestLambdaReturnTypeRestrictionAndParameters()
+        {
+            AssertParsedParameter("(number[<(20)]|list[t(string)],string[])=>number[>(20)]|list[t(string)]");
+        }
+        [TestMethod]
+        public void TestLambdaReturnTypeRestrictionAndParametersNoEnv()
+        {
+            AssertParsedParameter("(number[<(20)]|list[t(string)],string[])~>number[>(20)]|list[t(string)]",
+                "(number[<(20)]|list[t(string)],string[])!~>number[>(20)]|list[t(string)]");
+        }
+        [TestMethod]
+        public void TestLambdaReturnTypeRestrictionAndParametersForceEnv()
+        {
+            AssertParsedParameter("(number[<(20)]|list[t(string)],string[])!=>number[>(20)]|list[t(string)]");
+        }
     }
 }
