@@ -1,4 +1,5 @@
 ﻿using IML.Evaluation;
+using IML.Exceptions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -52,6 +53,18 @@ namespace IMLTests
         private void AssertParsedType(string input)
         {
             AssertParsedType(input, input);
+        }
+        private void AssertParsedTypeException(string input)
+        {
+            try
+            {
+                AstType type = parser.ParseType(input);
+                Assert.Fail();
+            }
+            catch (InvalidParseException ex)
+            {
+                Assert.IsTrue(true);
+            }
         }
 
         [TestMethod]
@@ -168,6 +181,22 @@ namespace IMLTests
         public void TestParenWrappedTypeEntry()
         {
             AssertParsedType("(number)|string", "number[]|string[]");
+        }
+
+        [TestMethod]
+        public void TestImbalancedBracketsException()
+        {
+            AssertParsedTypeException("(number)|(string");
+        }
+        [TestMethod]
+        public void TestImbalancedBracketsException2()
+        {
+            AssertParsedTypeException("(number=>void");
+        }
+        [TestMethod]
+        public void TestImbalancedBracketsException3()
+        {
+            AssertParsedTypeException("list[list[list[number[]]]");
         }
     }
 }

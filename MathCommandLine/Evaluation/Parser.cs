@@ -342,21 +342,28 @@ namespace IML.Evaluation
         }
         public AstType ParseType(string typeStr)
         {
-            if (IsParenWrapped(typeStr))
+            try
             {
-                return ParseType(typeStr.SubstringBetween(1, typeStr.Length - 1));
+                if (IsParenWrapped(typeStr))
+                {
+                    return ParseType(typeStr.SubstringBetween(1, typeStr.Length - 1));
+                }
+                // typeStr can have unions and restrictions to process
+                // Split the type on pipe (excluding things in brackets [] to avoid types provided to restrictions)
+                string[] types = SplitByDelimiter(typeStr, TYPE_UNION_DELIMITER,
+                    TYPE_RESTRICTIONS_WRAPPERS, LAMBDA_TYPE_PARAM_WRAPPERS);
+                // Now for each of these, we need to parse out the datatype + restrictions
+                List<AstTypeEntry> entries = new List<AstTypeEntry>();
+                for (int i = 0; i < types.Length; i++)
+                {
+                    entries.Add(ParseTypeEntry(types[i]));
+                }
+                return new AstType(entries);
             }
-            // typeStr can have unions and restrictions to process
-            // Split the type on pipe (excluding things in brackets [] to avoid types provided to restrictions)
-            string[] types = SplitByDelimiter(typeStr, TYPE_UNION_DELIMITER, 
-                TYPE_RESTRICTIONS_WRAPPERS, LAMBDA_TYPE_PARAM_WRAPPERS);
-            // Now for each of these, we need to parse out the datatype + restrictions
-            List<AstTypeEntry> entries = new List<AstTypeEntry>();
-            for (int i = 0; i < types.Length; i++)
+            catch (Exception ex)
             {
-                entries.Add(ParseTypeEntry(types[i]));
+                throw new InvalidParseException(typeStr);
             }
-            return new AstType(entries);
         }
         private AstTypeEntry ParseTypeEntry(string entryStr)
         {
