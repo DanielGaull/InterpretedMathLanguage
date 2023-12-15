@@ -7,6 +7,7 @@ namespace IML.Evaluation
 {
     public class AstType
     {
+        // All the entries that are union'ed together
         public List<AstTypeEntry> Entries { get; private set; }
 
         public AstType(List<AstTypeEntry> entries)
@@ -17,23 +18,23 @@ namespace IML.Evaluation
         public static readonly AstType Any =
             new AstType(new List<AstTypeEntry>()
             {
-                new AstTypeEntry("any", new List<AstTypeRestriction>())
+                new AstTypeEntry("any", new List<AstType>())
             });
     }
     public class AstTypeEntry
     {
         public string DataTypeName { get; private set; }
-        public List<AstTypeRestriction> Restrictions { get; private set; }
+        public List<AstType> Generics { get; private set; }
 
-        public AstTypeEntry(string dataTypeName, List<AstTypeRestriction> restrictions)
+        public AstTypeEntry(string dataTypeName, List<AstType> generics)
         {
             DataTypeName = dataTypeName;
-            Restrictions = restrictions;
+            Generics = generics;
         }
 
         public static AstTypeEntry Simple(string name)
         {
-            return new AstTypeEntry(name, new List<AstTypeRestriction>());
+            return new AstTypeEntry(name, new List<AstType>());
         }
     }
     public class LambdaAstTypeEntry : AstTypeEntry
@@ -47,7 +48,7 @@ namespace IML.Evaluation
         public bool IsPure { get; private set; }
 
         public LambdaAstTypeEntry(AstType returnType, List<AstType> argTypes, LambdaEnvironmentType envType, bool isPure)
-            : base("function", new List<AstTypeRestriction>())
+            : base("function", new List<AstType>())
         {
             ReturnType = returnType;
             ArgTypes = argTypes;
@@ -60,47 +61,6 @@ namespace IML.Evaluation
             ForceEnvironment, // Ex. ()!=>{}
             ForceNoEnvironment, // Ex. ()!~>{}
             AllowAny, // Ex. ()=>{}
-        }
-    }
-
-    public class AstTypeRestriction
-    {
-        public string Name { get; private set; }
-        public List<Argument> Args { get; private set; }
-
-        public AstTypeRestriction(string name, List<Argument> args)
-        {
-            Name = name;
-            Args = args;
-        }
-
-        public class Argument
-        {
-            public RestrictionArgumentType ArgType { get; private set; }
-            public double NumberValue { get; private set; }
-            public string StringValue { get; private set; }
-            public AstType TypeValue { get; private set; }
-
-            private Argument(RestrictionArgumentType type, double num, string str, AstType t)
-            {
-                ArgType = type;
-                NumberValue = num;
-                StringValue = str;
-                TypeValue = t;
-            }
-
-            public static Argument Number(double v)
-            {
-                return new Argument(RestrictionArgumentType.Number, v, null, null);
-            }
-            public static Argument String(string v)
-            {
-                return new Argument(RestrictionArgumentType.String, 0, v, null);
-            }
-            public static Argument Type(AstType v)
-            {
-                return new Argument(RestrictionArgumentType.Type, 0, null, v);
-            }
         }
     }
 }

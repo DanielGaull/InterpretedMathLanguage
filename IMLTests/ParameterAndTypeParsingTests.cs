@@ -65,54 +65,40 @@ namespace IMLTests
             AssertParsedParameter("value:number|string", "value:number[]|string[]");
         }
         [TestMethod]
-        public void TestSimpleSingleRestriction()
+        public void TestSimpleSingleGeneric()
         {
-            AssertParsedParameter("value:number[%]", "value:number[%()]");
+            AssertParsedParameter("value:list[number]", "value:list[number[]]");
         }
         [TestMethod]
-        public void TestSimpleSingleRestrictionArg()
+        public void TestSimpleDoubleGeneric()
         {
-            AssertParsedParameter("value:number[<(5)]");
+            AssertParsedParameter("value:tuple[number[],number[]]");
         }
         [TestMethod]
-        public void TestSimpleDoubleRestrictionArg()
+        public void TestUnionDoubleGeneric()
         {
-            AssertParsedParameter("value:number[<(5),>(0)]");
+            AssertParsedParameter("value:tuple[number[],number[]]|list[string[]]");
         }
         [TestMethod]
-        public void TestUnionDoubleRestrictionArg()
+        public void TestNestedGeneric()
         {
-            AssertParsedParameter("value:number[<(5),>(0)]|string[l(5)]");
+            AssertParsedParameter("value:list[list[boolean]]", "value:list[list[boolean[]]]");
         }
         [TestMethod]
-        public void TestSimpleStringArgRestriction()
+        public void TestUnionNestedGeneric()
         {
-            AssertParsedParameter("value:number[v(\"hello\")]");
+            AssertParsedParameter("value:list[list[boolean]]|list[list[string]]", 
+                "value:list[list[boolean[]]]|list[list[string[]]]");
         }
         [TestMethod]
-        public void TestUnionStringArgRestriction()
+        public void TestTriplyNestedGeneric()
         {
-            AssertParsedParameter("value:number[v(\"hello\")]|string[like(\"([a-b])*\")]");
+            AssertParsedParameter("value:list[list[list[boolean[]]]]");
         }
         [TestMethod]
-        public void TestSimpleTypeArgRestriction()
+        public void TestQuadruplyNestedGeneric()
         {
-            AssertParsedParameter("value:list[t(number[])]");
-        }
-        [TestMethod]
-        public void TestUnionTypeArgRestriction()
-        {
-            AssertParsedParameter("value:list[t(number[]|string[])]");
-        }
-        [TestMethod]
-        public void TestUnionTypeArgWithRestriction()
-        {
-            AssertParsedParameter("value:list[t(number[>(0)]|string[])]");
-        }
-        [TestMethod]
-        public void TestNestedUnionTypeArgWithRestriction()
-        {
-            AssertParsedParameter("value:list[t(number[>(0)]|list[t(boolean[])])]");
+            AssertParsedParameter("value:list[list[list[list[boolean[]]]]]");
         }
 
         [TestMethod]
@@ -136,10 +122,10 @@ namespace IMLTests
             AssertParsedType("(number|list,string)=>void", "(number[]|list[],string[])=>void[]");
         }
         [TestMethod]
-        public void TestLambdaUnionArgsRestrictions()
+        public void TestLambdaUnionArgsGenerics()
         {
-            AssertParsedType("(number[<(20)]|list[t(string)],string)=>void", 
-                "(number[<(20)]|list[t(string[])],string[])=>void[]");
+            AssertParsedType("(number|list[string],string)=>void", 
+                "(number[]|list[string[]],string[])=>void[]");
         }
         [TestMethod]
         public void TestLambdaReturnType()
@@ -152,25 +138,25 @@ namespace IMLTests
             AssertParsedType("()=>number[]|list[]");
         }
         [TestMethod]
-        public void TestLambdaReturnTypeRestriction()
+        public void TestLambdaReturnTypeGeneric()
         {
-            AssertParsedType("()=>number[>(20)]|list[t(string[])]");
+            AssertParsedType("()=>number[]|list[string[]]");
         }
         [TestMethod]
-        public void TestLambdaReturnTypeRestrictionAndParameters()
+        public void TestLambdaReturnTypeGenericAndParameters()
         {
-            AssertParsedType("(number[<(20)]|list[t(string[])],string[])=>number[>(20)]|list[t(string[])]");
+            AssertParsedType("(number[]|list[string[]],string[])=>number[]|list[string[]]");
         }
         [TestMethod]
-        public void TestLambdaReturnTypeRestrictionAndParametersNoEnv()
+        public void TestLambdaReturnTypeGenericAndParametersNoEnv()
         {
-            AssertParsedType("(number[<(20)]|list[t(string)],string[])~>number[>(20)]|list[t(string)]",
-                "(number[<(20)]|list[t(string[])],string[])!~>number[>(20)]|list[t(string[])]");
+            AssertParsedType("(number|list[string],string)~>number|list[string]",
+                "(number[]|list[string[]],string[])!~>number[]|list[string[]]");
         }
         [TestMethod]
-        public void TestLambdaReturnTypeRestrictionAndParametersForceEnv()
+        public void TestLambdaReturnTypeGenericAndParametersForceEnv()
         {
-            AssertParsedType("(number[<(20)]|list[t(string[])],string[])!=>number[>(20)]|list[t(string[])]");
+            AssertParsedType("(number[]|list[string[]],string[])!=>number[]|list[string[]]");
         }
     }
 }
