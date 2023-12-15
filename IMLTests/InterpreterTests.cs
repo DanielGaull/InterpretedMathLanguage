@@ -74,7 +74,7 @@ namespace IMLTests
         [TestMethod]
         public void TestSimpleReference()
         {
-            AssertInterpreterValues("&true", "(ref) <ref -> (boolean) TRUE>");
+            AssertInterpreterValues("&true", "(ref) <ref -> (boolean) true>");
         }
         [TestMethod]
         public void TestSimpleList()
@@ -183,7 +183,7 @@ namespace IMLTests
         [TestMethod]
         public void TestComplextShortenedLambda()
         {
-            AssertInterpreterValues("_do({[var x=false],[x]})", "(boolean) FALSE");
+            AssertInterpreterValues("_do({[var x=false],[x]})", "(boolean) false");
         }
         [TestMethod]
         public void TestStringMemberAccess()
@@ -215,12 +215,12 @@ namespace IMLTests
         [TestMethod]
         public void TestListRemoveFail()
         {
-            AssertInterpreterValues("_do({[var list={1,2,3}],[list.remove(0)]})", "(boolean) FALSE");
+            AssertInterpreterValues("_do({[var list={1,2,3}],[list.remove(0)]})", "(boolean) false");
         }
         [TestMethod]
         public void TestListRemoveSucceed()
         {
-            AssertInterpreterValues("_do({[var list={1,2,3}],[list.remove(2)]})", "(boolean) TRUE");
+            AssertInterpreterValues("_do({[var list={1,2,3}],[list.remove(2)]})", "(boolean) true");
             AssertInterpreterValues("_do({[var list={1,2,3}],[list.remove(2)],[list]})", "(list) { 1, 3 }");
         }
         [TestMethod]

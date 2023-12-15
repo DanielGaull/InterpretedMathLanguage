@@ -29,28 +29,40 @@ namespace IML.CoreDataTypes
         {
         }
 
+        public const string ANY_TYPE_NAME = "any";
+        public const string NUMBER_TYPE_NAME = "number";
+        public const string LIST_TYPE_NAME = "list";
+        public const string FUNCTION_TYPE_NAME = "function";
+        public const string BOOLEAN_TYPE_NAME = "boolean";
+        public const string TYPE_TYPE_NAME = "type";
+        public const string REF_TYPE_NAME = "ref";
+        public const string ERROR_TYPE_NAME = "error";
+        public const string STRING_TYPE_NAME = "string";
+        public const string VOID_TYPE_NAME = "void";
+        public const string NULL_TYPE_NAME = "null";
+
         public static readonly MDataType Any = 
-            new MDataType(ANY_TYPE_ID, "any", new List<MTypeRestrictionDefinition>());
+            new MDataType(ANY_TYPE_ID, ANY_TYPE_NAME, new List<MTypeRestrictionDefinition>());
         public static readonly MDataType Number =
-            new MDataType("number", new List<MTypeRestrictionDefinition>());
+            new MDataType(NUMBER_TYPE_NAME, new List<MTypeRestrictionDefinition>());
         public static readonly MDataType List =
-            new MDataType("list", new List<MTypeRestrictionDefinition>());
+            new MDataType(LIST_TYPE_NAME, new List<MTypeRestrictionDefinition>());
         public static readonly MDataType Function =
-            new MDataType("function", new List<MTypeRestrictionDefinition>());
+            new MDataType(FUNCTION_TYPE_NAME, new List<MTypeRestrictionDefinition>());
         public static readonly MDataType Boolean =
-            new MDataType("boolean", new List<MTypeRestrictionDefinition>());
+            new MDataType(BOOLEAN_TYPE_NAME, new List<MTypeRestrictionDefinition>());
         public static readonly MDataType Type =
-            new MDataType("type", new List<MTypeRestrictionDefinition>());
+            new MDataType(TYPE_TYPE_NAME, new List<MTypeRestrictionDefinition>());
         public static readonly MDataType Reference =
-            new MDataType("ref", new List<MTypeRestrictionDefinition>());
+            new MDataType(REF_TYPE_NAME, new List<MTypeRestrictionDefinition>());
         public static readonly MDataType Error =
-            new MDataType("error", new List<MTypeRestrictionDefinition>());
+            new MDataType(ERROR_TYPE_NAME, new List<MTypeRestrictionDefinition>());
         public static readonly MDataType String =
-            new MDataType("string", new List<MTypeRestrictionDefinition>());
+            new MDataType(STRING_TYPE_NAME, new List<MTypeRestrictionDefinition>());
         public static readonly MDataType Null =
-            new MDataType("null", new List<MTypeRestrictionDefinition>());
+            new MDataType(NULL_TYPE_NAME, new List<MTypeRestrictionDefinition>());
         public static readonly MDataType Void =
-            new MDataType("void", new List<MTypeRestrictionDefinition>());
+            new MDataType(VOID_TYPE_NAME, new List<MTypeRestrictionDefinition>());
 
         public bool MatchesType(MDataType other)
         {

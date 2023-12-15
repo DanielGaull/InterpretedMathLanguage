@@ -18,7 +18,7 @@ namespace IML.Evaluation
         public static readonly AstType Any =
             new AstType(new List<AstTypeEntry>()
             {
-                new AstTypeEntry("any", new List<AstType>())
+                new AstTypeEntry(MDataType.ANY_TYPE_NAME, new List<AstType>())
             });
     }
     public class AstTypeEntry
@@ -46,14 +46,17 @@ namespace IML.Evaluation
         public List<AstType> ArgTypes { get; private set; }
         public LambdaEnvironmentType EnvironmentType { get; private set; }
         public bool IsPure { get; private set; }
+        public bool IsLastVarArgs { get; private set; }
 
-        public LambdaAstTypeEntry(AstType returnType, List<AstType> argTypes, LambdaEnvironmentType envType, bool isPure)
+        public LambdaAstTypeEntry(AstType returnType, List<AstType> argTypes, LambdaEnvironmentType envType, bool isPure,
+            bool isLastVarArgs)
             : base("function", new List<AstType>())
         {
             ReturnType = returnType;
             ArgTypes = argTypes;
             EnvironmentType = envType;
             IsPure = isPure;
+            IsLastVarArgs = isLastVarArgs;
         }
 
         public enum LambdaEnvironmentType

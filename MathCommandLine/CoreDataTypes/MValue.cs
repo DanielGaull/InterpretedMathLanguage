@@ -236,11 +236,11 @@ namespace IML.Structure
             {
                 if (BoolValue)
                 {
-                    return "TRUE";
+                    return "true";
                 }
                 else
                 {
-                    return "FALSE";
+                    return "false";
                 }
             }
             else if (DataType.MatchesTypeExactly(MDataType.Null))

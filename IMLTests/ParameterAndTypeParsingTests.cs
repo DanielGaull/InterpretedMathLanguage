@@ -198,5 +198,27 @@ namespace IMLTests
         {
             AssertParsedTypeException("list[list[list[number[]]]");
         }
+
+        // Varargs tests
+        [TestMethod]
+        public void TestSimpleVarargs()
+        {
+            AssertParsedType("(list[number[]]...)=>void[]");
+        }
+        [TestMethod]
+        public void TestMultipleVarargs()
+        {
+            AssertParsedType("(number[],string[],list[number[]]...)=>void[]");
+        }
+        [TestMethod]
+        public void TestVarargsTooEarlyFails()
+        {
+            AssertParsedTypeException("(number[],string[]...,list[number])=>void[]");
+        }
+        [TestMethod]
+        public void TestVarargsNotAListFail()
+        {
+            AssertParsedTypeException("(number[],string[]...)=>void[]");
+        }
     }
 }

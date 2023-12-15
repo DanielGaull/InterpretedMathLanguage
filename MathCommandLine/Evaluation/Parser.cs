@@ -68,6 +68,7 @@ namespace IML.Evaluation
         private const char LAMBDA_TYPE_REQ_ENV_CHARACTER = '!'; // Character for requiring lambda to create env
         private const string LAMBDA_TYPE_PARAM_WRAPPERS = "()";
         private const char LAMBDA_TYPE_PARAM_DELMITER = ',';
+        private const string LAMBDA_TYPE_VARARGS_SYMBOL = "...";
         private readonly Regex LAMBDA_TYPE_REGEX = 
             new Regex($"{LAMBDA_TYPE_PARAM_WRAPPERS[0]}(.*){LAMBDA_TYPE_PARAM_WRAPPERS[1]}" + 
                 $"[{LAMBDA_TYPE_REQ_ENV_CHARACTER}]?[{LAMBDA_TYPE_NO_ENVIRONMENT_LINE}|{LAMBDA_TYPE_CREATES_ENVIRONMENT_LINE}]" +
@@ -410,9 +411,35 @@ namespace IML.Evaluation
             string[] paramTypeStrings = SplitByDelimiter(args, LAMBDA_TYPE_PARAM_DELMITER,
                 LAMBDA_TYPE_PARAM_WRAPPERS, TYPE_RESTRICTIONS_ARGS_WRAPPERS, TYPE_RESTRICTIONS_WRAPPERS);
             List<AstType> parameterTypes = new List<AstType>();
+            bool isVarArgs = false;
             for (int i = 0; i < paramTypeStrings.Length; i++)
             {
-                parameterTypes.Add(ParseType(paramTypeStrings[i]));
+                paramTypeStrings[i] = paramTypeStrings[i].Trim();
+                if (paramTypeStrings[i].EndsWith(LAMBDA_TYPE_VARARGS_SYMBOL))
+                {
+                    // Better be the last parameter
+                    if (i + 1 < paramTypeStrings.Length)
+                    {
+                        // Trying to use varargs with the not-last argument; illegal
+                        // Prevent this by throwing an exception
+                        throw new InvalidParseException("Varargs can only be used with the last parameter", str);
+                    }
+                    // Ok, now parse the type and make sure it's a list of something
+                    AstType type = ParseType(paramTypeStrings[i]
+                        .SubstringBetween(0, paramTypeStrings[i].Length - LAMBDA_TYPE_VARARGS_SYMBOL.Length));
+                    if (!type.Entries.All(e => e.DataTypeName == MDataType.LIST_TYPE_NAME))
+                    {
+                        // We have an entry for the type of the varargs that is not a list
+                        throw new InvalidParseException("Varargs must be of type list or a union type of lists", str);
+                    }
+                    // Okay, if we're here then it was legal, so lets add the varargs
+                    parameterTypes.Add(type);
+                    isVarArgs = true;
+                }
+                else
+                {
+                    parameterTypes.Add(ParseType(paramTypeStrings[i]));
+                }
             }
             // Ok, now handle the "arrow" and cover any special behaviors here
             // Start at end paren in case any lambdas in the params (can't use LastIndexOf either since there could
@@ -467,7 +494,7 @@ namespace IML.Evaluation
             string returnTypeString = str.Substring(arrowTipIndex + 1);
             AstType returnType = ParseType(returnTypeString);
             // Now we can construct this thing and return it
-            return new LambdaAstTypeEntry(returnType, parameterTypes, envType, false);
+            return new LambdaAstTypeEntry(returnType, parameterTypes, envType, false, isVarArgs);
         }
         #endregion
 
@@ -519,6 +546,10 @@ namespace IML.Evaluation
                 if (i + 1 < entry.ArgTypes.Count)
                 {
                     builder.Append(LAMBDA_TYPE_PARAM_DELMITER);
+                }
+                else if (entry.IsLastVarArgs)
+                {
+                    builder.Append(LAMBDA_TYPE_VARARGS_SYMBOL);
                 }
             }
             builder.Append(LAMBDA_TYPE_PARAM_WRAPPERS[1]);
