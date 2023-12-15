@@ -158,5 +158,16 @@ namespace IMLTests
         {
             AssertParsedType("(number[]|list[string[]],string[])!=>number[]|list[string[]]");
         }
+
+        [TestMethod]
+        public void TestParenWrappedType()
+        {
+            AssertParsedType("(number|string)", "number[]|string[]");
+        }
+        [TestMethod]
+        public void TestParenWrappedTypeEntry()
+        {
+            AssertParsedType("(number)|string", "number[]|string[]");
+        }
     }
 }
