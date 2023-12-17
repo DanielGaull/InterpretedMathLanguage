@@ -18,19 +18,19 @@ namespace IML.Functions
             Name = name;
             isNotEmpty = true;
         }
-        public MParameter(MDataTypeRestrictionEntry singleEntry, string name)
+        public MParameter(MDataTypeEntry singleEntry, string name)
         {
             Type = new MType(singleEntry);
             Name = name;
             isNotEmpty = true;
         }
-        public MParameter(string name, params MDataTypeRestrictionEntry[] entries)
+        public MParameter(string name, params MDataTypeEntry[] entries)
         {
             Type = new MType(entries);
             Name = name;
             isNotEmpty = true;
         }
-        public MParameter(string name, List<MDataTypeRestrictionEntry> entries)
+        public MParameter(string name, List<MDataTypeEntry> entries)
         {
             Type = new MType(entries);
             Name = name;

@@ -11,27 +11,27 @@ namespace IML.CoreDataTypes
     // This includes unions and restrictions
     public class MType
     {
-        private List<MDataTypeRestrictionEntry> entries;
+        private List<MDataTypeEntry> entries;
 
-        public List<MDataTypeRestrictionEntry> Entries
+        public List<MDataTypeEntry> Entries
         {
             get
             {
-                return new List<MDataTypeRestrictionEntry>(entries);
+                return new List<MDataTypeEntry>(entries);
             }
         }
 
-        public MType(List<MDataTypeRestrictionEntry> entries)
+        public MType(List<MDataTypeEntry> entries)
         {
-            this.entries = new List<MDataTypeRestrictionEntry>(entries);
+            this.entries = new List<MDataTypeEntry>(entries);
         }
-        public MType(params MDataTypeRestrictionEntry[] entries)
+        public MType(params MDataTypeEntry[] entries)
         {
-            this.entries = new List<MDataTypeRestrictionEntry>(entries);
+            this.entries = new List<MDataTypeEntry>(entries);
         }
-        public MType(MDataTypeRestrictionEntry entry)
+        public MType(MDataTypeEntry entry)
         {
-            entries = new List<MDataTypeRestrictionEntry>();
+            entries = new List<MDataTypeEntry>();
             entries.Add(entry);
         }
 
@@ -39,7 +39,7 @@ namespace IML.CoreDataTypes
         {
             for (int i = 0; i < entries.Count; i++)
             {
-                if (entries[i].TypeDefinition.MatchesType(value.DataType))
+                if (entries[i].DataType.MatchesType(value.DataType))
                 {
                     bool failsRestrictions = false;
                     foreach (MTypeRestriction rest in entries[i].TypeRestrictions)

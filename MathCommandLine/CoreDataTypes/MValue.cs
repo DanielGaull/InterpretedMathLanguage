@@ -21,9 +21,9 @@ namespace IML.Structure
         public MBoxedValue RefValue; // For the reference value
         public bool BoolValue; // For the boolean type
         public Dictionary<string, MField> DataValues; // The Data Values for composite types (maps name => value)
-        public MDataType DataType;
+        public MDataTypeEntry DataType;
 
-        public MValue(MDataType dataType, double numberValue, MList listValue, MClosure closureValue, decimal bigDecimalValue, 
+        public MValue(MDataTypeEntry dataType, double numberValue, MList listValue, MClosure closureValue, decimal bigDecimalValue, 
             long bigIntValue, MType typeValue, MBoxedValue refValue, bool boolValue, Dictionary<string, MField> dataValues)
         {
             DataType = dataType;
@@ -40,7 +40,7 @@ namespace IML.Structure
 
         public static MValue Number(double numberValue)
         {
-            return new MValue(MDataType.Number, numberValue, MList.Empty, MClosure.Empty, 0, 0, null, null, 
+            return new MValue(MDataTypeEntry.Number, numberValue, MList.Empty, MClosure.Empty, 0, 0, null, null, 
                 false, new Dictionary<string, MField>());
         }
         public static MValue List(MList list)
@@ -55,30 +55,32 @@ namespace IML.Structure
         }
         public static MValue Type(MType type)
         {
-            return new MValue(MDataType.Type, 0, MList.Empty, MClosure.Empty, 0, 0, type, null, false,
+            return new MValue(MDataTypeEntry.Type, 0, MList.Empty, MClosure.Empty, 0, 0, type, null, false,
                 new Dictionary<string, MField>());
         }
         public static MValue Reference(MBoxedValue refValue)
         {
-            return new MValue(MDataType.Reference, 0, MList.Empty, MClosure.Empty, 0, 0, null, refValue, 
+            MValue v = refValue.GetValue();
+            MType type = new MType(v.DataType);
+            return new MValue(MDataTypeEntry.Reference(type), 0, MList.Empty, MClosure.Empty, 0, 0, null, refValue, 
                 false, new Dictionary<string, MField>());
         }
         public static MValue Bool(bool boolValue)
         {
-            return new MValue(MDataType.Boolean, 0, MList.Empty, MClosure.Empty, 0, 0, null, null,
+            return new MValue(MDataTypeEntry.Boolean, 0, MList.Empty, MClosure.Empty, 0, 0, null, null,
                 boolValue, new Dictionary<string, MField>());
         }
         public static MValue Void()
         {
-            return new MValue(MDataType.Void, 0, MList.Empty, MClosure.Empty, 0, 0, null, null, 
+            return new MValue(MDataTypeEntry.Void, 0, MList.Empty, MClosure.Empty, 0, 0, null, null, 
                 false, null);
         }
         public static MValue Null()
         {
-            return new MValue(MDataType.Null, 0, MList.Empty, MClosure.Empty, 0, 0, null, null,
+            return new MValue(MDataTypeEntry.Null, 0, MList.Empty, MClosure.Empty, 0, 0, null, null,
                 false, null);
         }
-        public static MValue Composite(MDataType type, Dictionary<string, MField> values)
+        public static MValue Composite(MDataTypeEntry type, Dictionary<string, MField> values)
         {
             return new MValue(type, 0, MList.Empty, MClosure.Empty, 0, 0, null, null, false, values);
         }
@@ -105,7 +107,7 @@ namespace IML.Structure
                 { "message", new MField(String(message), MField.PUBLIC, MField.PRIVATE) },
                 { "data", new MField(List(data), MField.PUBLIC, MField.PRIVATE) }
             };
-            return Composite(MDataType.Error, values);
+            return Composite(MDataTypeEntry.Error, values);
         }
         public static MValue Error(ErrorCodes code, string message)
         {
@@ -125,7 +127,7 @@ namespace IML.Structure
             {
                 { "chars", new MField(List(value), MField.PUBLIC, MField.PRIVATE) }
             };
-            return Composite(MDataType.String, values);
+            return Composite(MDataTypeEntry.String, values);
         }
 
         public MValue GetValueByName(string name, bool isSelfAccessing)
@@ -137,7 +139,7 @@ namespace IML.Structure
                     MField field = DataValues[name];
                     if (!isSelfAccessing && field.ReadPermission != MField.PUBLIC)
                     {
-                        if (DataType == MDataType.Error)
+                        if (DataType == MDataTypeEntry.Error)
                         {
                             return this;
                         }
@@ -147,7 +149,7 @@ namespace IML.Structure
                     }
                     return field.Value;
                 }
-                if (DataType == MDataType.Error)
+                if (DataType == MDataTypeEntry.Error)
                 {
                     return this;
                 }
@@ -166,7 +168,7 @@ namespace IML.Structure
                     MField field = DataValues[name];
                     if (!isSelfAccessing && field.WritePermission != MField.PUBLIC)
                     {
-                        if (DataType == MDataType.Error)
+                        if (DataType == MDataTypeEntry.Error)
                         {
                             return this;
                         }
@@ -177,7 +179,7 @@ namespace IML.Structure
                     field.SetValue(value);
                     return value;
                 }
-                if (DataType == MDataType.Error)
+                if (DataType == MDataTypeEntry.Error)
                 {
                     return this;
                 }
@@ -190,9 +192,9 @@ namespace IML.Structure
 
         public bool IsTruthy()
         {
-            return !(DataType == MDataType.Boolean && !BoolValue) &&
-                DataType != MDataType.Null &&
-                DataType != MDataType.Void;
+            return !(DataType == MDataTypeEntry.Boolean && !BoolValue) &&
+                DataType != MDataTypeEntry.Null &&
+                DataType != MDataTypeEntry.Void;
         }
 
         public override string ToString()
@@ -201,38 +203,38 @@ namespace IML.Structure
         }
         public string ToShortString()
         {
-            if (DataType.MatchesTypeExactly(MDataType.Number))
+            if (DataType.DataType.MatchesTypeExactly(MDataType.Number))
             {
                 return NumberValue.ToString();
             }
-            else if (DataType.MatchesTypeExactly(MDataType.List))
+            else if (DataType.DataType.MatchesTypeExactly(MDataType.List))
             {
                 return ListValue.ToString();
             }
-            else if (DataType.MatchesTypeExactly(MDataType.Function))
+            else if (DataType.DataType.MatchesTypeExactly(MDataType.Function))
             {
                 return ClosureValue.ToString();
             }
-            else if (DataType.MatchesTypeExactly(MDataType.Type))
+            else if (DataType.DataType.MatchesTypeExactly(MDataType.Type))
             {
                 return TypeValue.ToString();
             }
-            else if (DataType.MatchesTypeExactly(MDataType.Reference))
+            else if (DataType.DataType.MatchesTypeExactly(MDataType.Reference))
             {
                 return "<ref -> " + RefValue.ToString() + ">";
             }
-            else if (DataType.MatchesTypeExactly(MDataType.String))
+            else if (DataType.DataType.MatchesTypeExactly(MDataType.String))
             {
                 StringBuilder builder = new StringBuilder("\"");
                 builder.Append(Utilities.MListToString(GetValueByName("chars", true).ListValue));
                 builder.Append("\"");
                 return builder.ToString();
             }
-            else if (DataType.MatchesTypeExactly(MDataType.Void))
+            else if (DataType.DataType.MatchesTypeExactly(MDataType.Void))
             {
                 return "void";
             }
-            else if (DataType.MatchesTypeExactly(MDataType.Boolean))
+            else if (DataType.DataType.MatchesTypeExactly(MDataType.Boolean))
             {
                 if (BoolValue)
                 {
@@ -243,11 +245,11 @@ namespace IML.Structure
                     return "false";
                 }
             }
-            else if (DataType.MatchesTypeExactly(MDataType.Null))
+            else if (DataType.DataType.MatchesTypeExactly(MDataType.Null))
             {
                 return "null";
             }
-            else if (DataType.MatchesTypeExactly(MDataType.Error))
+            else if (DataType.DataType.MatchesTypeExactly(MDataType.Error))
             {
                 StringBuilder builder = new StringBuilder("Error: #");
                 MValue codeValue = GetValueByName("code", true);
@@ -282,7 +284,7 @@ namespace IML.Structure
         }
         public string ToLongString()
         {
-            return "(" + DataType.Name + ") " + ToShortString();
+            return "(" + DataType.DataType.Name + ") " + ToShortString();
         }
 
         public static bool operator ==(MValue v1, MValue v2)
@@ -292,7 +294,7 @@ namespace IML.Structure
             {
                 return false;
             }
-            MDataType dt = v1.DataType;
+            MDataType dt = v1.DataType.DataType;
             if (dt.MatchesTypeExactly(MDataType.Number))
             {
                 return v1.NumberValue == v2.NumberValue;
@@ -359,7 +361,7 @@ namespace IML.Structure
             {
                 {
                     "get",
-                    new MField(Closure(new MClosure(new MParameters(new MParameter(MDataTypeRestrictionEntry.Number, "index")), 
+                    new MField(Closure(new MClosure(new MParameters(new MParameter(MDataTypeEntry.Number, "index")), 
                         MEnvironment.Empty, 
                         (args, env, interpreter) => {
                             int index = (int) args[0].Value.NumberValue;
@@ -373,7 +375,7 @@ namespace IML.Structure
                 },
                 {
                     "index",
-                    new MField(Closure(new MClosure(new MParameters(new MParameter(MDataTypeRestrictionEntry.Any, "value")),
+                    new MField(Closure(new MClosure(new MParameters(new MParameter(MDataTypeEntry.Any, "value")),
                         MEnvironment.Empty,
                         (args, env, interpreter) => {
                             MValue value = args[0].Value;
@@ -384,8 +386,8 @@ namespace IML.Structure
                 {
                     "indexc",
                     new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(MDataTypeRestrictionEntry.Any, "element"),
-                            new MParameter(MDataTypeRestrictionEntry.Function, "equality_evaluator")),
+                            new MParameter(MDataTypeEntry.Any, "element"),
+                            new MParameter(MDataTypeEntry.Function, "equality_evaluator")),
                         MEnvironment.Empty,
                         (args, env, interpreter) => {
                             return Number(MList.IndexOfCustom(list, args.Get(0).Value,
@@ -403,7 +405,8 @@ namespace IML.Structure
                 },
                 {
                     "map",
-                    new MField(Closure(new MClosure(new MParameters(new MParameter(MDataTypeRestrictionEntry.Function, "mapper")),
+                    new MField(Closure(new MClosure(new MParameters(
+                        new MParameter(MDataTypeEntry.Function, "mapper")),
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
@@ -414,8 +417,8 @@ namespace IML.Structure
                 {
                     "reduce",
                     new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(MDataTypeRestrictionEntry.Function, "reducer"),
-                            new MParameter(MDataTypeRestrictionEntry.Any, "init_value")),
+                            new MParameter(MDataTypeEntry.Function, "reducer"),
+                            new MParameter(MDataTypeEntry.Any, "init_value")),
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
@@ -426,7 +429,7 @@ namespace IML.Structure
                 {
                     "add",
                     new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(MDataTypeRestrictionEntry.Any, "item")),
+                            new MParameter(MDataTypeEntry.Any, "item")),
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
@@ -437,8 +440,8 @@ namespace IML.Structure
                 {
                     "insert",
                     new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(MDataTypeRestrictionEntry.Any, "item"),
-                            new MParameter(MDataTypeRestrictionEntry.Number, "index")),
+                            new MParameter(MDataTypeEntry.Any, "item"),
+                            new MParameter(MDataTypeEntry.Number, "index")),
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
@@ -455,7 +458,7 @@ namespace IML.Structure
                 {
                     "removeAt",
                     new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(MDataTypeRestrictionEntry.Number, "index")),
+                            new MParameter(MDataTypeEntry.Number, "index")),
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
@@ -472,7 +475,7 @@ namespace IML.Structure
                 {
                     "remove",
                     new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(MDataTypeRestrictionEntry.Any, "value")),
+                            new MParameter(MDataTypeEntry.Any, "value")),
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
@@ -488,8 +491,8 @@ namespace IML.Structure
                 {
                     "removec",
                     new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(MDataTypeRestrictionEntry.Any, "value"),
-                            new MParameter(MDataTypeRestrictionEntry.Function, "equality_evaluator")),
+                            new MParameter(MDataTypeEntry.Any, "value"),
+                            new MParameter(MDataTypeEntry.Function, "equality_evaluator")),
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
@@ -506,7 +509,7 @@ namespace IML.Structure
                 {
                     "addAll",
                     new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(MDataTypeRestrictionEntry.List, "other")),
+                            new MParameter(MDataTypeEntry.List, "other")),
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
