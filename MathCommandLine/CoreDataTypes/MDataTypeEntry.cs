@@ -22,15 +22,15 @@ namespace IML.CoreDataTypes
         {
             return new MConcreteDataTypeEntry(MDataType.Reference, of);
         }
-        public static MConcreteDataTypeEntry Fuction(MType returnType, params MType[] paramTypes)
+        public static MConcreteDataTypeEntry Function(MType returnType, params MType[] paramTypes)
         {
             return new MFunctionDataTypeEntry(returnType, new List<MType>(paramTypes), new List<string>());
         }
-        public static MConcreteDataTypeEntry Fuction(MType returnType, List<MType> paramTypes)
+        public static MConcreteDataTypeEntry Function(MType returnType, List<MType> paramTypes)
         {
             return new MFunctionDataTypeEntry(returnType, paramTypes, new List<string>());
         }
-        public static MConcreteDataTypeEntry Fuction(MType returnType, List<MType> paramTypes, List<string> genericNames)
+        public static MConcreteDataTypeEntry Function(MType returnType, List<MType> paramTypes, List<string> genericNames)
         {
             return new MFunctionDataTypeEntry(returnType, paramTypes, genericNames);
         }
@@ -70,7 +70,7 @@ namespace IML.CoreDataTypes
             GenericNames = genericNames;
         }
     }
-    public class MGenericDataTypeEntry
+    public class MGenericDataTypeEntry : MDataTypeEntry
     {
         // A generic type that isn't resolved yet
         // Simply has a name

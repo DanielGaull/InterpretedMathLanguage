@@ -355,14 +355,15 @@ namespace IML.Structure
             return base.GetHashCode();
         }
 
-        private static Dictionary<string, MField> ListProperties(MList list)
+        private static Dictionary<string, MField> ListProperties(MList list, string listGenericName)
         {
+            MDataTypeEntry genericType = new MGenericDataTypeEntry(listGenericName);
             return new Dictionary<string, MField>()
             {
                 {
                     "get",
                     new MField(Closure(new MClosure(new MParameters(new MParameter(MDataTypeEntry.Number, "index")), 
-                        MEnvironment.Empty, 
+                        MEnvironment.Empty,
                         (args, env, interpreter) => {
                             int index = (int) args[0].Value.NumberValue;
                             int len = MList.Length(list);
@@ -375,7 +376,7 @@ namespace IML.Structure
                 },
                 {
                     "index",
-                    new MField(Closure(new MClosure(new MParameters(new MParameter(MDataTypeEntry.Any, "value")),
+                    new MField(Closure(new MClosure(new MParameters(new MParameter(genericType, "value")),
                         MEnvironment.Empty,
                         (args, env, interpreter) => {
                             MValue value = args[0].Value;
@@ -387,7 +388,8 @@ namespace IML.Structure
                     "indexc",
                     new MField(Closure(new MClosure(new MParameters(
                             new MParameter(MDataTypeEntry.Any, "element"),
-                            new MParameter(MDataTypeEntry.Function, "equality_evaluator")),
+                            new MParameter(MDataTypeEntry.Function(new MType(MDataTypeEntry.Any),
+                                new MType(genericType), new MType(genericType)), "equality_evaluator")),
                         MEnvironment.Empty,
                         (args, env, interpreter) => {
                             return Number(MList.IndexOfCustom(list, args.Get(0).Value,
@@ -404,7 +406,7 @@ namespace IML.Structure
                         })), 1, 0)
                 },
                 {
-                    "map",
+                    "map", // We need a generic here for the return type of the mapper
                     new MField(Closure(new MClosure(new MParameters(
                         new MParameter(MDataTypeEntry.Function, "mapper")),
                         MEnvironment.Empty,
@@ -415,7 +417,7 @@ namespace IML.Structure
                         })), 1, 0)
                 },
                 {
-                    "reduce",
+                    "reduce", // Need a generic here for return type of the reducer
                     new MField(Closure(new MClosure(new MParameters(
                             new MParameter(MDataTypeEntry.Function, "reducer"),
                             new MParameter(MDataTypeEntry.Any, "init_value")),
@@ -429,7 +431,7 @@ namespace IML.Structure
                 {
                     "add",
                     new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(MDataTypeEntry.Any, "item")),
+                            new MParameter(genericType, "item")),
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
@@ -440,7 +442,7 @@ namespace IML.Structure
                 {
                     "insert",
                     new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(MDataTypeEntry.Any, "item"),
+                            new MParameter(genericType, "item"),
                             new MParameter(MDataTypeEntry.Number, "index")),
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
@@ -475,7 +477,7 @@ namespace IML.Structure
                 {
                     "remove",
                     new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(MDataTypeEntry.Any, "value")),
+                            new MParameter(genericType, "value")),
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
@@ -491,8 +493,9 @@ namespace IML.Structure
                 {
                     "removec",
                     new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(MDataTypeEntry.Any, "value"),
-                            new MParameter(MDataTypeEntry.Function, "equality_evaluator")),
+                            new MParameter(genericType, "value"),
+                            new MParameter(MDataTypeEntry.Function(new MType(MDataTypeEntry.Any),
+                                new MType(genericType), new MType(genericType)), "equality_evaluator")),
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
@@ -509,7 +512,7 @@ namespace IML.Structure
                 {
                     "addAll",
                     new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(MDataTypeEntry.List, "other")),
+                            new MParameter(MDataTypeEntry.List(new MType(genericType)), "other")),
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
