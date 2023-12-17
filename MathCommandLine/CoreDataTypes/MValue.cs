@@ -21,9 +21,9 @@ namespace IML.Structure
         public MBoxedValue RefValue; // For the reference value
         public bool BoolValue; // For the boolean type
         public Dictionary<string, MField> DataValues; // The Data Values for composite types (maps name => value)
-        public MDataTypeEntry DataType;
+        public MConcreteDataTypeEntry DataType;
 
-        public MValue(MDataTypeEntry dataType, double numberValue, MList listValue, MClosure closureValue, decimal bigDecimalValue, 
+        public MValue(MConcreteDataTypeEntry dataType, double numberValue, MList listValue, MClosure closureValue, decimal bigDecimalValue, 
             long bigIntValue, MType typeValue, MBoxedValue refValue, bool boolValue, Dictionary<string, MField> dataValues)
         {
             DataType = dataType;
@@ -45,12 +45,12 @@ namespace IML.Structure
         }
         public static MValue List(MList list)
         {
-            return new MValue(MDataType.List, 0, list, MClosure.Empty, 0, 0, null, null, false,
+            return new MValue(MDataTypeEntry.List, 0, list, MClosure.Empty, 0, 0, null, null, false,
                 ListProperties(list));
         }
         public static MValue Closure(MClosure closure)
         {
-            return new MValue(MDataType.Function, 0, MList.Empty, closure, 0, 0, null, null, false,
+            return new MValue(MDataTypeEntry.Function, 0, MList.Empty, closure, 0, 0, null, null, false,
                 new Dictionary<string, MField>());
         }
         public static MValue Type(MType type)
@@ -80,7 +80,7 @@ namespace IML.Structure
             return new MValue(MDataTypeEntry.Null, 0, MList.Empty, MClosure.Empty, 0, 0, null, null,
                 false, null);
         }
-        public static MValue Composite(MDataTypeEntry type, Dictionary<string, MField> values)
+        public static MValue Composite(MConcreteDataTypeEntry type, Dictionary<string, MField> values)
         {
             return new MValue(type, 0, MList.Empty, MClosure.Empty, 0, 0, null, null, false, values);
         }

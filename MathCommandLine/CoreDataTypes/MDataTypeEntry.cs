@@ -6,31 +6,31 @@ namespace IML.CoreDataTypes
 {
     public abstract class MDataTypeEntry
     {
-        public static readonly MDataTypeEntry Any = new MConcreteDataTypeEntry(MDataType.Any);
-        public static readonly MDataTypeEntry Number = new MConcreteDataTypeEntry(MDataType.Number);
-        public static readonly MDataTypeEntry Boolean = new MConcreteDataTypeEntry(MDataType.Boolean);
-        public static readonly MDataTypeEntry String = new MConcreteDataTypeEntry(MDataType.String);
-        public static readonly MDataTypeEntry Type = new MConcreteDataTypeEntry(MDataType.Type);
-        public static readonly MDataTypeEntry Error = new MConcreteDataTypeEntry(MDataType.Error);
-        public static readonly MDataTypeEntry Void = new MConcreteDataTypeEntry(MDataType.Null);
-        public static readonly MDataTypeEntry Null = new MConcreteDataTypeEntry(MDataType.Void);
-        public static MDataTypeEntry List(MType of)
+        public static readonly MConcreteDataTypeEntry Any = new MConcreteDataTypeEntry(MDataType.Any);
+        public static readonly MConcreteDataTypeEntry Number = new MConcreteDataTypeEntry(MDataType.Number);
+        public static readonly MConcreteDataTypeEntry Boolean = new MConcreteDataTypeEntry(MDataType.Boolean);
+        public static readonly MConcreteDataTypeEntry String = new MConcreteDataTypeEntry(MDataType.String);
+        public static readonly MConcreteDataTypeEntry Type = new MConcreteDataTypeEntry(MDataType.Type);
+        public static readonly MConcreteDataTypeEntry Error = new MConcreteDataTypeEntry(MDataType.Error);
+        public static readonly MConcreteDataTypeEntry Void = new MConcreteDataTypeEntry(MDataType.Null);
+        public static readonly MConcreteDataTypeEntry Null = new MConcreteDataTypeEntry(MDataType.Void);
+        public static MConcreteDataTypeEntry List(MType of)
         {
             return new MConcreteDataTypeEntry(MDataType.List, of);
         }
-        public static MDataTypeEntry Reference(MType of)
+        public static MConcreteDataTypeEntry Reference(MType of)
         {
             return new MConcreteDataTypeEntry(MDataType.Reference, of);
         }
-        public static MDataTypeEntry Fuction(MType returnType, params MType[] paramTypes)
+        public static MConcreteDataTypeEntry Fuction(MType returnType, params MType[] paramTypes)
         {
             return new MFunctionDataTypeEntry(returnType, new List<MType>(paramTypes), new List<string>());
         }
-        public static MDataTypeEntry Fuction(MType returnType, List<MType> paramTypes)
+        public static MConcreteDataTypeEntry Fuction(MType returnType, List<MType> paramTypes)
         {
             return new MFunctionDataTypeEntry(returnType, paramTypes, new List<string>());
         }
-        public static MDataTypeEntry Fuction(MType returnType, List<MType> paramTypes, List<string> genericNames)
+        public static MConcreteDataTypeEntry Fuction(MType returnType, List<MType> paramTypes, List<string> genericNames)
         {
             return new MFunctionDataTypeEntry(returnType, paramTypes, genericNames);
         }
