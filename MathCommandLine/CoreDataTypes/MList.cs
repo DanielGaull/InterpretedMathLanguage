@@ -12,17 +12,27 @@ namespace IML.CoreDataTypes
     public class MList
     {
         private List<MValue> iList;
+        private MType type;
+        public MType Type 
+        { 
+            get
+            {
+                return type;
+            } 
+        }
 
-        public MList()
+        public MList(MType of)
         {
             iList = new List<MValue>();
+            type = of;
         }
-        public MList(List<MValue> list)
+        public MList(List<MValue> list, MType of)
         {
             iList = new List<MValue>(list);
+            type = of;
         }
 
-        public static MList Empty = new MList();
+        public static MList Empty = new MList(MType.Any);
 
         public List<MValue> InternalList
         {
@@ -37,13 +47,13 @@ namespace IML.CoreDataTypes
             return iList;
         }
 
-        public static MList FromArray(MValue[] values)
+        public static MList FromArray(MValue[] values, MType type)
         {
-            return new MList(values.ToList());
+            return new MList(values.ToList(), type);
         }
         public static MList FromOne(MValue value)
         {
-            return FromArray(new MValue[] { value });
+            return FromArray(new MValue[] { value }, new MType(value.DataType));
         }
 
         public override string ToString()
@@ -68,18 +78,6 @@ namespace IML.CoreDataTypes
         public static MValue Get(MList list, int index)
         {
             return list.iList[index];
-        }
-        public static MList Insert(MList list, int index, MValue value)
-        {
-            List<MValue> newList = new List<MValue>(list.iList);
-            newList.Insert(index, value);
-            return new MList(newList);
-        }
-        public static MList Remove(MList list, int index)
-        {
-            List<MValue> newList = new List<MValue>(list.iList);
-            newList.RemoveAt(index);
-            return new MList(newList);
         }
         public static int IndexOf(MList list, MValue value)
         {
@@ -140,12 +138,13 @@ namespace IML.CoreDataTypes
             {
                 newList.Add(MValue.Number(i));
             }
-            return new MList(newList);
+            return new MList(newList, new MType(MDataTypeEntry.Number));
         }
         public static MList Concat(MList list1, MList list2)
         {
             IEnumerable<MValue> result = list1.iList.Concat(list2.iList);
-            return new MList(result.ToList());
+            
+            return new MList(result.ToList(), list1.type.Union(list2.Type));
         }
 
         public static bool operator ==(MList l1, MList l2)

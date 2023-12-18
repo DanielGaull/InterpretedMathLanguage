@@ -59,6 +59,49 @@ namespace IML.CoreDataTypes
             return false;
         }
 
+        // Performs a union of the two types and returns the simplest-form reduced type
+        // Ex. any UNION number => any
+        // Ex. string UNION number => string|number
+        // Ex. list[string] UNION list[number] => list[string|number]
+        // Ex. tuple[number,number] UNION tuple[string,string] => tuple[number,number]|tuple[string,string]
+        // Ex. string|number UNION number => string|number
+        // Notable properties:
+        // (Order doesn't matter for the type '|' operator)
+        // A UNION B => A|B
+        // A|B UNION A => A|B
+        // A UNION any => any
+        // If there is a single generic and both base types are the same, unions the generics
+        // If there are multiple generics, then unions the types separately
+        // ex A[T] UNION A[R] = A[T|R], but B[T,R] UNION B[C,D] = B[T,R]|B[C,D]
+        // This is because A[T|R] = A[T]|A[R]
+        public MType Union(MType other)
+        {
+            // First check if either has the "any" type
+            // If so, then just return "any"
+            if (IsAnyType() || other.IsAnyType())
+            {
+                return Any;
+            }
+            // Now create a SET of the types that appear in each
+        }
+        public bool IsAnyType()
+        {
+            foreach (MDataTypeEntry entry in entries)
+            {
+                if (entry is MConcreteDataTypeEntry)
+                {
+                    MConcreteDataTypeEntry e = (MConcreteDataTypeEntry)entry;
+                    if (e.DataType.MatchesTypeExactly(MDataType.Any))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        public static readonly MType Any = new MType(MDataTypeEntry.Any);
+
         public static bool operator ==(MType t1, MType t2)
         {
             if (t1.entries.Count != t2.entries.Count)
