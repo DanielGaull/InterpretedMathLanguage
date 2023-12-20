@@ -91,7 +91,7 @@ namespace IML.Structure
         /// <returns></returns>
         public string GetStringValue()
         {
-            if (DataType.MatchesTypeExactly(MDataType.String))
+            if (DataType.DataType.MatchesTypeExactly(MDataType.String))
             {
                 return Utilities.MListToString(GetValueByName("chars", true).ListValue);
             }
@@ -361,7 +361,12 @@ namespace IML.Structure
             {
                 {
                     "get",
-                    new MField(Closure(new MClosure(new MParameters(new MParameter(MDataTypeEntry.Number, "index")), 
+                    new MField(Closure(new MClosure(
+                        MDataTypeEntry.Function(list.Type, new List<MType>()
+                        {
+                            MType.Number
+                        }, true, false), 
+                        new List<string>(){"index"},
                         MEnvironment.Empty,
                         (args, env, interpreter) => {
                             int index = (int) args[0].Value.NumberValue;
@@ -375,7 +380,12 @@ namespace IML.Structure
                 },
                 {
                     "index",
-                    new MField(Closure(new MClosure(new MParameters(new MParameter(list.Type, "value")),
+                    new MField(Closure(new MClosure(
+                        MDataTypeEntry.Function(MType.Number, new List<MType>()
+                        {
+                            list.Type
+                        }, true, false),
+                        new List<string>(){"value"},
                         MEnvironment.Empty,
                         (args, env, interpreter) => {
                             MValue value = args[0].Value;
@@ -385,10 +395,13 @@ namespace IML.Structure
                 },
                 {
                     "indexc",
-                    new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(MDataTypeEntry.Any, "element"),
-                            new MParameter(MDataTypeEntry.Function(new MType(MDataTypeEntry.Any),
-                                list.Type, list.Type), "equality_evaluator")),
+                    new MField(Closure(new MClosure(
+                        MDataTypeEntry.Function(MType.Number, new List<MType>()
+                        {
+                            list.Type,
+                            MType.Function(MType.Any, list.Type, list.Type)
+                        }, true, false),
+                        new List<string>(){"element", "equality_evaluator"},
                         MEnvironment.Empty,
                         (args, env, interpreter) => {
                             return Number(MList.IndexOfCustom(list, args.Get(0).Value,
@@ -397,7 +410,9 @@ namespace IML.Structure
                 },
                 {
                     "length",
-                    new MField(Closure(new MClosure(MParameters.Empty,
+                    new MField(Closure(new MClosure(
+                        MDataTypeEntry.Function(MType.Number, new List<MType>(), true, false),
+                        new List<string>(),
                         MEnvironment.Empty,
                         (args, env, interpreter) => {
                             int len = MList.Length(list);
@@ -406,8 +421,18 @@ namespace IML.Structure
                 },
                 {
                     "map", // We need a generic here for the return type of the mapper
-                    new MField(Closure(new MClosure(new MParameters(
-                        new MParameter(MDataTypeEntry.Function, "mapper")),
+                    new MField(Closure(new MClosure(
+                        MDataTypeEntry.Function(MType.List(new MType(new MGenericDataTypeEntry("T"))),
+                            new List<MType>()
+                            {
+                                MType.Function(new MType(new MGenericDataTypeEntry("T")), list.Type)
+                            }, 
+                            new List<string>()
+                            {
+                                "T"
+                            },
+                            true, false),
+                        new List<string>(){"mapper_func"},
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
@@ -417,9 +442,21 @@ namespace IML.Structure
                 },
                 {
                     "reduce", // Need a generic here for return type of the reducer
-                    new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(MDataTypeEntry.Function, "reducer"),
-                            new MParameter(MDataTypeEntry.Any, "init_value")),
+                    new MField(Closure(new MClosure(
+                        MDataTypeEntry.Function(new MType(new MGenericDataTypeEntry("T")),
+                            new List<MType>()
+                            {
+                                // Returns a T, takes in a T & list value
+                                MType.Function(new MType(new MGenericDataTypeEntry("T")), 
+                                    new MType(new MGenericDataTypeEntry("T")), list.Type),
+                                new MType(new MGenericDataTypeEntry("T"))
+                            },
+                            new List<string>() // Generics
+                            {
+                                "T"
+                            },
+                            true, false),
+                        new List<string>(){"reducer_func", "init_value"},
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
@@ -429,8 +466,14 @@ namespace IML.Structure
                 },
                 {
                     "add",
-                    new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(list.Type, "item")),
+                    new MField(Closure(new MClosure(
+                        MDataTypeEntry.Function(MType.Void,
+                            new List<MType>()
+                            {
+                                list.Type
+                            },
+                            true, false),
+                        new List<string>(){"item"},
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
@@ -440,9 +483,15 @@ namespace IML.Structure
                 },
                 {
                     "insert",
-                    new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(list.Type, "item"),
-                            new MParameter(MDataTypeEntry.Number, "index")),
+                    new MField(Closure(new MClosure(
+                        MDataTypeEntry.Function(MType.Void,
+                            new List<MType>()
+                            {
+                                list.Type,
+                                MType.Number
+                            },
+                            true, false),
+                        new List<string>(){"item", "index"},
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
@@ -458,8 +507,14 @@ namespace IML.Structure
                 },
                 {
                     "removeAt",
-                    new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(MDataTypeEntry.Number, "index")),
+                    new MField(Closure(new MClosure(
+                         MDataTypeEntry.Function(MType.Void,
+                            new List<MType>()
+                            {
+                                MType.Number
+                            },
+                            true, false),
+                        new List<string>(){"index"},
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
@@ -475,8 +530,14 @@ namespace IML.Structure
                 },
                 {
                     "remove",
-                    new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(list.Type, "value")),
+                    new MField(Closure(new MClosure(
+                         MDataTypeEntry.Function(MType.Boolean,
+                            new List<MType>()
+                            {
+                                list.Type
+                            },
+                            true, false),
+                        new List<string>(){"item"},
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
@@ -491,10 +552,15 @@ namespace IML.Structure
                 },
                 {
                     "removec",
-                    new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(list.Type, "value"),
-                            new MParameter(MDataTypeEntry.Function(new MType(MDataTypeEntry.Any),
-                                list.Type, list.Type), "equality_evaluator")),
+                    new MField(Closure(new MClosure(
+                         MDataTypeEntry.Function(MType.Boolean,
+                            new List<MType>()
+                            {
+                                list.Type,
+                                MType.Function(MType.Any, list.Type, list.Type)
+                            },
+                            true, false),
+                        new List<string>(){"item", "equality_evaluator"},
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
@@ -510,8 +576,14 @@ namespace IML.Structure
                 },
                 {
                     "addAll",
-                    new MField(Closure(new MClosure(new MParameters(
-                            new MParameter(MDataTypeEntry.List(list.Type), "other")),
+                    new MField(Closure(new MClosure(
+                        MDataTypeEntry.Function(MType.Void,
+                            new List<MType>()
+                            {
+                                MType.List(list.Type)
+                            },
+                            true, false),
+                        new List<string>(){"other"},
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {

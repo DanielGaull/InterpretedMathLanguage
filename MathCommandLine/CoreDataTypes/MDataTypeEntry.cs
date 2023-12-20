@@ -22,17 +22,29 @@ namespace IML.CoreDataTypes
         {
             return new MConcreteDataTypeEntry(MDataType.Reference, of);
         }
-        public static MConcreteDataTypeEntry Function(MType returnType, params MType[] paramTypes)
+        public static MFunctionDataTypeEntry Function(MType returnType, List<MType> paramTypes)
         {
-            return new MFunctionDataTypeEntry(returnType, new List<MType>(paramTypes), new List<string>(),
+            return new MFunctionDataTypeEntry(returnType, paramTypes, new List<string>(),
                 false, LambdaEnvironmentType.AllowAny, false);
         }
-        public static MConcreteDataTypeEntry Function(MType returnType, List<MType> paramTypes, bool isPure, 
+        public static MFunctionDataTypeEntry Function(MType returnType, List<MType> paramTypes, bool isPure,
+            bool isLastVarArgs)
+        {
+            return new MFunctionDataTypeEntry(returnType, paramTypes, new List<string>(), isPure, 
+                LambdaEnvironmentType.AllowAny, isLastVarArgs);
+        }
+        public static MFunctionDataTypeEntry Function(MType returnType, List<MType> paramTypes, bool isPure, 
             bool isLastVarArgs, LambdaEnvironmentType envType)
         {
             return new MFunctionDataTypeEntry(returnType, paramTypes, new List<string>(), isPure, envType, isLastVarArgs);
         }
-        public static MConcreteDataTypeEntry Function(MType returnType, List<MType> paramTypes, List<string> genericNames, 
+        public static MFunctionDataTypeEntry Function(MType returnType, List<MType> paramTypes, List<string> genericNames,
+            bool isPure, bool isLastVarArgs)
+        {
+            return new MFunctionDataTypeEntry(returnType, paramTypes, genericNames, isPure,
+                LambdaEnvironmentType.AllowAny, isLastVarArgs);
+        }
+        public static MFunctionDataTypeEntry Function(MType returnType, List<MType> paramTypes, List<string> genericNames, 
             bool isPure, bool isLastVarArgs, LambdaEnvironmentType envType)
         {
             return new MFunctionDataTypeEntry(returnType, paramTypes, genericNames, isPure, envType, isLastVarArgs);

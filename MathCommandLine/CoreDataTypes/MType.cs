@@ -124,6 +124,44 @@ namespace IML.CoreDataTypes
         }
 
         public static readonly MType Any = new MType(MDataTypeEntry.Any);
+        public static readonly MType Number = new MType(MDataTypeEntry.Number);
+        public static readonly MType Boolean = new MType(MDataTypeEntry.Boolean);
+        public static readonly MType Type = new MType(MDataTypeEntry.Type);
+        public static readonly MType String = new MType(MDataTypeEntry.String);
+        public static readonly MType Error = new MType(MDataTypeEntry.Error);
+        public static readonly MType Null = new MType(MDataTypeEntry.Null);
+        public static readonly MType Void = new MType(MDataTypeEntry.Void);
+        public static MType List(MType of)
+        {
+            return new MType(MDataTypeEntry.List(of));
+        }
+        public static MType Reference(MType of)
+        {
+            return new MType(MDataTypeEntry.Reference(of));
+        }
+        public static MType Function(MType returnType, List<MType> paramTypes, List<string> genericNames,
+            bool isPure, bool isLastVarArgs, LambdaEnvironmentType envType)
+        {
+            return new MType(MDataTypeEntry.Function(returnType, paramTypes, genericNames, isPure, isLastVarArgs, envType));
+        }
+        public static MType Function(MType returnType, List<MType> paramTypes, List<string> genericNames)
+        {
+            return new MType(MDataTypeEntry.Function(returnType, paramTypes, genericNames, false, false, 
+                LambdaEnvironmentType.AllowAny));
+        }
+        public static MType Function(MType returnType, params MType[] paramTypes)
+        {
+            return new MType(MDataTypeEntry.Function(returnType, new List<MType>(paramTypes)));
+        }
+        public static MType Function(MType returnType, List<MType> paramTypes)
+        {
+            return new MType(MDataTypeEntry.Function(returnType, paramTypes));
+        }
+        public static MType Function(MType returnType, List<MType> paramTypes, bool isPure, bool isLastVarArgs)
+        {
+            return new MType(MDataTypeEntry.Function(returnType, paramTypes, isPure, isLastVarArgs, 
+                LambdaEnvironmentType.AllowAny));
+        }
 
         // Strict equals, have to completely match
         public static bool operator ==(MType t1, MType t2)

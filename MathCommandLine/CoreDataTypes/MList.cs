@@ -111,7 +111,7 @@ namespace IML.CoreDataTypes
                 ), env);
                 newList.Add(result);
             }
-            return new MList(newList);
+            return new MList(newList, closure.ReturnType);
         }
         public static MValue Reduce(MList list, MClosure closure, MValue initial, IInterpreter evaluator,
             MEnvironment env)
