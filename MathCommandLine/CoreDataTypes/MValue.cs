@@ -50,7 +50,7 @@ namespace IML.Structure
         }
         public static MValue Closure(MClosure closure)
         {
-            return new MValue(MDataTypeEntry.Function, 0, MList.Empty, closure, 0, 0, null, null, false,
+            return new MValue(closure.TypeEntry, 0, MList.Empty, closure, 0, 0, null, null, false,
                 new Dictionary<string, MField>());
         }
         public static MValue Type(MType type)
