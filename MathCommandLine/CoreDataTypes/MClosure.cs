@@ -11,49 +11,97 @@ namespace IML.CoreDataTypes
     public delegate MValue NativeExpression(MArguments args, MEnvironment env, IInterpreter evaluator);
     public class MClosure
     {
-        public MParameters Parameters { get; private set; }
         public MEnvironment Environment { get; private set; }
         public Ast AstBody { get; private set; }
         public NativeExpression NativeBody { get; private set; }
         public bool IsNativeBody { get; private set; }
         public bool CreatesEnv { get; private set; }
+        public MFunctionDataTypeEntry TypeEntry { get; private set; }
+        List<string> paramNames;
+        public MParameters Parameters { get; private set; }
 
-        public MClosure(MParameters parameters, MEnvironment env, Ast body, bool createsEnv)
+        public MType ReturnType
         {
-            Parameters = parameters;
+            get
+            {
+                return TypeEntry.ReturnType;
+            }
+        }
+        public List<MType> ParameterTypes
+        {
+            get
+            {
+                return TypeEntry.ParameterTypes;
+            }
+        }
+        public List<string> DefinedGenerics
+        {
+            get
+            {
+                return TypeEntry.GenericNames;
+            }
+        }
+        public bool IsPure
+        {
+            get
+            {
+                return TypeEntry.IsPure;
+            }
+        }
+        public bool IsLastVarArgs
+        {
+            get
+            {
+                return TypeEntry.IsLastVarArgs;
+            }
+        }
+
+        public MClosure(MFunctionDataTypeEntry type, List<string> paramNames, MEnvironment env, Ast body, bool createsEnv)
+        {
+            TypeEntry = type;
+            this.paramNames = paramNames;
             Environment = env;
             AstBody = body;
             IsNativeBody = false;
             CreatesEnv = createsEnv;
+            Parameters = ConstructParameters(type.ParameterTypes, paramNames);
         }
-        public MClosure(MParameters parameters, MEnvironment env, NativeExpression nativeBody)
+        public MClosure(MFunctionDataTypeEntry type, List<string> paramNames, MEnvironment env, NativeExpression nativeBody)
         {
-            Parameters = parameters;
+            TypeEntry = type;
+            this.paramNames = paramNames;
             Environment = env;
             NativeBody = nativeBody;
             IsNativeBody = true;
+            Parameters = ConstructParameters(type.ParameterTypes, paramNames);
         }
 
-        public static MClosure Empty = new MClosure(MParameters.Empty, null, Ast.Invalid(null), false);
-
-        public override string ToString()
+        private static MParameters ConstructParameters(List<MType> types, List<string> names)
         {
-            if (this == Empty)
+            if (types.Count != names.Count)
             {
-                return "<empty>";
+                throw new InvalidOperationException("Types must have same length as names");
             }
-            return "(" + Parameters.ToString() + ")" + (CreatesEnv ? "=>" : "~>") + "{ <function> }";
+            List<MParameter> ps = new List<MParameter>();
+            for (int i = 0; i < types.Count; i++)
+            {
+                MParameter p = new MParameter(types[i], names[i]);
+                ps.Add(p);
+            }
+            return new MParameters(ps);
         }
+
+        public static MClosure Empty = new MClosure(null, null, null, Ast.Invalid(null), false);
 
         public MClosure CloneWithNewEnvironment(MEnvironment env)
         {
             if (IsNativeBody)
             {
-                return new MClosure(Parameters, env, NativeBody);
+                return new MClosure(TypeEntry, paramNames, env, NativeBody);
             }
             else
             {
-                return new MClosure(Parameters, env, AstBody, CreatesEnv);
+                return new MClosure(TypeEntry, paramNames, env, AstBody, CreatesEnv);
             }
         }
     }

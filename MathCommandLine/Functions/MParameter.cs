@@ -55,29 +55,5 @@ namespace IML.Functions
         {
             return "";// string.Join('|', GetDataTypes());
         }
-
-        //public static bool operator ==(MParameter p1, MParameter p2)
-        //{
-        //    // TODO: Define MParameter Equals
-
-        //    return false;
-        //}
-        //public static bool operator !=(MParameter p1, MParameter p2)
-        //{
-        //    return !(p1 == p2);
-        //}
-        //public override bool Equals(object obj)
-        //{
-        //    if (obj is MParameter)
-        //    {
-        //        MParameter value = (MParameter)obj;
-        //        return value == this;
-        //    }
-        //    return false;
-        //}
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
     }
 }
