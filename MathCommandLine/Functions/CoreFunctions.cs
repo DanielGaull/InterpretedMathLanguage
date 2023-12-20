@@ -158,7 +158,6 @@ namespace IML.Functions
         }
         public static MFunction TrigFunction()
         {
-            // TODO: Add parameter restrictions, and make the op here have to be a number from 0-5
             // TODO: Hyperbolic trig functions
             return new MFunction(
                 "_trig", 
@@ -413,7 +412,6 @@ namespace IML.Functions
             );
         }
 
-        // TODO: Add restriction
         public static MFunction CreateStringFunction()
         {
             return new MFunction(

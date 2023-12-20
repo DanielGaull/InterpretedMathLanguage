@@ -467,27 +467,27 @@ namespace IML.Evaluation
                 throw new InvalidParseException($"'{str}' could not be parsed to a function type. {arrow[0]} is an invalid " +
                     "environment specifier.");
             }
-            LambdaAstTypeEntry.LambdaEnvironmentType envType;
+            LambdaEnvironmentType envType;
             if (forceEnv)
             {
                 if (createsEnv)
                 {
-                    envType = LambdaAstTypeEntry.LambdaEnvironmentType.ForceEnvironment;
+                    envType = LambdaEnvironmentType.ForceEnvironment;
                 }
                 else
                 {
-                    envType = LambdaAstTypeEntry.LambdaEnvironmentType.ForceNoEnvironment;
+                    envType = LambdaEnvironmentType.ForceNoEnvironment;
                 }
             }
             else if (!forceEnv && !createsEnv)
             {
                 // Still force no environment, since user specified (like "()~>void")
-                envType = LambdaAstTypeEntry.LambdaEnvironmentType.ForceNoEnvironment;
+                envType = LambdaEnvironmentType.ForceNoEnvironment;
             }
             else
             {
                 // No env forced at all
-                envType = LambdaAstTypeEntry.LambdaEnvironmentType.AllowAny;
+                envType = LambdaEnvironmentType.AllowAny;
             }
 
             // Finally, we need the return type
@@ -556,15 +556,15 @@ namespace IML.Evaluation
             // Now build the arrow
             switch (entry.EnvironmentType) 
             {
-                case LambdaAstTypeEntry.LambdaEnvironmentType.ForceEnvironment:
+                case LambdaEnvironmentType.ForceEnvironment:
                     builder.Append(LAMBDA_TYPE_REQ_ENV_CHARACTER);
                     builder.Append(LAMBDA_TYPE_CREATES_ENVIRONMENT_LINE);
                     break;
-                case LambdaAstTypeEntry.LambdaEnvironmentType.ForceNoEnvironment:
+                case LambdaEnvironmentType.ForceNoEnvironment:
                     builder.Append(LAMBDA_TYPE_REQ_ENV_CHARACTER);
                     builder.Append(LAMBDA_TYPE_NO_ENVIRONMENT_LINE);
                     break;
-                case LambdaAstTypeEntry.LambdaEnvironmentType.AllowAny:
+                case LambdaEnvironmentType.AllowAny:
                     builder.Append(LAMBDA_TYPE_CREATES_ENVIRONMENT_LINE);
                     break;
             }
