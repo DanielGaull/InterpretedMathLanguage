@@ -60,6 +60,11 @@ namespace IML.CoreDataTypes
             return false;
         }
 
+        public static MType Union(MType t1, MType t2)
+        {
+            return t1.Union(t2);
+        }
+
         // Performs a union of the two types and returns the simplest-form reduced type
         // Ex. any UNION number => any
         // Ex. string UNION number => string|number

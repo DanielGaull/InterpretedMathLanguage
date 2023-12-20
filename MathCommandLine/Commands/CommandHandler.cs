@@ -115,8 +115,7 @@ namespace IML.Commands
             baseEnv.AddConstant("false", MValue.Bool(false));
             for (int i = 0; i < coreFuncs.Count; i++)
             {
-                MValue closure = MValue.Closure(
-                    new MClosure(coreFuncs[i].Parameters, MEnvironment.Empty, coreFuncs[i].Expression));
+                MValue closure = MValue.Closure(coreFuncs[i].ToClosure());
                 baseEnv.AddConstant(coreFuncs[i].Name, closure, coreFuncs[i].Description);
             }
             return baseEnv;

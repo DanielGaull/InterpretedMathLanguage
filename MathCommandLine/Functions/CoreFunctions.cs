@@ -39,7 +39,6 @@ namespace IML.Functions
                 CreateErrorFunction(),
                 CreateStringFunction(),
                 DisplayFunction(),
-                CreateTypeFunction(),
                 TimeFunction(),
                 CheckFunction(),
                 ExitFunction(),
@@ -66,9 +65,10 @@ namespace IML.Functions
                 {
                     return MValue.Number(args.Get(0).Value.NumberValue + args.Get(1).Value.NumberValue);
                 },
+                MType.Number,
                 new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.Number, "a"),
-                    new MParameter(MDataTypeRestrictionEntry.Number, "b")
+                    new MParameter(MType.Number, "a"),
+                    new MParameter(MType.Number, "b")
                 ),
                 "Returns the sum of 'a' and 'b' (a + b)."
             );
@@ -81,9 +81,10 @@ namespace IML.Functions
                 {
                     return MValue.Number(args.Get(0).Value.NumberValue * args.Get(1).Value.NumberValue);
                 },
+                MType.Number,
                 new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.Number, "a"),
-                    new MParameter(MDataTypeRestrictionEntry.Number, "b")
+                    new MParameter(MType.Number, "a"),
+                    new MParameter(MType.Number, "b")
                 ),
                 "Returns the product of 'a' and 'b' (a * b)."
             );
@@ -96,8 +97,9 @@ namespace IML.Functions
                 {
                     return MValue.Number(-args.Get(0).Value.NumberValue);
                 },
+                MType.Number,
                 new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.Number, "a")
+                    new MParameter(MType.Number, "a")
                 ),
                 "Returns the additive inverse of 'a'."
             );
@@ -115,8 +117,9 @@ namespace IML.Functions
                     }
                     return MValue.Number(1 / arg);
                 },
+                MType.Number,
                 new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.Number, "a")
+                    new MParameter(MType.Number, "a")
                 ),
                 "Returns the multiplicative inverse of 'a'."
             );
@@ -129,9 +132,10 @@ namespace IML.Functions
                 {
                     return MValue.Number(Math.Pow(args.Get(0).Value.NumberValue, args.Get(1).Value.NumberValue));
                 },
+                MType.Number,
                 new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.Number, "base"),
-                    new MParameter(MDataTypeRestrictionEntry.Number, "exponent")
+                    new MParameter(MType.Number, "base"),
+                    new MParameter(MType.Number, "exponent")
 
                 ),
                 "Returns the value of 'base' raised to the power of 'exponent'."
@@ -145,8 +149,9 @@ namespace IML.Functions
                 {
                     return MValue.Number(Math.Floor(args.Get(0).Value.NumberValue));
                 },
+                MType.Number,
                 new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.Number, "a")
+                    new MParameter(MType.Number, "a")
                 ),
                 "Returns the floor of 'a'."
             );
@@ -182,12 +187,15 @@ namespace IML.Functions
                         case 5:
                             result = Math.Atan(arg);
                             break;
+                        default:
+                            return MValue.Error(ErrorCodes.INVALID_ARGUMENT, "Trig operation must be between 0 and 5.");
                     }
                     return MValue.Number(result);
                 },
+                MType.Number,
                 new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.Number, "arg"),
-                    new MParameter(MDataTypeRestrictionEntry.Number, "op")
+                    new MParameter(MType.Number, "arg"),
+                    new MParameter(MType.Number, "op")
                 ),
                 "Performs a trigonometric function. (Op Codes: 0-sin, 1-cos, 2-tan, 3-arcsin, 4-arccos, 5-arctan)"
             );
@@ -200,8 +208,9 @@ namespace IML.Functions
                 {
                     return MValue.Number(Math.Log(args.Get(0).Value.NumberValue));
                 },
+                MType.Number,
                 new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.Number, "arg")
+                    new MParameter(MType.Number, "arg")
                 ),
                 "Returns the natural logarithm of 'arg'."
             );
@@ -216,8 +225,9 @@ namespace IML.Functions
                 {
                     return MValue.List(MList.CreateRange((int) args.Get(0).Value.NumberValue));
                 },
+                MType.List(MType.Number),
                 new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.Number, "max")
+                    new MParameter(MType.Number, "max")
                 ),
                 "Creates a list of integers from 0 to 'max', exclusive (i.e. 'max' is not included in the result list)."
             );
@@ -233,10 +243,15 @@ namespace IML.Functions
                     MBoxedValue box = args[0].Value.RefValue;
                     return box.GetValue();
                 },
+                new MType(new MGenericDataTypeEntry("T")),
                 new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.Reference, "ref")
+                    new MParameter(MType.Reference(new MType(new MGenericDataTypeEntry("T"))), "ref")
                 ),
-                "Returns the value stored in 'ref'."
+                "Returns the value stored in 'ref'.",
+                new List<string>() // Generics
+                {
+                    "T"
+                }
             );
         }
         public static MFunction Set()
@@ -249,11 +264,16 @@ namespace IML.Functions
                     MValue value = args[1].Value;
                     return refAddr.SetValue(value);
                 },
+                MType.Void,
                 new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.Reference, "ref"),
-                    new MParameter(MDataTypeRestrictionEntry.Any, "value")
+                    new MParameter(MType.Reference(new MType(new MGenericDataTypeEntry("T"))), "ref"),
+                    new MParameter(new MType(new MGenericDataTypeEntry("T")), "value")
                 ),
-                "Assigns the value for 'ref' to 'value'. Returns CAN_NOT_ASSIGN if reference variable is constant."
+                "Assigns the value for 'ref' to 'value'. Throws CAN_NOT_ASSIGN if reference variable is constant.",
+                new List<string>() // Generics
+                {
+                    "T"
+                }
             );
         }
         public static MFunction GetDesc()
@@ -272,8 +292,9 @@ namespace IML.Functions
                         return MValue.String(refAddr.Description);
                     }
                 },
+                MType.String,
                 new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.Reference, "ref")
+                    new MParameter(MType.Reference(MType.Any), "ref")
                 ),
                 "Gets and returns the description for 'ref'. If there is no description, returns null."
             );
@@ -289,9 +310,10 @@ namespace IML.Functions
                     refAddr.Description = newDesc;
                     return MValue.Void();
                 },
+                MType.Void,
                 new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.Reference, "ref"),
-                    new MParameter(MDataTypeRestrictionEntry.String, "desc")
+                    new MParameter(MType.Reference(MType.Any), "ref"),
+                    new MParameter(MType.String, "desc")
                 ),
                 "Assigns a new description to 'ref'."
             );
@@ -307,10 +329,11 @@ namespace IML.Functions
                 "_type_of", 
                 (args, env, interpreter) =>
                 {
-                    return MValue.Type(new MType(MDataTypeRestrictionEntry.CreateDataType(args.Get(0).Value.DataType)));
+                    return MValue.Type(new MType(args[0].Value.DataType));
                 },
+                MType.Type,
                 new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.CreateDataType(MDataType.Any), "value")
+                    new MParameter(MType.Any, "value")
                 ),
                 "Returns the type of 'value'."
             );
@@ -325,9 +348,10 @@ namespace IML.Functions
                     double second = args.Get(0).Value.NumberValue;
                     return MValue.Number((first < second) ? -1 : (first == second ? 0 : 1));
                 },
+                MType.Number,
                 new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.Number, "first"),
-                    new MParameter(MDataTypeRestrictionEntry.Number, "second")
+                    new MParameter(MType.Number, "first"),
+                    new MParameter(MType.Number, "second")
                 ),
                 "If 'first' is less than 'second', returns -1. If 'first' == 'second', returns 0. " +
                 "If 'first' > 'second', returns 1."
@@ -352,14 +376,19 @@ namespace IML.Functions
                     }
                     return defaultValue;
                 },
+                new MType(new MGenericDataTypeEntry("R")),
                 new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.Any, "value"),
-                    new MParameter(MDataTypeRestrictionEntry.List, "cases"),
-                    new MParameter(MDataTypeRestrictionEntry.List, "results"),
-                    new MParameter(MDataTypeRestrictionEntry.Any, "default")
+                    new MParameter(new MType(new MGenericDataTypeEntry("T")), "value"),
+                    new MParameter(MType.List(new MType(new MGenericDataTypeEntry("T"))), "cases"),
+                    new MParameter(MType.List(new MType(new MGenericDataTypeEntry("R"))), "results"),
+                    new MParameter(new MType(new MGenericDataTypeEntry("R")), "default")
                 ),
                 "If 'value' appears in 'cases', returns the corresponding value in 'results' " +
-                "(the one with the same index). Otherwise, returns 'default'."
+                    "(the one with the same index). Otherwise, returns 'default'.",
+                new List<string>() // Generics
+                {
+                    "T", "R"
+                }
             );
         }
         public static MFunction CreateErrorFunction()
@@ -374,10 +403,11 @@ namespace IML.Functions
                     MList info = args[2].Value.ListValue;
                     return MValue.Error((ErrorCodes)code, msg, info);
                 },
+                MType.Error,
                 new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.Number, "code"),
-                    new MParameter(MDataTypeRestrictionEntry.String, "message"),
-                    new MParameter(MDataTypeRestrictionEntry.List, "info")
+                    new MParameter(MType.Number, "code"),
+                    new MParameter(MType.String, "message"),
+                    new MParameter(MType.List(MType.Number), "info")
                 ),
                 "Creates and returns an error with the specified code, message, and info list."
             );
@@ -392,8 +422,9 @@ namespace IML.Functions
                 {
                     return MValue.String(args[0].Value.ListValue);
                 },
+                MType.String,
                 new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.List, "chars")
+                    new MParameter(MType.List(MType.Number), "chars")
                 ),
                 "Creates a string with the specified character stream."
             );
@@ -408,34 +439,11 @@ namespace IML.Functions
                     Console.WriteLine(args[0].Value.GetStringValue());
                     return MValue.Void();
                 },
+                MType.Void,
                 new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.String, "str")
+                    new MParameter(MType.String, "str")
                 ),
                 "Prints the specified string to the standard output stream"
-            );
-        }
-
-        public static MFunction CreateTypeFunction()
-        {
-            return new MFunction(
-                "_type", 
-                (args, env, interpreter) =>
-                {
-                    string typeName = args[0].Value.GetStringValue();
-                    MDataType type = interpreter.GetDataType(typeName);
-                    if (type == null)
-                    {
-                        return MValue.Error(ErrorCodes.TYPE_DOES_NOT_EXIST, $"Type \"{typeName}\" does not exist.");
-                    }
-                    else
-                    {
-                        return MValue.Type(new MType(MDataTypeRestrictionEntry.CreateDataType(type)));
-                    }
-                },
-                new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.String, "type_name")
-                ),
-                "Returns a type object for a type with the specified 'type_name'. Returns an error if the type does not exist."
             );
         }
 
@@ -450,8 +458,9 @@ namespace IML.Functions
                     long unixTimeMilliseconds = now.ToUnixTimeMilliseconds();
                     return MValue.Number((double)unixTimeMilliseconds);
                 },
+                MType.Number,
                 new MParameters(),
-                "Returns the number of milliseconds since the epoch"
+                "Returns the number of milliseconds since the Unix epoch"
             );
         }
 
@@ -472,7 +481,7 @@ namespace IML.Functions
                         }
                         MClosure cond = pair[0].ClosureValue;
                         MValue condValue = interpreter.PerformCall(cond, MArguments.Empty, env);
-                        if (condValue.DataType.MatchesTypeExactly(MDataType.Error))
+                        if (condValue.DataType.DataType.MatchesTypeExactly(MDataType.Error))
                         {
                             return condValue;
                         }
@@ -487,8 +496,9 @@ namespace IML.Functions
                     // Return void if we didn't evaluate any of the conditions
                     return MValue.Void();
                 },
+                MType.Any,
                 new MParameters(
-                    new MParameter("pairs", MDataTypeRestrictionEntry.List)
+                    new MParameter(MType.List(MType.Function(MType.Any)), "pairs")
                 ),
                 "Takes in a list of 2-lists of functions with no arguments, evaluating the each element. " +
                 "Once an element returns true, then the corresponding code is run and returned, " +
@@ -504,6 +514,7 @@ namespace IML.Functions
                     interpreter.Exit();
                     return MValue.Void();
                 },
+                MType.Void,
                 new MParameters(),
                 "Exits the program immediately (returns null)"
             );
@@ -519,7 +530,8 @@ namespace IML.Functions
                     string input = Console.ReadLine();
                     return MValue.String(input);
                 },
-                new MParameters(new MParameter(MDataTypeRestrictionEntry.String, "prompt")),
+                MType.String,
+                new MParameters(new MParameter(MType.String, "prompt")),
                 "Reads in and returns a single string line from the user using the standard input stream"
             );
         }
@@ -539,8 +551,9 @@ namespace IML.Functions
                     }
                     return returnValue;
                 },
+                MType.Any,
                 new MParameters(
-                    new MParameter("code", MDataTypeRestrictionEntry.List)
+                    new MParameter(MType.List(MType.Function(MType.Any)), "code")
                 ),
                 "Executes the series of functions in 'code'. These functions should take no parameters. " +
                 "Functions are executed in order. Returns the return value of the last function."
@@ -670,11 +683,16 @@ namespace IML.Functions
                     }
                     return args[0].Value;
                 },
+                MType.Union(new MType(new MGenericDataTypeEntry("T1")), new MType(new MGenericDataTypeEntry("T2"))),
                 new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.Any, "input1"),
-                    new MParameter(MDataTypeRestrictionEntry.Any, "input2")
+                    new MParameter(new MType(new MGenericDataTypeEntry("T1")), "input1"),
+                    new MParameter(new MType(new MGenericDataTypeEntry("T2")), "input2")
                 ),
-                "If 'input1' is truthy, returns 'input2'. Otherwise, returns 'input1'"
+                "If 'input1' is truthy, returns 'input2'. Otherwise, returns 'input1'",
+                new List<string>()
+                {
+                    "T1", "T2"
+                }
             );
         }
         public static MFunction OrFunction()
@@ -690,11 +708,16 @@ namespace IML.Functions
                     }
                     return args[1].Value;
                 },
+                MType.Union(new MType(new MGenericDataTypeEntry("T1")), new MType(new MGenericDataTypeEntry("T2"))),
                 new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.Any, "input1"),
-                    new MParameter(MDataTypeRestrictionEntry.Any, "input2")
+                    new MParameter(new MType(new MGenericDataTypeEntry("T1")), "input1"),
+                    new MParameter(new MType(new MGenericDataTypeEntry("T2")), "input2")
                 ),
-                "If 'input1' is truthy, returns 'input1'. Otherwise, returns 'input2'"
+                "If 'input1' is truthy, returns 'input1'. Otherwise, returns 'input2'",
+                new List<string>()
+                {
+                    "T1", "T2"
+                }
             );
         }
         public static MFunction NotFunction()
@@ -707,8 +730,9 @@ namespace IML.Functions
                     bool b = args[0].Value.IsTruthy();
                     return MValue.Bool(!b);
                 },
+                MType.Boolean,
                 new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.Any, "input")
+                    new MParameter(MType.Any, "input")
                 ),
                 "Inverts the input"
             );
@@ -722,7 +746,7 @@ namespace IML.Functions
                     MClosure b1 = args[0].Value.ClosureValue;
                     MClosure b2 = args[1].Value.ClosureValue;
                     MValue result1 = interpreter.PerformCall(b1, MArguments.Empty, env);
-                    if (result1.DataType.MatchesTypeExactly(MDataType.Error))
+                    if (result1.DataType.DataType.MatchesTypeExactly(MDataType.Error))
                     {
                         return result1;
                     }
@@ -733,11 +757,16 @@ namespace IML.Functions
                     }
                     return result1;
                 },
+                MType.Union(new MType(new MGenericDataTypeEntry("T1")), new MType(new MGenericDataTypeEntry("T2"))),
                 new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.Function, "eval1"),
-                    new MParameter(MDataTypeRestrictionEntry.Function, "eval2")
+                    new MParameter(MType.Function(new MType(new MGenericDataTypeEntry("T1"))), "eval1"),
+                    new MParameter(MType.Function(new MType(new MGenericDataTypeEntry("T2"))), "eval2")
                 ),
-                "If 'eval1' returns truthy, returns the result of 'eval2'. Otherwise, returns result of 'eval1'"
+                "If 'eval1' returns truthy, returns the result of 'eval2'. Otherwise, returns result of 'eval1'",
+                new List<string>()
+                {
+                    "T1", "T2"
+                }
             );
         }
         public static MFunction OreFunction()
@@ -750,7 +779,7 @@ namespace IML.Functions
                     MClosure b1 = args[0].Value.ClosureValue;
                     MClosure b2 = args[1].Value.ClosureValue;
                     MValue result1 = interpreter.PerformCall(b1, MArguments.Empty, env);
-                    if (result1.DataType.MatchesTypeExactly(MDataType.Error))
+                    if (result1.DataType.DataType.MatchesTypeExactly(MDataType.Error))
                     {
                         return result1;
                     }
@@ -761,11 +790,16 @@ namespace IML.Functions
                     }
                     return result1;
                 },
+                MType.Union(new MType(new MGenericDataTypeEntry("T1")), new MType(new MGenericDataTypeEntry("T2"))),
                 new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.Function, "eval1"),
-                    new MParameter(MDataTypeRestrictionEntry.Function, "eval2")
+                    new MParameter(MType.Function(new MType(new MGenericDataTypeEntry("T1"))), "eval1"),
+                    new MParameter(MType.Function(new MType(new MGenericDataTypeEntry("T2"))), "eval2")
                 ),
-                "If 'eval1' returns truthy, returns result. Otherwise, returns result of 'eval2'"
+                "If 'eval1' returns truthy, returns result. Otherwise, returns result of 'eval2'",
+                new List<string>()
+                {
+                    "T1", "T2"
+                }
             );
         }
 
@@ -780,9 +814,10 @@ namespace IML.Functions
                     MValue item2 = args[1].Value;
                     return MValue.Bool(item1 == item2);
                 },
+                MType.Boolean,
                 new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.Any, "item1"),
-                    new MParameter(MDataTypeRestrictionEntry.Any, "item2")
+                    new MParameter(MType.Any, "item1"),
+                    new MParameter(MType.Any, "item2")
                 ),
                 "Returns whether or not both items are equal"
             );
@@ -798,9 +833,10 @@ namespace IML.Functions
                     double item2 = args[1].Value.NumberValue;
                     return MValue.Bool(item1 < item2);
                 },
+                MType.Boolean,
                 new MParameters(
-                    new MParameter(MDataTypeRestrictionEntry.Number, "num1"),
-                    new MParameter(MDataTypeRestrictionEntry.Number, "num2")
+                    new MParameter(MType.Number, "num1"),
+                    new MParameter(MType.Number, "num2")
                 ),
                 "Returns true if num1 is less than num2"
             );
