@@ -1,6 +1,7 @@
 ﻿using IML.Environments;
 using IML.Evaluation;
 using IML.Structure;
+using IML.Util;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -82,7 +83,19 @@ namespace IML.CoreDataTypes
             {
                 return Any;
             }
-            // Now create a SET of the types that appear in each
+            // Now create a SET of the types that appear in each subtype
+            // Compare each to see if they're equal
+            Set<MDataTypeEntry> entries = new Set<MDataTypeEntry>();
+            for (int i = 0; i < Entries.Count; i++)
+            {
+                entries.Add(Entries[i]);
+            }
+            for (int i = 0; i < other.Entries.Count; i++)
+            {
+                entries.Add(other.Entries[i]);
+            }
+            // Now we have a set of entries
+            return new MType(entries.ToList());
         }
         public bool IsAnyType()
         {
@@ -100,8 +113,19 @@ namespace IML.CoreDataTypes
             return false;
         }
 
+        public MType DeepClone()
+        {
+            List<MDataTypeEntry> entries = new List<MDataTypeEntry>();
+            foreach (MDataTypeEntry e in Entries)
+            {
+                entries.Add(e.DeepClone());
+            }
+            return new MType(entries);
+        }
+
         public static readonly MType Any = new MType(MDataTypeEntry.Any);
 
+        // Strict equals, have to completely match
         public static bool operator ==(MType t1, MType t2)
         {
             if (t1.entries.Count != t2.entries.Count)
