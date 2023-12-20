@@ -24,15 +24,18 @@ namespace IML.CoreDataTypes
         }
         public static MConcreteDataTypeEntry Function(MType returnType, params MType[] paramTypes)
         {
-            return new MFunctionDataTypeEntry(returnType, new List<MType>(paramTypes), new List<string>());
+            return new MFunctionDataTypeEntry(returnType, new List<MType>(paramTypes), new List<string>(),
+                false, LambdaEnvironmentType.AllowAny, false);
         }
-        public static MConcreteDataTypeEntry Function(MType returnType, List<MType> paramTypes)
+        public static MConcreteDataTypeEntry Function(MType returnType, List<MType> paramTypes, bool isPure, 
+            bool isLastVarArgs, LambdaEnvironmentType envType)
         {
-            return new MFunctionDataTypeEntry(returnType, paramTypes, new List<string>());
+            return new MFunctionDataTypeEntry(returnType, paramTypes, new List<string>(), isPure, envType, isLastVarArgs);
         }
-        public static MConcreteDataTypeEntry Function(MType returnType, List<MType> paramTypes, List<string> genericNames)
+        public static MConcreteDataTypeEntry Function(MType returnType, List<MType> paramTypes, List<string> genericNames, 
+            bool isPure, bool isLastVarArgs, LambdaEnvironmentType envType)
         {
-            return new MFunctionDataTypeEntry(returnType, paramTypes, genericNames);
+            return new MFunctionDataTypeEntry(returnType, paramTypes, genericNames, isPure, envType, isLastVarArgs);
         }
 
         public abstract MDataTypeEntry DeepClone();
@@ -127,17 +130,29 @@ namespace IML.CoreDataTypes
         public MType ReturnType { get; private set; }
         public List<MType> ParameterTypes { get; private set; }
         public List<string> GenericNames { get; private set; }
+        public LambdaEnvironmentType EnvironmentType { get; private set; }
+        public bool IsPure { get; private set; }
+        public bool IsLastVarArgs { get; private set; }
 
-        public MFunctionDataTypeEntry(MType returnType, List<MType> paramTypes, List<string> genericNames)
+        public MFunctionDataTypeEntry(MType returnType, List<MType> paramTypes, List<string> genericNames, bool isPure,
+            LambdaEnvironmentType envType, bool isLastVarArgs)
             : base(MDataType.Function)
         {
             ReturnType = returnType;
             ParameterTypes = paramTypes;
             GenericNames = genericNames;
+            IsPure = isPure;
+            EnvironmentType = envType;
+            IsLastVarArgs = isLastVarArgs;
         }
 
         public bool Equals(MFunctionDataTypeEntry other)
         {
+            // Check all the small easy stuff
+            if (IsPure != other.IsPure || EnvironmentType != other.EnvironmentType || IsLastVarArgs != other.IsLastVarArgs)
+            {
+                return false;
+            }
             // The generic names don't have to match, but should have the same count of them
             if (GenericNames.Count != other.GenericNames.Count)
             {
@@ -227,7 +242,7 @@ namespace IML.CoreDataTypes
             {
                 gens.Add(g);
             }
-            return new MFunctionDataTypeEntry(ReturnType.DeepClone(), paramList, gens);
+            return new MFunctionDataTypeEntry(ReturnType.DeepClone(), paramList, gens, IsPure, EnvironmentType, IsLastVarArgs);
         }
 
         private class FunctionPositionalGeneric : MDataTypeEntry

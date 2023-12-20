@@ -58,12 +58,5 @@ namespace IML.Evaluation
             IsPure = isPure;
             IsLastVarArgs = isLastVarArgs;
         }
-
-        public enum LambdaEnvironmentType
-        {
-            ForceEnvironment, // Ex. ()!=>{}
-            ForceNoEnvironment, // Ex. ()!~>{}
-            AllowAny, // Ex. ()=>{}
-        }
     }
 }
