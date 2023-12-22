@@ -40,21 +40,9 @@ namespace IML.CoreDataTypes
         {
             for (int i = 0; i < entries.Count; i++)
             {
-                if (entries[i].DataType.MatchesType(value.DataType))
+                if (entries[i] == value.DataType)
                 {
-                    bool failsRestrictions = false;
-                    foreach (MTypeRestriction rest in entries[i].TypeRestrictions)
-                    {
-                        if (!rest.Definition.IsValid(value, rest, interpreter, env))
-                        {
-                            failsRestrictions = true;
-                            break;
-                        }
-                    }
-                    if (!failsRestrictions)
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
             return false;
