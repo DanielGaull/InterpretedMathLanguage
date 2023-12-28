@@ -56,7 +56,7 @@ namespace IMLTests
         [TestMethod]
         public void TestSimpleMatch()
         {
-            MType type = new MType(MDataTypeRestrictionEntry.Boolean);
+            MType type = new MType(MDataTypeEntry.Boolean);
             MValue value = MValue.Bool(true);
             AssertTypes(type, value);
         }
@@ -64,7 +64,7 @@ namespace IMLTests
         [TestMethod]
         public void TestSimpleMatchAny()
         {
-            MType type = new MType(MDataTypeRestrictionEntry.Any);
+            MType type = new MType(MDataTypeEntry.Any);
             MValue value = MValue.Bool(true);
             AssertTypes(type, value);
         }
@@ -72,7 +72,7 @@ namespace IMLTests
         [TestMethod]
         public void TestSimpleMatchFail()
         {
-            MType type = new MType(MDataTypeRestrictionEntry.String);
+            MType type = new MType(MDataTypeEntry.String);
             MValue value = MValue.Bool(true);
             AssertTypesFail(type, value);
         }
@@ -80,7 +80,7 @@ namespace IMLTests
         [TestMethod]
         public void TestUnionMatch()
         {
-            MType type = new MType(MDataTypeRestrictionEntry.String, MDataTypeRestrictionEntry.Boolean);
+            MType type = new MType(MDataTypeEntry.String, MDataTypeEntry.Boolean);
             MValue value = MValue.Bool(true);
             AssertTypes(type, value);
         }
@@ -88,7 +88,7 @@ namespace IMLTests
         [TestMethod]
         public void TestUnionMatchFail()
         {
-            MType type = new MType(MDataTypeRestrictionEntry.String, MDataTypeRestrictionEntry.Number);
+            MType type = new MType(MDataTypeEntry.String, MDataTypeEntry.Number);
             MValue value = MValue.Bool(true);
             AssertTypesFail(type, value);
         }

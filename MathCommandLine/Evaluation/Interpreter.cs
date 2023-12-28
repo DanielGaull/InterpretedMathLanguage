@@ -104,15 +104,15 @@ namespace IML.Evaluation
                 case AstTypes.Call:
                     MValue evaluatedCaller = EvaluateAst(ast.ParentAst, env);
                     // If an error, return that error instead of attempting to call it
-                    if (evaluatedCaller.DataType == MDataType.Error)
+                    if (evaluatedCaller.DataType.DataType == MDataType.Error)
                     {
                         return evaluatedCaller;
                     }
-                    if (evaluatedCaller.DataType != MDataType.Function)
+                    if (evaluatedCaller.DataType.DataType != MDataType.Function)
                     {
                         // Not a callable object
                         return MValue.Error(ErrorCodes.NOT_CALLABLE,
-                            "Cannot invoke because \"" + evaluatedCaller.DataType.Name + "\" is not a callable data type.",
+                            "Cannot invoke because \"" + evaluatedCaller.DataType.DataType.Name + "\" is not a callable data type.",
                             MList.Empty);
                     }
                     MClosure closure = evaluatedCaller.ClosureValue;
@@ -144,11 +144,14 @@ namespace IML.Evaluation
                 case AstTypes.ListLiteral:
                     // Need to evaluate each element of the list
                     List<MValue> elements = new List<MValue>();
+                    MType listType = MType.UNION_BASE;
                     foreach (Ast elem in ast.AstCollectionArg)
                     {
-                        elements.Add(EvaluateAst(elem, env));
+                        MValue value = EvaluateAst(elem, env);
+                        elements.Add(value);
+                        listType = listType.Union(new MType(value.DataType));
                     }
-                    return MValue.List(new MList(elements));
+                    return MValue.List(new MList(elements, listType));
                 case AstTypes.LambdaLiteral:
                     // Immediately check to make sure we aren't allowing any parameters if the closure
                     // doesn't create an environment
@@ -161,8 +164,8 @@ namespace IML.Evaluation
                     MParameter[] paramArray = ast.Parameters.Select((astParam) =>
                     {
                         string name = astParam.Name;
-                        List<MDataTypeRestrictionEntry> entries = new List<MDataTypeRestrictionEntry>();
-                        entries.Add(MDataTypeRestrictionEntry.Any);
+                        List<MDataTypeEntry> entries = new List<MDataTypeEntry>();
+                        entries.Add(MDataTypeEntry.Any);
                         // TODO: Parse data types here
                         // If any type entries are empty, then return an error (type doesn't exist)
                         return new MParameter(name, entries);
@@ -258,7 +261,7 @@ namespace IML.Evaluation
                             parameters.Get(i).DataTypeString() + "' but received type '" + args[i].Value.DataType + "'.",
                         MList.FromOne(MValue.Number(i)));
                 }
-                else if (args[i].Value.DataType == MDataType.Error)
+                else if (args[i].Value.DataType.DataType == MDataType.Error)
                 {
                     // An error was passed as an argument, so simply need to return it
                     return args[i].Value;

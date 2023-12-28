@@ -14,6 +14,13 @@ namespace IML.CoreDataTypes
     {
         private List<MDataTypeEntry> entries;
 
+        // UNION_BASE is a special MType that is not actually valid. It is used when iteratively unioning types.
+        // The UNION_BASE type will assign itself to the type to union to. This is to simplify code so you don't have to
+        // assign a variable to null and check if its null at first; you just perform unions with the UNION_BASE
+        // UNION_BASE SHOULD NEVER BE USED AS AN ACTUAL TYPE, ONLY PRECEEDING UNION OPERATIONS
+        private bool isUnionBase = false;
+        public static readonly MType UNION_BASE = new MType(true);
+
         public List<MDataTypeEntry> Entries
         {
             get
@@ -34,6 +41,11 @@ namespace IML.CoreDataTypes
         {
             entries = new List<MDataTypeEntry>();
             entries.Add(entry);
+        }
+        private MType(bool isUnionBase)
+        {
+            entries = new List<MDataTypeEntry>();
+            this.isUnionBase = isUnionBase;
         }
 
         public bool ValueMatches(MValue value, IInterpreter interpreter, MEnvironment env)
@@ -70,6 +82,10 @@ namespace IML.CoreDataTypes
         // This is because A[T|R] = A[T]|A[R]
         public MType Union(MType other)
         {
+            // If either are the union base, return the other
+            if (isUnionBase) return other;
+            if (other.isUnionBase) return this;
+
             // First check if either has the "any" type
             // If so, then just return "any"
             if (IsAnyType() || other.IsAnyType())

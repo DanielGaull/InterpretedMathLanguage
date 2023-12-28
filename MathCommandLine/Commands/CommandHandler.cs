@@ -194,7 +194,7 @@ namespace IML.Commands
                 try
                 {
                     MValue result = RunLine(baseEnv, sp, evaluator, input);
-                    if (!result.DataType.MatchesTypeExactly(MDataType.Void))
+                    if (!result.DataType.DataType.MatchesTypeExactly(MDataType.Void))
                     {
                         // Never output void as a result, since we're typically running a function
                         string resultString = "  " + result.ToLongString();

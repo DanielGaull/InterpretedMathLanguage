@@ -11,7 +11,7 @@ namespace IML
     {
         public static MList StringToMList(string str)
         {
-            return new MList(str.Select((c) => MValue.Number(c)).ToList());
+            return new MList(str.Select((c) => MValue.Number(c)).ToList(), MType.Number);
         }
         public static string MListToString(MList list)
         {
