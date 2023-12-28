@@ -14,6 +14,14 @@ namespace IML.Evaluation
         {
             Entries = entries;
         }
+        public AstType(AstTypeEntry entry)
+            : this(new List<AstTypeEntry>() { entry })
+        {
+        }
+        public AstType(string typeName, params AstType[] generics)
+            : this(new AstTypeEntry(typeName, new List<AstType>(generics)))
+        {
+        }
 
         public static readonly AstType Any =
             new AstType(new List<AstTypeEntry>()

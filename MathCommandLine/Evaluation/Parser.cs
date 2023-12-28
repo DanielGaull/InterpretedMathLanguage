@@ -101,8 +101,11 @@ namespace IML.Evaluation
             DECLARATION_CONST_KEYWORD,
         };
 
+        private TypeDeterminer typeDeterminer;
+
         public Parser()
         {
+            typeDeterminer = new TypeDeterminer();
         }
 
         /// <summary>
@@ -186,7 +189,7 @@ namespace IML.Evaluation
                     string paramsString;
                     string arrowBit;
                     string exprString;
-                    string returnTypeString;
+                    string returnTypeString = "";
                     bool provideReturnType = false;
                     if (groups.Count == 5)
                     {
@@ -212,7 +215,19 @@ namespace IML.Evaluation
 
                     List<Ast> body = ParseBody(exprString);
 
-                    return Ast.LambdaLiteral(parsedParams, body, arrowBit == "=");
+                    bool createsEnv = arrowBit == "=";
+
+                    AstType returnType;
+                    if (provideReturnType)
+                    {
+                        returnType = ParseType(returnTypeString);
+                    }
+                    else
+                    {
+                        returnType = typeDeterminer.DetermineDataType(body);
+                    }
+
+                    return Ast.LambdaLiteral(parsedParams, body, returnType, createsEnv, false);
                 }
                 else if (MatchesSimpleLambda(expression))
                 {

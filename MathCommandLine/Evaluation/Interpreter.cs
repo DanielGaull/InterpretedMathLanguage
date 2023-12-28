@@ -94,7 +94,10 @@ namespace IML.Evaluation
                 case AstTypes.LambdaLiteral:
                     {
                         LambdaAst ast = (LambdaAst)baseAst;
-                        EnsureValidity(ast.Body);
+                        foreach (Ast line in ast.Body)
+                        {
+                            EnsureValidity(line);
+                        }
                     }
                     break;
                 case AstTypes.MemberAccess:
