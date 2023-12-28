@@ -1,5 +1,7 @@
 ﻿using IML.CoreDataTypes;
 using IML.Environments;
+using IML.Evaluation.AST;
+using IML.Evaluation.AST.ValueAsts;
 using IML.Exceptions;
 using IML.Functions;
 using IML.Structure;
@@ -58,19 +60,22 @@ namespace IML.Evaluation
         }
 
         // Throws an invalid syntax exception if it finds any invalid syntax
-        private void EnsureValidity(Ast ast)
+        private void EnsureValidity(Ast baseAst)
         {
-            switch (ast.Type)
+            switch (baseAst.Type)
             {
                 case AstTypes.Call:
-                    EnsureValidity(ast.ParentAst);
-                    foreach (var child in ast.AstCollectionArg)
                     {
-                        EnsureValidity(child);
+                        CallAst ast = (CallAst)baseAst;
+                        EnsureValidity(ast.CalledAst);
+                        foreach (var child in ast.Arguments)
+                        {
+                            EnsureValidity(child);
+                        }
                     }
                     break;
                 case AstTypes.Invalid:
-                    throw new InvalidParseException(ast.Expression);
+                    throw new InvalidParseException(((InvalidAst)baseAst).Expression);
                 case AstTypes.NumberLiteral:
                 case AstTypes.StringLiteral:
                 case AstTypes.ReferenceLiteral:
@@ -78,163 +83,193 @@ namespace IML.Evaluation
                     // Do nothing, this is perfectly legal always
                     break;
                 case AstTypes.ListLiteral:
-                    foreach (var child in ast.AstCollectionArg)
                     {
-                        EnsureValidity(child);
+                        ListAst ast = (ListAst)baseAst;
+                        foreach (var child in ast.Elements)
+                        {
+                            EnsureValidity(child);
+                        }
                     }
                     break;
                 case AstTypes.LambdaLiteral:
-                    EnsureValidity(ast.Body);
+                    {
+                        LambdaAst ast = (LambdaAst)baseAst;
+                        EnsureValidity(ast.Body);
+                    }
                     break;
                 case AstTypes.MemberAccess:
-                    EnsureValidity(ast.ParentAst);
+                    EnsureValidity(((MemberAccessAst)baseAst).Parent);
                     break;
                 case AstTypes.VariableAssignment:
+                    EnsureValidity(((VariableAssignmentAst)baseAst).Value);
+                    break;
                 case AstTypes.VariableDeclaration:
-                    EnsureValidity(ast.Body);
+                    EnsureValidity(((VariableDeclarationAst)baseAst).Value);
                     break;
 
             }
         }
 
-        private MValue EvaluateAst(Ast ast, MEnvironment env)
+        private MValue EvaluateAst(Ast baseAst, MEnvironment env)
         {
-            switch (ast.Type)
+            switch (baseAst.Type)
             {
                 case AstTypes.Call:
-                    MValue evaluatedCaller = EvaluateAst(ast.ParentAst, env);
-                    // If an error, return that error instead of attempting to call it
-                    if (evaluatedCaller.DataType.DataType == MDataType.Error)
                     {
-                        return evaluatedCaller;
+                        CallAst ast = (CallAst)baseAst;
+                        MValue evaluatedCaller = EvaluateAst(ast.CalledAst, env);
+                        // If an error, return that error instead of attempting to call it
+                        if (evaluatedCaller.DataType.DataType == MDataType.Error)
+                        {
+                            return evaluatedCaller;
+                        }
+                        if (evaluatedCaller.DataType.DataType != MDataType.Function)
+                        {
+                            // Not a callable object
+                            return MValue.Error(ErrorCodes.NOT_CALLABLE,
+                                "Cannot invoke because \"" + evaluatedCaller.DataType.DataType.Name + "\" is not a callable data type.",
+                                MList.Empty);
+                        }
+                        MClosure closure = evaluatedCaller.ClosureValue;
+                        List<MArgument> argsList = new List<MArgument>();
+                        for (int i = 0; i < ast.Arguments.Count; i++)
+                        {
+                            // Don't worry; names are added to values later
+                            argsList.Add(new MArgument(EvaluateAst(ast.Arguments[i], env)));
+                        }
+                        return PerformCall(closure, new MArguments(argsList), env);
                     }
-                    if (evaluatedCaller.DataType.DataType != MDataType.Function)
-                    {
-                        // Not a callable object
-                        return MValue.Error(ErrorCodes.NOT_CALLABLE,
-                            "Cannot invoke because \"" + evaluatedCaller.DataType.DataType.Name + "\" is not a callable data type.",
-                            MList.Empty);
-                    }
-                    MClosure closure = evaluatedCaller.ClosureValue;
-                    List<MArgument> argsList = new List<MArgument>();
-                    for (int i = 0; i < ast.AstCollectionArg.Length; i++)
-                    {
-                        // Don't worry; names are added to values later
-                        argsList.Add(new MArgument(EvaluateAst(ast.AstCollectionArg[i], env)));
-                    }
-                    return PerformCall(closure, new MArguments(argsList), env);
                 case AstTypes.Variable:
                     // Return the value of the variable with this name
-                    return env.Get(ast.Name);
+                    return env.Get(((VariableAst)baseAst).Name);
                 case AstTypes.NumberLiteral:
-                    return MValue.Number(ast.NumberArg);
+                    return MValue.Number(((NumberAst)baseAst).Value);
                 case AstTypes.StringLiteral:
-                    return MValue.String(ast.StringArg);
+                    return MValue.String(((StringAst)baseAst).Value);
                 case AstTypes.ReferenceLiteral:
-                    MBoxedValue box = env.GetBox(ast.Name);
-                    if (box != null)
                     {
-                        return MValue.Reference(box);
-                    }
-                    else
-                    {
-                        return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST,
-                                $"Variable \"{ast.Name}\" does not exist.", MList.Empty);
+                        string name = ((ReferenceAst)baseAst).RefName;
+                        MBoxedValue box = env.GetBox(name);
+                        if (box != null)
+                        {
+                            return MValue.Reference(box);
+                        }
+                        else
+                        {
+                            return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST,
+                                    $"Variable \"{name}\" does not exist.", MList.Empty);
+                        }
                     }
                 case AstTypes.ListLiteral:
-                    // Need to evaluate each element of the list
-                    List<MValue> elements = new List<MValue>();
-                    MType listType = MType.UNION_BASE;
-                    foreach (Ast elem in ast.AstCollectionArg)
                     {
-                        MValue value = EvaluateAst(elem, env);
-                        elements.Add(value);
-                        listType = listType.Union(new MType(value.DataType));
+                        ListAst ast = (ListAst)baseAst;
+                        // Need to evaluate each element of the list
+                        List<MValue> elements = new List<MValue>();
+                        MType listType = MType.UNION_BASE;
+                        foreach (Ast elem in ast.Elements)
+                        {
+                            MValue value = EvaluateAst(elem, env);
+                            elements.Add(value);
+                            listType = listType.Union(new MType(value.DataType));
+                        }
+                        return MValue.List(new MList(elements, listType));
                     }
-                    return MValue.List(new MList(elements, listType));
                 case AstTypes.LambdaLiteral:
-                    // Immediately check to make sure we aren't allowing any parameters if the closure
-                    // doesn't create an environment
-                    // Environment-less closures (i.e. ()~>{...}) cannot have parameters
-                    if (ast.Parameters.Length > 0 && !ast.CreatesEnv)
                     {
-                        return MValue.Error(ErrorCodes.ILLEGAL_LAMBDA,
-                            "Lambdas that don't create environments (~>) cannot have parameters", MList.Empty);
+                        LambdaAst ast = (LambdaAst)baseAst;
+                        // Immediately check to make sure we aren't allowing any parameters if the closure
+                        // doesn't create an environment
+                        // Environment-less closures (i.e. ()~>{...}) cannot have parameters
+                        //if (ast.Parameters.Length > 0 && !ast.CreatesEnv)
+                        //{
+                        //    return MValue.Error(ErrorCodes.ILLEGAL_LAMBDA,
+                        //        "Lambdas that don't create environments (~>) cannot have parameters", MList.Empty);
+                        //}
+                        //MParameter[] paramArray = ast.Parameters.Select((astParam) =>
+                        //{
+                        //    string name = astParam.Name;
+                        //    List<MDataTypeEntry> entries = new List<MDataTypeEntry>();
+                        //    entries.Add(MDataTypeEntry.Any);
+                        //// TODO: Parse data types here
+                        //// If any type entries are empty, then return an error (type doesn't exist)
+                        //return new MParameter(name, entries);
+                        //}).ToArray();
+                        //if (paramArray.Any((param) => param.IsEmpty))
+                        //{
+                        //    return MValue.Error(ErrorCodes.TYPE_DOES_NOT_EXIST,
+                        //        "Type \"" + ast.Name + "\" is not defined.", MList.Empty);
+                        //}
+                        //MParameters parameters = new MParameters(paramArray);
+                        //// Make sure the body is valid
+                        //if (ast.Body.Type == AstTypes.Invalid)
+                        //{
+                        //    throw new InvalidParseException(ast.Body.Expression);
+                        //}
+                        //// Create a closure with this current environment
+                        //return MValue.Closure(new MClosure(parameters, env, ast.Body, ast.CreatesEnv));
+                        throw new InvalidOperationException("Unimplemented");
                     }
-                    MParameter[] paramArray = ast.Parameters.Select((astParam) =>
-                    {
-                        string name = astParam.Name;
-                        List<MDataTypeEntry> entries = new List<MDataTypeEntry>();
-                        entries.Add(MDataTypeEntry.Any);
-                        // TODO: Parse data types here
-                        // If any type entries are empty, then return an error (type doesn't exist)
-                        return new MParameter(name, entries);
-                    }).ToArray();
-                    if (paramArray.Any((param) => param.IsEmpty))
-                    {
-                        return MValue.Error(ErrorCodes.TYPE_DOES_NOT_EXIST,
-                            "Type \"" + ast.Name + "\" is not defined.", MList.Empty);
-                    }
-                    MParameters parameters = new MParameters(paramArray);
-                    // Make sure the body is valid
-                    if (ast.Body.Type == AstTypes.Invalid)
-                    {
-                        throw new InvalidParseException(ast.Body.Expression);
-                    }
-                    // Create a closure with this current environment
-                    return MValue.Closure(new MClosure(parameters, env, ast.Body, ast.CreatesEnv));
                 // Var declaration & assignment both return the value of the variable after the operation
                 // This means that assignments such as "x += 5" will return the new value of x
                 case AstTypes.VariableDeclaration:
-                    string newVarName = ast.Name;
-                    MValue newVarValue = EvaluateAst(ast.Body, env);
-                    bool canSet = ast.VariableType == VariableType.Variable;
-                    Regex reg = new Regex("^[a-zA-Z][a-zA-Z0-9_]*$");
-                    if (env.Has(newVarName))
                     {
-                        return MValue.Error(ErrorCodes.CANNOT_DECLARE, $"Named value \"{newVarName}\" already exists.");
-                    }
-                    else if (!reg.IsMatch(newVarName))
-                    {
-                        return MValue.Error(ErrorCodes.CANNOT_DECLARE, $"The name \"{newVarName}\" is an invalid name.");
-                    }
-                    else
-                    {
-                        env.AddValue(newVarName, newVarValue, true, canSet, null);
-                        return newVarValue;
+                        VariableDeclarationAst ast = (VariableDeclarationAst)baseAst;
+                        string newVarName = ast.Name;
+                        MValue newVarValue = EvaluateAst(ast.Value, env);
+                        bool canSet = ast.VariableType == VariableType.Variable;
+                        Regex reg = new Regex("^[a-zA-Z][a-zA-Z0-9_]*$");
+                        if (env.Has(newVarName))
+                        {
+                            return MValue.Error(ErrorCodes.CANNOT_DECLARE, $"Named value \"{newVarName}\" already exists.");
+                        }
+                        else if (!reg.IsMatch(newVarName))
+                        {
+                            return MValue.Error(ErrorCodes.CANNOT_DECLARE, $"The name \"{newVarName}\" is an invalid name.");
+                        }
+                        else
+                        {
+                            env.AddValue(newVarName, newVarValue, true, canSet, null);
+                            return newVarValue;
+                        }
                     }
                 case AstTypes.VariableAssignment:
-                    IdentifierAst identifier = ast.Identifier;
-                    MValue assignValue = EvaluateAst(ast.Body, env);
-                    switch (identifier.Type)
                     {
-                        case IdentifierAstTypes.RawVar:
-                            string varName = identifier.Name;
-                            if (!env.Has(varName))
-                            {
-                                return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST, $"Variable \"{varName}\" does not exist.");
-                            }
-                            MBoxedValue boxToAssign = env.GetBox(varName);
-                            if (!boxToAssign.CanSet)
-                            {
-                                return MValue.Error(ErrorCodes.CANNOT_ASSIGN, $"Cannot assign value to constant \"{varName}\"");
-                            }
-                            boxToAssign.SetValue(assignValue);
-                            break;
-                        case IdentifierAstTypes.MemberAccess:
-                            MValue assignParent = EvaluateAst(identifier.Parent, env);
-                            return assignParent.SetValueByName(identifier.Name, assignValue, false);
-                        case IdentifierAstTypes.Dereference:
-                            // TODO
-                            break;
+                        VariableAssignmentAst ast = (VariableAssignmentAst)baseAst;
+                        IdentifierAst identifier = ast.Identifier;
+                        MValue assignValue = EvaluateAst(ast.Value, env);
+                        switch (identifier.Type)
+                        {
+                            case IdentifierAstTypes.RawVar:
+                                string varName = identifier.Name;
+                                if (!env.Has(varName))
+                                {
+                                    return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST, $"Variable \"{varName}\" does not exist.");
+                                }
+                                MBoxedValue boxToAssign = env.GetBox(varName);
+                                if (!boxToAssign.CanSet)
+                                {
+                                    return MValue.Error(ErrorCodes.CANNOT_ASSIGN, $"Cannot assign value to constant \"{varName}\"");
+                                }
+                                boxToAssign.SetValue(assignValue);
+                                break;
+                            case IdentifierAstTypes.MemberAccess:
+                                MValue assignParent = EvaluateAst(identifier.Parent, env);
+                                return assignParent.SetValueByName(identifier.Name, assignValue, false);
+                            case IdentifierAstTypes.Dereference:
+                                // TODO
+                                break;
+                        }
+                        return assignValue;
                     }
-                    return assignValue;
                 case AstTypes.MemberAccess:
-                    MValue original = EvaluateAst(ast.ParentAst, env);
-                    string key = ast.Name;
-                    return original.GetValueByName(key, false);
+                    {
+                        MemberAccessAst ast = (MemberAccessAst)baseAst;
+                        MValue original = EvaluateAst(ast.Parent, env);
+                        string key = ast.Name;
+                        return original.GetValueByName(key, false);
+                    }
                 case AstTypes.Invalid:
-                    throw new InvalidParseException(ast.Expression);
+                    throw new InvalidParseException(((InvalidAst)baseAst).Expression);
             }
             return null;
         }

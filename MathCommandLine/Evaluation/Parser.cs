@@ -1,5 +1,6 @@
 ﻿using IML.CoreDataTypes;
 using IML.Environments;
+using IML.Evaluation.AST.ValueAsts;
 using IML.Exceptions;
 using IML.Functions;
 using IML.Structure;
@@ -27,7 +28,9 @@ namespace IML.Evaluation
         private static readonly Regex REFERENCE_REGEX = new Regex(@"^\&(" + SYMBOL_PATTERN + ")$");
         private static readonly Regex LIST_REGEX = new Regex(@"^\{(.*)\}$");
         private static readonly Regex SIMPLE_LAMBDA_REGEX = new Regex(@"^\[(.*)\]$");
-        private static readonly Regex LAMBDA_REGEX = new Regex(@"^\((.*?)\)(\:.*)?([=~])>\{(.*)\}$");
+        // Group for params. Non capturing to make the ':' optional, capturing for the type
+        // Capturing for the arrow type and the return type
+        private static readonly Regex LAMBDA_REGEX = new Regex(@"^\((.*)\)(?:\:(.*))?([=~])>\{(.*)\}$");
         private static readonly Regex STRING_REGEX = new Regex("^\"([^\"]*)\"$");
         private static readonly Regex MEMBER_ACCESS_REGEX = new Regex(@$"^(.*)\{MEMBER_ACCESS_TOKEN}(" + SYMBOL_PATTERN + ")$");
 
@@ -169,11 +172,28 @@ namespace IML.Evaluation
                 }
                 else if (LAMBDA_REGEX.IsMatch(expression))
                 {
-                    // Three parts: The expression, the parameters, and the type of lambda (environment/no environment)
+                    // 3-4 parts: parameters, return type (optional), type of lambda (environment/no environment), expression/body
                     var groups = LAMBDA_REGEX.Match(expression).Groups;
-                    string paramsString = groups[1].Value;
-                    string arrowBit = groups[2].Value;
-                    string exprString = groups[3].Value;
+                    // If there are 5 groups, then the return type has been provided. Else, we must infer the return type
+                    string paramsString;
+                    string arrowBit;
+                    string exprString;
+                    string returnTypeString;
+                    bool provideReturnType = false;
+                    if (groups.Count == 5)
+                    {
+                        paramsString = groups[1].Value;
+                        returnTypeString = groups[2].Value;
+                        arrowBit = groups[3].Value;
+                        exprString = groups[4].Value;
+                        provideReturnType = true;
+                    }
+                    else
+                    {
+                        paramsString = groups[1].Value;
+                        arrowBit = groups[2].Value;
+                        exprString = groups[3].Value;
+                    }
 
                     // Parse Parameters
                     AstParameter[] parsedParams = paramsString.Length > 0 ?
@@ -269,54 +289,54 @@ namespace IML.Evaluation
             }
         }
 
-        public string Unparse(Ast ast)
-        {
-            StringBuilder builder = new StringBuilder();
-            switch (ast.Type)
-            {
-                case AstTypes.NumberLiteral:
-                    return ast.NumberArg.ToString();
-                case AstTypes.ListLiteral:
-                    builder.Append(LIST_START_WRAPPER);
-                    for (int i = 0; i < ast.AstCollectionArg.Length; i++)
-                    {
-                        builder.Append(Unparse(ast.AstCollectionArg[i]));
-                        if (i + 1 < ast.AstCollectionArg.Length)
-                        {
-                            builder.Append(LIST_DELIMITER);
-                        }
-                    }
-                    builder.Append(LIST_END_WRAPPER);
-                    return builder.ToString();
-                case AstTypes.StringLiteral:
-                    builder.Append(STRING_START_WRAPPER);
-                    builder.Append(ast.Expression);
-                    builder.Append(STRING_END_WRAPPER);
-                    return builder.ToString();
-                case AstTypes.Variable:
-                    return ast.Name;
-                case AstTypes.Call:
-                    builder.Append(Unparse(ast.ParentAst));
-                    builder.Append(CALL_START_WRAPPER);
-                    for (int i = 0; i < ast.AstCollectionArg.Length; i++)
-                    {
-                        builder.Append(Unparse(ast.AstCollectionArg[i]));
-                        if (i + 1 < ast.AstCollectionArg.Length)
-                        {
-                            builder.Append(ARG_DELIMITER);
-                        }
-                    }
-                    builder.Append(CALL_END_WRAPPER);
-                    return builder.ToString();
-                case AstTypes.Invalid:
-                    return ast.Expression;
-                case AstTypes.LambdaLiteral:
-                    return "(" + string.Join(',', ast.Parameters.Select(x => UnparseParameter(x)).ToArray()) + ")" +
-                        (ast.CreatesEnv ? "=>" : "~>") + "{" +
-                        Unparse(ast.Body) + "}";
-            }
-            return "";
-        }
+        //public string Unparse(Ast ast)
+        //{
+        //    StringBuilder builder = new StringBuilder();
+        //    switch (ast.Type)
+        //    {
+        //        case AstTypes.NumberLiteral:
+        //            return ast.NumberArg.ToString();
+        //        case AstTypes.ListLiteral:
+        //            builder.Append(LIST_START_WRAPPER);
+        //            for (int i = 0; i < ast.AstCollectionArg.Length; i++)
+        //            {
+        //                builder.Append(Unparse(ast.AstCollectionArg[i]));
+        //                if (i + 1 < ast.AstCollectionArg.Length)
+        //                {
+        //                    builder.Append(LIST_DELIMITER);
+        //                }
+        //            }
+        //            builder.Append(LIST_END_WRAPPER);
+        //            return builder.ToString();
+        //        case AstTypes.StringLiteral:
+        //            builder.Append(STRING_START_WRAPPER);
+        //            builder.Append(ast.Expression);
+        //            builder.Append(STRING_END_WRAPPER);
+        //            return builder.ToString();
+        //        case AstTypes.Variable:
+        //            return ast.Name;
+        //        case AstTypes.Call:
+        //            builder.Append(Unparse(ast.ParentAst));
+        //            builder.Append(CALL_START_WRAPPER);
+        //            for (int i = 0; i < ast.AstCollectionArg.Length; i++)
+        //            {
+        //                builder.Append(Unparse(ast.AstCollectionArg[i]));
+        //                if (i + 1 < ast.AstCollectionArg.Length)
+        //                {
+        //                    builder.Append(ARG_DELIMITER);
+        //                }
+        //            }
+        //            builder.Append(CALL_END_WRAPPER);
+        //            return builder.ToString();
+        //        case AstTypes.Invalid:
+        //            return ast.Expression;
+        //        case AstTypes.LambdaLiteral:
+        //            return "(" + string.Join(',', ast.Parameters.Select(x => UnparseParameter(x)).ToArray()) + ")" +
+        //                (ast.CreatesEnv ? "=>" : "~>") + "{" +
+        //                Unparse(ast.Body) + "}";
+        //    }
+        //    return "";
+        //}
 
         #region Parsing Parameters
         /// <summary>
