@@ -186,8 +186,26 @@ namespace IML.Functions
                         case 5:
                             result = Math.Atan(arg);
                             break;
+                        case 6:
+                            result = Math.Sinh(arg);
+                            break;
+                        case 7:
+                            result = Math.Cosh(arg);
+                            break;
+                        case 8:
+                            result = Math.Tanh(arg);
+                            break;
+                        case 9:
+                            result = Math.Asinh(arg);
+                            break;
+                        case 10:
+                            result = Math.Acosh(arg);
+                            break;
+                        case 11:
+                            result = Math.Atanh(arg);
+                            break;
                         default:
-                            return MValue.Error(ErrorCodes.INVALID_ARGUMENT, "Trig operation must be between 0 and 5.");
+                            return MValue.Error(ErrorCodes.INVALID_ARGUMENT, "Trig operation must be between 0 and 11.");
                     }
                     return MValue.Number(result);
                 },
@@ -196,7 +214,8 @@ namespace IML.Functions
                     new MParameter(MType.Number, "arg"),
                     new MParameter(MType.Number, "op")
                 ),
-                "Performs a trigonometric function. (Op Codes: 0-sin, 1-cos, 2-tan, 3-arcsin, 4-arccos, 5-arctan)"
+                "Performs a trigonometric function. (Op Codes: 0-sin, 1-cos, 2-tan, 3-arcsin, 4-arccos, 5-arctan, " + 
+                    "6-sinh, 7-cosh, 8-tanh, 9-asinh, 10-acosh, 11-atanh)"
             );
         }
         public static MFunction NaturalLog()
