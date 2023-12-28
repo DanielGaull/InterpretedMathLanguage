@@ -1,4 +1,5 @@
-﻿using IML.Environments;
+﻿using IML.CoreDataTypes;
+using IML.Environments;
 using IML.Evaluation.AST.ValueAsts;
 using IML.Functions;
 using IML.Structure;
@@ -28,8 +29,10 @@ namespace IML.Evaluation
         {
             return new ListAst(new List<Ast>(elements));
         }
-        public static Ast LambdaLiteral(AstParameter[] parameters, Ast body, bool createsEnv)
+        public static LambdaAst LambdaLiteral(AstParameter[] parameters, List<Ast> body, AstType returnType, 
+            bool createsEnv, bool isPure)
         {
+            return new LambdaAst(new List<AstParameter>(parameters), body, returnType, isPure, createsEnv);
         }
         public static StringAst StringLiteral(string text)
         {

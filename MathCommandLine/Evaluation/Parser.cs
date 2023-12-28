@@ -39,22 +39,28 @@ namespace IML.Evaluation
         private const char CALL_START_WRAPPER = '('; 
         private const char ARG_DELIMITER = ',';
 
+        private readonly string LAMBDA_BODY_WRAPPERS = "{}";
+
         // Param parsing values
         private const char GENERIC_END_WRAPPER = ')';
         private const char GENERIC_START_WRAPPER = '(';
+        private readonly string GENERIC_WRAPPERS = $"{GENERIC_START_WRAPPER}{GENERIC_END_WRAPPER}";
 
         // Simple lambda parsing values
         private const char SIMPLE_LAMBDA_START_WRAPPER = '[';
         private const char SIMPLE_LAMBDA_END_WRAPPER = ']';
+        private readonly string SIMPLE_LAMBDA_WRAPPERS = $"{SIMPLE_LAMBDA_START_WRAPPER}{SIMPLE_LAMBDA_END_WRAPPER}";
 
         // List parsing values
         private const char LIST_START_WRAPPER = '{';
         private const char LIST_END_WRAPPER = '}';
         private const char LIST_DELIMITER = ',';
+        private readonly string LIST_WRAPPERS = $"{LIST_START_WRAPPER}{LIST_END_WRAPPER}";
 
         // String parsing values
         private const char STRING_START_WRAPPER = '"';
         private const char STRING_END_WRAPPER = '"';
+        private const char STRING_ESCAPE_STARTER = '\\';
 
         // Parameter parsing regexes
         private const char PARAM_DELIMITER = ',';
@@ -62,6 +68,8 @@ namespace IML.Evaluation
         private const char TYPE_UNION_DELIMITER = '|';
         private const char TYPE_GENERICS_DELIMITER = ',';
         private const string TYPE_GENERICS_WRAPPERS = "[]";
+
+        private const char CODE_LINE_DELIMITER = ';';
 
         private const char LAMBDA_TYPE_NO_ENVIRONMENT_LINE = '~';
         private const char LAMBDA_TYPE_CREATES_ENVIRONMENT_LINE = '=';
@@ -202,7 +210,7 @@ namespace IML.Evaluation
                             return ParseParameter(paramString);
                         }).ToArray()) : new AstParameter[0];
 
-                    Ast body = Parse(exprString);
+                    List<Ast> body = ParseBody(exprString);
 
                     return Ast.LambdaLiteral(parsedParams, body, arrowBit == "=");
                 }
@@ -211,7 +219,7 @@ namespace IML.Evaluation
                     // Simple lambda; no params, does not create body
                     string contents = SIMPLE_LAMBDA_REGEX.Match(expression).Groups[1].Value;
                     Ast body = Parse(contents);
-                    return Ast.LambdaLiteral(new AstParameter[0], body, false);
+                    return Ast.LambdaLiteral(new AstParameter[0], new List<Ast>() { body }, AstType.Any, false, false);
                 }
                 else if (MEMBER_ACCESS_REGEX.IsMatch(expression))
                 {
@@ -287,6 +295,18 @@ namespace IML.Evaluation
             {
                 return Ast.Invalid(expression);
             }
+        }
+
+        private List<Ast> ParseBody(string bodyExpr)
+        {
+            string[] lines = SplitByDelimiter(bodyExpr, CODE_LINE_DELIMITER,
+                LAMBDA_BODY_WRAPPERS, LIST_WRAPPERS, SIMPLE_LAMBDA_WRAPPERS, GENERIC_WRAPPERS);
+            List<Ast> bodyLines = new List<Ast>();
+            foreach (string line in lines)
+            {
+                bodyLines.Add(Parse(line));
+            }
+            return bodyLines;
         }
 
         //public string Unparse(Ast ast)
@@ -686,6 +706,7 @@ namespace IML.Evaluation
         {
             int parenCounter = 0;
             int braceCounter = 0;
+            int bracketCounter = 0;
             List<string> substrings = new List<string>();
             StringBuilder currentString = new StringBuilder();
             for (int i = 0; i < expr.Length; i++)
@@ -694,7 +715,7 @@ namespace IML.Evaluation
                 if (c == delimiter)
                 {
                     // If not in parentheses or braces, then we add this as a split string
-                    if (parenCounter == 0 && braceCounter == 0)
+                    if (parenCounter == 0 && braceCounter == 0 && bracketCounter == 0)
                     {
                         substrings.Add(currentString.ToString());
                         currentString.Clear();
@@ -725,6 +746,14 @@ namespace IML.Evaluation
                     {
                         braceCounter--;
                     }
+                    else if (c == SIMPLE_LAMBDA_START_WRAPPER)
+                    {
+                        bracketCounter++;
+                    }
+                    else if (c == SIMPLE_LAMBDA_END_WRAPPER)
+                    {
+                        bracketCounter--;
+                    }
                 }
             }
             // Remember to add the string that we are in the middle of building
@@ -733,6 +762,7 @@ namespace IML.Evaluation
         }
 
         // Wrapper pairs in the form of "{}" or "()"
+        // Need to ignore strings as well - that's hard-coded into this function
         private static string[] SplitByDelimiter(string expr, char delimiter, params string[] wrapperPairs)
         {
             if (expr.Length == 0)
@@ -750,6 +780,22 @@ namespace IML.Evaluation
                     // Split here
                     substrings.Add(current.ToString());
                     current = new StringBuilder();
+                }
+                else if (c == STRING_START_WRAPPER)
+                {
+                    char prevChar = c;
+                    while (!(c == STRING_END_WRAPPER && prevChar != STRING_ESCAPE_STARTER))
+                    {
+                        prevChar = c;
+                        c = expr[i];
+                        current.Append(c);
+                        i++;
+                        if (i >= expr.Length)
+                        {
+                            throw new InvalidParseException("String does not terminate", expr);
+                        }
+                    }
+                    current.Append(c);
                 }
                 else
                 {
