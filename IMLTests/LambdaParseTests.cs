@@ -1,4 +1,5 @@
 ﻿using IML.Evaluation;
+using IML.Evaluation.AST.ValueAsts;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -24,11 +25,12 @@ namespace IMLTests
         {
             Ast ast = parser.Parse("()=>{5}");
             Assert.AreEqual(AstTypes.LambdaLiteral, ast.Type);
-            Assert.AreEqual(true, ast.CreatesEnv);
-            Assert.AreEqual(0, ast.Parameters.Length);
-            Ast body = ast.Body;
-            Assert.AreEqual(AstTypes.NumberLiteral, body.Type);
-            Assert.AreEqual(5, body.NumberArg);
+            LambdaAst last = (LambdaAst)ast;
+            Assert.AreEqual(true, last.CreatesEnv);
+            Assert.AreEqual(0, last.Parameters.Count);
+            List<Ast> body = last.Body;
+            Assert.AreEqual(AstTypes.NumberLiteral, body[0].Type);
+            Assert.AreEqual(5, ((NumberAst)body[0]).Value);
         }
 
         [TestMethod]
@@ -36,11 +38,12 @@ namespace IMLTests
         {
             Ast ast = parser.Parse("()~>{5}");
             Assert.AreEqual(AstTypes.LambdaLiteral, ast.Type);
-            Assert.AreEqual(false, ast.CreatesEnv);
-            Assert.AreEqual(0, ast.Parameters.Length);
-            Ast body = ast.Body;
-            Assert.AreEqual(AstTypes.NumberLiteral, body.Type);
-            Assert.AreEqual(5, body.NumberArg);
+            LambdaAst last = (LambdaAst)ast;
+            Assert.AreEqual(false, last.CreatesEnv);
+            Assert.AreEqual(0, last.Parameters.Count);
+            List<Ast> body = last.Body;
+            Assert.AreEqual(AstTypes.NumberLiteral, body[0].Type);
+            Assert.AreEqual(5, ((NumberAst)body[0]).Value);
         }
     }
 }
