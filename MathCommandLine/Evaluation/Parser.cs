@@ -27,7 +27,7 @@ namespace IML.Evaluation
         private static readonly Regex REFERENCE_REGEX = new Regex(@"^\&(" + SYMBOL_PATTERN + ")$");
         private static readonly Regex LIST_REGEX = new Regex(@"^\{(.*)\}$");
         private static readonly Regex SIMPLE_LAMBDA_REGEX = new Regex(@"^\[(.*)\]$");
-        private static readonly Regex LAMBDA_REGEX = new Regex(@"^\((.*?)\)([=~])>\{(.*)\}$");
+        private static readonly Regex LAMBDA_REGEX = new Regex(@"^\((.*?)\)(\:.*)?([=~])>\{(.*)\}$");
         private static readonly Regex STRING_REGEX = new Regex("^\"([^\"]*)\"$");
         private static readonly Regex MEMBER_ACCESS_REGEX = new Regex(@$"^(.*)\{MEMBER_ACCESS_TOKEN}(" + SYMBOL_PATTERN + ")$");
 
@@ -57,10 +57,8 @@ namespace IML.Evaluation
         private const char PARAM_DELIMITER = ',';
         private const string PARAM_NAME_TYPE_SEPARATOR = ":";
         private const char TYPE_UNION_DELIMITER = '|';
-        private const char TYPE_REQS_DELIMITER = ',';
-        private const char TYPE_REQS_ARGS_DELIMITER = ',';
-        private const string TYPE_RESTRICTIONS_WRAPPERS = "[]";
-        private const string TYPE_RESTRICTIONS_ARGS_WRAPPERS = "()";
+        private const char TYPE_GENERICS_DELIMITER = ',';
+        private const string TYPE_GENERICS_WRAPPERS = "[]";
 
         private const char LAMBDA_TYPE_NO_ENVIRONMENT_LINE = '~';
         private const char LAMBDA_TYPE_CREATES_ENVIRONMENT_LINE = '=';
@@ -352,7 +350,7 @@ namespace IML.Evaluation
                 // typeStr can have unions and restrictions to process
                 // Split the type on pipe (excluding things in brackets [] to avoid types provided to restrictions)
                 string[] types = SplitByDelimiter(typeStr, TYPE_UNION_DELIMITER,
-                    TYPE_RESTRICTIONS_WRAPPERS, LAMBDA_TYPE_PARAM_WRAPPERS);
+                    TYPE_GENERICS_WRAPPERS, LAMBDA_TYPE_PARAM_WRAPPERS);
                 // Now for each of these, we need to parse out the datatype + restrictions
                 List<AstTypeEntry> entries = new List<AstTypeEntry>();
                 for (int i = 0; i < types.Length; i++)
@@ -378,22 +376,22 @@ namespace IML.Evaluation
                 return ParseLambdaTypeEntry(entryStr);
             }
             // See if we even have restrictions
-            if (!entryStr.Contains(TYPE_RESTRICTIONS_WRAPPERS[0]))
+            if (!entryStr.Contains(TYPE_GENERICS_WRAPPERS[0]))
             {
                 // Simply stores a type. We should pass that up.
                 return AstTypeEntry.Simple(entryStr);
             }
             // Need to get everything between the first and last brackets
-            int bracketStart = entryStr.IndexOf(TYPE_RESTRICTIONS_WRAPPERS[0]);
-            int bracketEnd = entryStr.LastIndexOf(TYPE_RESTRICTIONS_WRAPPERS[1]);
+            int bracketStart = entryStr.IndexOf(TYPE_GENERICS_WRAPPERS[0]);
+            int bracketEnd = entryStr.LastIndexOf(TYPE_GENERICS_WRAPPERS[1]);
             string name = entryStr.Substring(0, bracketStart);
             string genericsString = entryStr.SubstringBetween(bracketStart + 1, bracketEnd);
             List<AstType> generics = new List<AstType>();
             if (genericsString.Length > 0)
             {
                 // Now need to split this up
-                string[] genericStrings = SplitByDelimiter(genericsString, TYPE_REQS_DELIMITER,
-                    TYPE_RESTRICTIONS_WRAPPERS, TYPE_RESTRICTIONS_ARGS_WRAPPERS);
+                string[] genericStrings = SplitByDelimiter(genericsString, TYPE_GENERICS_DELIMITER,
+                    TYPE_GENERICS_WRAPPERS);
 
                 for (int i = 0; i < genericStrings.Length; i++)
                 {
@@ -409,7 +407,7 @@ namespace IML.Evaluation
             int endParen = GetBracketEndIndex(str, 0, LAMBDA_TYPE_PARAM_WRAPPERS[0], LAMBDA_TYPE_PARAM_WRAPPERS[1]);
             string args = str.SubstringBetween(startParen + 1, endParen);
             string[] paramTypeStrings = SplitByDelimiter(args, LAMBDA_TYPE_PARAM_DELMITER,
-                LAMBDA_TYPE_PARAM_WRAPPERS, TYPE_RESTRICTIONS_ARGS_WRAPPERS, TYPE_RESTRICTIONS_WRAPPERS);
+                LAMBDA_TYPE_PARAM_WRAPPERS, TYPE_GENERICS_WRAPPERS);
             List<AstType> parameterTypes = new List<AstType>();
             bool isVarArgs = false;
             for (int i = 0; i < paramTypeStrings.Length; i++)
@@ -524,16 +522,16 @@ namespace IML.Evaluation
             }
             StringBuilder builder = new StringBuilder();
             builder.Append(entry.DataTypeName);
-            builder.Append(TYPE_RESTRICTIONS_WRAPPERS[0]);
+            builder.Append(TYPE_GENERICS_WRAPPERS[0]);
             for (int i = 0; i < entry.Generics.Count; i++)
             {
                 builder.Append(UnparseType(entry.Generics[i]));
                 if (i + 1 < entry.Generics.Count)
                 {
-                    builder.Append(TYPE_REQS_DELIMITER);
+                    builder.Append(TYPE_GENERICS_DELIMITER);
                 }
             }
-            builder.Append(TYPE_RESTRICTIONS_WRAPPERS[1]);
+            builder.Append(TYPE_GENERICS_WRAPPERS[1]);
             return builder.ToString();
         }
         private string UnparseLambdaTypeEntry(LambdaAstTypeEntry entry)
