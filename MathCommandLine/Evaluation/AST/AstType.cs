@@ -58,7 +58,7 @@ namespace IML.Evaluation
 
         public LambdaAstTypeEntry(AstType returnType, List<AstType> argTypes, LambdaEnvironmentType envType, bool isPure,
             bool isLastVarArgs)
-            : base("function", new List<AstType>())
+            : base(MDataType.FUNCTION_TYPE_NAME, new List<AstType>())
         {
             ReturnType = returnType;
             ArgTypes = argTypes;
