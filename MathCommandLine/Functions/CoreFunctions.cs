@@ -398,6 +398,11 @@ namespace IML.Functions
                 (args, env, interpreter) =>
                 {
                     int code = (int)args[0].Value.NumberValue;
+                    if (!Enum.IsDefined(typeof(ErrorCodes), code))
+                    {
+                        return MValue.Error(ErrorCodes.INVALID_ARGUMENT,
+                                $"The value \"{code}\" is not a valid error code.");
+                    }
                     string msg = args[1].Value.GetStringValue();
                     MList info = args[2].Value.ListValue;
                     return MValue.Error((ErrorCodes)code, msg, info);
