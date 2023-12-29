@@ -30,7 +30,7 @@ namespace IML.Evaluation
         private static readonly Regex SIMPLE_LAMBDA_REGEX = new Regex(@"^\[(.*)\]$");
         // Group for params. Non capturing to make the ':' optional, capturing for the type
         // Capturing for the arrow type and the return type
-        private static readonly Regex LAMBDA_REGEX = new Regex(@"^\((.*)\)(?:\:(.*))?([=~])>\{(.*)\}$");
+        private static readonly Regex LAMBDA_REGEX = new Regex(@"^(?:\[(.*)\])?\s*\((.*)\)(?:\s*\:(.*))?\s*([=~])>\s*\{(.*)\}$");
         private static readonly Regex STRING_REGEX = new Regex("^\"([^\"]*)\"$");
         private static readonly Regex MEMBER_ACCESS_REGEX = new Regex(@$"^(.*)\{MEMBER_ACCESS_TOKEN}(" + SYMBOL_PATTERN + ")$");
 
@@ -186,26 +186,29 @@ namespace IML.Evaluation
                 {
                     // 3-4 parts: parameters, return type (optional), type of lambda (environment/no environment), expression/body
                     var groups = LAMBDA_REGEX.Match(expression).Groups;
-                    // If there are 5 groups, then the return type has been provided. Else, we must infer the return type
                     string paramsString;
                     string arrowBit;
                     string exprString;
                     string returnTypeString = "";
+                    string genericsString = "";
+                    int nextGroupIndex = 1;
                     bool provideReturnType = false;
-                    if (groups.Count == 5)
+                    bool haveGenerics = false;
+                    if (expression.StartsWith(TYPE_GENERICS_WRAPPERS[0]))
                     {
-                        paramsString = groups[1].Value;
-                        returnTypeString = groups[2].Value;
-                        arrowBit = groups[3].Value;
-                        exprString = groups[4].Value;
+                        // We have generics
+                        haveGenerics = true;
+                        genericsString = groups[nextGroupIndex++].Value;
+                    }
+                    paramsString = groups[nextGroupIndex++].Value;
+                    // Determine if we specify the return type, based on if we have generics and the # of groups
+                    if ((haveGenerics && groups.Count == 6) || (!haveGenerics && groups.Count == 5))
+                    {
                         provideReturnType = true;
+                        returnTypeString = groups[nextGroupIndex++].Value;
                     }
-                    else
-                    {
-                        paramsString = groups[1].Value;
-                        arrowBit = groups[2].Value;
-                        exprString = groups[3].Value;
-                    }
+                    arrowBit = groups[nextGroupIndex++].Value;
+                    exprString = groups[nextGroupIndex++].Value;
 
                     // Parse Parameters
                     AstParameter[] parsedParams = paramsString.Length > 0 ?
@@ -228,14 +231,17 @@ namespace IML.Evaluation
                         returnType = typeDeterminer.DetermineDataType(body);
                     }
 
-                    return Ast.LambdaLiteral(parsedParams, body, returnType, createsEnv, false);
+                    List<string> generics = ParseGenericNames(genericsString);
+
+                    return Ast.LambdaLiteral(parsedParams, body, returnType, createsEnv, false, generics);
                 }
                 else if (MatchesSimpleLambda(expression))
                 {
                     // Simple lambda; no params, does not create body
                     string contents = SIMPLE_LAMBDA_REGEX.Match(expression).Groups[1].Value;
                     Ast body = Parse(contents);
-                    return Ast.LambdaLiteral(new AstParameter[0], new List<Ast>() { body }, AstType.Any, false, false);
+                    return Ast.LambdaLiteral(new AstParameter[0], new List<Ast>() { body }, AstType.Any, false, false,
+                        new List<string>());
                 }
                 else if (MEMBER_ACCESS_REGEX.IsMatch(expression))
                 {
