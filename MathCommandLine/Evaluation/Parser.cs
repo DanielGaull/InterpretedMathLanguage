@@ -90,8 +90,8 @@ namespace IML.Evaluation
         private const string DECLARATION_VAR_KEYWORD = "var";
         private const string DECLARATION_CONST_KEYWORD = "const";
         private static readonly Regex DECLARATION_REGEX = 
-            new Regex($@"^({DECLARATION_VAR_KEYWORD}|{DECLARATION_CONST_KEYWORD})\s+({SYMBOL_PATTERN})\s*" + 
-                $@"\{ASSIGNMENT_TOKEN}\s*(.*)$");
+            new Regex($@"^({DECLARATION_VAR_KEYWORD}|{DECLARATION_CONST_KEYWORD})\s+({SYMBOL_PATTERN})" + 
+                $@"(?:\s*\:(.*))?\s*{ASSIGNMENT_TOKEN}\s*(.*)$");
 
         private const string RETURN_KEYWORD = "return";
         private static readonly Regex RETURN_REGEX =
@@ -115,13 +115,18 @@ namespace IML.Evaluation
             typeDeterminer = new TypeDeterminer();
         }
 
+        public virtual Ast Parse(string expression)
+        {
+            return Parse(expression, new VariableAstTypeMap());
+        }
+
         /// <summary>
         /// Parses a finalized expression into an AST
         /// Recall: Finalized expressions consist only of functions, literals, and variables
         /// </summary>
         /// <param name="expression"></param>
         /// <returns></returns>
-        public virtual Ast Parse(string expression, VariableAstTypeMap typeMap)
+        public Ast Parse(string expression, VariableAstTypeMap typeMap)
         {
             try
             {
@@ -292,7 +297,7 @@ namespace IML.Evaluation
                         throw new InvalidParseException(expression);
                     }
                     string declarationType = groups[1].Value;
-                    VariableType varType = (VariableType)0;
+                    VariableType varType = 0;
                     if (declarationType == DECLARATION_VAR_KEYWORD)
                     {
                         varType = VariableType.Variable;
@@ -306,10 +311,28 @@ namespace IML.Evaluation
                         // Should never get here, we'd have not matched the regex
                         throw new InvalidParseException(expression);
                     }
-                    string assignedExpr = groups[3].Value;
+                    string assignedExpr = groups[4].Value;
                     Ast assigned = Parse(assignedExpr, typeMap);
 
-                    return Ast.VariableDeclaration(varName, assigned, varType);
+                    // See if we've been given a type; if so, verify that it matches; if not, infer the type
+                    string variableType = groups[3].Value;
+                    AstType varValType;
+                    AstType bodyType = typeDeterminer.DetermineDataType(assigned, typeMap);
+                    if (variableType.Length > 0)
+                    {
+                        varValType = ParseType(variableType);
+                        if (varValType != bodyType)
+                        {
+                            throw new InvalidParseException($"Variable {varName} is not assigned the type it is declared.", 
+                                expression);
+                        }
+                    }
+                    else
+                    {
+                        varValType = bodyType;
+                    }
+
+                    return Ast.VariableDeclaration(varName, assigned, varType, varValType);
                 }
                 else if (attemptedAssignmentMatchIndex >= 0)
                 {

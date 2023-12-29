@@ -51,9 +51,9 @@ namespace IML.Evaluation
         {
             return new VariableAst(name);
         }
-        public static VariableDeclarationAst VariableDeclaration(string name, Ast value, VariableType type)
+        public static VariableDeclarationAst VariableDeclaration(string name, Ast value, VariableType type, AstType varValType)
         {
-            return new VariableDeclarationAst(name, value, type);
+            return new VariableDeclarationAst(name, value, type, varValType);
         }
         public static VariableAssignmentAst VariableAssignment(IdentifierAst identifier, Ast value)
         {

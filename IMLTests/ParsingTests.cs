@@ -24,7 +24,7 @@ namespace IMLTests
         [TestMethod]
         public void TestReturn()
         {
-            Ast ast = parser.Parse("return 5", new VariableAstTypeMap());
+            Ast ast = parser.Parse("return 5");
             Assert.AreEqual(AstTypes.Return, ast.Type);
             ReturnAst rast = (ReturnAst)ast;
             Assert.AreEqual(AstTypes.NumberLiteral, rast.Body.Type);
