@@ -40,6 +40,7 @@ namespace IML.Evaluation
         private const char ARG_DELIMITER = ',';
 
         private readonly string LAMBDA_BODY_WRAPPERS = "{}";
+        private const string VAR_ARGS_SYMBOL = "...";
 
         // Param parsing values
         private const char GENERIC_END_WRAPPER = ')';
@@ -195,11 +196,32 @@ namespace IML.Evaluation
                     bool provideReturnType = returnTypeString.Length > 0;
 
                     // Parse Parameters
-                    AstParameter[] parsedParams = paramsString.Length > 0 ?
-                        (SplitByDelimiter(paramsString, PARAM_DELIMITER).Select((paramString) =>
+                    List<AstParameter> parsedParamsList = new List<AstParameter>();
+                    AstParameter[] parsedParams;
+                    bool hasVarArgs = false;
+                    if (paramsString.Length > 0)
+                    {
+                        string[] splitParamsStrings = SplitByDelimiter(paramsString, PARAM_DELIMITER);
+                        for (int i = 0; i < splitParamsStrings.Length; i++)
                         {
-                            return ParseParameter(paramString);
-                        }).ToArray()) : new AstParameter[0];
+                            if (i + 1 == splitParamsStrings.Length)
+                            {
+                                // This is the last parameter; check for varargs
+                                if (splitParamsStrings[i].EndsWith(VAR_ARGS_SYMBOL))
+                                {
+                                    hasVarArgs = true;
+                                    splitParamsStrings[i] = splitParamsStrings[i].SubstringBetween(0,
+                                        splitParamsStrings[i].Length - VAR_ARGS_SYMBOL.Length);
+                                }
+                            }
+                            parsedParamsList.Add(ParseParameter(splitParamsStrings[i]));
+                        }
+                        parsedParams = parsedParamsList.ToArray();
+                    }
+                    else
+                    {
+                        parsedParams = new AstParameter[0];
+                    }
 
                     List<Ast> body = ParseBody(exprString);
 
@@ -222,7 +244,7 @@ namespace IML.Evaluation
 
                     List<string> generics = ParseGenericNames(genericsString);
 
-                    return Ast.LambdaLiteral(parsedParams, body, returnType, createsEnv, false, false, generics);
+                    return Ast.LambdaLiteral(parsedParams, body, returnType, createsEnv, false, hasVarArgs, generics);
                 }
                 else if (MatchesSimpleLambda(expression))
                 {
@@ -411,7 +433,7 @@ namespace IML.Evaluation
                 }
                 return new AstType(entries);
             }
-            catch (Exception ex)
+            catch
             {
                 throw new InvalidParseException(typeStr);
             }

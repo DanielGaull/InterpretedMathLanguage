@@ -448,5 +448,32 @@ namespace IMLTests
             Assert.AreEqual(1, entry.Generics[0].Entries.Count);
             Assert.AreEqual("number", entry.Generics[0].Entries[0].DataTypeName);
         }
+
+        [TestMethod]
+        public void TestSimpleVarargs()
+        {
+            Ast ast = parser.Parse("(x:list[number]...):number=>{5}");
+            Assert.AreEqual(AstTypes.LambdaLiteral, ast.Type);
+
+            LambdaAst last = (LambdaAst)ast;
+            Assert.IsTrue(last.IsLastVarArgs);
+
+            // Check parameter
+            Assert.AreEqual(1, last.Parameters.Count);
+            AstParameter p = last.Parameters[0];
+            Assert.AreEqual("x", p.Name);
+            Assert.AreEqual(1, p.Type.Entries.Count);
+            AstTypeEntry pentry = p.Type.Entries[0];
+            Assert.AreEqual("list", pentry.DataTypeName);
+            Assert.AreEqual(1, pentry.Generics.Count);
+            Assert.AreEqual(1, pentry.Generics[0].Entries.Count);
+            Assert.AreEqual("number", pentry.Generics[0].Entries[0].DataTypeName);
+
+            // Check return type
+            Assert.AreEqual(1, last.ReturnType.Entries.Count);
+            AstTypeEntry entry = last.ReturnType.Entries[0];
+            Assert.AreEqual("number", entry.DataTypeName);
+            Assert.AreEqual(0, entry.Generics.Count);
+        }
     }
 }
