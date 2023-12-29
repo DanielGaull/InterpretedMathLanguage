@@ -63,6 +63,10 @@ namespace IML.Evaluation
         {
             return new MemberAccessAst(parent, name);
         }
+        public static ReturnAst Return(Ast body)
+        {
+            return new ReturnAst(body);
+        }
         public static InvalidAst Invalid(string expr)
         {
             return new InvalidAst(expr);

@@ -33,6 +33,9 @@ namespace IML.Evaluation.AST.ValueAsts
         // May or may not include a binary operator, too
         // Example: x = 7; x += 5; b &&= a || c;
         VariableAssignment,
+        // A "return" statement for use within functions
+        // Example: return 7+2;
+        Return,
         // Anything that doesn't fit into the above definitions
         // Used in syntax handling, but if it appears when parsing some final expression,
         // then there's an error

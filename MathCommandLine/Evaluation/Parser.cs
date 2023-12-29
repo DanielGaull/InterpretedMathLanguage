@@ -93,6 +93,10 @@ namespace IML.Evaluation
             new Regex($@"^({DECLARATION_VAR_KEYWORD}|{DECLARATION_CONST_KEYWORD})\s+({SYMBOL_PATTERN})\s*" + 
                 $@"\{ASSIGNMENT_TOKEN}\s*(.*)$");
 
+        private const string RETURN_KEYWORD = "return";
+        private static readonly Regex RETURN_REGEX =
+            new Regex(@$"^{RETURN_KEYWORD}\s+(.*)$");
+
         private const string DEREFERENCE_TOKEN = "*";
 
         // Other useful regexes
@@ -101,6 +105,7 @@ namespace IML.Evaluation
         {
             DECLARATION_VAR_KEYWORD,
             DECLARATION_CONST_KEYWORD,
+            RETURN_KEYWORD,
         };
 
         private TypeDeterminer typeDeterminer;
@@ -261,6 +266,13 @@ namespace IML.Evaluation
                     string name = groups[2].Value;
                     Ast parent = Parse(parentStr);
                     return Ast.MemberAccess(parent, name);
+                }
+                else if (RETURN_REGEX.IsMatch(expression))
+                {
+                    var groups = RETURN_REGEX.Match(expression).Groups;
+                    string body = groups[1].Value;
+                    Ast bodyAst = Parse(body);
+                    return Ast.Return(bodyAst);
                 }
                 else if (DECLARATION_REGEX.IsMatch(expression))
                 {
