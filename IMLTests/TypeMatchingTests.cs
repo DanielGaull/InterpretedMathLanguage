@@ -92,9 +92,5 @@ namespace IMLTests
             MValue value = MValue.Bool(true);
             AssertTypesFail(type, value);
         }
-
-        // TODO: Write some tests involving restrictions
-        // Simple restriction pass/fail
-        // Union restriction pass/fail
     }
 }
