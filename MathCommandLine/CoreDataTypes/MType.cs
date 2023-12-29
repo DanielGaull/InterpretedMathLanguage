@@ -48,11 +48,11 @@ namespace IML.CoreDataTypes
             this.isUnionBase = isUnionBase;
         }
 
-        public bool ValueMatches(MValue value, IInterpreter interpreter, MEnvironment env)
+        public bool ValueMatches(MValue value)
         {
             for (int i = 0; i < entries.Count; i++)
             {
-                if (entries[i] == value.DataType)
+                if (entries[i] == value.DataType || entries[i] == MDataTypeEntry.Any)
                 {
                     return true;
                 }

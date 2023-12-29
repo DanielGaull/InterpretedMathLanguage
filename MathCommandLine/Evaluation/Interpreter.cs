@@ -291,7 +291,7 @@ namespace IML.Evaluation
             // Now check the types of the arguments to ensure they match. If any errors appear in the arguments, return that immediately
             for (int i = 0; i < args.Length; i++)
             {
-                if (!parameters[i].Type.ValueMatches(args[i].Value, this, currentEnv))
+                if (!parameters[i].Type.ValueMatches(args[i].Value))
                 {
                     // Improper data type!
                     return MValue.Error(ErrorCodes.INVALID_TYPE,

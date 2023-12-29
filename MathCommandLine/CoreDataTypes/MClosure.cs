@@ -64,7 +64,14 @@ namespace IML.CoreDataTypes
             AstBody = body;
             IsNativeBody = false;
             CreatesEnv = createsEnv;
-            Parameters = ConstructParameters(type.ParameterTypes, paramNames);
+            if (!(type is null))
+            {
+                Parameters = ConstructParameters(type.ParameterTypes, paramNames);
+            }
+            else
+            {
+                Parameters = null;
+            }
         }
         public MClosure(MFunctionDataTypeEntry type, List<string> paramNames, MEnvironment env, NativeExpression nativeBody)
         {
@@ -73,7 +80,14 @@ namespace IML.CoreDataTypes
             Environment = env;
             NativeBody = nativeBody;
             IsNativeBody = true;
-            Parameters = ConstructParameters(type.ParameterTypes, paramNames);
+            if (!(type is null))
+            {
+                Parameters = ConstructParameters(type.ParameterTypes, paramNames);
+            }
+            else
+            {
+                Parameters = null;
+            }
         }
 
         private static MParameters ConstructParameters(List<MType> types, List<string> names)

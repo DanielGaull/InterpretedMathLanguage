@@ -46,11 +46,11 @@ namespace IMLTests
 
         private void AssertTypes(MType type, MValue value)
         {
-            Assert.IsTrue(type.ValueMatches(value, interpreter, baseEnv));
+            Assert.IsTrue(type.ValueMatches(value));
         }
         private void AssertTypesFail(MType type, MValue value)
         {
-            Assert.IsFalse(type.ValueMatches(value, interpreter, baseEnv));
+            Assert.IsFalse(type.ValueMatches(value));
         }
 
         [TestMethod]

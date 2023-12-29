@@ -224,7 +224,27 @@ namespace IMLTests
         [TestMethod]
         public void TestGenericNames()
         {
-            AssertParsedType("[T](T[])=>T");
+            AssertParsedType("[T](T[])=>T[]");
+        }
+        [TestMethod]
+        public void TestGenericNamesMultiple()
+        {
+            AssertParsedType("[T,R,S](T[],R[])=>S[]");
+        }
+        [TestMethod]
+        public void TestGenericNamesInvalidFail1()
+        {
+            AssertParsedTypeException("[123](number[])=>void[]");
+        }
+        [TestMethod]
+        public void TestGenericNamesInvalidFail2()
+        {
+            AssertParsedTypeException("[,](number[])=>void[]");
+        }
+        [TestMethod]
+        public void TestGenericNamesInvalidFail3()
+        {
+            AssertParsedTypeException("[[]](number[])=>void[]");
         }
     }
 }
