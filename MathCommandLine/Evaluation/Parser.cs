@@ -79,10 +79,10 @@ namespace IML.Evaluation
         private const char LAMBDA_TYPE_PARAM_DELMITER = ',';
         private const string LAMBDA_TYPE_VARARGS_SYMBOL = "...";
         private readonly Regex LAMBDA_TYPE_REGEX = 
-            new Regex($"({TYPE_GENERICS_WRAPPERS[0]}(.*){TYPE_GENERICS_WRAPPERS[1]})?" +
-                $"{LAMBDA_TYPE_PARAM_WRAPPERS[0]}(.*){LAMBDA_TYPE_PARAM_WRAPPERS[1]}" + 
-                $"[{LAMBDA_TYPE_REQ_ENV_CHARACTER}]?[{LAMBDA_TYPE_NO_ENVIRONMENT_LINE}|{LAMBDA_TYPE_CREATES_ENVIRONMENT_LINE}]" +
-                $"{LAMBDA_TYPE_ARROW_TIP}(.*)");
+            new Regex($@"({TYPE_GENERICS_WRAPPERS[0]}(.*){TYPE_GENERICS_WRAPPERS[1]})?\s*" +
+                $@"{LAMBDA_TYPE_PARAM_WRAPPERS[0]}(.*){LAMBDA_TYPE_PARAM_WRAPPERS[1]}\s*" + 
+                $@"[{LAMBDA_TYPE_REQ_ENV_CHARACTER}]?[{LAMBDA_TYPE_NO_ENVIRONMENT_LINE}|{LAMBDA_TYPE_CREATES_ENVIRONMENT_LINE}]" +
+                $@"{LAMBDA_TYPE_ARROW_TIP}\s*(.*)");
 
         // Variable declaration and assigment syntax
         private const char ASSIGNMENT_TOKEN = '=';
@@ -310,7 +310,7 @@ namespace IML.Evaluation
             List<Ast> bodyLines = new List<Ast>();
             foreach (string line in lines)
             {
-                bodyLines.Add(Parse(line));
+                bodyLines.Add(Parse(line.Trim()));
             }
             return bodyLines;
         }
@@ -372,6 +372,7 @@ namespace IML.Evaluation
         /// <returns></returns>
         public AstParameter ParseParameter(string parameter)
         {
+            parameter = parameter.Trim();
             // Check if no type provided. If parameter simply matches valid variable name, then it is of the any type
             if (SYMBOL_NAME_REGEX.IsMatch(parameter))
             {
@@ -382,8 +383,8 @@ namespace IML.Evaluation
             int colonIndex = parameter.IndexOf(':');
             string paramName = parameter.Substring(0, colonIndex);
             string typeString = parameter.Substring(colonIndex + 1);
-            AstType type = ParseType(typeString);
-            return new AstParameter(paramName, type);
+            AstType type = ParseType(typeString.Trim());
+            return new AstParameter(paramName.Trim(), type);
         }
         public AstType ParseType(string typeStr)
         {
@@ -412,6 +413,7 @@ namespace IML.Evaluation
         }
         private AstTypeEntry ParseTypeEntry(string entryStr)
         {
+            entryStr = entryStr.Trim();
             if (IsParenWrapped(entryStr))
             {
                 return ParseTypeEntry(entryStr.SubstringBetween(1, entryStr.Length - 1));
@@ -430,7 +432,7 @@ namespace IML.Evaluation
             // Need to get everything between the first and last brackets
             int bracketStart = entryStr.IndexOf(TYPE_GENERICS_WRAPPERS[0]);
             int bracketEnd = entryStr.LastIndexOf(TYPE_GENERICS_WRAPPERS[1]);
-            string name = entryStr.Substring(0, bracketStart);
+            string name = entryStr.Substring(0, bracketStart).Trim();
             string genericsString = entryStr.SubstringBetween(bracketStart + 1, bracketEnd);
             List<AstType> generics = new List<AstType>();
             if (genericsString.Length > 0)
@@ -441,7 +443,7 @@ namespace IML.Evaluation
 
                 for (int i = 0; i < genericStrings.Length; i++)
                 {
-                    generics.Add(ParseType(genericStrings[i]));
+                    generics.Add(ParseType(genericStrings[i].Trim()));
                 }
             }
             return new AstTypeEntry(name, generics);
@@ -671,12 +673,13 @@ namespace IML.Evaluation
         {
             string[] genericNamesArray = SplitByDelimiter(expression, TYPE_GENERICS_DELIMITER, TYPE_GENERICS_WRAPPERS);
             List<string> genericNames = new List<string>(genericNamesArray);
-            // Make sure all the names are valid
-            foreach (string gen in genericNames)
+            // Make sure all the names are valid, also trim out whitespace
+            for (int i = 0; i < genericNames.Count; i++)
             {
-                if (!SYMBOL_NAME_REGEX.IsMatch(gen))
+                genericNames[i] = genericNames[i].Trim();
+                if (!SYMBOL_NAME_REGEX.IsMatch(genericNames[i]))
                 {
-                    throw new InvalidParseException($"{gen} is not a valid symbol name", gen);
+                    throw new InvalidParseException($"{genericNames[i]} is not a valid symbol name", genericNames[i]);
                 }
             }
             return genericNames;
