@@ -8,7 +8,7 @@ using System.Text;
 namespace IMLTests
 {
     [TestClass]
-    class LambdaParseTests
+    public class LambdaParseTests
     {
         private static Parser parser;
 
@@ -121,7 +121,7 @@ namespace IMLTests
 
             AstParameter p2 = last.Parameters[1];
             Assert.AreEqual("y", p2.Name);
-            AstType type2 = p.Type;
+            AstType type2 = p2.Type;
             Assert.AreEqual(1, type2.Entries.Count);
             AstTypeEntry entry2 = type2.Entries[0];
             Assert.AreEqual("list", entry2.DataTypeName);
@@ -163,7 +163,7 @@ namespace IMLTests
 
             AstParameter p2 = last.Parameters[1];
             Assert.AreEqual("y", p2.Name);
-            AstType type2 = p.Type;
+            AstType type2 = p2.Type;
             Assert.AreEqual(1, type2.Entries.Count);
             AstTypeEntry entry2 = type2.Entries[0];
             Assert.AreEqual("list", entry2.DataTypeName);
@@ -206,7 +206,7 @@ namespace IMLTests
 
             AstParameter p2 = last.Parameters[1];
             Assert.AreEqual("y", p2.Name);
-            AstType type2 = p.Type;
+            AstType type2 = p2.Type;
             Assert.AreEqual(1, type2.Entries.Count);
             AstTypeEntry entry2 = type2.Entries[0];
             Assert.AreEqual("list", entry2.DataTypeName);
@@ -249,7 +249,7 @@ namespace IMLTests
 
             AstParameter p2 = last.Parameters[1];
             Assert.AreEqual("y", p2.Name);
-            AstType type2 = p.Type;
+            AstType type2 = p2.Type;
             Assert.AreEqual(1, type2.Entries.Count);
             AstTypeEntry entry2 = type2.Entries[0];
             Assert.AreEqual("list", entry2.DataTypeName);

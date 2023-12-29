@@ -30,7 +30,7 @@ namespace IML.Evaluation
         private static readonly Regex SIMPLE_LAMBDA_REGEX = new Regex(@"^\[(.*)\]$");
         // Group for params. Non capturing to make the ':' optional, capturing for the type
         // Capturing for the arrow type and the return type
-        private static readonly Regex LAMBDA_REGEX = new Regex(@"^(?:\[(.*)\])?\s*\((.*)\)(?:\s*\:(.*))?\s*([=~])>\s*\{(.*)\}$");
+        private static readonly Regex LAMBDA_REGEX = new Regex(@"^(?:\[(.*)\])?\s*\((.*)\)(?:\s*\:(.+))?\s*([=~])>\s*\{(.*)\}$");
         private static readonly Regex STRING_REGEX = new Regex("^\"([^\"]*)\"$");
         private static readonly Regex MEMBER_ACCESS_REGEX = new Regex(@$"^(.*)\{MEMBER_ACCESS_TOKEN}(" + SYMBOL_PATTERN + ")$");
 
@@ -186,29 +186,13 @@ namespace IML.Evaluation
                 {
                     // 3-4 parts: parameters, return type (optional), type of lambda (environment/no environment), expression/body
                     var groups = LAMBDA_REGEX.Match(expression).Groups;
-                    string paramsString;
-                    string arrowBit;
-                    string exprString;
-                    string returnTypeString = "";
-                    string genericsString = "";
-                    int nextGroupIndex = 1;
-                    bool provideReturnType = false;
-                    bool haveGenerics = false;
-                    if (expression.StartsWith(TYPE_GENERICS_WRAPPERS[0]))
-                    {
-                        // We have generics
-                        haveGenerics = true;
-                        genericsString = groups[nextGroupIndex++].Value;
-                    }
-                    paramsString = groups[nextGroupIndex++].Value;
-                    // Determine if we specify the return type, based on if we have generics and the # of groups
-                    if ((haveGenerics && groups.Count == 6) || (!haveGenerics && groups.Count == 5))
-                    {
-                        provideReturnType = true;
-                        returnTypeString = groups[nextGroupIndex++].Value;
-                    }
-                    arrowBit = groups[nextGroupIndex++].Value;
-                    exprString = groups[nextGroupIndex++].Value;
+                    string genericsString = groups[1].Value;
+                    string paramsString = groups[2].Value;
+                    string returnTypeString = groups[3].Value;
+                    string arrowBit = groups[4].Value;
+                    string exprString = groups[5].Value;
+
+                    bool provideReturnType = returnTypeString.Length > 0;
 
                     // Parse Parameters
                     AstParameter[] parsedParams = paramsString.Length > 0 ?
