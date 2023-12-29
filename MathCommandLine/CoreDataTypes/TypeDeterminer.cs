@@ -15,6 +15,11 @@ namespace IML.CoreDataTypes
         {
             switch (expression.Type)
             {
+                case AstTypes.Return:
+                    // Doesn't really matter what we put here, since assigning to a return expression
+                    // will not work, we'll return from the function before we can resolve the return statement
+                    // i.e. "var x = return 5;" will return 5 before it finishes declaring x
+                    return new AstType(MDataType.VOID_TYPE_NAME);
                 case AstTypes.NumberLiteral:
                     return new AstType(MDataType.NUMBER_TYPE_NAME);
                 case AstTypes.StringLiteral:
