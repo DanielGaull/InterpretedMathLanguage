@@ -1,4 +1,5 @@
 ﻿using IML.CoreDataTypes;
+using IML.Util;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,6 +11,14 @@ namespace IML.Evaluation
         // All the entries that are union'ed together
         public List<AstTypeEntry> Entries { get; private set; }
 
+        // See MType for an explanation of this; it works in the same way
+        private bool isUnionBase = false;
+        public static readonly AstType UNION_BASE = new AstType(true);
+
+        private AstType(bool isUnionBase)
+        {
+            this.isUnionBase = isUnionBase;
+        }
         public AstType(List<AstTypeEntry> entries)
         {
             Entries = entries;
@@ -28,6 +37,40 @@ namespace IML.Evaluation
             {
                 new AstTypeEntry(MDataType.ANY_TYPE_NAME, new List<AstType>())
             });
+
+        public AstType Union(AstType other)
+        {
+            if (isUnionBase) return other;
+            if (other.isUnionBase) return this;
+
+            if (IsAnyType() || other.IsAnyType())
+            {
+                return Any;
+            }
+
+            Set<AstTypeEntry> entries = new Set<AstTypeEntry>();
+            for (int i = 0; i < Entries.Count; i++)
+            {
+                entries.Add(Entries[i]);
+            }
+            for (int i = 0; i < other.Entries.Count; i++)
+            {
+                entries.Add(other.Entries[i]);
+            }
+            // Now we have a set of entries
+            return new AstType(entries.ToList());
+        }
+        public bool IsAnyType()
+        {
+            foreach (AstTypeEntry entry in Entries)
+            {
+                if (entry.DataTypeName == MDataType.ANY_TYPE_NAME)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
 
         public static bool operator ==(AstType a1, AstType a2)
         {
