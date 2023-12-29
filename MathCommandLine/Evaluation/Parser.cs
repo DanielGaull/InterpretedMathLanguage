@@ -236,15 +236,20 @@ namespace IML.Evaluation
                     bool createsEnv = arrowBit == "=";
 
                     VariableAstTypeMap mapToUseForBody = typeMap;
-                    VariableAstTypeMap mapToUseForBody2 = typeMap;
                     if (createsEnv)
                     {
                         mapToUseForBody = typeMap.Clone();
-                        mapToUseForBody2 = typeMap.Clone();
+                        // Need to add all the params to it
+                        for (int i = 0; i < parsedParams.Length; i++)
+                        {
+                            mapToUseForBody.Add(parsedParams[i].Name, parsedParams[i].Type);
+                        }
                     }
 
+                    // In the event that we don't create an env, the typeMap will be updated by parsing the body
+                    // We clone the map to use for body return type since we will always have our own type map updated by parsing
                     List<Ast> body = ParseBody(exprString, mapToUseForBody);
-                    AstType bodyReturnType = typeDeterminer.DetermineDataType(body, mapToUseForBody2);
+                    AstType bodyReturnType = typeDeterminer.DetermineDataType(body, mapToUseForBody.Clone());
                     AstType returnType;
                     if (provideReturnType)
                     {
