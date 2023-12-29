@@ -205,14 +205,19 @@ namespace IML.Evaluation
 
                     bool createsEnv = arrowBit == "=";
 
+                    AstType bodyReturnType = typeDeterminer.DetermineDataType(body);
                     AstType returnType;
                     if (provideReturnType)
                     {
                         returnType = ParseType(returnTypeString);
+                        if (bodyReturnType != returnType)
+                        {
+                            throw new InvalidParseException("Function return type does not match returned value(s)", expression);
+                        }
                     }
                     else
                     {
-                        returnType = typeDeterminer.DetermineDataType(body);
+                        returnType = bodyReturnType;
                     }
 
                     List<string> generics = ParseGenericNames(genericsString);
@@ -634,10 +639,10 @@ namespace IML.Evaluation
                 builder.Append(TYPE_GENERICS_WRAPPERS[1]);
             }
             builder.Append(LAMBDA_TYPE_PARAM_WRAPPERS[0]);
-            for (int i = 0; i < entry.ArgTypes.Count; i++)
+            for (int i = 0; i < entry.ParamTypes.Count; i++)
             {
-                builder.Append(UnparseType(entry.ArgTypes[i]));
-                if (i + 1 < entry.ArgTypes.Count)
+                builder.Append(UnparseType(entry.ParamTypes[i]));
+                if (i + 1 < entry.ParamTypes.Count)
                 {
                     builder.Append(LAMBDA_TYPE_PARAM_DELMITER);
                 }
