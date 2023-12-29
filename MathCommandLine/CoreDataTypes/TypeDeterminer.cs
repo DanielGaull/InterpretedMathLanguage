@@ -73,8 +73,33 @@ namespace IML.CoreDataTypes
 
         public AstType DetermineDataType(List<Ast> body)
         {
-            // TODO: If one entry, return just that. Otherwise, look for return ASTs and union them
-            return DetermineDataType(body[body.Count - 1]);
+            // If one entry, return just that. Otherwise, look for return ASTs and union them
+            if (body.Count == 1)
+            {
+                return DetermineDataType(body[body.Count - 1]);
+            }
+            else
+            {
+                // Find all return ASTs and union them
+                AstType returnType = AstType.UNION_BASE;
+                bool foundReturn = false;
+                foreach (Ast ast in body)
+                {
+                    if (ast.Type == AstTypes.Return)
+                    {
+                        ReturnAst rast = ast as ReturnAst;
+                        returnType = returnType.Union(DetermineDataType(rast.Body));
+                        foundReturn = true;
+                    }
+                }
+                // If still union base, return type is void
+                // TODO: could still have a void even if we've found "return" statements
+                if (!foundReturn)
+                {
+                    return new AstType(MDataType.VOID_TYPE_NAME);
+                }
+                return returnType;
+            }
         }
     }
 }
