@@ -13,10 +13,11 @@ namespace IML.Evaluation.AST.ValueAsts
         public AstType ReturnType { get; private set; }
         public bool IsPure { get; private set; }
         public bool CreatesEnv { get; private set; }
+        public bool IsLastVarArgs { get; private set; }
         public List<string> GenericNames { get; private set; }
         
         public LambdaAst(List<AstParameter> parameters, List<Ast> body, AstType returnType, bool pure, bool createsEnv,
-            List<string> generics)
+            bool isLastVarArgs, List<string> generics)
             : base(AstTypes.LambdaLiteral)
         {
             Parameters = parameters;
@@ -24,11 +25,12 @@ namespace IML.Evaluation.AST.ValueAsts
             ReturnType = returnType;
             IsPure = pure;
             CreatesEnv = createsEnv;
+            IsLastVarArgs = isLastVarArgs;
             GenericNames = generics;
         }
         public LambdaAst(List<AstParameter> parameters, Ast body, AstType returnType, bool pure, bool createsEnv,
-            List<string> generics)
-            : this(parameters, new List<Ast>() { body }, returnType, pure, createsEnv, generics)
+            bool isLastVarArgs, List<string> generics)
+            : this(parameters, new List<Ast>() { body }, returnType, pure, createsEnv, isLastVarArgs, generics)
         {
         }
     }

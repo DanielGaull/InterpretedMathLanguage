@@ -21,27 +21,51 @@ namespace IML.CoreDataTypes
                     return new AstType("string");
                 case AstTypes.ListLiteral:
                     // Combine the types of the items within the list
-
-                    break;
+                    ListAst list = (ListAst)expression;
+                    if (list.Elements.Count == 0)
+                    {
+                        // Empty list, can hold any type then
+                        return AstType.Any;
+                    }
+                    AstType listType = AstType.UNION_BASE;
+                    foreach (Ast entry in list.Elements)
+                    {
+                        listType = listType.Union(DetermineDataType(entry));
+                    }
+                    return listType;
+                case AstTypes.LambdaLiteral:
+                    LambdaAst lambda = (LambdaAst)expression;
+                    List<AstType> paramTypes = new List<AstType>();
+                    foreach (AstParameter p in lambda.Parameters)
+                    {
+                        paramTypes.Add(p.Type);
+                    }
+                    LambdaAstTypeEntry lambdaTypeEntry = new LambdaAstTypeEntry(lambda.ReturnType, paramTypes,
+                        lambda.CreatesEnv ? LambdaEnvironmentType.ForceEnvironment : LambdaEnvironmentType.ForceNoEnvironment,
+                        lambda.IsPure, lambda.IsLastVarArgs, lambda.GenericNames);
+                    return new AstType(lambdaTypeEntry);
                 case AstTypes.Call:
                     CallAst callAst = (CallAst)expression;
                     AstType callerType = DetermineDataType(callAst.CalledAst);
                     // This better be a lambda type or union of lambda types
+                    AstType finalReturnType = AstType.UNION_BASE;
+                    if (callerType.Entries.Count <= 0)
+                    {
+                        throw new TypeDeterminationException("Caller has no type entries", expression);
+                    }
                     foreach (AstTypeEntry entry in callerType.Entries) 
                     {
                         if (entry is LambdaAstTypeEntry)
                         {
                             LambdaAstTypeEntry l = (LambdaAstTypeEntry)entry;
-                            // TODO: Union return types
-                            // l.ReturnType
+                            finalReturnType = finalReturnType.Union(l.ReturnType);
                         }
                         else
                         {
                             throw new TypeDeterminationException("Cannot call a non-function", expression);
                         }
                     }
-                    
-                    break;
+                    return finalReturnType;
                 // Todo... the rest
             }
             return null;
@@ -49,7 +73,7 @@ namespace IML.CoreDataTypes
 
         public AstType DetermineDataType(List<Ast> body)
         {
-            // TODO
+            // TODO: If one entry, return just that. Otherwise, look for return ASTs and union them
             return DetermineDataType(body[body.Count - 1]);
         }
     }

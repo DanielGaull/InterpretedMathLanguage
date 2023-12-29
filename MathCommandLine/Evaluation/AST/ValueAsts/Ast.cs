@@ -30,9 +30,10 @@ namespace IML.Evaluation
             return new ListAst(new List<Ast>(elements));
         }
         public static LambdaAst LambdaLiteral(AstParameter[] parameters, List<Ast> body, AstType returnType, 
-            bool createsEnv, bool isPure, List<string> generics)
+            bool createsEnv, bool isPure, bool isLastVarArgs, List<string> generics)
         {
-            return new LambdaAst(new List<AstParameter>(parameters), body, returnType, isPure, createsEnv, generics);
+            return new LambdaAst(new List<AstParameter>(parameters), body, returnType, isPure, createsEnv, 
+                isLastVarArgs, generics);
         }
         public static StringAst StringLiteral(string text)
         {

@@ -222,14 +222,14 @@ namespace IML.Evaluation
 
                     List<string> generics = ParseGenericNames(genericsString);
 
-                    return Ast.LambdaLiteral(parsedParams, body, returnType, createsEnv, false, generics);
+                    return Ast.LambdaLiteral(parsedParams, body, returnType, createsEnv, false, false, generics);
                 }
                 else if (MatchesSimpleLambda(expression))
                 {
                     // Simple lambda; no params, does not create body
                     string contents = SIMPLE_LAMBDA_REGEX.Match(expression).Groups[1].Value;
                     Ast body = Parse(contents);
-                    return Ast.LambdaLiteral(new AstParameter[0], new List<Ast>() { body }, AstType.Any, false, false,
+                    return Ast.LambdaLiteral(new AstParameter[0], new List<Ast>() { body }, AstType.Any, false, false, false,
                         new List<string>());
                 }
                 else if (MEMBER_ACCESS_REGEX.IsMatch(expression))
