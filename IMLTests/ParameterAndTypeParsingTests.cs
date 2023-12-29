@@ -220,5 +220,11 @@ namespace IMLTests
         {
             AssertParsedTypeException("(number[],string[]...)=>void[]");
         }
+
+        [TestMethod]
+        public void TestGenericNames()
+        {
+            AssertParsedType("[T](T[])=>T");
+        }
     }
 }

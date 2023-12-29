@@ -79,7 +79,8 @@ namespace IML.Evaluation
         private const char LAMBDA_TYPE_PARAM_DELMITER = ',';
         private const string LAMBDA_TYPE_VARARGS_SYMBOL = "...";
         private readonly Regex LAMBDA_TYPE_REGEX = 
-            new Regex($"{LAMBDA_TYPE_PARAM_WRAPPERS[0]}(.*){LAMBDA_TYPE_PARAM_WRAPPERS[1]}" + 
+            new Regex($"({TYPE_GENERICS_WRAPPERS[0]}(.*){TYPE_GENERICS_WRAPPERS[1]})?" +
+                $"{LAMBDA_TYPE_PARAM_WRAPPERS[0]}(.*){LAMBDA_TYPE_PARAM_WRAPPERS[1]}" + 
                 $"[{LAMBDA_TYPE_REQ_ENV_CHARACTER}]?[{LAMBDA_TYPE_NO_ENVIRONMENT_LINE}|{LAMBDA_TYPE_CREATES_ENVIRONMENT_LINE}]" +
                 $"{LAMBDA_TYPE_ARROW_TIP}(.*)");
 
@@ -457,9 +458,43 @@ namespace IML.Evaluation
         }
         private LambdaAstTypeEntry ParseLambdaTypeEntry(string str)
         {
-            // Get the param types, return type, and any requirements on environments/purity
+            // Check if the type starts with generic wrappers
+            // For example, we could have [T](x:T)=>T or something like (x:any)=>any
+            List<string> genericNames = new List<string>();
             int startParen = 0;
-            int endParen = GetBracketEndIndex(str, 0, LAMBDA_TYPE_PARAM_WRAPPERS[0], LAMBDA_TYPE_PARAM_WRAPPERS[1]);
+            if (str.StartsWith(TYPE_GENERICS_WRAPPERS[0]))
+            {
+                // Parse our generics first
+                int startBracket = 0;
+                int endBracket = GetBracketEndIndex(str, 0, TYPE_GENERICS_WRAPPERS[0], TYPE_GENERICS_WRAPPERS[1]);
+                string generics = str.SubstringBetween(startBracket + 1, endBracket);
+                genericNames = ParseGenericNames(generics);
+                // Now move the startParen to the proper place. We allow whitespace in between the brackets and paren
+                startParen = endBracket;
+                char c = str[startParen];
+                string inBetweenStuff = "";
+                while (c != LAMBDA_TYPE_PARAM_WRAPPERS[0])
+                {
+                    c = str[startParen];
+                    inBetweenStuff += c;
+                    startParen++;
+                    if (startParen > str.Length)
+                    {
+                        throw new InvalidParseException("No argument wrapper present in function type declaration", str);
+                    }
+                }
+                // Undo last iteration to keep it in the right spot
+                startParen--;
+                // Make sure everything in between is whitespace
+                Regex whitespaceRegex = new Regex(@"\s*");
+                if (!whitespaceRegex.IsMatch(inBetweenStuff))
+                {
+                    throw new InvalidParseException($"Unrecognized token(s): \"{inBetweenStuff}\"", str);
+                }
+            }
+
+            // Get the param types, return type, and any requirements on environments/purity
+            int endParen = GetBracketEndIndex(str, startParen, LAMBDA_TYPE_PARAM_WRAPPERS[0], LAMBDA_TYPE_PARAM_WRAPPERS[1]);
             string args = str.SubstringBetween(startParen + 1, endParen);
             string[] paramTypeStrings = SplitByDelimiter(args, LAMBDA_TYPE_PARAM_DELMITER,
                 LAMBDA_TYPE_PARAM_WRAPPERS, TYPE_GENERICS_WRAPPERS);
@@ -547,7 +582,7 @@ namespace IML.Evaluation
             string returnTypeString = str.Substring(arrowTipIndex + 1);
             AstType returnType = ParseType(returnTypeString);
             // Now we can construct this thing and return it
-            return new LambdaAstTypeEntry(returnType, parameterTypes, envType, false, isVarArgs);
+            return new LambdaAstTypeEntry(returnType, parameterTypes, envType, false, isVarArgs, genericNames);
         }
         #endregion
 
@@ -592,6 +627,20 @@ namespace IML.Evaluation
         private string UnparseLambdaTypeEntry(LambdaAstTypeEntry entry)
         {
             StringBuilder builder = new StringBuilder();
+            if (entry.GenericNames.Count > 0)
+            {
+                // Need to include generic names out in front
+                builder.Append(TYPE_GENERICS_WRAPPERS[0]);
+                for (int i = 0; i < entry.GenericNames.Count; i++)
+                {
+                    builder.Append(entry.GenericNames[i]);
+                    if (i + 1 < entry.GenericNames.Count)
+                    {
+                        builder.Append(TYPE_GENERICS_DELIMITER);
+                    }
+                }
+                builder.Append(TYPE_GENERICS_WRAPPERS[1]);
+            }
             builder.Append(LAMBDA_TYPE_PARAM_WRAPPERS[0]);
             for (int i = 0; i < entry.ArgTypes.Count; i++)
             {
@@ -627,6 +676,21 @@ namespace IML.Evaluation
             return builder.ToString();
         }
         #endregion
+
+        public List<string> ParseGenericNames(string expression)
+        {
+            string[] genericNamesArray = SplitByDelimiter(expression, TYPE_GENERICS_DELIMITER, TYPE_GENERICS_WRAPPERS);
+            List<string> genericNames = new List<string>(genericNamesArray);
+            // Make sure all the names are valid
+            foreach (string gen in genericNames)
+            {
+                if (!SYMBOL_NAME_REGEX.IsMatch(gen))
+                {
+                    throw new InvalidParseException($"{gen} is not a valid symbol name", gen);
+                }
+            }
+            return genericNames;
+        }
 
         public IdentifierAst ParseIdentifier(string expression)
         {

@@ -55,9 +55,10 @@ namespace IML.Evaluation
         public LambdaEnvironmentType EnvironmentType { get; private set; }
         public bool IsPure { get; private set; }
         public bool IsLastVarArgs { get; private set; }
+        public List<string> GenericNames { get; private set; }
 
         public LambdaAstTypeEntry(AstType returnType, List<AstType> argTypes, LambdaEnvironmentType envType, bool isPure,
-            bool isLastVarArgs)
+            bool isLastVarArgs, List<string> genericNames)
             : base(MDataType.FUNCTION_TYPE_NAME, new List<AstType>())
         {
             ReturnType = returnType;
@@ -65,6 +66,7 @@ namespace IML.Evaluation
             EnvironmentType = envType;
             IsPure = isPure;
             IsLastVarArgs = isLastVarArgs;
+            GenericNames = genericNames;
         }
     }
 }
