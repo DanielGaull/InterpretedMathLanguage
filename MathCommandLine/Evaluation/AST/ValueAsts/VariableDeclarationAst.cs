@@ -10,13 +10,15 @@ namespace IML.Evaluation.AST.ValueAsts
         public string Name { get; private set; }
         public Ast Value { get; private set; }
         public VariableType VariableType { get; private set; }
+        public AstType VariableValueType { get; private set; }
 
-        public VariableDeclarationAst(string name, Ast value, VariableType varType)
+        public VariableDeclarationAst(string name, Ast value, VariableType varType, AstType variableValueType)
             : base(AstTypes.VariableDeclaration)
         {
             Name = name;
             Value = value;
             VariableType = varType;
+            VariableValueType = variableValueType;
         }
     }
 }

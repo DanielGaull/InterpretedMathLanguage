@@ -54,7 +54,7 @@ namespace IML.Evaluation
         // functions, variables (i.e. arguments), and literal core values
         private MValue FinalStageEvaluate(string expression, MEnvironment env)
         {
-            Ast tree = parser.Parse(expression);
+            Ast tree = parser.Parse(expression, new VariableAstTypeMap());
             EnsureValidity(tree);
             return EvaluateAst(tree, env);
         }
@@ -232,7 +232,7 @@ namespace IML.Evaluation
                         else
                         {
                             env.AddValue(newVarName, newVarValue, true, canSet, null);
-                            return newVarValue;
+                            return MValue.Void();
                         }
                     }
                 case AstTypes.VariableAssignment:
@@ -262,7 +262,7 @@ namespace IML.Evaluation
                                 // TODO
                                 break;
                         }
-                        return assignValue;
+                        return MValue.Void();
                     }
                 case AstTypes.MemberAccess:
                     {

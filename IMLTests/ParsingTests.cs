@@ -1,4 +1,5 @@
-﻿using IML.Evaluation;
+﻿using IML.CoreDataTypes;
+using IML.Evaluation;
 using IML.Evaluation.AST.ValueAsts;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -23,7 +24,7 @@ namespace IMLTests
         [TestMethod]
         public void TestReturn()
         {
-            Ast ast = parser.Parse("return 5");
+            Ast ast = parser.Parse("return 5", new VariableAstTypeMap());
             Assert.AreEqual(AstTypes.Return, ast.Type);
             ReturnAst rast = (ReturnAst)ast;
             Assert.AreEqual(AstTypes.NumberLiteral, rast.Body.Type);

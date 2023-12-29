@@ -121,7 +121,7 @@ namespace IML.Evaluation
         /// </summary>
         /// <param name="expression"></param>
         /// <returns></returns>
-        public virtual Ast Parse(string expression)
+        public virtual Ast Parse(string expression, VariableAstTypeMap typeMap)
         {
             try
             {
@@ -132,7 +132,7 @@ namespace IML.Evaluation
                 {
                     // Pull out the expression without the first and last characters
                     expression = expression.Substring(1, expression.Length - 2);
-                    return Parse(expression);
+                    return Parse(expression, typeMap);
                 }
 
                 // 'expression' is either a call, variable, or literal
@@ -146,7 +146,7 @@ namespace IML.Evaluation
                     string callerString = attempedCallMatch.Caller;
                     string argsString = attempedCallMatch.Args;
 
-                    Ast caller = Parse(callerString);
+                    Ast caller = Parse(callerString, typeMap);
                     if (caller.Type == AstTypes.Invalid)
                     {
                         // Invalid caller means we need to return an invalid overall, instead of a valid call
@@ -155,7 +155,7 @@ namespace IML.Evaluation
 
                     string[] argStrings = argsString.Length > 0 ? SplitByDelimiter(argsString, ARG_DELIMITER) : new string[0];
                     // Parse all the arguments
-                    Ast[] args = argStrings.Select(Parse).ToArray();
+                    Ast[] args = argStrings.Select(x => Parse(x, typeMap)).ToArray();
 
                     return Ast.Call(caller, args);
                 }
@@ -184,7 +184,7 @@ namespace IML.Evaluation
                     List<Ast> elementAsts = new List<Ast>();
                     foreach (string str in elementStrings)
                     {
-                        elementAsts.Add(Parse(str.Trim()));
+                        elementAsts.Add(Parse(str.Trim(), typeMap));
                     }
                     return Ast.ListLiteral(elementAsts.ToArray());
                 }
@@ -228,11 +228,18 @@ namespace IML.Evaluation
                         parsedParams = new AstParameter[0];
                     }
 
-                    List<Ast> body = ParseBody(exprString);
-
                     bool createsEnv = arrowBit == "=";
 
-                    AstType bodyReturnType = typeDeterminer.DetermineDataType(body);
+                    VariableAstTypeMap mapToUseForBody = typeMap;
+                    VariableAstTypeMap mapToUseForBody2 = typeMap;
+                    if (createsEnv)
+                    {
+                        mapToUseForBody = typeMap.Clone();
+                        mapToUseForBody2 = typeMap.Clone();
+                    }
+
+                    List<Ast> body = ParseBody(exprString, mapToUseForBody);
+                    AstType bodyReturnType = typeDeterminer.DetermineDataType(body, mapToUseForBody2);
                     AstType returnType;
                     if (provideReturnType)
                     {
@@ -255,7 +262,7 @@ namespace IML.Evaluation
                 {
                     // Simple lambda; no params, does not create body
                     string contents = SIMPLE_LAMBDA_REGEX.Match(expression).Groups[1].Value;
-                    Ast body = Parse(contents);
+                    Ast body = Parse(contents, typeMap); // Don't clone the type map since we don't create env
                     return Ast.LambdaLiteral(new AstParameter[0], new List<Ast>() { body }, AstType.Any, false, false, false,
                         new List<string>());
                 }
@@ -264,14 +271,14 @@ namespace IML.Evaluation
                     var groups = MEMBER_ACCESS_REGEX.Match(expression).Groups;
                     string parentStr = groups[1].Value;
                     string name = groups[2].Value;
-                    Ast parent = Parse(parentStr);
+                    Ast parent = Parse(parentStr, typeMap);
                     return Ast.MemberAccess(parent, name);
                 }
                 else if (RETURN_REGEX.IsMatch(expression))
                 {
                     var groups = RETURN_REGEX.Match(expression).Groups;
                     string body = groups[1].Value;
-                    Ast bodyAst = Parse(body);
+                    Ast bodyAst = Parse(body, typeMap);
                     return Ast.Return(bodyAst);
                 }
                 else if (DECLARATION_REGEX.IsMatch(expression))
@@ -300,7 +307,7 @@ namespace IML.Evaluation
                         throw new InvalidParseException(expression);
                     }
                     string assignedExpr = groups[3].Value;
-                    Ast assigned = Parse(assignedExpr);
+                    Ast assigned = Parse(assignedExpr, typeMap);
 
                     return Ast.VariableDeclaration(varName, assigned, varType);
                 }
@@ -310,9 +317,9 @@ namespace IML.Evaluation
                     string assignedExpr = expression.Substring(attemptedAssignmentMatchIndex + 1,
                         expression.Length - attemptedAssignmentMatchIndex - 1).Trim();
                     // Parse the assigned expression
-                    Ast assigned = Parse(assignedExpr);
+                    Ast assigned = Parse(assignedExpr, typeMap);
                     // Parse the identifier
-                    IdentifierAst identifier = ParseIdentifier(identifierExpr);
+                    IdentifierAst identifier = ParseIdentifier(identifierExpr, typeMap);
                     // TODO: Add operator-assignments, ex. +=, &&=, etc.
                     // Should be valid for ANY binary operator; even doing something like !== or === should work,
                     // though they'd be pretty rare to want to do
@@ -342,14 +349,14 @@ namespace IML.Evaluation
             }
         }
 
-        private List<Ast> ParseBody(string bodyExpr)
+        private List<Ast> ParseBody(string bodyExpr, VariableAstTypeMap typeMap)
         {
             string[] lines = SplitByDelimiter(bodyExpr, CODE_LINE_DELIMITER,
                 LAMBDA_BODY_WRAPPERS, LIST_WRAPPERS, SIMPLE_LAMBDA_WRAPPERS, GENERIC_WRAPPERS);
             List<Ast> bodyLines = new List<Ast>();
             foreach (string line in lines)
             {
-                bodyLines.Add(Parse(line.Trim()));
+                bodyLines.Add(Parse(line.Trim(), typeMap));
             }
             return bodyLines;
         }
@@ -724,13 +731,13 @@ namespace IML.Evaluation
             return genericNames;
         }
 
-        public IdentifierAst ParseIdentifier(string expression)
+        public IdentifierAst ParseIdentifier(string expression, VariableAstTypeMap typeMap)
         {
             if (IsParenWrapped(expression))
             {
                 // Pull out the expression without the first and last characters
                 expression = expression.Substring(1, expression.Length - 2);
-                return ParseIdentifier(expression);
+                return ParseIdentifier(expression, typeMap);
             }
 
             // Check if this is just a symbol string
@@ -748,7 +755,7 @@ namespace IML.Evaluation
             if (expression.StartsWith(DEREFERENCE_TOKEN))
             {
                 // Everything else gets turned into the AST
-                Ast r = Parse(expression.Substring(DEREFERENCE_TOKEN.Length));
+                Ast r = Parse(expression.Substring(DEREFERENCE_TOKEN.Length), typeMap);
                 return IdentifierAst.Dereference(r);
             }
             
@@ -758,7 +765,7 @@ namespace IML.Evaluation
                 var groups = MEMBER_ACCESS_REGEX.Match(expression).Groups;
                 string parentExpr = groups[1].Value;
                 string varName = groups[2].Value;
-                Ast parent = Parse(parentExpr);
+                Ast parent = Parse(parentExpr, typeMap);
                 return IdentifierAst.MemberAccess(parent, varName);
             }
 
