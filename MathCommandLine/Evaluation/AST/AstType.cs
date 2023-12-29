@@ -2,11 +2,12 @@
 using IML.Util;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace IML.Evaluation
 {
-    public class AstType
+    public class AstType : IEquatable<AstType>
     {
         // All the entries that are union'ed together
         public List<AstTypeEntry> Entries { get; private set; }
@@ -101,8 +102,22 @@ namespace IML.Evaluation
         {
             return !(a1 == a2);
         }
+        public override bool Equals(object obj)
+        {
+            if (!(obj is AstType))
+            {
+                return false;
+            }
+            AstType type = obj as AstType;
+            return this == type;
+        }
+
+        public bool Equals([AllowNull] AstType other)
+        {
+            return this == other;
+        }
     }
-    public class AstTypeEntry
+    public class AstTypeEntry : IEquatable<AstTypeEntry>
     {
         public string DataTypeName { get; private set; }
         public List<AstType> Generics { get; private set; }
@@ -116,6 +131,11 @@ namespace IML.Evaluation
         public static AstTypeEntry Simple(string name)
         {
             return new AstTypeEntry(name, new List<AstType>());
+        }
+
+        public bool Equals([AllowNull] AstTypeEntry other)
+        {
+            return this == other;
         }
 
         public static bool operator ==(AstTypeEntry a1, AstTypeEntry a2)

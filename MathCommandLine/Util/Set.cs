@@ -4,7 +4,7 @@ using System.Text;
 
 namespace IML.Util
 {
-    public class Set<T>
+    public class Set<T> where T : IEquatable<T>
     {
         List<T> set;
 
@@ -15,18 +15,22 @@ namespace IML.Util
 
         public void Add(T item)
         {
-            if (!set.Contains(item))
+            if (!Contains(item))
             {
                 set.Add(item);
             }
         }
         public bool Contains(T item)
         {
-            return set.Contains(item);
-        }
-        public void Remove(T item)
-        {
-            set.Remove(item);
+            foreach (T i in set)
+            {
+                IEquatable<T> ie = i;
+                if (ie.Equals(item))
+                {
+                    return true;
+                }
+            }
+            return false;// set.Contains(item);
         }
         public List<T> ToList()
         {

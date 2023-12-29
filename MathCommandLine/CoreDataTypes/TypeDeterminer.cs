@@ -16,9 +16,9 @@ namespace IML.CoreDataTypes
             switch (expression.Type)
             {
                 case AstTypes.NumberLiteral:
-                    return new AstType("number");
+                    return new AstType(MDataType.NUMBER_TYPE_NAME);
                 case AstTypes.StringLiteral:
-                    return new AstType("string");
+                    return new AstType(MDataType.STRING_TYPE_NAME);
                 case AstTypes.ListLiteral:
                     // Combine the types of the items within the list
                     ListAst list = (ListAst)expression;
@@ -32,7 +32,7 @@ namespace IML.CoreDataTypes
                     {
                         listType = listType.Union(DetermineDataType(entry));
                     }
-                    return listType;
+                    return new AstType(new AstTypeEntry(MDataType.LIST_TYPE_NAME, new List<AstType>() { listType }));
                 case AstTypes.LambdaLiteral:
                     LambdaAst lambda = (LambdaAst)expression;
                     List<AstType> paramTypes = new List<AstType>();

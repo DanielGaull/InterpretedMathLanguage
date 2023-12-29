@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace IML.CoreDataTypes
 {
-    public abstract class MDataTypeEntry
+    public abstract class MDataTypeEntry : IEquatable<MDataTypeEntry>
     {
         public static readonly MConcreteDataTypeEntry Any = new MConcreteDataTypeEntry(MDataType.Any);
         public static readonly MConcreteDataTypeEntry Number = new MConcreteDataTypeEntry(MDataType.Number);
@@ -80,6 +81,11 @@ namespace IML.CoreDataTypes
             }
             MDataTypeEntry o = obj as MDataTypeEntry;
             return this == o;
+        }
+
+        public bool Equals([AllowNull] MDataTypeEntry other)
+        {
+            return this == other;
         }
     }
     public class MConcreteDataTypeEntry : MDataTypeEntry

@@ -1,5 +1,6 @@
 ﻿using IML.Evaluation;
 using IML.Evaluation.AST.ValueAsts;
+using IML.Exceptions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -416,6 +417,36 @@ namespace IMLTests
             List<Ast> body = last.Body;
             Assert.AreEqual(AstTypes.NumberLiteral, body[0].Type);
             Assert.AreEqual(5, ((NumberAst)body[0]).Value);
+        }
+
+        [TestMethod]
+        public void TestSimpleReturnTypeFail()
+        {
+            Ast ast = parser.Parse("():string=>{5}");
+            Assert.AreEqual(AstTypes.Invalid, ast.Type);
+        }
+
+        [TestMethod]
+        public void TestSimpleReturnTypeGenericFail()
+        {
+            Ast ast = parser.Parse("():list[string]=>{{1,2,3}}");
+            Assert.AreEqual(AstTypes.Invalid, ast.Type);
+        }
+
+        [TestMethod]
+        public void TestSimpleReturnTypeGeneric()
+        {
+            Ast ast = parser.Parse("():list[number]=>{{1,2,3}}");
+            Assert.AreEqual(AstTypes.LambdaLiteral, ast.Type);
+
+            LambdaAst last = (LambdaAst)ast;
+            // Just check the return type
+            Assert.AreEqual(1, last.ReturnType.Entries.Count);
+            AstTypeEntry entry = last.ReturnType.Entries[0];
+            Assert.AreEqual("list", entry.DataTypeName);
+            Assert.AreEqual(1, entry.Generics.Count);
+            Assert.AreEqual(1, entry.Generics[0].Entries.Count);
+            Assert.AreEqual("number", entry.Generics[0].Entries[0].DataTypeName);
         }
     }
 }
