@@ -384,6 +384,26 @@ namespace IML.Evaluation
             string[] lines = SplitByDelimiter(bodyExpr, CODE_LINE_DELIMITER,
                 LAMBDA_BODY_WRAPPERS, LIST_WRAPPERS, SIMPLE_LAMBDA_WRAPPERS, GENERIC_WRAPPERS);
 
+            if (lines.Length == 1)
+            {
+                string line = lines[0].Trim();
+                if (line.Length > 0)
+                {
+                    // Single line, no semicolon after
+                    // This is valid syntax
+                    // Special case so the code below doesn't give invalid for missing a semicolon
+                    return new List<Ast>() 
+                    { 
+                        Parse(line, typeMap)
+                    };
+                }
+                else
+                {
+                    // Lambda has an empty body
+                    throw new InvalidOperationException("Lambda has an empty body; Currently UNIMPLEMENTED");
+                }
+            }
+
             // The last line should be empty, denoting that a semicolon was used after the last actual line of code
             // If not, then we didn't have a final semicolon
             if (lines[lines.Length - 1].Trim().Length > 0)
