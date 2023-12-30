@@ -109,15 +109,17 @@ namespace IML.Evaluation
         };
 
         private TypeDeterminer typeDeterminer;
+        private VariableAstTypeMap defaultVariables;
 
-        public Parser()
+        public Parser(VariableAstTypeMap defaultVariables)
         {
             typeDeterminer = new TypeDeterminer();
+            this.defaultVariables = defaultVariables;
         }
 
         public virtual Ast Parse(string expression)
         {
-            return Parse(expression, new VariableAstTypeMap());
+            return Parse(expression, defaultVariables);
         }
 
         /// <summary>

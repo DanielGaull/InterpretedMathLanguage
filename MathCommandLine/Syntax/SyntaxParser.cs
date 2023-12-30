@@ -1,4 +1,5 @@
-﻿using IML.Evaluation;
+﻿using IML.CoreDataTypes;
+using IML.Evaluation;
 using IML.Evaluation.AST.ValueAsts;
 using IML.Exceptions;
 using IML.Util;
@@ -13,7 +14,8 @@ namespace IML.Syntax
     {
         private List<SyntaxDef> definitions;
 
-        public SyntaxParser(List<SyntaxDef> definitions)
+        public SyntaxParser(List<SyntaxDef> definitions, VariableAstTypeMap typeMap)
+            : base(typeMap)
         {
             this.definitions = definitions;
         }

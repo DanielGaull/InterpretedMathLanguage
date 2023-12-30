@@ -17,14 +17,14 @@ namespace IMLTests
         [ClassInitialize]
         public static void Setup(TestContext context)
         {
-            parser = new Parser();
-            typeDeterminer = new TypeDeterminer();
-
             baseTypeMap = new VariableAstTypeMap();
             baseTypeMap.Add("true", new AstType(MDataType.BOOLEAN_TYPE_NAME));
             baseTypeMap.Add("false", new AstType(MDataType.BOOLEAN_TYPE_NAME));
             baseTypeMap.Add("void", new AstType(MDataType.VOID_TYPE_NAME));
             baseTypeMap.Add("null", new AstType(MDataType.NULL_TYPE_NAME));
+
+            parser = new Parser(baseTypeMap);
+            typeDeterminer = new TypeDeterminer();
         }
 
         public void AssertTypes(string input, AstType type, VariableAstTypeMap typeMap)
@@ -60,10 +60,12 @@ namespace IMLTests
         [TestMethod]
         public void RefGenerics()
         {
-            AssertTypes("&true", new AstType(MDataType.REF_TYPE_NAME, new AstType(MDataType.BOOLEAN_TYPE_NAME)), baseTypeMap);
-            AssertTypes("&&void", new AstType(MDataType.REF_TYPE_NAME,
-                new AstType(MDataType.REF_TYPE_NAME, new AstType(MDataType.VOID_TYPE_NAME))), baseTypeMap);
-            // TODO: Use multi-line parsing to do a test where we create a list and then a ref to it
+            VariableAstTypeMap typeMap = baseTypeMap.Clone();
+            typeMap.Add("test_list", new AstType(MDataType.LIST_TYPE_NAME, new AstType(MDataType.NUMBER_TYPE_NAME)));
+
+            AssertTypes("&true", new AstType(MDataType.REF_TYPE_NAME, new AstType(MDataType.BOOLEAN_TYPE_NAME)), typeMap);
+            AssertTypes("&test_list", new AstType(MDataType.REF_TYPE_NAME,
+                new AstType(MDataType.LIST_TYPE_NAME, new AstType(MDataType.NUMBER_TYPE_NAME))), typeMap);
         }
         [TestMethod]
         public void SimpleFunction()

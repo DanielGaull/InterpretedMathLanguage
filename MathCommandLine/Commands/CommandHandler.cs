@@ -120,6 +120,15 @@ namespace IML.Commands
             }
             return baseEnv;
         }
+        private VariableAstTypeMap CreateBaseTypeMap()
+        {
+            VariableAstTypeMap baseTypeMap = new VariableAstTypeMap();
+            baseTypeMap.Add("true", new AstType(MDataType.BOOLEAN_TYPE_NAME));
+            baseTypeMap.Add("false", new AstType(MDataType.BOOLEAN_TYPE_NAME));
+            baseTypeMap.Add("void", new AstType(MDataType.VOID_TYPE_NAME));
+            baseTypeMap.Add("null", new AstType(MDataType.NULL_TYPE_NAME));
+            return baseTypeMap;
+        }
 
         private MValue RunLine(MEnvironment env, SyntaxParser sp, Interpreter evaluator, string line)
         {
@@ -132,9 +141,10 @@ namespace IML.Commands
 
         private void RunFile(string filePath)
         {
+            VariableAstTypeMap typeMap = CreateBaseTypeMap();
             string text = File.ReadAllText(filePath);
 
-            Parser parser = new Parser();
+            Parser parser = new Parser(typeMap);
 
             bool running = true;
             Interpreter evaluator = CreateInterpreter(parser, () =>
@@ -147,7 +157,7 @@ namespace IML.Commands
             // Syntax loading; go to the syntax files path, and load in all the files it lists
             SyntaxHandler sh = new SyntaxHandler(parser, "{}(),".ToCharArray().ToList());
             List<SyntaxDef> syntaxDefinitions = ImportSyntax(sh);
-            SyntaxParser sp = new SyntaxParser(syntaxDefinitions);
+            SyntaxParser sp = new SyntaxParser(syntaxDefinitions, typeMap);
 
             // Simple reading for now
             string[] lines = Regex.Split(text, "(?:\r\n|\r|\n)+");
@@ -167,7 +177,8 @@ namespace IML.Commands
 
         private void RunInterpreter()
         {
-            Parser parser = new Parser();
+            VariableAstTypeMap typeMap = CreateBaseTypeMap();
+            Parser parser = new Parser(typeMap);
 
             bool running = true;
             Interpreter evaluator = CreateInterpreter(parser, () =>
@@ -180,7 +191,7 @@ namespace IML.Commands
             // Syntax loading; go to the syntax files path, and load in all the files it lists
             SyntaxHandler sh = new SyntaxHandler(parser, "{}(),".ToCharArray().ToList());
             List<SyntaxDef> syntaxDefinitions = ImportSyntax(sh);
-            SyntaxParser sp = new SyntaxParser(syntaxDefinitions);
+            SyntaxParser sp = new SyntaxParser(syntaxDefinitions, typeMap);
 
             // Simple reading for now
             while (running)

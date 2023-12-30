@@ -19,7 +19,13 @@ namespace IMLTests
         [ClassInitialize]
         public static void Setup(TestContext context)
         {
-            Parser parser = new Parser();
+            VariableAstTypeMap baseTypeMap = new VariableAstTypeMap();
+            baseTypeMap.Add("true", new AstType(MDataType.BOOLEAN_TYPE_NAME));
+            baseTypeMap.Add("false", new AstType(MDataType.BOOLEAN_TYPE_NAME));
+            baseTypeMap.Add("void", new AstType(MDataType.VOID_TYPE_NAME));
+            baseTypeMap.Add("null", new AstType(MDataType.NULL_TYPE_NAME));
+
+            Parser parser = new Parser(baseTypeMap);
 
             Interpreter evaluator = new Interpreter();
 

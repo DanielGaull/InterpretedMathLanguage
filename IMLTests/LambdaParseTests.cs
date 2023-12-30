@@ -1,4 +1,5 @@
-﻿using IML.Evaluation;
+﻿using IML.CoreDataTypes;
+using IML.Evaluation;
 using IML.Evaluation.AST.ValueAsts;
 using IML.Exceptions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -16,7 +17,13 @@ namespace IMLTests
         [ClassInitialize]
         public static void Setup(TestContext context)
         {
-            Parser parser = new Parser();
+            VariableAstTypeMap baseTypeMap = new VariableAstTypeMap();
+            baseTypeMap.Add("true", new AstType(MDataType.BOOLEAN_TYPE_NAME));
+            baseTypeMap.Add("false", new AstType(MDataType.BOOLEAN_TYPE_NAME));
+            baseTypeMap.Add("void", new AstType(MDataType.VOID_TYPE_NAME));
+            baseTypeMap.Add("null", new AstType(MDataType.NULL_TYPE_NAME));
+
+            Parser parser = new Parser(baseTypeMap);
 
             LambdaParseTests.parser = parser;
         }
