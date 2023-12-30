@@ -127,6 +127,11 @@ namespace IML.Evaluation
             DataTypeName = dataTypeName;
             Generics = generics;
         }
+        public AstTypeEntry(string dataTypeName, params AstType[] generics)
+        {
+            DataTypeName = dataTypeName;
+            Generics = new List<AstType>(generics);
+        }
 
         public static AstTypeEntry Simple(string name)
         {

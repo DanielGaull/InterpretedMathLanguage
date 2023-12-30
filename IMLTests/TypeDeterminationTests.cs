@@ -46,19 +46,15 @@ namespace IMLTests
             AssertTypes("{1,2,3}", new AstType(MDataType.LIST_TYPE_NAME, new AstType(MDataType.NUMBER_TYPE_NAME)),
                 new VariableAstTypeMap());
             AssertTypes("{{1,2,3},{\"h\"}}", new AstType(
-                new List<AstTypeEntry>() 
-                { 
                     new AstTypeEntry(MDataType.LIST_TYPE_NAME, 
-                        new List<AstType>()
-                        {
-                            new AstType(MDataType.LIST_TYPE_NAME, new AstType(MDataType.NUMBER_TYPE_NAME))
-                        }),
-                    new AstTypeEntry(MDataType.LIST_TYPE_NAME,
-                        new List<AstType>()
-                        {
-                            new AstType(MDataType.LIST_TYPE_NAME, new AstType(MDataType.STRING_TYPE_NAME))
-                        }),
-                }),
+                        new AstType(new List<AstTypeEntry>()
+                            {
+                                new AstTypeEntry(MDataType.LIST_TYPE_NAME, new AstType(MDataType.NUMBER_TYPE_NAME)),
+                                new AstTypeEntry(MDataType.LIST_TYPE_NAME, new AstType(MDataType.STRING_TYPE_NAME))
+                            }
+                        )
+                    )
+                ),
                 new VariableAstTypeMap());
         }
         [TestMethod]
