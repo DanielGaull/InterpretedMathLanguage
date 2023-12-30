@@ -116,7 +116,8 @@ namespace IML.CoreDataTypes
                         }
                     }
                 case AstTypes.Invalid:
-                    throw new TypeDeterminationException("Expression given was Invalid", expression);
+                    throw new TypeDeterminationException("Expression given was Invalid " + 
+                        $"\"{((InvalidAst)expression).Expression}\"", expression);
             }
             return null;
         }

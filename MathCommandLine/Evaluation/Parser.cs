@@ -383,10 +383,24 @@ namespace IML.Evaluation
         {
             string[] lines = SplitByDelimiter(bodyExpr, CODE_LINE_DELIMITER,
                 LAMBDA_BODY_WRAPPERS, LIST_WRAPPERS, SIMPLE_LAMBDA_WRAPPERS, GENERIC_WRAPPERS);
-            List<Ast> bodyLines = new List<Ast>();
-            foreach (string line in lines)
+
+            // The last line should be empty, denoting that a semicolon was used after the last actual line of code
+            // If not, then we didn't have a final semicolon
+            if (lines[lines.Length - 1].Trim().Length > 0)
             {
-                bodyLines.Add(Parse(line.Trim(), typeMap));
+                // Last "line" is not empty, meaning we did not have a semicolon after the final function line
+                throw new InvalidParseException($"Statement not terminated (missing '{CODE_LINE_DELIMITER}')", bodyExpr);
+            }
+
+            List<Ast> bodyLines = new List<Ast>();
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string line = lines[i].Trim();
+                // Don't add the last (empty) line
+                if (i + 1 < lines.Length)
+                {
+                    bodyLines.Add(Parse(line, typeMap));
+                }
             }
             return bodyLines;
         }
@@ -809,6 +823,11 @@ namespace IML.Evaluation
         /// <returns></returns>
         private bool IsParenWrapped(string expression)
         {
+            if (expression.Length < 2)
+            {
+                return false;
+            }
+
             if (expression[0] != GENERIC_START_WRAPPER || expression[expression.Length - 1] != GENERIC_END_WRAPPER)
             {
                 return false;
@@ -1153,6 +1172,11 @@ namespace IML.Evaluation
         /// <returns></returns>
         private CallMatch MatchCall(string expression)
         {
+            if (expression.Length < 2)
+            {
+                return CallMatch.Failure;
+            }
+
             // What makes a call a call?
             // Well, it's simply some "thing" followed by parentheses, which may have arguments in them
             // It's important to note that the "thing" must have balanced brackets: that is, balanced curly braces
