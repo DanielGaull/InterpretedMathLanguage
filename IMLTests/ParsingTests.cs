@@ -33,8 +33,14 @@ namespace IMLTests
             Ast ast = parser.Parse("return 5");
             Assert.AreEqual(AstTypes.Return, ast.Type);
             ReturnAst rast = (ReturnAst)ast;
+            Assert.AreEqual(false, rast.ReturnsVoid);
             Assert.AreEqual(AstTypes.NumberLiteral, rast.Body.Type);
             Assert.AreEqual(5, ((NumberAst)rast.Body).Value);
+
+            ast = parser.Parse("return");
+            Assert.AreEqual(AstTypes.Return, ast.Type);
+            rast = (ReturnAst)ast;
+            Assert.AreEqual(true, rast.ReturnsVoid);
         }
     }
 }

@@ -95,7 +95,7 @@ namespace IML.Evaluation
 
         private const string RETURN_KEYWORD = "return";
         private static readonly Regex RETURN_REGEX =
-            new Regex(@$"^{RETURN_KEYWORD}\s+(.*)$");
+            new Regex(@$"^{RETURN_KEYWORD}(?:\s+(.*))?$");
 
         private const string DEREFERENCE_TOKEN = "*";
 
@@ -289,9 +289,18 @@ namespace IML.Evaluation
                 else if (RETURN_REGEX.IsMatch(expression))
                 {
                     var groups = RETURN_REGEX.Match(expression).Groups;
-                    string body = groups[1].Value;
-                    Ast bodyAst = Parse(body, typeMap);
-                    return Ast.Return(bodyAst);
+                    string body = groups[1].Value.Trim();
+                    bool returnsVoid = false;
+                    Ast bodyAst = null;
+                    if (body.Length <= 0)
+                    {
+                        returnsVoid = true;
+                    }
+                    else
+                    {
+                        bodyAst = Parse(body, typeMap);
+                    }
+                    return Ast.Return(bodyAst, returnsVoid);
                 }
                 else if (DECLARATION_REGEX.IsMatch(expression))
                 {
