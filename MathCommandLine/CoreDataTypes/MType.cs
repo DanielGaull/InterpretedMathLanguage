@@ -100,7 +100,25 @@ namespace IML.CoreDataTypes
             {
                 // Check if there is already an entry in the set that is of the same type, with a single generic,
                 // allowing us to union the generics together
-                
+                // Only if the current entry is a concrete type
+                // This code is currently unfinished; feels like it might cause more problems than it solves if
+                // not implemented perfectly
+                //if (Entries[i] is MConcreteDataTypeEntry)
+                //{
+                //    foreach (MDataTypeEntry e in entries)
+                //    {
+                //        if (e is MConcreteDataTypeEntry)
+                //        {
+                //            MConcreteDataTypeEntry e1 = (MConcreteDataTypeEntry)e;
+                //            MConcreteDataTypeEntry e2 = (MConcreteDataTypeEntry)Entries[i];
+                //            if (e1.DataType == e2.DataType && e1.DataType.NumberOfGenerics == 1)
+                //            {
+                //                MType newGeneric = e1.Generics[0].Union(e2.Generics[0]);
+
+                //            }
+                //        }
+                //    }
+                //}
                 entries.Add(Entries[i]);
             }
             for (int i = 0; i < other.Entries.Count; i++)
