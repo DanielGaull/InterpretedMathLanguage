@@ -79,22 +79,25 @@ namespace IML.Evaluation
             {
                 return false;
             }
-            for (int i = 0; i < a1.Entries.Count; i++)
+            // Order of entries does not matter
+            // Just put everything into a list, and remove as needed
+            List<AstTypeEntry> entriesToCompare = new List<AstTypeEntry>(a1.Entries);
+            for (int i = 0; i < a2.Entries.Count; i++)
             {
-                if (a1.Entries[i] is LambdaAstTypeEntry)
+                if (entriesToCompare.Contains(a2.Entries[i]))
                 {
-                    if (!(a2.Entries[i] is LambdaAstTypeEntry))
-                    {
-                        return false;
-                    }
-                    LambdaAstTypeEntry e1 = (LambdaAstTypeEntry)a1.Entries[i];
-                    LambdaAstTypeEntry e2 = (LambdaAstTypeEntry)a2.Entries[i];
-                    return e1 == e2;
+                    entriesToCompare.Remove(a2.Entries[i]);
                 }
-                if (a1.Entries[i] != a2.Entries[i])
+                else
                 {
+                    // We've found an entry in a2 that isn't in a1
                     return false;
                 }
+            }
+            if (entriesToCompare.Count > 0)
+            {
+                // If there are things in the list still, we've found things in a1 that aren't in a2
+                return false;
             }
             return true;
         }
@@ -145,6 +148,11 @@ namespace IML.Evaluation
 
         public static bool operator ==(AstTypeEntry a1, AstTypeEntry a2)
         {
+            if (a1 is LambdaAstTypeEntry && a2 is LambdaAstTypeEntry)
+            {
+                return ((LambdaAstTypeEntry)a1) == ((LambdaAstTypeEntry)a2);
+            }
+
             if (a1.DataTypeName != a2.DataTypeName)
             {
                 return false;

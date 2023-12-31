@@ -179,12 +179,25 @@ namespace IML.CoreDataTypes
             {
                 return false;
             }
-            for (int i = 0; i < t1.entries.Count; i++)
+            // Order of entries does not matter
+            // Just put everything into a list, and remove as needed
+            List<MDataTypeEntry> entriesToCompare = new List<MDataTypeEntry>(t1.Entries);
+            for (int i = 0; i < t2.Entries.Count; i++)
             {
-                if (t1.entries[i] != t2.entries[i])
+                if (entriesToCompare.Contains(t2.Entries[i]))
                 {
+                    entriesToCompare.Remove(t2.Entries[i]);
+                }
+                else
+                {
+                    // Found something in t2 that isn't in t1
                     return false;
                 }
+            }
+            if (entriesToCompare.Count > 0)
+            {
+                // Found something(s) in t1 that aren't in t2
+                return false;
             }
             return true;
         }
