@@ -525,6 +525,7 @@ namespace IML.Evaluation
                 AstType type = AstType.UNION_BASE;
                 for (int i = 0; i < types.Length; i++)
                 {
+                    types[i] = types[i].Trim();
                     AstTypeEntry entry = ParseTypeEntry(types[i]);
                     type = type.Union(new AstType(entry));
                 }
@@ -551,13 +552,17 @@ namespace IML.Evaluation
             if (!entryStr.Contains(TYPE_GENERICS_WRAPPERS[0]))
             {
                 // Simply stores a type. We should pass that up.
+                if (!SYMBOL_NAME_REGEX.IsMatch(entryStr))
+                {
+                    throw new InvalidParseException("Invalid type name", entryStr);
+                }
                 return AstTypeEntry.Simple(entryStr);
             }
             // Need to get everything between the first and last brackets
             int bracketStart = entryStr.IndexOf(TYPE_GENERICS_WRAPPERS[0]);
             int bracketEnd = entryStr.LastIndexOf(TYPE_GENERICS_WRAPPERS[1]);
             string name = entryStr.Substring(0, bracketStart).Trim();
-            string genericsString = entryStr.SubstringBetween(bracketStart + 1, bracketEnd);
+            string genericsString = entryStr.SubstringBetween(bracketStart + 1, bracketEnd).Trim();
             List<AstType> generics = new List<AstType>();
             if (genericsString.Length > 0)
             {
@@ -629,8 +634,10 @@ namespace IML.Evaluation
                         throw new InvalidParseException("Varargs can only be used with the last parameter", str);
                     }
                     // Ok, now parse the type and make sure it's a list of something
-                    AstType type = ParseType(paramTypeStrings[i]
-                        .SubstringBetween(0, paramTypeStrings[i].Length - LAMBDA_TYPE_VARARGS_SYMBOL.Length));
+                    string varArgsTypeString = paramTypeStrings[i]
+                        .SubstringBetween(0, paramTypeStrings[i].Length - LAMBDA_TYPE_VARARGS_SYMBOL.Length)
+                        .Trim();
+                    AstType type = ParseType(varArgsTypeString);
                     if (!type.Entries.All(e => e.DataTypeName == MDataType.LIST_TYPE_NAME))
                     {
                         // We have an entry for the type of the varargs that is not a list
@@ -649,7 +656,7 @@ namespace IML.Evaluation
             // Start at end paren in case any lambdas in the params (can't use LastIndexOf either since there could
             // be one in the return type)
             int arrowTipIndex = str.IndexOf(LAMBDA_TYPE_ARROW_TIP, endParen);
-            string arrow = str.SubstringBetween(endParen + 1, arrowTipIndex);
+            string arrow = str.SubstringBetween(endParen + 1, arrowTipIndex).Trim();
             bool forceEnv = false;
             bool createsEnv;
             if (arrow.StartsWith(LAMBDA_TYPE_REQ_ENV_CHARACTER))
@@ -695,7 +702,7 @@ namespace IML.Evaluation
             }
 
             // Finally, we need the return type
-            string returnTypeString = str.Substring(arrowTipIndex + 1);
+            string returnTypeString = str.Substring(arrowTipIndex + 1).Trim();
             AstType returnType = ParseType(returnTypeString);
             // Now we can construct this thing and return it
             return new LambdaAstTypeEntry(returnType, parameterTypes, envType, false, isVarArgs, genericNames);

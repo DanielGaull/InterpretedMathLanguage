@@ -1,6 +1,7 @@
 ﻿using IML.CoreDataTypes;
 using IML.Evaluation;
 using IML.Exceptions;
+using IML.Util;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -226,6 +227,14 @@ namespace IMLTests
         public void TestVarargsNotAListFail()
         {
             AssertParsedTypeException("(number[],string[]...)=>void[]");
+        }
+        [TestMethod]
+        public void TestMultipleVarargsMaxWhitespaceWrapped()
+        {
+            string test = " ( ( [ T , R ] ( number [ ] , string [ ] , list[ number [ ] ] ... ) => void [ ] ) ) ";
+            string noWhitespace = test.Replace(" ", "");
+            string noParens = noWhitespace.SubstringBetween(2, noWhitespace.Length - 2);
+            AssertParsedType(test, noParens);
         }
 
         [TestMethod]
