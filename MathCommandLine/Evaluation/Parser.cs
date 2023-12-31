@@ -508,13 +508,18 @@ namespace IML.Evaluation
                 // Split the type on pipe (excluding things in brackets [] to avoid types provided to restrictions)
                 string[] types = SplitByDelimiter(typeStr, TYPE_UNION_DELIMITER,
                     TYPE_GENERICS_WRAPPERS, LAMBDA_TYPE_PARAM_WRAPPERS);
+                if (types.Length <= 0)
+                {
+                    throw new InvalidParseException("Type has no entries", typeStr);
+                }
                 // Now for each of these, we need to parse out the datatype + restrictions
-                List<AstTypeEntry> entries = new List<AstTypeEntry>();
+                AstType type = AstType.UNION_BASE;
                 for (int i = 0; i < types.Length; i++)
                 {
-                    entries.Add(ParseTypeEntry(types[i]));
+                    AstTypeEntry entry = ParseTypeEntry(types[i]);
+                    type = type.Union(new AstType(entry));
                 }
-                return new AstType(entries);
+                return type;
             }
             catch
             {
