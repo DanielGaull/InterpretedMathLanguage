@@ -92,11 +92,15 @@ namespace IML.CoreDataTypes
             {
                 return Any;
             }
+
             // Now create a SET of the types that appear in each subtype
             // Compare each to see if they're equal
             Set<MDataTypeEntry> entries = new Set<MDataTypeEntry>();
             for (int i = 0; i < Entries.Count; i++)
             {
+                // Check if there is already an entry in the set that is of the same type, with a single generic,
+                // allowing us to union the generics together
+                
                 entries.Add(Entries[i]);
             }
             for (int i = 0; i < other.Entries.Count; i++)
