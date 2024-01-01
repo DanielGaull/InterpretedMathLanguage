@@ -1,6 +1,5 @@
 ﻿using IML.CoreDataTypes;
 using IML.Exceptions;
-using IML.Structure;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -16,9 +15,12 @@ namespace IML.Environments
         Dictionary<string, MBoxedValue> hiddenValues = new Dictionary<string, MBoxedValue>();
         MEnvironment parent;
 
+        private Dictionary<string, MType> genericMap;
+
         public MEnvironment(MEnvironment parent)
         {
             this.parent = parent;
+            genericMap = new Dictionary<string, MType>();
         }
 
         public void AddHiddenValue(string name, MValue value, bool canGet, bool canSet)
@@ -65,6 +67,18 @@ namespace IML.Environments
             }
             return parent.Has(name);
         }
+        public bool HasGeneric(string name)
+        {
+            if (this == Empty)
+            {
+                return false;
+            }
+            if (genericMap.ContainsKey(name))
+            {
+                return true;
+            }
+            return parent.HasGeneric(name);
+        }
 
         public MBoxedValue GetBox(string name)
         {
@@ -107,6 +121,22 @@ namespace IML.Environments
                 return parent.Get(name);
             }
         }
+        public MType GetGeneric(string name)
+        {
+            if (this == Empty)
+            {
+                throw new FatalRuntimeException($"Generic \"{name}\" is not defined in this context.");
+            }
+
+            if (genericMap.ContainsKey(name))
+            {
+                return genericMap[name];
+            }
+            else
+            {
+                return parent.GetGeneric(name);
+            }
+        }
 
         public MValue Set(string name, MValue value)
         {
@@ -130,6 +160,17 @@ namespace IML.Environments
             else
             {
                 return parent.Set(name, value);
+            }
+        }
+        public void AddGeneric(string name, MType type)
+        {
+            if (genericMap.ContainsKey(name))
+            {
+                genericMap[name] = type;
+            }
+            else
+            {
+                genericMap.Add(name, type);
             }
         }
 
