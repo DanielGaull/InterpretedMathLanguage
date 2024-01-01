@@ -435,7 +435,9 @@ namespace IML.Evaluation
                         envToUse.AddVariable(args[i].Name, args[i].Value);
                     }
                 }
-                //return EvaluateAst(function.AstBody, envToUse);
+                // Add the defined generics to the new environment
+                // TODO!!!!! How do we determine which type maps to which generic ?????????
+
                 return EvaluateBody(function.AstBody, envToUse, !function.CreatesEnv);
             }
         }
