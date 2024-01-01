@@ -11,11 +11,18 @@ namespace IML.CoreDataTypes
     public delegate MValue NativeExpression(MArguments args, MEnvironment env, IInterpreter evaluator);
     public class MClosure
     {
+        public bool IsEmpty { get; private set; }
         public MEnvironment Environment { get; private set; }
-        public Ast AstBody { get; private set; }
+        public List<Ast> AstBody { get; private set; }
         public NativeExpression NativeBody { get; private set; }
         public bool IsNativeBody { get; private set; }
-        public bool CreatesEnv { get; private set; }
+        public bool CreatesEnv 
+        { 
+            get
+            {
+                return TypeEntry.EnvironmentType != LambdaEnvironmentType.ForceNoEnvironment;
+            }
+        }
         public MFunctionDataTypeEntry TypeEntry { get; private set; }
         List<string> paramNames;
         public MParameters Parameters { get; private set; }
@@ -56,14 +63,18 @@ namespace IML.CoreDataTypes
             }
         }
 
-        public MClosure(MFunctionDataTypeEntry type, List<string> paramNames, MEnvironment env, Ast body, bool createsEnv)
+        private MClosure()
+        {
+            IsEmpty = true;
+        }
+
+        public MClosure(MFunctionDataTypeEntry type, List<string> paramNames, MEnvironment env, List<Ast> body)
         {
             TypeEntry = type;
             this.paramNames = paramNames;
             Environment = env;
             AstBody = body;
             IsNativeBody = false;
-            CreatesEnv = createsEnv;
             if (!(type is null))
             {
                 Parameters = ConstructParameters(type.ParameterTypes, paramNames);
@@ -105,7 +116,7 @@ namespace IML.CoreDataTypes
             return new MParameters(ps);
         }
 
-        public static MClosure Empty = new MClosure(null, null, null, Ast.Invalid(null), false);
+        public static MClosure Empty = new MClosure();
 
         public MClosure CloneWithNewEnvironment(MEnvironment env)
         {
@@ -115,7 +126,7 @@ namespace IML.CoreDataTypes
             }
             else
             {
-                return new MClosure(TypeEntry, paramNames, env, AstBody, CreatesEnv);
+                return new MClosure(TypeEntry, paramNames, env, AstBody);
             }
         }
     }

@@ -183,34 +183,36 @@ namespace IML.Evaluation
                         // Immediately check to make sure we aren't allowing any parameters if the closure
                         // doesn't create an environment
                         // Environment-less closures (i.e. ()~>{...}) cannot have parameters
-                        //if (ast.Parameters.Length > 0 && !ast.CreatesEnv)
-                        //{
-                        //    return MValue.Error(ErrorCodes.ILLEGAL_LAMBDA,
-                        //        "Lambdas that don't create environments (~>) cannot have parameters", MList.Empty);
-                        //}
-                        //MParameter[] paramArray = ast.Parameters.Select((astParam) =>
-                        //{
-                        //    string name = astParam.Name;
-                        //    List<MDataTypeEntry> entries = new List<MDataTypeEntry>();
-                        //    entries.Add(MDataTypeEntry.Any);
-                        //// TODO: Parse data types here
-                        //// If any type entries are empty, then return an error (type doesn't exist)
-                        //return new MParameter(name, entries);
-                        //}).ToArray();
-                        //if (paramArray.Any((param) => param.IsEmpty))
-                        //{
-                        //    return MValue.Error(ErrorCodes.TYPE_DOES_NOT_EXIST,
-                        //        "Type \"" + ast.Name + "\" is not defined.", MList.Empty);
-                        //}
-                        //MParameters parameters = new MParameters(paramArray);
-                        //// Make sure the body is valid
-                        //if (ast.Body.Type == AstTypes.Invalid)
-                        //{
-                        //    throw new InvalidParseException(ast.Body.Expression);
-                        //}
-                        //// Create a closure with this current environment
-                        //return MValue.Closure(new MClosure(parameters, env, ast.Body, ast.CreatesEnv));
-                        throw new InvalidOperationException("Unimplemented");
+                        if (ast.Parameters.Count > 0 && !ast.CreatesEnv)
+                        {
+                            return MValue.Error(ErrorCodes.ILLEGAL_LAMBDA,
+                                "Lambdas that don't create environments (~>) cannot have parameters", MList.Empty);
+                        }
+                        int indexOfInvalidBody = ast.Body.FindIndex(x => x.Type == AstTypes.Invalid);
+                        if (indexOfInvalidBody >= 0)
+                        {
+                            throw new InvalidParseException(((InvalidAst)ast.Body[indexOfInvalidBody]).Expression);
+                        }
+
+                        MType returnType = ResolveType(ast.ReturnType);
+                        List<MType> paramTypes = new List<MType>();
+                        List<string> paramNames = new List<string>();
+                        for (int i = 0; i < ast.Parameters.Count; i++)
+                        {
+                            paramTypes.Add(ResolveType(ast.Parameters[i].Type));
+                            paramNames.Add(ast.Parameters[i].Name);
+                        }
+                        LambdaEnvironmentType envType = 
+                            ast.CreatesEnv ? 
+                            LambdaEnvironmentType.ForceEnvironment :
+                            LambdaEnvironmentType.ForceNoEnvironment;
+
+                        MFunctionDataTypeEntry funcType = MDataTypeEntry.Function(returnType, paramTypes,
+                            ast.GenericNames, ast.IsPure, ast.IsLastVarArgs, envType);
+
+                        MClosure closure = new MClosure(funcType, paramNames, env, ast.Body);
+                        // Create a closure with this current environment
+                        return MValue.Closure(closure);
                     }
                 // Var declaration & assignment both return the value of the variable after the operation
                 // This means that assignments such as "x += 5" will return the new value of x
@@ -277,6 +279,11 @@ namespace IML.Evaluation
             return null;
         }
 
+        public MType ResolveType(AstType astType)
+        {
+
+        }
+
         public MValue PerformCall(MClosure closure, MArguments args, MEnvironment currentEnv)
         {
             // We have a callable type!
@@ -333,8 +340,13 @@ namespace IML.Evaluation
                         envToUse.AddVariable(args[i].Name, args[i].Value);
                     }
                 }
-                return EvaluateAst(closure.AstBody, envToUse);
+                //return EvaluateAst(closure.AstBody, envToUse);
+                return EvaluateBody(closure.AstBody, envToUse);
             }
+        }
+        public MValue EvaluateBody(List<Ast> body, MEnvironment env)
+        {
+
         }
 
         public MDataType GetDataType(string typeName)
