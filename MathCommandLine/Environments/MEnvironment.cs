@@ -15,12 +15,17 @@ namespace IML.Environments
         Dictionary<string, MBoxedValue> hiddenValues = new Dictionary<string, MBoxedValue>();
         MEnvironment parent;
 
-        private Dictionary<string, MType> genericMap;
+        // Map of generic names to the types they represent in this context
+        Dictionary<string, MType> genericMap;
+        // Names of all the generics that don't yet have definitions, but can be used
+        // I.e. in [T]()=>{ <here> } we can access T, but don't have a definitive type for it yet
+        List<string> anonymousGenerics;
 
         public MEnvironment(MEnvironment parent)
         {
             this.parent = parent;
             genericMap = new Dictionary<string, MType>();
+            anonymousGenerics = new List<string>();
         }
 
         public void AddHiddenValue(string name, MValue value, bool canGet, bool canSet)
@@ -67,7 +72,7 @@ namespace IML.Environments
             }
             return parent.Has(name);
         }
-        public bool HasGeneric(string name)
+        public bool HasDefinedGeneric(string name)
         {
             if (this == Empty)
             {
@@ -77,7 +82,19 @@ namespace IML.Environments
             {
                 return true;
             }
-            return parent.HasGeneric(name);
+            return parent.HasDefinedGeneric(name);
+        }
+        public bool HasAnonymousGeneric(string name)
+        {
+            if (this == Empty)
+            {
+                return false;
+            }
+            if (anonymousGenerics.Contains(name))
+            {
+                return true;
+            }
+            return parent.HasDefinedGeneric(name);
         }
 
         public MBoxedValue GetBox(string name)
@@ -162,7 +179,7 @@ namespace IML.Environments
                 return parent.Set(name, value);
             }
         }
-        public void AddGeneric(string name, MType type)
+        public void AddDefinedGeneric(string name, MType type)
         {
             if (genericMap.ContainsKey(name))
             {
@@ -171,6 +188,13 @@ namespace IML.Environments
             else
             {
                 genericMap.Add(name, type);
+            }
+        }
+        public void AddAnonymousGeneric(string name)
+        {
+            if (!HasAnonymousGeneric(name))
+            {
+                anonymousGenerics.Add(name);
             }
         }
 

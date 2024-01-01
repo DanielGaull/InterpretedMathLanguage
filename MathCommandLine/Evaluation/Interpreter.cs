@@ -193,12 +193,12 @@ namespace IML.Evaluation
                             throw new InvalidParseException(((InvalidAst)ast.Body[indexOfInvalidBody]).Expression);
                         }
 
-                        MType returnType = ResolveType(ast.ReturnType);
+                        MType returnType = ResolveType(ast.ReturnType, env);
                         List<MType> paramTypes = new List<MType>();
                         List<string> paramNames = new List<string>();
                         for (int i = 0; i < ast.Parameters.Count; i++)
                         {
-                            paramTypes.Add(ResolveType(ast.Parameters[i].Type));
+                            paramTypes.Add(ResolveType(ast.Parameters[i].Type, env));
                             paramNames.Add(ast.Parameters[i].Name);
                         }
                         LambdaEnvironmentType envType =
@@ -314,7 +314,7 @@ namespace IML.Evaluation
             return new ValueOrReturn(MValue.Void());
         }
 
-        private MType ResolveType(AstType astType, List<string> definedGenerics)
+        private MType ResolveType(AstType astType, MEnvironment env)
         {
             if (astType.Entries.Count <= 0)
             {
@@ -323,21 +323,21 @@ namespace IML.Evaluation
             List<MDataTypeEntry> entries = new List<MDataTypeEntry>();
             for (int i = 0; i < astType.Entries.Count; i++)
             {
-                MDataTypeEntry entry = ResolveTypeEntry(astType.Entries[i], definedGenerics);
+                MDataTypeEntry entry = ResolveTypeEntry(astType.Entries[i], env);
                 entries.Add(entry);
             }
             return new MType(entries);
         }
-        private MDataTypeEntry ResolveTypeEntry(AstTypeEntry astTypeEntry, List<string> definedGenerics)
+        private MDataTypeEntry ResolveTypeEntry(AstTypeEntry astTypeEntry, MEnvironment env)
         {
             if (astTypeEntry is LambdaAstTypeEntry)
             {
                 LambdaAstTypeEntry funcEntry = (LambdaAstTypeEntry)astTypeEntry;
-                MType returnType = ResolveType(funcEntry.ReturnType, definedGenerics);
+                MType returnType = ResolveType(funcEntry.ReturnType, env);
                 List<MType> paramTypes = new List<MType>();
                 for (int i = 0; i < funcEntry.ParamTypes.Count; i++)
                 {
-                    paramTypes.Add(ResolveType(funcEntry.ParamTypes[i], definedGenerics));
+                    paramTypes.Add(ResolveType(funcEntry.ParamTypes[i], env));
                 }
                 return new MFunctionDataTypeEntry(returnType, paramTypes, funcEntry.GenericNames,
                     funcEntry.IsPure, funcEntry.EnvironmentType, funcEntry.IsLastVarArgs);
@@ -357,11 +357,11 @@ namespace IML.Evaluation
                     List<MType> generics = new List<MType>();
                     for (int i = 0; i < astTypeEntry.Generics.Count; i++)
                     {
-                        generics.Add(ResolveType(astTypeEntry.Generics[i], definedGenerics));
+                        generics.Add(ResolveType(astTypeEntry.Generics[i], env));
                     }
                     return new MConcreteDataTypeEntry(dt, generics);
                 }
-                else if (definedGenerics.Contains(astTypeEntry.DataTypeName))
+                else if (env.HasAnonymousGeneric(astTypeEntry.DataTypeName))
                 {
                     if (astTypeEntry.Generics.Count > 0)
                     {
