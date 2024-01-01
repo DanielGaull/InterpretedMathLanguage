@@ -17,15 +17,11 @@ namespace IML.Environments
 
         // Map of generic names to the types they represent in this context
         Dictionary<string, MType> genericMap;
-        // Names of all the generics that don't yet have definitions, but can be used
-        // I.e. in [T]()=>{ <here> } we can access T, but don't have a definitive type for it yet
-        List<string> anonymousGenerics;
 
         public MEnvironment(MEnvironment parent)
         {
             this.parent = parent;
             genericMap = new Dictionary<string, MType>();
-            anonymousGenerics = new List<string>();
         }
 
         public void AddHiddenValue(string name, MValue value, bool canGet, bool canSet)
@@ -84,17 +80,14 @@ namespace IML.Environments
             }
             return parent.HasDefinedGeneric(name);
         }
-        public bool HasAnonymousGeneric(string name)
+        // Returns if the generic is defined AT THIS ENVIRONENT LEVEL
+        public bool IsGenericImmediatelyDefined(string name)
         {
             if (this == Empty)
             {
                 return false;
             }
-            if (anonymousGenerics.Contains(name))
-            {
-                return true;
-            }
-            return parent.HasDefinedGeneric(name);
+            return genericMap.ContainsKey(name);
         }
 
         public MBoxedValue GetBox(string name)
@@ -188,13 +181,6 @@ namespace IML.Environments
             else
             {
                 genericMap.Add(name, type);
-            }
-        }
-        public void AddAnonymousGeneric(string name)
-        {
-            if (!HasAnonymousGeneric(name))
-            {
-                anonymousGenerics.Add(name);
             }
         }
 

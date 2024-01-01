@@ -193,12 +193,14 @@ namespace IML.Evaluation
                             throw new InvalidParseException(((InvalidAst)ast.Body[indexOfInvalidBody]).Expression);
                         }
 
-                        MType returnType = ResolveType(ast.ReturnType, env);
+                        List<string> anonymousGenerics = new List<string>(ast.GenericNames);
+
+                        MType returnType = ResolveType(ast.ReturnType, anonymousGenerics);
                         List<MType> paramTypes = new List<MType>();
                         List<string> paramNames = new List<string>();
                         for (int i = 0; i < ast.Parameters.Count; i++)
                         {
-                            paramTypes.Add(ResolveType(ast.Parameters[i].Type, env));
+                            paramTypes.Add(ResolveType(ast.Parameters[i].Type, anonymousGenerics));
                             paramNames.Add(ast.Parameters[i].Name);
                         }
                         LambdaEnvironmentType envType =
@@ -314,7 +316,7 @@ namespace IML.Evaluation
             return new ValueOrReturn(MValue.Void());
         }
 
-        private MType ResolveType(AstType astType, MEnvironment env)
+        private MType ResolveType(AstType astType, List<string> anonymousGenerics)
         {
             if (astType.Entries.Count <= 0)
             {
@@ -323,21 +325,21 @@ namespace IML.Evaluation
             List<MDataTypeEntry> entries = new List<MDataTypeEntry>();
             for (int i = 0; i < astType.Entries.Count; i++)
             {
-                MDataTypeEntry entry = ResolveTypeEntry(astType.Entries[i], env);
+                MDataTypeEntry entry = ResolveTypeEntry(astType.Entries[i], anonymousGenerics);
                 entries.Add(entry);
             }
             return new MType(entries);
         }
-        private MDataTypeEntry ResolveTypeEntry(AstTypeEntry astTypeEntry, MEnvironment env)
+        private MDataTypeEntry ResolveTypeEntry(AstTypeEntry astTypeEntry, List<string> anonymousGenerics)
         {
             if (astTypeEntry is LambdaAstTypeEntry)
             {
                 LambdaAstTypeEntry funcEntry = (LambdaAstTypeEntry)astTypeEntry;
-                MType returnType = ResolveType(funcEntry.ReturnType, env);
+                MType returnType = ResolveType(funcEntry.ReturnType, anonymousGenerics);
                 List<MType> paramTypes = new List<MType>();
                 for (int i = 0; i < funcEntry.ParamTypes.Count; i++)
                 {
-                    paramTypes.Add(ResolveType(funcEntry.ParamTypes[i], env));
+                    paramTypes.Add(ResolveType(funcEntry.ParamTypes[i], anonymousGenerics));
                 }
                 return new MFunctionDataTypeEntry(returnType, paramTypes, funcEntry.GenericNames,
                     funcEntry.IsPure, funcEntry.EnvironmentType, funcEntry.IsLastVarArgs);
@@ -357,11 +359,11 @@ namespace IML.Evaluation
                     List<MType> generics = new List<MType>();
                     for (int i = 0; i < astTypeEntry.Generics.Count; i++)
                     {
-                        generics.Add(ResolveType(astTypeEntry.Generics[i], env));
+                        generics.Add(ResolveType(astTypeEntry.Generics[i], anonymousGenerics));
                     }
                     return new MConcreteDataTypeEntry(dt, generics);
                 }
-                else if (env.HasAnonymousGeneric(astTypeEntry.DataTypeName))
+                else if (anonymousGenerics.Contains(astTypeEntry.DataTypeName))
                 {
                     if (astTypeEntry.Generics.Count > 0)
                     {
@@ -430,13 +432,18 @@ namespace IML.Evaluation
                 // Only add args if the function creates a new env; functions that don't create envs can't have params
                 if (function.CreatesEnv)
                 {
+                    // Add the params and defined generics to the new environment; get them from the param values
                     for (int i = 0; i < args.Length; i++)
                     {
                         envToUse.AddVariable(args[i].Name, args[i].Value);
+                        // TODO
+                        // CANNOT simply set every generic to a var's type, ex.
+                        // if we've got a (x:T|R, y:R)=>void called with (5, "hello")
+                        // we can't set T and R to number, because then y is invalid, even though
+                        // this is a valid call since T = number, R = string
+                        // Need an algorithm to match these up best
                     }
                 }
-                // Add the defined generics to the new environment
-                // TODO!!!!! How do we determine which type maps to which generic ?????????
 
                 return EvaluateBody(function.AstBody, envToUse, !function.CreatesEnv);
             }
