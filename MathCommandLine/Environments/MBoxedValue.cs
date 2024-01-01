@@ -1,5 +1,5 @@
-﻿using IML.Exceptions;
-using IML.Structure;
+﻿using IML.CoreDataTypes;
+using IML.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Text;

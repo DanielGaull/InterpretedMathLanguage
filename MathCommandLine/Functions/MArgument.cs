@@ -1,4 +1,4 @@
-﻿using IML.Structure;
+﻿using IML.CoreDataTypes;
 using System;
 using System.Collections.Generic;
 using System.Text;

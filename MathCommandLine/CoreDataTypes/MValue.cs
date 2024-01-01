@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace IML.Structure
+namespace IML.CoreDataTypes
 {
     // Class for a math data value
     // Can represent a primitive data type or a composite data type

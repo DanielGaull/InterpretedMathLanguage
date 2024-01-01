@@ -1,7 +1,6 @@
 ﻿using IML.CoreDataTypes;
 using IML.Environments;
 using IML.Functions;
-using IML.Structure;
 
 namespace IML.Evaluation
 {
@@ -9,7 +8,7 @@ namespace IML.Evaluation
     {
         public MValue Evaluate(string expression, MEnvironment env);
         public MDataType GetDataType(string typeName);
-        public MValue PerformCall(MFunction function, MArguments args, MEnvironment currentEnv);
+        public ValueOrReturn PerformCall(MFunction function, MArguments args, MEnvironment currentEnv);
         public void Exit();
     }
 }

@@ -4,7 +4,6 @@ using IML.Evaluation.AST;
 using IML.Evaluation.AST.ValueAsts;
 using IML.Exceptions;
 using IML.Functions;
-using IML.Structure;
 using IML.Util;
 using System;
 using System.Collections.Generic;
@@ -202,8 +201,8 @@ namespace IML.Evaluation
                             paramTypes.Add(ResolveType(ast.Parameters[i].Type));
                             paramNames.Add(ast.Parameters[i].Name);
                         }
-                        LambdaEnvironmentType envType = 
-                            ast.CreatesEnv ? 
+                        LambdaEnvironmentType envType =
+                            ast.CreatesEnv ?
                             LambdaEnvironmentType.ForceEnvironment :
                             LambdaEnvironmentType.ForceNoEnvironment;
 
@@ -278,13 +277,49 @@ namespace IML.Evaluation
             }
             return null;
         }
+        // If in an environment-less function, we "pass returns to parent"
+        // i.e., if return is called, we want to go up
+        // So something like this (assuming "if" is defined)
+        // var func = ()=>{
+        //  if(true, ()~>{return 5})
+        // }
+        // Should make "func" return 5, not return 5 from the environmentless lambda
+        private ValueOrReturn EvaluateBody(List<Ast> body, MEnvironment env, bool passReturnsToParent)
+        {
+            for (int i = 0; i < body.Count; i++)
+            {
+                // If we find a return, check if we pass returns to parent
+                // Otherwise, we'll ignore it
+                if (body[i].Type == AstTypes.Return)
+                {
+                    Ast returnAstValue = ((ReturnAst)body[i]).Body;
+                    MValue returnValue = EvaluateAst(returnAstValue, env);
+                    if (passReturnsToParent)
+                    {
+                        return new ValueOrReturn(true, returnValue);
+                    }
+                    else
+                    {
+                        return new ValueOrReturn(returnValue);
+                    }
+                }
+                else
+                {
+                    // Simply run the line
+                    EvaluateAst(body[i], env);
+                }
+            }
+            // If we got down here, we didn't encounter a single return the entire time
+            // Therefore, we return void
+            return new ValueOrReturn(MValue.Void());
+        }
 
-        public MType ResolveType(AstType astType)
+        private MType ResolveType(AstType astType)
         {
 
         }
 
-        public MValue PerformCall(MFunction function, MArguments args, MEnvironment currentEnv)
+        public ValueOrReturn PerformCall(MFunction function, MArguments args, MEnvironment currentEnv)
         {
             // We have a callable type!
             // Verify that everything is good to go before we actually call it
@@ -292,8 +327,8 @@ namespace IML.Evaluation
             MParameters parameters = function.Parameters;
             if (args.Length != parameters.Length)
             {
-                return MValue.Error(ErrorCodes.WRONG_ARG_COUNT, "Expected " + parameters.Length +
-                    " arguments but received " + args.Length + ".", MList.Empty);
+                return new ValueOrReturn(MValue.Error(ErrorCodes.WRONG_ARG_COUNT, "Expected " + parameters.Length +
+                    " arguments but received " + args.Length + ".", MList.Empty));
             }
             // Now check the types of the arguments to ensure they match. If any errors appear in the arguments, return that immediately
             for (int i = 0; i < args.Length; i++)
@@ -301,15 +336,15 @@ namespace IML.Evaluation
                 if (!parameters[i].Type.ValueMatches(args[i].Value))
                 {
                     // Improper data type!
-                    return MValue.Error(ErrorCodes.INVALID_TYPE,
+                    return new ValueOrReturn(MValue.Error(ErrorCodes.INVALID_TYPE,
                         "Expected argument \"" + parameters.Get(i).Name + "\" to be of type '" +
                             parameters.Get(i).DataTypeString() + "' but received type '" + args[i].Value.DataType + "'.",
-                        MList.FromOne(MValue.Number(i)));
+                        MList.FromOne(MValue.Number(i))));
                 }
                 else if (args[i].Value.DataType.DataType == MDataType.Error)
                 {
                     // An error was passed as an argument, so simply need to return it
-                    return args[i].Value;
+                    return new ValueOrReturn(args[i].Value);
                 }
                 else
                 {
@@ -325,7 +360,7 @@ namespace IML.Evaluation
             // - Otherwise, need to create a new environment and evaluate the body w/ that environment
             if (function.IsNativeBody)
             {
-                return function.NativeBody(args, currentEnv, this);
+                return new ValueOrReturn(function.NativeBody(args, currentEnv, this));
             }
             else
             {
@@ -341,14 +376,10 @@ namespace IML.Evaluation
                     }
                 }
                 //return EvaluateAst(function.AstBody, envToUse);
-                return EvaluateBody(function.AstBody, envToUse);
+                return EvaluateBody(function.AstBody, envToUse, !function.CreatesEnv);
             }
         }
-        public MValue EvaluateBody(List<Ast> body, MEnvironment env)
-        {
-
-        }
-
+        
         public MDataType GetDataType(string typeName)
         {
             if (dtDict.Contains(typeName))
