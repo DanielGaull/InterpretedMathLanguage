@@ -314,9 +314,69 @@ namespace IML.Evaluation
             return new ValueOrReturn(MValue.Void());
         }
 
-        private MType ResolveType(AstType astType)
+        private MType ResolveType(AstType astType, List<string> definedGenerics)
         {
-
+            if (astType.Entries.Count <= 0)
+            {
+                throw new FatalRuntimeException("Type has no entries when being resolved");
+            }
+            List<MDataTypeEntry> entries = new List<MDataTypeEntry>();
+            for (int i = 0; i < astType.Entries.Count; i++)
+            {
+                MDataTypeEntry entry = ResolveTypeEntry(astType.Entries[i], definedGenerics);
+                entries.Add(entry);
+            }
+            return new MType(entries);
+        }
+        private MDataTypeEntry ResolveTypeEntry(AstTypeEntry astTypeEntry, List<string> definedGenerics)
+        {
+            if (astTypeEntry is LambdaAstTypeEntry)
+            {
+                LambdaAstTypeEntry funcEntry = (LambdaAstTypeEntry)astTypeEntry;
+                MType returnType = ResolveType(funcEntry.ReturnType, definedGenerics);
+                List<MType> paramTypes = new List<MType>();
+                for (int i = 0; i < funcEntry.ParamTypes.Count; i++)
+                {
+                    paramTypes.Add(ResolveType(funcEntry.ParamTypes[i], definedGenerics));
+                }
+                return new MFunctionDataTypeEntry(returnType, paramTypes, funcEntry.GenericNames,
+                    funcEntry.IsPure, funcEntry.EnvironmentType, funcEntry.IsLastVarArgs);
+            }
+            else
+            {
+                if (dtDict.Contains(astTypeEntry.DataTypeName))
+                {
+                    MDataType dt = dtDict.GetType(astTypeEntry.DataTypeName);
+                    if (dt.NumberOfGenerics != astTypeEntry.Generics.Count)
+                    {
+                        throw new InvalidTypeException(
+                            $"The type \"{dt.Name}\" requires {dt.NumberOfGenerics} generic(s), but " +
+                                $"{astTypeEntry.Generics.Count} were provided",
+                            astTypeEntry);
+                    }
+                    List<MType> generics = new List<MType>();
+                    for (int i = 0; i < astTypeEntry.Generics.Count; i++)
+                    {
+                        generics.Add(ResolveType(astTypeEntry.Generics[i], definedGenerics));
+                    }
+                    return new MConcreteDataTypeEntry(dt, generics);
+                }
+                else if (definedGenerics.Contains(astTypeEntry.DataTypeName))
+                {
+                    if (astTypeEntry.Generics.Count > 0)
+                    {
+                        // Generic entries cannot have generics themselves
+                        throw new InvalidTypeException($"Generic entry \"{astTypeEntry.DataTypeName}\" cannot have generics",
+                            astTypeEntry);
+                    }
+                    return new MGenericDataTypeEntry(astTypeEntry.DataTypeName);
+                }
+                else
+                {
+                    throw new InvalidTypeException($"Data type \"{astTypeEntry.DataTypeName}\" does not exist", 
+                        astTypeEntry);
+                }
+            }
         }
 
         public ValueOrReturn PerformCall(MFunction function, MArguments args, MEnvironment currentEnv)
