@@ -14,7 +14,7 @@ namespace IML.Structure
     {
         public double NumberValue; // For the number type, a 64-bit floating-pt number
         public MList ListValue; // For the list type
-        public MClosure ClosureValue; // For the lambda type
+        public MFunction FunctionValue; // For the lambda type
         public decimal BigDecimalValue; // For the big_decimal type
         public long BigIntValue; // For the big_int type
         public MType TypeValue; // For the type type (that represents an actual data type)
@@ -23,13 +23,14 @@ namespace IML.Structure
         public Dictionary<string, MField> DataValues; // The Data Values for composite types (maps name => value)
         public MConcreteDataTypeEntry DataType;
 
-        public MValue(MConcreteDataTypeEntry dataType, double numberValue, MList listValue, MClosure closureValue, decimal bigDecimalValue, 
-            long bigIntValue, MType typeValue, MBoxedValue refValue, bool boolValue, Dictionary<string, MField> dataValues)
+        public MValue(MConcreteDataTypeEntry dataType, double numberValue, MList listValue, MFunction functionValue, 
+            decimal bigDecimalValue, long bigIntValue, MType typeValue, MBoxedValue refValue, bool boolValue, 
+            Dictionary<string, MField> dataValues)
         {
             DataType = dataType;
             NumberValue = numberValue;
             ListValue = listValue;
-            ClosureValue = closureValue;
+            FunctionValue = functionValue;
             BigDecimalValue = bigDecimalValue;
             BigIntValue = bigIntValue;
             TypeValue = typeValue;
@@ -40,49 +41,49 @@ namespace IML.Structure
 
         public static MValue Number(double numberValue)
         {
-            return new MValue(MDataTypeEntry.Number, numberValue, MList.Empty, MClosure.Empty, 0, 0, null, null, 
+            return new MValue(MDataTypeEntry.Number, numberValue, MList.Empty, MFunction.Empty, 0, 0, null, null, 
                 false, new Dictionary<string, MField>());
         }
         public static MValue List(MList list)
         {
-            return new MValue(MDataTypeEntry.List(list.Type), 0, list, MClosure.Empty, 0, 0, null, null, false,
+            return new MValue(MDataTypeEntry.List(list.Type), 0, list, MFunction.Empty, 0, 0, null, null, false,
                 ListProperties(list));
         }
-        public static MValue Closure(MClosure closure)
+        public static MValue Function(MFunction function)
         {
-            return new MValue(closure.TypeEntry, 0, MList.Empty, closure, 0, 0, null, null, false,
+            return new MValue(function.TypeEntry, 0, MList.Empty, function, 0, 0, null, null, false,
                 new Dictionary<string, MField>());
         }
         public static MValue Type(MType type)
         {
-            return new MValue(MDataTypeEntry.Type, 0, MList.Empty, MClosure.Empty, 0, 0, type, null, false,
+            return new MValue(MDataTypeEntry.Type, 0, MList.Empty, MFunction.Empty, 0, 0, type, null, false,
                 new Dictionary<string, MField>());
         }
         public static MValue Reference(MBoxedValue refValue)
         {
             MValue v = refValue.GetValue();
             MType type = new MType(v.DataType);
-            return new MValue(MDataTypeEntry.Reference(type), 0, MList.Empty, MClosure.Empty, 0, 0, null, refValue, 
+            return new MValue(MDataTypeEntry.Reference(type), 0, MList.Empty, MFunction.Empty, 0, 0, null, refValue, 
                 false, new Dictionary<string, MField>());
         }
         public static MValue Bool(bool boolValue)
         {
-            return new MValue(MDataTypeEntry.Boolean, 0, MList.Empty, MClosure.Empty, 0, 0, null, null,
+            return new MValue(MDataTypeEntry.Boolean, 0, MList.Empty, MFunction.Empty, 0, 0, null, null,
                 boolValue, new Dictionary<string, MField>());
         }
         public static MValue Void()
         {
-            return new MValue(MDataTypeEntry.Void, 0, MList.Empty, MClosure.Empty, 0, 0, null, null, 
+            return new MValue(MDataTypeEntry.Void, 0, MList.Empty, MFunction.Empty, 0, 0, null, null, 
                 false, null);
         }
         public static MValue Null()
         {
-            return new MValue(MDataTypeEntry.Null, 0, MList.Empty, MClosure.Empty, 0, 0, null, null,
+            return new MValue(MDataTypeEntry.Null, 0, MList.Empty, MFunction.Empty, 0, 0, null, null,
                 false, null);
         }
         public static MValue Composite(MConcreteDataTypeEntry type, Dictionary<string, MField> values)
         {
-            return new MValue(type, 0, MList.Empty, MClosure.Empty, 0, 0, null, null, false, values);
+            return new MValue(type, 0, MList.Empty, MFunction.Empty, 0, 0, null, null, false, values);
         }
 
         /// <summary>
@@ -213,7 +214,7 @@ namespace IML.Structure
             }
             else if (DataType.DataType.MatchesTypeExactly(MDataType.Function))
             {
-                return ClosureValue.ToString();
+                return FunctionValue.ToString();
             }
             else if (DataType.DataType.MatchesTypeExactly(MDataType.Type))
             {
@@ -305,7 +306,7 @@ namespace IML.Structure
             }
             else if (dt.MatchesTypeExactly(MDataType.Function))
             {
-                return v1.ClosureValue == v2.ClosureValue;
+                return v1.FunctionValue == v2.FunctionValue;
             }
             else if (dt.MatchesTypeExactly(MDataType.Type))
             {
@@ -361,7 +362,7 @@ namespace IML.Structure
             {
                 {
                     "get",
-                    new MField(Closure(new MClosure(
+                    new MField(Function(new MFunction(
                         MDataTypeEntry.Function(list.Type, new List<MType>()
                         {
                             MType.Number
@@ -380,7 +381,7 @@ namespace IML.Structure
                 },
                 {
                     "index",
-                    new MField(Closure(new MClosure(
+                    new MField(Function(new MFunction(
                         MDataTypeEntry.Function(MType.Number, new List<MType>()
                         {
                             list.Type
@@ -395,7 +396,7 @@ namespace IML.Structure
                 },
                 {
                     "indexc",
-                    new MField(Closure(new MClosure(
+                    new MField(Function(new MFunction(
                         MDataTypeEntry.Function(MType.Number, new List<MType>()
                         {
                             list.Type,
@@ -405,12 +406,12 @@ namespace IML.Structure
                         MEnvironment.Empty,
                         (args, env, interpreter) => {
                             return Number(MList.IndexOfCustom(list, args.Get(0).Value,
-                                args.Get(1).Value.ClosureValue, interpreter, env));
+                                args.Get(1).Value.FunctionValue, interpreter, env));
                         })), 1, 0)
                 },
                 {
                     "length",
-                    new MField(Closure(new MClosure(
+                    new MField(Function(new MFunction(
                         MDataTypeEntry.Function(MType.Number, new List<MType>(), true, false),
                         new List<string>(),
                         MEnvironment.Empty,
@@ -421,7 +422,7 @@ namespace IML.Structure
                 },
                 {
                     "map", // We need a generic here for the return type of the mapper
-                    new MField(Closure(new MClosure(
+                    new MField(Function(new MFunction(
                         MDataTypeEntry.Function(MType.List(new MType(new MGenericDataTypeEntry("T"))),
                             new List<MType>()
                             {
@@ -437,12 +438,12 @@ namespace IML.Structure
                         (args, env, interpreter) =>
                         {
                             return List(MList.Map(list,
-                                args.Get(0).Value.ClosureValue, interpreter, env));
+                                args.Get(0).Value.FunctionValue, interpreter, env));
                         })), 1, 0)
                 },
                 {
                     "reduce", // Need a generic here for return type of the reducer
-                    new MField(Closure(new MClosure(
+                    new MField(Function(new MFunction(
                         MDataTypeEntry.Function(new MType(new MGenericDataTypeEntry("T")),
                             new List<MType>()
                             {
@@ -460,13 +461,13 @@ namespace IML.Structure
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
-                            return MList.Reduce(list, args.Get(0).Value.ClosureValue,
+                            return MList.Reduce(list, args.Get(0).Value.FunctionValue,
                                 args.Get(1).Value, interpreter, env);
                         })), 1, 0)
                 },
                 {
                     "add",
-                    new MField(Closure(new MClosure(
+                    new MField(Function(new MFunction(
                         MDataTypeEntry.Function(MType.Void,
                             new List<MType>()
                             {
@@ -483,7 +484,7 @@ namespace IML.Structure
                 },
                 {
                     "insert",
-                    new MField(Closure(new MClosure(
+                    new MField(Function(new MFunction(
                         MDataTypeEntry.Function(MType.Void,
                             new List<MType>()
                             {
@@ -507,7 +508,7 @@ namespace IML.Structure
                 },
                 {
                     "removeAt",
-                    new MField(Closure(new MClosure(
+                    new MField(Function(new MFunction(
                          MDataTypeEntry.Function(MType.Void,
                             new List<MType>()
                             {
@@ -530,7 +531,7 @@ namespace IML.Structure
                 },
                 {
                     "remove",
-                    new MField(Closure(new MClosure(
+                    new MField(Function(new MFunction(
                          MDataTypeEntry.Function(MType.Boolean,
                             new List<MType>()
                             {
@@ -552,7 +553,7 @@ namespace IML.Structure
                 },
                 {
                     "removec",
-                    new MField(Closure(new MClosure(
+                    new MField(Function(new MFunction(
                          MDataTypeEntry.Function(MType.Boolean,
                             new List<MType>()
                             {
@@ -565,7 +566,7 @@ namespace IML.Structure
                         (args, env, interpreter) =>
                         {
                             int index = MList.IndexOfCustom(list, args.Get(0).Value,
-                                args.Get(1).Value.ClosureValue, interpreter, env);
+                                args.Get(1).Value.FunctionValue, interpreter, env);
                             if (index < 0)
                             {
                                 return Bool(false);
@@ -576,7 +577,7 @@ namespace IML.Structure
                 },
                 {
                     "addAll",
-                    new MField(Closure(new MClosure(
+                    new MField(Function(new MFunction(
                         MDataTypeEntry.Function(MType.Void,
                             new List<MType>()
                             {

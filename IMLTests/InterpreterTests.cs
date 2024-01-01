@@ -37,7 +37,7 @@ namespace IMLTests
         }
         private MEnvironment CreateBaseEnv()
         {
-            List<MFunction> coreFuncs = CoreFunctions.GenerateCoreFunctions();
+            List<MNativeFunction> coreFuncs = CoreFunctions.GenerateCoreFunctions();
             MEnvironment baseEnv = new MEnvironment(MEnvironment.Empty);
             baseEnv.AddConstant("null", MValue.Null());
             baseEnv.AddConstant("void", MValue.Void());
@@ -45,8 +45,8 @@ namespace IMLTests
             baseEnv.AddConstant("false", MValue.Bool(false));
             for (int i = 0; i < coreFuncs.Count; i++)
             {
-                MValue closure = MValue.Closure(coreFuncs[i].ToClosure());
-                baseEnv.AddConstant(coreFuncs[i].Name, closure, coreFuncs[i].Description);
+                MValue function = MValue.Function(coreFuncs[i].ToFunction());
+                baseEnv.AddConstant(coreFuncs[i].Name, function, coreFuncs[i].Description);
             }
             return baseEnv;
         }

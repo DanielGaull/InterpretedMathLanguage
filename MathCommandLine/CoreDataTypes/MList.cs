@@ -83,7 +83,7 @@ namespace IML.CoreDataTypes
         {
             return list.iList.IndexOf(value);
         }
-        public static int IndexOfCustom(MList list, MValue value, MClosure equalityEvaluator, IInterpreter evaluator,
+        public static int IndexOfCustom(MList list, MValue value, MFunction equalityEvaluator, IInterpreter evaluator,
             MEnvironment env)
         {
             for (int i = 0; i < list.iList.Count; i++)
@@ -101,25 +101,25 @@ namespace IML.CoreDataTypes
             }
             return -1;
         }
-        public static MList Map(MList list, MClosure closure, IInterpreter evaluator, MEnvironment env)
+        public static MList Map(MList list, MFunction function, IInterpreter evaluator, MEnvironment env)
         {
             List<MValue> newList = new List<MValue>();
             for (int i = 0; i < list.iList.Count; i++)
             {
-                MValue result = evaluator.PerformCall(closure, new MArguments(
+                MValue result = evaluator.PerformCall(function, new MArguments(
                     new MArgument(list.iList[i])
                 ), env);
                 newList.Add(result);
             }
-            return new MList(newList, closure.ReturnType);
+            return new MList(newList, function.ReturnType);
         }
-        public static MValue Reduce(MList list, MClosure closure, MValue initial, IInterpreter evaluator,
+        public static MValue Reduce(MList list, MFunction function, MValue initial, IInterpreter evaluator,
             MEnvironment env)
         {
             MValue runningResult = initial;
             for (int i = 0; i < list.iList.Count; i++)
             {
-                runningResult = evaluator.PerformCall(closure,
+                runningResult = evaluator.PerformCall(function,
                     new MArguments(
                         new MArgument(runningResult),
                         new MArgument(list.iList[i])

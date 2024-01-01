@@ -14,9 +14,9 @@ namespace IML.Functions
      */
     public static class CoreFunctions
     {
-        public static List<MFunction> GenerateCoreFunctions()
+        public static List<MNativeFunction> GenerateCoreFunctions()
         {
-            return new List<MFunction>()
+            return new List<MNativeFunction>()
             {
                 Add(),
                 Multiply(),
@@ -58,8 +58,8 @@ namespace IML.Functions
         }
 
         // Numerical Functions
-        public static MFunction Add() {
-            return new MFunction(
+        public static MNativeFunction Add() {
+            return new MNativeFunction(
                 "_add", 
                 (args, env, interpreter) =>
                 {
@@ -73,9 +73,9 @@ namespace IML.Functions
                 "Returns the sum of 'a' and 'b' (a + b)."
             );
         }
-        public static MFunction Multiply()
+        public static MNativeFunction Multiply()
         {
-            return new MFunction(
+            return new MNativeFunction(
                 "_mul", 
                 (args, env, interpreter) =>
                 {
@@ -89,9 +89,9 @@ namespace IML.Functions
                 "Returns the product of 'a' and 'b' (a * b)."
             );
         }
-        public static MFunction Negate()
+        public static MNativeFunction Negate()
         {
-            return new MFunction(
+            return new MNativeFunction(
                 "_add_inv", 
                 (args, env, interpreter) =>
                 {
@@ -104,9 +104,9 @@ namespace IML.Functions
                 "Returns the additive inverse of 'a'."
             );
         }
-        public static MFunction MulInverse()
+        public static MNativeFunction MulInverse()
         {
-            return new MFunction(
+            return new MNativeFunction(
                 "_mul_inv", 
                 (args, env, interpreter) =>
                 {
@@ -124,9 +124,9 @@ namespace IML.Functions
                 "Returns the multiplicative inverse of 'a'."
             );
         }
-        public static MFunction Pow()
+        public static MNativeFunction Pow()
         {
-            return new MFunction(
+            return new MNativeFunction(
                 "_pow", 
                 (args, env, interpreter) =>
                 {
@@ -141,9 +141,9 @@ namespace IML.Functions
                 "Returns the value of 'base' raised to the power of 'exponent'."
             );
         }
-        public static MFunction FloorFunction()
+        public static MNativeFunction FloorFunction()
         {
-            return new MFunction(
+            return new MNativeFunction(
                 "_flr", 
                 (args, env, interpreter) =>
                 {
@@ -156,10 +156,10 @@ namespace IML.Functions
                 "Returns the floor of 'a'."
             );
         }
-        public static MFunction TrigFunction()
+        public static MNativeFunction TrigFunction()
         {
             // TODO: Hyperbolic trig functions
-            return new MFunction(
+            return new MNativeFunction(
                 "_trig", 
                 (args, env, interpreter) =>
                 {
@@ -218,9 +218,9 @@ namespace IML.Functions
                     "6-sinh, 7-cosh, 8-tanh, 9-asinh, 10-acosh, 11-atanh)"
             );
         }
-        public static MFunction NaturalLog()
+        public static MNativeFunction NaturalLog()
         {
-            return new MFunction(
+            return new MNativeFunction(
                 "_ln", 
                 (args, env, interpreter) =>
                 {
@@ -235,9 +235,9 @@ namespace IML.Functions
         }
 
         // List Functions
-        public static MFunction CreateRangeList()
+        public static MNativeFunction CreateRangeList()
         {
-            return new MFunction(
+            return new MNativeFunction(
                 "_crange", 
                 (args, env, interpreter) =>
                 {
@@ -252,9 +252,9 @@ namespace IML.Functions
         }
 
         // Reference/var manipulation functions
-        public static MFunction Get() 
+        public static MNativeFunction Get() 
         {
-            return new MFunction(
+            return new MNativeFunction(
                 "_get", 
                 (args, env, interpreter) =>
                 {
@@ -272,9 +272,9 @@ namespace IML.Functions
                 }
             );
         }
-        public static MFunction Set()
+        public static MNativeFunction Set()
         {
-            return new MFunction(
+            return new MNativeFunction(
                 "_set", 
                 (args, env, interpreter) =>
                 {
@@ -294,9 +294,9 @@ namespace IML.Functions
                 }
             );
         }
-        public static MFunction GetDesc()
+        public static MNativeFunction GetDesc()
         {
-            return new MFunction(
+            return new MNativeFunction(
                 "_gd",
                 (args, env, interpreter) =>
                 {
@@ -317,9 +317,9 @@ namespace IML.Functions
                 "Gets and returns the description for 'ref'. If there is no description, returns null."
             );
         }
-        public static MFunction SetDesc()
+        public static MNativeFunction SetDesc()
         {
-            return new MFunction(
+            return new MNativeFunction(
                 "_sd",
                 (args, env, interpreter) =>
                 {
@@ -341,9 +341,9 @@ namespace IML.Functions
         // TODO: derivatives/integrals/solve
 
         // Utility Functions
-        public static MFunction TypeOf()
+        public static MNativeFunction TypeOf()
         {
-            return new MFunction(
+            return new MNativeFunction(
                 "_type_of", 
                 (args, env, interpreter) =>
                 {
@@ -356,9 +356,9 @@ namespace IML.Functions
                 "Returns the type of 'value'."
             );
         }
-        public static MFunction CompareFunction()
+        public static MNativeFunction CompareFunction()
         {
-            return new MFunction(
+            return new MNativeFunction(
                 "_cmp", 
                 (args, env, interpreter) =>
                 {
@@ -375,9 +375,9 @@ namespace IML.Functions
                 "If 'first' > 'second', returns 1."
             );
         }
-        public static MFunction CaseFunction()
+        public static MNativeFunction CaseFunction()
         {
-            return new MFunction(
+            return new MNativeFunction(
                 "_case", 
                 (args, env, interpreter) =>
                 {
@@ -409,10 +409,10 @@ namespace IML.Functions
                 }
             );
         }
-        public static MFunction CreateErrorFunction()
+        public static MNativeFunction CreateErrorFunction()
         {
             // TODO: Apply arg restrictions
-            return new MFunction(
+            return new MNativeFunction(
                 "_error", 
                 (args, env, interpreter) =>
                 {
@@ -436,9 +436,9 @@ namespace IML.Functions
             );
         }
 
-        public static MFunction CreateStringFunction()
+        public static MNativeFunction CreateStringFunction()
         {
-            return new MFunction(
+            return new MNativeFunction(
                 "_str", 
                 (args, env, interpreter) =>
                 {
@@ -452,9 +452,9 @@ namespace IML.Functions
             );
         }
 
-        public static MFunction DisplayFunction()
+        public static MNativeFunction DisplayFunction()
         {
-            return new MFunction(
+            return new MNativeFunction(
                 "_display", 
                 (args, env, interpreter) =>
                 {
@@ -469,10 +469,10 @@ namespace IML.Functions
             );
         }
 
-        public static MFunction TimeFunction()
+        public static MNativeFunction TimeFunction()
         {
 
-            return new MFunction(
+            return new MNativeFunction(
                 "_time", 
                 (args, env, interpreter) =>
                 {
@@ -486,9 +486,9 @@ namespace IML.Functions
             );
         }
 
-        public static MFunction CheckFunction()
+        public static MNativeFunction CheckFunction()
         {
-            return new MFunction(
+            return new MNativeFunction(
                 "_c", 
                 (args, env, interpreter) =>
                 {
@@ -501,7 +501,7 @@ namespace IML.Functions
                             return MValue.Error(ErrorCodes.INVALID_ARGUMENT, 
                                 "Expected list length of 2 but found " + pair.Count + ".");
                         }
-                        MClosure cond = pair[0].ClosureValue;
+                        MFunction cond = pair[0].FunctionValue;
                         MValue condValue = interpreter.PerformCall(cond, MArguments.Empty, env);
                         if (condValue.DataType.DataType.MatchesTypeExactly(MDataType.Error))
                         {
@@ -510,7 +510,7 @@ namespace IML.Functions
                         // Everything is truthy except the "false" value, "void", and "null"
                         if (condValue.IsTruthy())
                         {
-                            MClosure outputFunc = pair[1].ClosureValue;
+                            MFunction outputFunc = pair[1].FunctionValue;
                             MValue output = interpreter.PerformCall(outputFunc, MArguments.Empty, env);
                             return output;
                         }
@@ -527,9 +527,9 @@ namespace IML.Functions
                 "with no other code being run."
             );
         }
-        public static MFunction ExitFunction()
+        public static MNativeFunction ExitFunction()
         {
-            return new MFunction(
+            return new MNativeFunction(
                 "_exit",
                 (args, env, interpreter) =>
                 {
@@ -541,9 +541,9 @@ namespace IML.Functions
                 "Exits the program immediately (returns null)"
             );
         }
-        public static MFunction ReadFunction()
+        public static MNativeFunction ReadFunction()
         {
-            return new MFunction(
+            return new MNativeFunction(
                 "_read",
                 (args, env, interpreter) =>
                 {
@@ -557,10 +557,10 @@ namespace IML.Functions
                 "Reads in and returns a single string line from the user using the standard input stream"
             );
         }
-        public static MFunction DoFunction()
+        public static MNativeFunction DoFunction()
         {
 
-            return new MFunction(
+            return new MNativeFunction(
                 "_do",
                 (args, env, interpreter) =>
                 {
@@ -568,8 +568,8 @@ namespace IML.Functions
                     MValue returnValue = MValue.Void();
                     for (int i = 0; i < funcs.Count; i++)
                     {
-                        MClosure closure = funcs[i].ClosureValue;
-                        returnValue = interpreter.PerformCall(closure, MArguments.Empty, env);
+                        MFunction function = funcs[i].FunctionValue;
+                        returnValue = interpreter.PerformCall(function, MArguments.Empty, env);
                     }
                     return returnValue;
                 },
@@ -582,120 +582,11 @@ namespace IML.Functions
             );
         }
 
-        //public static MFunction RegisterDataType(IInterpreter interpreter)
-        //{
-        //    return new MFunction(
-        //        "_rdt",
-        //        (args, env) =>
-        //        {
-        //            string typeName = args[0].Value.GetStringValue();
-        //            MClosure providedConstructorFunction = args[1].Value.ClosureValue;
-
-        //            // Create the new data type
-        //            MDataType t = interpreter.AddDataType(typeName);
-
-        //            MClosure constructorFunction = new MClosure(providedConstructorFunction.Parameters, MEnvironment.Empty,
-        //                (args, env) =>
-        //                {
-        //                    // Keep a reference to the dictionary of values, so we can modify it
-        //                    Dictionary<string, MField> fields = new Dictionary<string, MField>();
-        //                    MValue cf = MValue.Closure(new MClosure(
-        //                    new MParameters(
-        //                        new MParameter(MDataType.String, "name"),
-        //                        new MParameter(MDataType.Any, "value"),
-        //                        new MParameter("read_modifier", new MTypeRestrictionsEntry(MDataType.Number,
-        //                            new ValueRestriction(ValueRestriction.ValueRestrictionTypes.LessThanOrEqualTo, 1, null),
-        //                            new ValueRestriction(ValueRestriction.ValueRestrictionTypes.GreaterThanOrEqualTo, 0, null))),
-        //                        new MParameter("write_modifier", new MTypeRestrictionsEntry(MDataType.Number,
-        //                            new ValueRestriction(ValueRestriction.ValueRestrictionTypes.LessThanOrEqualTo, 1, null),
-        //                            new ValueRestriction(ValueRestriction.ValueRestrictionTypes.GreaterThanOrEqualTo, 0, null)))
-        //                    ),
-        //                    env,
-        //                    (args, env) =>
-        //                    {
-        //                        string name = args[0].Value.GetStringValue();
-        //                        MValue value = args[1].Value;
-        //                        int readMod = (int)args[2].Value.NumberValue;
-        //                        int writeMod = (int)args[3].Value.NumberValue;
-        //                        fields.Add(name, new MField(value, readMod, writeMod));
-        //                        return MValue.Void();
-        //                    }
-        //                ));
-        //                    MValue hf = MValue.Closure(new MClosure(
-        //                            new MParameters(),
-        //                            env,
-        //                            (args, env) =>
-        //                            {
-        //                                string name = args[0].Value.GetStringValue();
-        //                                bool has = fields.ContainsKey(name);
-        //                                return MValue.Bool(has);
-        //                            }
-        //                        ));
-        //                    MValue gf = MValue.Closure(new MClosure(
-        //                            new MParameters(),
-        //                            env,
-        //                            (args, env) =>
-        //                            {
-        //                                string name = args[0].Value.GetStringValue();
-        //                                if (!fields.ContainsKey(name))
-        //                                {
-        //                                    return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST, "Variable " + name + " does not exist",
-        //                                        Utilities.StringToMList(name));
-        //                                }
-        //                                return fields[name].Value;
-        //                            }
-        //                        ));
-        //                    MValue sf = MValue.Closure(new MClosure(
-        //                            new MParameters(),
-        //                            env,
-        //                            (args, env) =>
-        //                            {
-        //                                string name = args[0].Value.GetStringValue();
-        //                                if (!fields.ContainsKey(name))
-        //                                {
-        //                                    return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST, "Variable " + name + " does not exist",
-        //                                        Utilities.StringToMList(name));
-        //                                }
-        //                                MValue value = args[1].Value;
-        //                                fields[name].SetValue(value);
-        //                                return MValue.Void();
-        //                            }
-        //                        ));
-
-        //                    MEnvironment constructorEnvironment = new MEnvironment(env);
-        //                    constructorEnvironment.AddConstant("_cf", cf);
-        //                    constructorEnvironment.AddConstant("_hf", hf);
-        //                    constructorEnvironment.AddConstant("_gf", gf);
-        //                    constructorEnvironment.AddConstant("_sf", sf);
-        //                    MClosure newSubConstFunc = 
-        //                        providedConstructorFunction.CloneWithNewEnvironment(constructorEnvironment);
-        //                    MValue callResult = interpreter.PerformCall(newSubConstFunc, args, env);
-        //                    if (callResult.DataType == MDataType.Error)
-        //                    {
-        //                        // Error means we should return it rather than continue
-        //                        return callResult;
-        //                    }
-        //                    return MValue.Composite(t, fields);
-        //                }
-        //            );
-
-        //            return MValue.Closure(constructorFunction);
-        //        },
-        //        new MParameters(
-        //            new MParameter(MDataType.String, "type_name"),
-        //            new MParameter(MDataType.Closure, "constructor_function")
-        //        ),
-        //        "Registers a data type, with the specified constructor function. The special function _cf, _sf, and _gf " +
-        //        "are defined in the context of the constructor function. Returns the constructor function for the " +
-        //        "newly-created type."
-        //    );
-        //}
-
         // Boolean functions
-        public static MFunction AndFunction()
+        public static MNativeFunction AndFunction()
         {
 
-            return new MFunction(
+            return new MNativeFunction(
                 "_and", 
                 (args, env, interpreter) =>
                 {
@@ -717,10 +608,10 @@ namespace IML.Functions
                 }
             );
         }
-        public static MFunction OrFunction()
+        public static MNativeFunction OrFunction()
         {
 
-            return new MFunction(
+            return new MNativeFunction(
                 "_or", 
                 (args, env, interpreter) =>
                 {
@@ -742,10 +633,10 @@ namespace IML.Functions
                 }
             );
         }
-        public static MFunction NotFunction()
+        public static MNativeFunction NotFunction()
         {
 
-            return new MFunction(
+            return new MNativeFunction(
                 "_not", 
                 (args, env, interpreter) =>
                 {
@@ -759,14 +650,14 @@ namespace IML.Functions
                 "Inverts the input"
             );
         }
-        public static MFunction AndeFunction()
+        public static MNativeFunction AndeFunction()
         {
-            return new MFunction(
+            return new MNativeFunction(
                 "_and_e", 
                 (args, env, interpreter) =>
                 {
-                    MClosure b1 = args[0].Value.ClosureValue;
-                    MClosure b2 = args[1].Value.ClosureValue;
+                    MFunction b1 = args[0].Value.FunctionValue;
+                    MFunction b2 = args[1].Value.FunctionValue;
                     MValue result1 = interpreter.PerformCall(b1, MArguments.Empty, env);
                     if (result1.DataType.DataType.MatchesTypeExactly(MDataType.Error))
                     {
@@ -791,15 +682,15 @@ namespace IML.Functions
                 }
             );
         }
-        public static MFunction OreFunction()
+        public static MNativeFunction OreFunction()
         {
 
-            return new MFunction(
+            return new MNativeFunction(
                 "_or_e", 
                 (args, env, interpreter) =>
                 {
-                    MClosure b1 = args[0].Value.ClosureValue;
-                    MClosure b2 = args[1].Value.ClosureValue;
+                    MFunction b1 = args[0].Value.FunctionValue;
+                    MFunction b2 = args[1].Value.FunctionValue;
                     MValue result1 = interpreter.PerformCall(b1, MArguments.Empty, env);
                     if (result1.DataType.DataType.MatchesTypeExactly(MDataType.Error))
                     {
@@ -825,10 +716,10 @@ namespace IML.Functions
             );
         }
 
-        public static MFunction EqFunction()
+        public static MNativeFunction EqFunction()
         {
 
-            return new MFunction(
+            return new MNativeFunction(
                 "_eq", 
                 (args, env, interpreter) =>
                 {
@@ -844,10 +735,10 @@ namespace IML.Functions
                 "Returns whether or not both items are equal"
             );
         }
-        public static MFunction LtFunction()
+        public static MNativeFunction LtFunction()
         {
 
-            return new MFunction(
+            return new MNativeFunction(
                 "_lt", 
                 (args, env, interpreter) =>
                 {

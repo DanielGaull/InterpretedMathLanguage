@@ -9,7 +9,7 @@ using System.Text;
 namespace IML.CoreDataTypes
 {
     public delegate MValue NativeExpression(MArguments args, MEnvironment env, IInterpreter evaluator);
-    public class MClosure
+    public class MFunction
     {
         public bool IsEmpty { get; private set; }
         public MEnvironment Environment { get; private set; }
@@ -63,12 +63,12 @@ namespace IML.CoreDataTypes
             }
         }
 
-        private MClosure()
+        private MFunction()
         {
             IsEmpty = true;
         }
 
-        public MClosure(MFunctionDataTypeEntry type, List<string> paramNames, MEnvironment env, List<Ast> body)
+        public MFunction(MFunctionDataTypeEntry type, List<string> paramNames, MEnvironment env, List<Ast> body)
         {
             TypeEntry = type;
             this.paramNames = paramNames;
@@ -84,7 +84,7 @@ namespace IML.CoreDataTypes
                 Parameters = null;
             }
         }
-        public MClosure(MFunctionDataTypeEntry type, List<string> paramNames, MEnvironment env, NativeExpression nativeBody)
+        public MFunction(MFunctionDataTypeEntry type, List<string> paramNames, MEnvironment env, NativeExpression nativeBody)
         {
             TypeEntry = type;
             this.paramNames = paramNames;
@@ -116,17 +116,17 @@ namespace IML.CoreDataTypes
             return new MParameters(ps);
         }
 
-        public static MClosure Empty = new MClosure();
+        public static MFunction Empty = new MFunction();
 
-        public MClosure CloneWithNewEnvironment(MEnvironment env)
+        public MFunction CloneWithNewEnvironment(MEnvironment env)
         {
             if (IsNativeBody)
             {
-                return new MClosure(TypeEntry, paramNames, env, NativeBody);
+                return new MFunction(TypeEntry, paramNames, env, NativeBody);
             }
             else
             {
-                return new MClosure(TypeEntry, paramNames, env, AstBody);
+                return new MFunction(TypeEntry, paramNames, env, AstBody);
             }
         }
     }

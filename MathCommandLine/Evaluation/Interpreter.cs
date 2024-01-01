@@ -133,14 +133,14 @@ namespace IML.Evaluation
                                 "Cannot invoke because \"" + evaluatedCaller.DataType.DataType.Name + "\" is not a callable data type.",
                                 MList.Empty);
                         }
-                        MClosure closure = evaluatedCaller.ClosureValue;
+                        MFunction function = evaluatedCaller.FunctionValue;
                         List<MArgument> argsList = new List<MArgument>();
                         for (int i = 0; i < ast.Arguments.Count; i++)
                         {
                             // Don't worry; names are added to values later
                             argsList.Add(new MArgument(EvaluateAst(ast.Arguments[i], env)));
                         }
-                        return PerformCall(closure, new MArguments(argsList), env);
+                        return PerformCall(function, new MArguments(argsList), env);
                     }
                 case AstTypes.Variable:
                     // Return the value of the variable with this name
@@ -180,9 +180,9 @@ namespace IML.Evaluation
                 case AstTypes.LambdaLiteral:
                     {
                         LambdaAst ast = (LambdaAst)baseAst;
-                        // Immediately check to make sure we aren't allowing any parameters if the closure
+                        // Immediately check to make sure we aren't allowing any parameters if the function
                         // doesn't create an environment
-                        // Environment-less closures (i.e. ()~>{...}) cannot have parameters
+                        // Environment-less functions (i.e. ()~>{...}) cannot have parameters
                         if (ast.Parameters.Count > 0 && !ast.CreatesEnv)
                         {
                             return MValue.Error(ErrorCodes.ILLEGAL_LAMBDA,
@@ -210,9 +210,9 @@ namespace IML.Evaluation
                         MFunctionDataTypeEntry funcType = MDataTypeEntry.Function(returnType, paramTypes,
                             ast.GenericNames, ast.IsPure, ast.IsLastVarArgs, envType);
 
-                        MClosure closure = new MClosure(funcType, paramNames, env, ast.Body);
-                        // Create a closure with this current environment
-                        return MValue.Closure(closure);
+                        MFunction function = new MFunction(funcType, paramNames, env, ast.Body);
+                        // Create a function with this current environment
+                        return MValue.Function(function);
                     }
                 // Var declaration & assignment both return the value of the variable after the operation
                 // This means that assignments such as "x += 5" will return the new value of x
@@ -284,12 +284,12 @@ namespace IML.Evaluation
 
         }
 
-        public MValue PerformCall(MClosure closure, MArguments args, MEnvironment currentEnv)
+        public MValue PerformCall(MFunction function, MArguments args, MEnvironment currentEnv)
         {
             // We have a callable type!
             // Verify that everything is good to go before we actually call it
             // Need to check that we've been provided the right number of arguments
-            MParameters parameters = closure.Parameters;
+            MParameters parameters = function.Parameters;
             if (args.Length != parameters.Length)
             {
                 return MValue.Error(ErrorCodes.WRONG_ARG_COUNT, "Expected " + parameters.Length +
@@ -319,29 +319,29 @@ namespace IML.Evaluation
                 }
             }
 
-            // Evaluate the closure
+            // Evaluate the function
             // Determine type
-            // - If a native closure, then hand it our current environment and call directly
+            // - If a native function, then hand it our current environment and call directly
             // - Otherwise, need to create a new environment and evaluate the body w/ that environment
-            if (closure.IsNativeBody)
+            if (function.IsNativeBody)
             {
-                return closure.NativeBody(args, currentEnv, this);
+                return function.NativeBody(args, currentEnv, this);
             }
             else
             {
-                // Step 1: Create the new environment (if the closure creates a new one)
-                MEnvironment envToUse = closure.CreatesEnv ? new MEnvironment(closure.Environment) : currentEnv;
+                // Step 1: Create the new environment (if the function creates a new one)
+                MEnvironment envToUse = function.CreatesEnv ? new MEnvironment(function.Environment) : currentEnv;
                 // Step 2: Evaluate the body with that new environment
-                // Only add args if the closure creates a new env; closures that don't create envs can't have params
-                if (closure.CreatesEnv)
+                // Only add args if the function creates a new env; functions that don't create envs can't have params
+                if (function.CreatesEnv)
                 {
                     for (int i = 0; i < args.Length; i++)
                     {
                         envToUse.AddVariable(args[i].Name, args[i].Value);
                     }
                 }
-                //return EvaluateAst(closure.AstBody, envToUse);
-                return EvaluateBody(closure.AstBody, envToUse);
+                //return EvaluateAst(function.AstBody, envToUse);
+                return EvaluateBody(function.AstBody, envToUse);
             }
         }
         public MValue EvaluateBody(List<Ast> body, MEnvironment env)
