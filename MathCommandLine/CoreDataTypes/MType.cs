@@ -1,6 +1,5 @@
 ﻿using IML.Environments;
 using IML.Evaluation;
-using IML.Structure;
 using IML.Util;
 using System;
 using System.Collections.Generic;

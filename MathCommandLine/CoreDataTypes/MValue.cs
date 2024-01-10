@@ -374,9 +374,10 @@ namespace IML.CoreDataTypes
                             int len = MList.Length(list);
                             if (index >= len || index < 0)
                             {
-                                return Error(ErrorCodes.I_OUT_OF_RANGE, $"Index {index} out of range for list of length {len}.");
+                                return new ValueOrReturn(Error(ErrorCodes.I_OUT_OF_RANGE, 
+                                    $"Index {index} out of range for list of length {len}."));
                             }
-                            return MList.Get(list, index);
+                            return new ValueOrReturn(MList.Get(list, index));
                         })), 1, 0)
                 },
                 {
@@ -391,7 +392,7 @@ namespace IML.CoreDataTypes
                         (args, env, interpreter) => {
                             MValue value = args[0].Value;
                             int index = MList.IndexOf(list, value);
-                            return Number(index);
+                            return new ValueOrReturn(Number(index));
                         })), 1, 0)
                 },
                 {
@@ -405,8 +406,8 @@ namespace IML.CoreDataTypes
                         new List<string>(){"element", "equality_evaluator"},
                         MEnvironment.Empty,
                         (args, env, interpreter) => {
-                            return Number(MList.IndexOfCustom(list, args.Get(0).Value,
-                                args.Get(1).Value.FunctionValue, interpreter, env));
+                            return new ValueOrReturn(Number(MList.IndexOfCustom(list, args.Get(0).Value,
+                                args.Get(1).Value.FunctionValue, interpreter, env)));
                         })), 1, 0)
                 },
                 {
@@ -417,7 +418,7 @@ namespace IML.CoreDataTypes
                         MEnvironment.Empty,
                         (args, env, interpreter) => {
                             int len = MList.Length(list);
-                            return Number(len);
+                            return new ValueOrReturn(Number(len));
                         })), 1, 0)
                 },
                 {
@@ -437,8 +438,8 @@ namespace IML.CoreDataTypes
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
-                            return List(MList.Map(list,
-                                args.Get(0).Value.FunctionValue, interpreter, env));
+                            return new ValueOrReturn(List(MList.Map(list,
+                                args.Get(0).Value.FunctionValue, interpreter, env)));
                         })), 1, 0)
                 },
                 {
@@ -461,8 +462,8 @@ namespace IML.CoreDataTypes
                         MEnvironment.Empty,
                         (args, env, interpreter) =>
                         {
-                            return MList.Reduce(list, args.Get(0).Value.FunctionValue,
-                                args.Get(1).Value, interpreter, env);
+                            return new ValueOrReturn(MList.Reduce(list, args.Get(0).Value.FunctionValue,
+                                args.Get(1).Value, interpreter, env));
                         })), 1, 0)
                 },
                 {
@@ -479,7 +480,7 @@ namespace IML.CoreDataTypes
                         (args, env, interpreter) =>
                         {
                             list.InternalList.Add(args[0].Value);
-                            return Void();
+                            return new ValueOrReturn(Void());
                         })), 1, 0)
                 },
                 {
@@ -500,10 +501,11 @@ namespace IML.CoreDataTypes
                             int len = MList.Length(list);
                             if (index >= len || index < 0)
                             {
-                                return Error(ErrorCodes.I_OUT_OF_RANGE, $"Index {index} out of range for list of length {len}.");
+                                return new ValueOrReturn(Error(ErrorCodes.I_OUT_OF_RANGE,
+                                    $"Index {index} out of range for list of length {len}."));
                             }
                             list.InternalList.Insert(index, args[0].Value);
-                            return Void();
+                            return new ValueOrReturn(Void());
                         })), 1, 0)
                 },
                 {
@@ -523,10 +525,11 @@ namespace IML.CoreDataTypes
                             int len = MList.Length(list);
                             if (index >= len || index < 0)
                             {
-                                return Error(ErrorCodes.I_OUT_OF_RANGE, $"Index {index} out of range for list of length {len}.");
+                                return new ValueOrReturn(Error(ErrorCodes.I_OUT_OF_RANGE,
+                                    $"Index {index} out of range for list of length {len}."));
                             }
                             list.InternalList.RemoveAt(index);
-                            return Void();
+                            return new ValueOrReturn(Void());
                         })), 1, 0)
                 },
                 {
@@ -545,10 +548,10 @@ namespace IML.CoreDataTypes
                             int index = MList.IndexOf(list, args[0].Value);
                             if (index < 0)
                             {
-                                return Bool(false);
+                                return new ValueOrReturn(Bool(false));
                             }
                             list.InternalList.RemoveAt(index);
-                            return Bool(true);
+                            return new ValueOrReturn(Bool(true));
                         })), 1, 0)
                 },
                 {
@@ -569,10 +572,10 @@ namespace IML.CoreDataTypes
                                 args.Get(1).Value.FunctionValue, interpreter, env);
                             if (index < 0)
                             {
-                                return Bool(false);
+                                return new ValueOrReturn(Bool(false));
                             }
                             list.InternalList.RemoveAt(index);
-                            return Bool(true);
+                            return new ValueOrReturn(Bool(true));
                         })), 1, 0)
                 },
                 {
@@ -590,7 +593,7 @@ namespace IML.CoreDataTypes
                         {
                             MList other = args[0].Value.ListValue;
                             list.InternalList.AddRange(other.InternalList);
-                            return Void();
+                            return new ValueOrReturn(Void());
                         })), 1, 0)
                 }
             };

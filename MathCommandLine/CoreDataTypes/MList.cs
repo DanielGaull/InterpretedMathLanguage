@@ -1,7 +1,7 @@
 ﻿using IML.Environments;
 using IML.Evaluation;
+using IML.Exceptions;
 using IML.Functions;
-using IML.Structure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -92,7 +92,13 @@ namespace IML.CoreDataTypes
                     new MArgument(value), 
                     new MArgument(list.iList[i])
                 );
-                MValue result = evaluator.PerformCall(equalityEvaluator, args, env);
+                ValueOrReturn vr = evaluator.PerformCall(equalityEvaluator, args, env);
+                if (vr.IsReturn)
+                {
+                    throw new FatalRuntimeException("Should never get a return from value or return in List IndexOfCustom. " +
+                        "Requires function that creates its own environment.");
+                }
+                MValue result = vr.Value;
                 if (result.IsTruthy())
                 {
                     // Result is true, so return index
@@ -106,10 +112,13 @@ namespace IML.CoreDataTypes
             List<MValue> newList = new List<MValue>();
             for (int i = 0; i < list.iList.Count; i++)
             {
-                MValue result = evaluator.PerformCall(function, new MArguments(
-                    new MArgument(list.iList[i])
-                ), env);
-                newList.Add(result);
+                ValueOrReturn vr = evaluator.PerformCall(function, new MArguments(new MArgument(list.iList[i])), env);
+                if (vr.IsReturn)
+                {
+                    throw new FatalRuntimeException("Should never get a return from value or return in List Map. " +
+                        "Requires function that creates its own environment.");
+                }
+                newList.Add(vr.Value);
             }
             return new MList(newList, function.ReturnType);
         }
@@ -119,11 +128,14 @@ namespace IML.CoreDataTypes
             MValue runningResult = initial;
             for (int i = 0; i < list.iList.Count; i++)
             {
-                runningResult = evaluator.PerformCall(function,
-                    new MArguments(
-                        new MArgument(runningResult),
-                        new MArgument(list.iList[i])
-                    ), env);
+                ValueOrReturn vr = evaluator.PerformCall(function,
+                    new MArguments(new MArgument(runningResult), new MArgument(list.iList[i])), env);
+                if (vr.IsReturn)
+                {
+                    throw new FatalRuntimeException("Should never get a return from value or return in List Reduce. " +
+                        "Requires function that creates its own environment.");
+                }
+                runningResult = vr.Value;
             }
             return runningResult;
         }

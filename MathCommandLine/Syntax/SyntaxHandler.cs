@@ -1,7 +1,6 @@
 ﻿using IML.Evaluation;
 using IML.Exceptions;
 using IML.Functions;
-using IML.Structure;
 using IML.Util;
 using System;
 using System.Collections.Generic;

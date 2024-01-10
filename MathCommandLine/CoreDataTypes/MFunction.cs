@@ -1,14 +1,13 @@
 ﻿using IML.Environments;
 using IML.Evaluation;
 using IML.Functions;
-using IML.Structure;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace IML.CoreDataTypes
 {
-    public delegate MValue NativeExpression(MArguments args, MEnvironment env, IInterpreter evaluator);
+    public delegate ValueOrReturn NativeExpression(MArguments args, MEnvironment env, IInterpreter evaluator);
     public class MFunction
     {
         public bool IsEmpty { get; private set; }

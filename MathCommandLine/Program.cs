@@ -4,7 +4,6 @@ using IML.Environments;
 using IML.Evaluation;
 using IML.Exceptions;
 using IML.Functions;
-using IML.Structure;
 using IML.Syntax;
 using IML.Util;
 using System;

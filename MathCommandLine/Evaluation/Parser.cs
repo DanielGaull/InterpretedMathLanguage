@@ -3,7 +3,6 @@ using IML.Environments;
 using IML.Evaluation.AST.ValueAsts;
 using IML.Exceptions;
 using IML.Functions;
-using IML.Structure;
 using IML.Util;
 using System;
 using System.Collections.Generic;

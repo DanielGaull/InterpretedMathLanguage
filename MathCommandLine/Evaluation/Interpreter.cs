@@ -55,7 +55,7 @@ namespace IML.Evaluation
         {
             Ast tree = parser.Parse(expression);
             EnsureValidity(tree);
-            return EvaluateAst(tree, env);
+            return EvaluateAst(tree, env).Value;
         }
 
         // Throws an invalid syntax exception if it finds any invalid syntax
@@ -112,54 +112,64 @@ namespace IML.Evaluation
             }
         }
 
-        private MValue EvaluateAst(Ast baseAst, MEnvironment env)
+        private ValueOrReturn EvaluateAst(Ast baseAst, MEnvironment env)
         {
             switch (baseAst.Type)
             {
                 case AstTypes.Call:
                     {
                         CallAst ast = (CallAst)baseAst;
-                        MValue evaluatedCaller = EvaluateAst(ast.CalledAst, env);
+                        ValueOrReturn evaluatedCallerVR = EvaluateAst(ast.CalledAst, env);
+                        if (evaluatedCallerVR.IsReturn)
+                        {
+                            return evaluatedCallerVR;
+                        }
+                        MValue evaluatedCaller = evaluatedCallerVR.Value;
                         // If an error, return that error instead of attempting to call it
                         if (evaluatedCaller.DataType.DataType == MDataType.Error)
                         {
-                            return evaluatedCaller;
+                            return new ValueOrReturn(evaluatedCaller);
                         }
                         if (evaluatedCaller.DataType.DataType != MDataType.Function)
                         {
                             // Not a callable object
-                            return MValue.Error(ErrorCodes.NOT_CALLABLE,
+                            return new ValueOrReturn(MValue.Error(ErrorCodes.NOT_CALLABLE,
                                 "Cannot invoke because \"" + evaluatedCaller.DataType.DataType.Name + "\" is not a callable data type.",
-                                MList.Empty);
+                                MList.Empty));
                         }
                         MFunction function = evaluatedCaller.FunctionValue;
                         List<MArgument> argsList = new List<MArgument>();
                         for (int i = 0; i < ast.Arguments.Count; i++)
                         {
                             // Don't worry; names are added to values later
-                            argsList.Add(new MArgument(EvaluateAst(ast.Arguments[i], env)));
+                            ValueOrReturn argVr = EvaluateAst(ast.Arguments[i], env);
+                            if (argVr.IsReturn)
+                            {
+                                return argVr;
+                            }
+                            argsList.Add(new MArgument(argVr.Value));
                         }
                         return PerformCall(function, new MArguments(argsList), env);
                     }
                 case AstTypes.Variable:
                     // Return the value of the variable with this name
-                    return env.Get(((VariableAst)baseAst).Name);
+                    return new ValueOrReturn(env.Get(((VariableAst)baseAst).Name));
                 case AstTypes.NumberLiteral:
-                    return MValue.Number(((NumberAst)baseAst).Value);
+                    return new ValueOrReturn(MValue.Number(((NumberAst)baseAst).Value));
                 case AstTypes.StringLiteral:
-                    return MValue.String(((StringAst)baseAst).Value);
+                    return new ValueOrReturn(MValue.String(((StringAst)baseAst).Value));
                 case AstTypes.ReferenceLiteral:
                     {
                         string name = ((ReferenceAst)baseAst).RefName;
                         MBoxedValue box = env.GetBox(name);
                         if (box != null)
                         {
-                            return MValue.Reference(box);
+                            return new ValueOrReturn(MValue.Reference(box));
                         }
                         else
                         {
-                            return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST,
-                                    $"Variable \"{name}\" does not exist.", MList.Empty);
+                            return new ValueOrReturn(MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST,
+                                    $"Variable \"{name}\" does not exist.", MList.Empty));
                         }
                     }
                 case AstTypes.ListLiteral:
@@ -170,11 +180,16 @@ namespace IML.Evaluation
                         MType listType = MType.UNION_BASE;
                         foreach (Ast elem in ast.Elements)
                         {
-                            MValue value = EvaluateAst(elem, env);
+                            ValueOrReturn valueVr = EvaluateAst(elem, env);
+                            if (valueVr.IsReturn)
+                            {
+                                return valueVr;
+                            }
+                            MValue value = valueVr.Value;
                             elements.Add(value);
                             listType = listType.Union(new MType(value.DataType));
                         }
-                        return MValue.List(new MList(elements, listType));
+                        return new ValueOrReturn(MValue.List(new MList(elements, listType)));
                     }
                 case AstTypes.LambdaLiteral:
                     {
@@ -184,8 +199,8 @@ namespace IML.Evaluation
                         // Environment-less functions (i.e. ()~>{...}) cannot have parameters
                         if (ast.Parameters.Count > 0 && !ast.CreatesEnv)
                         {
-                            return MValue.Error(ErrorCodes.ILLEGAL_LAMBDA,
-                                "Lambdas that don't create environments (~>) cannot have parameters", MList.Empty);
+                            return new ValueOrReturn(MValue.Error(ErrorCodes.ILLEGAL_LAMBDA,
+                                "Lambdas that don't create environments (~>) cannot have parameters", MList.Empty));
                         }
                         int indexOfInvalidBody = ast.Body.FindIndex(x => x.Type == AstTypes.Invalid);
                         if (indexOfInvalidBody >= 0)
@@ -213,7 +228,7 @@ namespace IML.Evaluation
 
                         MFunction function = new MFunction(funcType, paramNames, env, ast.Body);
                         // Create a function with this current environment
-                        return MValue.Function(function);
+                        return new ValueOrReturn(MValue.Function(function));
                     }
                 // Var declaration & assignment both return the value of the variable after the operation
                 // This means that assignments such as "x += 5" will return the new value of x
@@ -221,58 +236,82 @@ namespace IML.Evaluation
                     {
                         VariableDeclarationAst ast = (VariableDeclarationAst)baseAst;
                         string newVarName = ast.Name;
-                        MValue newVarValue = EvaluateAst(ast.Value, env);
+                        ValueOrReturn newVarVr = EvaluateAst(ast.Value, env); ;
+                        if (newVarVr.IsReturn)
+                        {
+                            return newVarVr;
+                        }
+                        MValue newVarValue = newVarVr.Value;
                         bool canSet = ast.VariableType == VariableType.Variable;
                         Regex reg = new Regex("^[a-zA-Z][a-zA-Z0-9_]*$");
                         if (env.Has(newVarName))
                         {
-                            return MValue.Error(ErrorCodes.CANNOT_DECLARE, $"Named value \"{newVarName}\" already exists.");
+                            return new ValueOrReturn(MValue.Error(ErrorCodes.CANNOT_DECLARE, 
+                                $"Named value \"{newVarName}\" already exists."));
                         }
                         else if (!reg.IsMatch(newVarName))
                         {
-                            return MValue.Error(ErrorCodes.CANNOT_DECLARE, $"The name \"{newVarName}\" is an invalid name.");
+                            return new ValueOrReturn(MValue.Error(ErrorCodes.CANNOT_DECLARE, 
+                                $"The name \"{newVarName}\" is an invalid name."));
                         }
                         else
                         {
                             env.AddValue(newVarName, newVarValue, true, canSet, null);
-                            return MValue.Void();
+                            return new ValueOrReturn(MValue.Void());
                         }
                     }
                 case AstTypes.VariableAssignment:
                     {
                         VariableAssignmentAst ast = (VariableAssignmentAst)baseAst;
                         IdentifierAst identifier = ast.Identifier;
-                        MValue assignValue = EvaluateAst(ast.Value, env);
+                        ValueOrReturn assignVr = EvaluateAst(ast.Value, env);
+                        if (assignVr.IsReturn)
+                        {
+                            return assignVr;
+                        }
+                        MValue assignValue = assignVr.Value;
                         switch (identifier.Type)
                         {
                             case IdentifierAstTypes.RawVar:
                                 string varName = identifier.Name;
                                 if (!env.Has(varName))
                                 {
-                                    return MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST, $"Variable \"{varName}\" does not exist.");
+                                    return new ValueOrReturn(MValue.Error(ErrorCodes.VAR_DOES_NOT_EXIST, 
+                                        $"Variable \"{varName}\" does not exist."));
                                 }
                                 MBoxedValue boxToAssign = env.GetBox(varName);
                                 if (!boxToAssign.CanSet)
                                 {
-                                    return MValue.Error(ErrorCodes.CANNOT_ASSIGN, $"Cannot assign value to constant \"{varName}\"");
+                                    return new ValueOrReturn(MValue.Error(ErrorCodes.CANNOT_ASSIGN, 
+                                        $"Cannot assign value to constant \"{varName}\""));
                                 }
                                 boxToAssign.SetValue(assignValue);
                                 break;
                             case IdentifierAstTypes.MemberAccess:
-                                MValue assignParent = EvaluateAst(identifier.Parent, env);
-                                return assignParent.SetValueByName(identifier.Name, assignValue, false);
+                                ValueOrReturn assignParentVr = EvaluateAst(identifier.Parent, env); ;
+                                if (assignParentVr.IsReturn)
+                                {
+                                    return assignParentVr;
+                                }
+                                MValue assignParent = assignParentVr.Value;
+                                return new ValueOrReturn(assignParent.SetValueByName(identifier.Name, assignValue, false));
                             case IdentifierAstTypes.Dereference:
                                 // TODO
                                 break;
                         }
-                        return MValue.Void();
+                        return new ValueOrReturn(MValue.Void());
                     }
                 case AstTypes.MemberAccess:
                     {
                         MemberAccessAst ast = (MemberAccessAst)baseAst;
-                        MValue original = EvaluateAst(ast.Parent, env);
+                        ValueOrReturn origVr = EvaluateAst(ast.Parent, env);
+                        if (origVr.IsReturn)
+                        {
+                            return origVr;
+                        }
+                        MValue original = origVr.Value;
                         string key = ast.Name;
-                        return original.GetValueByName(key, false);
+                        return new ValueOrReturn(original.GetValueByName(key, false));
                     }
                 case AstTypes.Invalid:
                     throw new InvalidParseException(((InvalidAst)baseAst).Expression);
@@ -295,7 +334,12 @@ namespace IML.Evaluation
                 if (body[i].Type == AstTypes.Return)
                 {
                     Ast returnAstValue = ((ReturnAst)body[i]).Body;
-                    MValue returnValue = EvaluateAst(returnAstValue, env);
+                    ValueOrReturn retValVr = EvaluateAst(returnAstValue, env);
+                    if (retValVr.IsReturn)
+                    {
+                        return retValVr;
+                    }
+                    MValue returnValue = retValVr.Value;
                     if (passReturnsToParent)
                     {
                         return new ValueOrReturn(true, returnValue);
@@ -422,7 +466,7 @@ namespace IML.Evaluation
             // - Otherwise, need to create a new environment and evaluate the body w/ that environment
             if (function.IsNativeBody)
             {
-                return new ValueOrReturn(function.NativeBody(args, currentEnv, this));
+                return function.NativeBody(args, currentEnv, this);
             }
             else
             {

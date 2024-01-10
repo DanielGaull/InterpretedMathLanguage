@@ -2,7 +2,6 @@
 using IML.Environments;
 using IML.Evaluation;
 using IML.Functions;
-using IML.Structure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;

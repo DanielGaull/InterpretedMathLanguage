@@ -2,7 +2,6 @@
 using IML.Environments;
 using IML.Evaluation.AST.ValueAsts;
 using IML.Functions;
-using IML.Structure;
 using System;
 using System.Collections.Generic;
 using System.Linq;

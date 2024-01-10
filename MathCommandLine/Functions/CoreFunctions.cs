@@ -1,7 +1,6 @@
 ﻿using IML.CoreDataTypes;
 using IML.Environments;
 using IML.Evaluation;
-using IML.Structure;
 using IML.Util;
 using System;
 using System.Collections.Generic;
@@ -63,7 +62,7 @@ namespace IML.Functions
                 "_add", 
                 (args, env, interpreter) =>
                 {
-                    return MValue.Number(args.Get(0).Value.NumberValue + args.Get(1).Value.NumberValue);
+                    return new ValueOrReturn(MValue.Number(args.Get(0).Value.NumberValue + args.Get(1).Value.NumberValue));
                 },
                 MType.Number,
                 new MParameters(
@@ -79,7 +78,7 @@ namespace IML.Functions
                 "_mul", 
                 (args, env, interpreter) =>
                 {
-                    return MValue.Number(args.Get(0).Value.NumberValue * args.Get(1).Value.NumberValue);
+                    return new ValueOrReturn(MValue.Number(args.Get(0).Value.NumberValue * args.Get(1).Value.NumberValue));
                 },
                 MType.Number,
                 new MParameters(
@@ -95,7 +94,7 @@ namespace IML.Functions
                 "_add_inv", 
                 (args, env, interpreter) =>
                 {
-                    return MValue.Number(-args.Get(0).Value.NumberValue);
+                    return new ValueOrReturn(MValue.Number(-args.Get(0).Value.NumberValue));
                 },
                 MType.Number,
                 new MParameters(
@@ -113,9 +112,9 @@ namespace IML.Functions
                     double arg = args.Get(0).Value.NumberValue;
                     if (arg == 0)
                     {
-                        return MValue.Error(ErrorCodes.DIV_BY_ZERO);
+                        return new ValueOrReturn(MValue.Error(ErrorCodes.DIV_BY_ZERO));
                     }
-                    return MValue.Number(1 / arg);
+                    return new ValueOrReturn(MValue.Number(1 / arg));
                 },
                 MType.Number,
                 new MParameters(
@@ -130,7 +129,7 @@ namespace IML.Functions
                 "_pow", 
                 (args, env, interpreter) =>
                 {
-                    return MValue.Number(Math.Pow(args.Get(0).Value.NumberValue, args.Get(1).Value.NumberValue));
+                    return new ValueOrReturn(MValue.Number(Math.Pow(args.Get(0).Value.NumberValue, args.Get(1).Value.NumberValue)));
                 },
                 MType.Number,
                 new MParameters(
@@ -147,7 +146,7 @@ namespace IML.Functions
                 "_flr", 
                 (args, env, interpreter) =>
                 {
-                    return MValue.Number(Math.Floor(args.Get(0).Value.NumberValue));
+                    return new ValueOrReturn(MValue.Number(Math.Floor(args.Get(0).Value.NumberValue)));
                 },
                 MType.Number,
                 new MParameters(
@@ -205,9 +204,10 @@ namespace IML.Functions
                             result = Math.Atanh(arg);
                             break;
                         default:
-                            return MValue.Error(ErrorCodes.INVALID_ARGUMENT, "Trig operation must be between 0 and 11.");
+                            return new ValueOrReturn(MValue.Error(ErrorCodes.INVALID_ARGUMENT, 
+                                "Trig operation must be between 0 and 11."));
                     }
-                    return MValue.Number(result);
+                    return new ValueOrReturn(MValue.Number(result));
                 },
                 MType.Number,
                 new MParameters(
@@ -224,7 +224,7 @@ namespace IML.Functions
                 "_ln", 
                 (args, env, interpreter) =>
                 {
-                    return MValue.Number(Math.Log(args.Get(0).Value.NumberValue));
+                    return new ValueOrReturn(MValue.Number(Math.Log(args.Get(0).Value.NumberValue)));
                 },
                 MType.Number,
                 new MParameters(
@@ -241,7 +241,7 @@ namespace IML.Functions
                 "_crange", 
                 (args, env, interpreter) =>
                 {
-                    return MValue.List(MList.CreateRange((int) args.Get(0).Value.NumberValue));
+                    return new ValueOrReturn(MValue.List(MList.CreateRange((int) args.Get(0).Value.NumberValue)));
                 },
                 MType.List(MType.Number),
                 new MParameters(
@@ -259,7 +259,7 @@ namespace IML.Functions
                 (args, env, interpreter) =>
                 {
                     MBoxedValue box = args[0].Value.RefValue;
-                    return box.GetValue();
+                    return new ValueOrReturn(box.GetValue());
                 },
                 new MType(new MGenericDataTypeEntry("T")),
                 new MParameters(
@@ -280,7 +280,7 @@ namespace IML.Functions
                 {
                     MBoxedValue refAddr = args[0].Value.RefValue;
                     MValue value = args[1].Value;
-                    return refAddr.SetValue(value);
+                    return new ValueOrReturn(refAddr.SetValue(value));
                 },
                 MType.Void,
                 new MParameters(
@@ -303,11 +303,11 @@ namespace IML.Functions
                     MBoxedValue refAddr = args[0].Value.RefValue;
                     if (refAddr.Description == null)
                     {
-                        return MValue.Null();
+                        return new ValueOrReturn(MValue.Null());
                     }
                     else
                     {
-                        return MValue.String(refAddr.Description);
+                        return new ValueOrReturn(MValue.String(refAddr.Description));
                     }
                 },
                 MType.String,
@@ -326,7 +326,7 @@ namespace IML.Functions
                     MBoxedValue refAddr = args[0].Value.RefValue;
                     string newDesc = args[1].Value.GetStringValue();
                     refAddr.Description = newDesc;
-                    return MValue.Void();
+                    return new ValueOrReturn(MValue.Void());
                 },
                 MType.Void,
                 new MParameters(
@@ -347,7 +347,7 @@ namespace IML.Functions
                 "_type_of", 
                 (args, env, interpreter) =>
                 {
-                    return MValue.Type(new MType(args[0].Value.DataType));
+                    return new ValueOrReturn(MValue.Type(new MType(args[0].Value.DataType)));
                 },
                 MType.Type,
                 new MParameters(
@@ -364,7 +364,7 @@ namespace IML.Functions
                 {
                     double first = args.Get(0).Value.NumberValue;
                     double second = args.Get(0).Value.NumberValue;
-                    return MValue.Number((first < second) ? -1 : (first == second ? 0 : 1));
+                    return new ValueOrReturn(MValue.Number((first < second) ? -1 : (first == second ? 0 : 1)));
                 },
                 MType.Number,
                 new MParameters(
@@ -389,10 +389,10 @@ namespace IML.Functions
                     {
                         if (cases[i] == value)
                         {
-                            return results[i];
+                            return new ValueOrReturn(results[i]);
                         }
                     }
-                    return defaultValue;
+                    return new ValueOrReturn(defaultValue);
                 },
                 new MType(new MGenericDataTypeEntry("R")),
                 new MParameters(
@@ -419,12 +419,12 @@ namespace IML.Functions
                     int code = (int)args[0].Value.NumberValue;
                     if (!Enum.IsDefined(typeof(ErrorCodes), code))
                     {
-                        return MValue.Error(ErrorCodes.INVALID_ARGUMENT,
-                                $"The value \"{code}\" is not a valid error code.");
+                        return new ValueOrReturn(MValue.Error(ErrorCodes.INVALID_ARGUMENT,
+                                $"The value \"{code}\" is not a valid error code."));
                     }
                     string msg = args[1].Value.GetStringValue();
                     MList info = args[2].Value.ListValue;
-                    return MValue.Error((ErrorCodes)code, msg, info);
+                    return new ValueOrReturn(MValue.Error((ErrorCodes)code, msg, info));
                 },
                 MType.Error,
                 new MParameters(
@@ -442,7 +442,7 @@ namespace IML.Functions
                 "_str", 
                 (args, env, interpreter) =>
                 {
-                    return MValue.String(args[0].Value.ListValue);
+                    return new ValueOrReturn(MValue.String(args[0].Value.ListValue));
                 },
                 MType.String,
                 new MParameters(
@@ -459,7 +459,7 @@ namespace IML.Functions
                 (args, env, interpreter) =>
                 {
                     Console.WriteLine(args[0].Value.GetStringValue());
-                    return MValue.Void();
+                    return new ValueOrReturn(MValue.Void());
                 },
                 MType.Void,
                 new MParameters(
@@ -478,7 +478,7 @@ namespace IML.Functions
                 {
                     DateTimeOffset now = DateTimeOffset.UtcNow;
                     long unixTimeMilliseconds = now.ToUnixTimeMilliseconds();
-                    return MValue.Number((double)unixTimeMilliseconds);
+                    return new ValueOrReturn(MValue.Number((double)unixTimeMilliseconds));
                 },
                 MType.Number,
                 new MParameters(),
@@ -498,25 +498,35 @@ namespace IML.Functions
                         List<MValue> pair = pairs[i].ListValue.InternalList;
                         if (pair.Count != 2)
                         {
-                            return MValue.Error(ErrorCodes.INVALID_ARGUMENT, 
-                                "Expected list length of 2 but found " + pair.Count + ".");
+                            return new ValueOrReturn(MValue.Error(ErrorCodes.INVALID_ARGUMENT, 
+                                "Expected list length of 2 but found " + pair.Count + "."));
                         }
                         MFunction cond = pair[0].FunctionValue;
-                        MValue condValue = interpreter.PerformCall(cond, MArguments.Empty, env);
+                        ValueOrReturn condVr = interpreter.PerformCall(cond, MArguments.Empty, env);
+                        if (condVr.IsReturn)
+                        {
+                            return condVr;
+                        }
+                        MValue condValue = condVr.Value; 
                         if (condValue.DataType.DataType.MatchesTypeExactly(MDataType.Error))
                         {
-                            return condValue;
+                            return new ValueOrReturn(condValue);
                         }
                         // Everything is truthy except the "false" value, "void", and "null"
                         if (condValue.IsTruthy())
                         {
                             MFunction outputFunc = pair[1].FunctionValue;
-                            MValue output = interpreter.PerformCall(outputFunc, MArguments.Empty, env);
-                            return output;
+                            ValueOrReturn outVr = interpreter.PerformCall(outputFunc, MArguments.Empty, env);
+                            if (outVr.IsReturn)
+                            {
+                                return outVr;
+                            }
+                            MValue output = outVr.Value;
+                            return new ValueOrReturn(output);
                         }
                     }
                     // Return void if we didn't evaluate any of the conditions
-                    return MValue.Void();
+                    return new ValueOrReturn(MValue.Void());
                 },
                 MType.Any,
                 new MParameters(
@@ -534,7 +544,7 @@ namespace IML.Functions
                 (args, env, interpreter) =>
                 {
                     interpreter.Exit();
-                    return MValue.Void();
+                    return new ValueOrReturn(MValue.Void());
                 },
                 MType.Void,
                 new MParameters(),
@@ -550,7 +560,7 @@ namespace IML.Functions
                     string prompt = args[0].Value.GetStringValue();
                     Console.Write(prompt);
                     string input = Console.ReadLine();
-                    return MValue.String(input);
+                    return new ValueOrReturn(MValue.String(input));
                 },
                 MType.String,
                 new MParameters(new MParameter(MType.String, "prompt")),
@@ -569,9 +579,9 @@ namespace IML.Functions
                     for (int i = 0; i < funcs.Count; i++)
                     {
                         MFunction function = funcs[i].FunctionValue;
-                        returnValue = interpreter.PerformCall(function, MArguments.Empty, env);
+                        returnValue = interpreter.PerformCall(function, MArguments.Empty, env).Value;
                     }
-                    return returnValue;
+                    return new ValueOrReturn(returnValue);
                 },
                 MType.Any,
                 new MParameters(
@@ -592,9 +602,9 @@ namespace IML.Functions
                 {
                     if (args[0].Value.IsTruthy())
                     {
-                        return args[1].Value;
+                        return new ValueOrReturn(args[1].Value);
                     }
-                    return args[0].Value;
+                    return new ValueOrReturn(args[0].Value);
                 },
                 MType.Union(new MType(new MGenericDataTypeEntry("T1")), new MType(new MGenericDataTypeEntry("T2"))),
                 new MParameters(
@@ -617,9 +627,9 @@ namespace IML.Functions
                 {
                     if (args[0].Value.IsTruthy())
                     {
-                        return args[0].Value;
+                        return new ValueOrReturn(args[0].Value);
                     }
-                    return args[1].Value;
+                    return new ValueOrReturn(args[1].Value);
                 },
                 MType.Union(new MType(new MGenericDataTypeEntry("T1")), new MType(new MGenericDataTypeEntry("T2"))),
                 new MParameters(
@@ -641,7 +651,7 @@ namespace IML.Functions
                 (args, env, interpreter) =>
                 {
                     bool b = args[0].Value.IsTruthy();
-                    return MValue.Bool(!b);
+                    return new ValueOrReturn(MValue.Bool(!b));
                 },
                 MType.Boolean,
                 new MParameters(
@@ -658,17 +668,22 @@ namespace IML.Functions
                 {
                     MFunction b1 = args[0].Value.FunctionValue;
                     MFunction b2 = args[1].Value.FunctionValue;
-                    MValue result1 = interpreter.PerformCall(b1, MArguments.Empty, env);
+                    ValueOrReturn vr1 = interpreter.PerformCall(b1, MArguments.Empty, env);
+                    if (vr1.IsReturn)
+                    {
+                        return vr1;
+                    }
+                    MValue result1 = vr1.Value;
                     if (result1.DataType.DataType.MatchesTypeExactly(MDataType.Error))
                     {
-                        return result1;
+                        return new ValueOrReturn(result1);
                     }
                     if (result1.IsTruthy())
                     {
                         // Simply return the second value
                         return interpreter.PerformCall(b2, MArguments.Empty, env);
                     }
-                    return result1;
+                    return new ValueOrReturn(result1);
                 },
                 MType.Union(new MType(new MGenericDataTypeEntry("T1")), new MType(new MGenericDataTypeEntry("T2"))),
                 new MParameters(
@@ -691,17 +706,22 @@ namespace IML.Functions
                 {
                     MFunction b1 = args[0].Value.FunctionValue;
                     MFunction b2 = args[1].Value.FunctionValue;
-                    MValue result1 = interpreter.PerformCall(b1, MArguments.Empty, env);
+                    ValueOrReturn vr1 = interpreter.PerformCall(b1, MArguments.Empty, env); ;
+                    if (vr1.IsReturn)
+                    {
+                        return vr1;
+                    }
+                    MValue result1 = vr1.Value;
                     if (result1.DataType.DataType.MatchesTypeExactly(MDataType.Error))
                     {
-                        return result1;
+                        return new ValueOrReturn(result1);
                     }
                     if (!result1.IsTruthy())
                     {
                         // Simply return the second value
                         return interpreter.PerformCall(b2, MArguments.Empty, env);
                     }
-                    return result1;
+                    return new ValueOrReturn(result1);
                 },
                 MType.Union(new MType(new MGenericDataTypeEntry("T1")), new MType(new MGenericDataTypeEntry("T2"))),
                 new MParameters(
@@ -725,7 +745,7 @@ namespace IML.Functions
                 {
                     MValue item1 = args[0].Value;
                     MValue item2 = args[1].Value;
-                    return MValue.Bool(item1 == item2);
+                    return new ValueOrReturn(MValue.Bool(item1 == item2));
                 },
                 MType.Boolean,
                 new MParameters(
@@ -744,7 +764,7 @@ namespace IML.Functions
                 {
                     double item1 = args[0].Value.NumberValue;
                     double item2 = args[1].Value.NumberValue;
-                    return MValue.Bool(item1 < item2);
+                    return new ValueOrReturn(MValue.Bool(item1 < item2));
                 },
                 MType.Boolean,
                 new MParameters(
