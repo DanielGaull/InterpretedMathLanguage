@@ -143,8 +143,6 @@ namespace IML.Evaluation
         {
             try
             {
-                // TODO: Add support for big_decimal and big_int (require D or L at the end of the number literal, i.e. 750L or 0.642D)
-
                 // Initially, attempt to extract an expression from parentheses
                 while (IsParenWrapped(expression))
                 {
