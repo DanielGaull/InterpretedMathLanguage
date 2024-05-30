@@ -59,6 +59,39 @@ namespace IMLTests
             Assert.IsTrue(result);
         }
 
+        [TestMethod]
+        public void TestTryMatchAssignment_WithValid_ReturnProperIndex()
+        {
+            int result = Parser.TryMatchAssignment("x=2");
+            Assert.AreEqual(1, result);
+        }
 
+        [TestMethod]
+        public void TestTryMatchAssignment_WithNoEquals_ReturnNegative()
+        {
+            int result = Parser.TryMatchAssignment("x");
+            Assert.AreEqual(-1, result);
+        }
+
+        [TestMethod]
+        public void TestTryMatchAssignment_WithLevels_ReturnNegative()
+        {
+            int result = Parser.TryMatchAssignment("((x=4))");
+            Assert.AreEqual(-1, result);
+        }
+
+        [TestMethod]
+        public void TestTryMatchAssignment_WithLevelsInIdentifier_ReturnProperIndex()
+        {
+            int result = Parser.TryMatchAssignment("(*x)=5");
+            Assert.AreEqual(4, result);
+        }
+
+        [TestMethod]
+        public void TestTryMatchAssignment_WithListLevels_ReturnNegative()
+        {
+            int result = Parser.TryMatchAssignment("{x=5}");
+            Assert.AreEqual(-1, result);
+        }
     }
 }

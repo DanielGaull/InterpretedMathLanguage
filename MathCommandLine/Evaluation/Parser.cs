@@ -17,7 +17,8 @@ namespace IML.Evaluation
     /// </summary>
     public class Parser
     {
-        private delegate void CharacterProcessor(char c, WrapperLevels level);
+        // Returns true if we should continue, false if we should break
+        private delegate bool CharacterProcessor(int i, WrapperLevels level);
 
         // Regexes for common necessities
         private const string NUMBER_REGEX_PATTERN = @"[+-]?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))";
@@ -40,26 +41,26 @@ namespace IML.Evaluation
         private const char CALL_START_WRAPPER = '('; 
         private const char ARG_DELIMITER = ',';
 
-        private readonly string LAMBDA_BODY_WRAPPERS = "{}";
+        private static readonly string LAMBDA_BODY_WRAPPERS = "{}";
         private const string VAR_ARGS_SYMBOL = "...";
 
         // Param parsing values
         private const char GENERAL_END_WRAPPER = ')';
         private const char GENERAL_START_WRAPPER = '(';
-        private readonly string GENERAL_WRAPPERS = $"{GENERAL_START_WRAPPER}{GENERAL_END_WRAPPER}";
+        private static readonly string GENERAL_WRAPPERS = $"{GENERAL_START_WRAPPER}{GENERAL_END_WRAPPER}";
 
-        private readonly string GENERIC_WRAPPERS = "<>";
+        private const string GENERIC_WRAPPERS = "<>";
 
         // Simple lambda parsing values
         private const char SIMPLE_LAMBDA_START_WRAPPER = '[';
         private const char SIMPLE_LAMBDA_END_WRAPPER = ']';
-        private readonly string SIMPLE_LAMBDA_WRAPPERS = $"{SIMPLE_LAMBDA_START_WRAPPER}{SIMPLE_LAMBDA_END_WRAPPER}";
+        private static readonly string SIMPLE_LAMBDA_WRAPPERS = $"{SIMPLE_LAMBDA_START_WRAPPER}{SIMPLE_LAMBDA_END_WRAPPER}";
 
         // List parsing values
         private const char LIST_START_WRAPPER = '{';
         private const char LIST_END_WRAPPER = '}';
         private const char LIST_DELIMITER = ',';
-        private readonly string LIST_WRAPPERS = $"{LIST_START_WRAPPER}{LIST_END_WRAPPER}";
+        private static readonly string LIST_WRAPPERS = $"{LIST_START_WRAPPER}{LIST_END_WRAPPER}";
 
         // String parsing values
         private const char STRING_START_WRAPPER = '"';
@@ -74,6 +75,11 @@ namespace IML.Evaluation
         private const string TYPE_GENERICS_WRAPPERS = "[]";
 
         private const char CODE_LINE_DELIMITER = ';';
+
+        private static readonly string[] ALL_WRAPPERS = new string[]
+        {
+            GENERAL_WRAPPERS, SIMPLE_LAMBDA_WRAPPERS, LIST_WRAPPERS, GENERIC_WRAPPERS
+        };
 
         private const char LAMBDA_TYPE_NO_ENVIRONMENT_LINE = '~';
         private const char LAMBDA_TYPE_CREATES_ENVIRONMENT_LINE = '=';
@@ -861,7 +867,7 @@ namespace IML.Evaluation
                 }
                 if (isNonWrapper)
                 {
-                    operation.Invoke(c, levels);
+                    operation.Invoke(i, levels);
                 }
             }
 
@@ -874,7 +880,7 @@ namespace IML.Evaluation
             {
                 return false;
             }
-            WrapperLevels levels = PassOverExpression(expression, (a, b) => { }, wrappers);
+            WrapperLevels levels = PassOverExpression(expression, (a, b) => true, wrappers);
             return levels.AreAllZero();
         }
 
@@ -893,10 +899,9 @@ namespace IML.Evaluation
                 c2 == LAMBDA_TYPE_ARROW_TIP;
         }
 
-        private bool IsWrappedBy(string expression, char start, char end)
+        private static bool IsWrappedBy(string expression, char start, char end)
         {
-            return IsWrappedBy(expression, start, end,
-                GENERAL_WRAPPERS, SIMPLE_LAMBDA_WRAPPERS, LIST_WRAPPERS, GENERIC_WRAPPERS);
+            return IsWrappedBy(expression, start, end, ALL_WRAPPERS);
         }
 
         /// <summary>
@@ -904,7 +909,7 @@ namespace IML.Evaluation
         /// </summary>
         /// <param name="expression"></param>
         /// <returns></returns>
-        private bool IsParenWrapped(string expression)
+        private static bool IsParenWrapped(string expression)
         {
             return IsWrappedBy(expression, GENERAL_START_WRAPPER, GENERAL_END_WRAPPER);
         }
@@ -1062,71 +1067,30 @@ namespace IML.Evaluation
             return -1;
         }
         
-        /// <summary>
-        /// Returns true if the expression is a list, or false if not
-        /// </summary>
-        /// <param name="expression"></param>
-        /// <returns></returns>
-        private bool MatchesList(string expression)
+        private static bool MatchesList(string expression)
         {
             return IsWrappedBy(expression, LIST_START_WRAPPER, LIST_END_WRAPPER);
         }
 
-        private bool MatchesSimpleLambda(string expression)
+        private static bool MatchesSimpleLambda(string expression)
         {
             return IsWrappedBy(expression, SIMPLE_LAMBDA_START_WRAPPER, SIMPLE_LAMBDA_END_WRAPPER);
         }
 
         // Returns index of the '='
-        private int TryMatchAssignment(string expression)
+        public static int TryMatchAssignment(string expression)
         {
-            // Check that there is an '=' that is at the bottom level
-            for (int i = 0; i < expression.Length; i++)
+            Container<int> equalsIndex = new Container<int>(-1);
+            PassOverExpression(expression, (index, levels) =>
             {
-                char c = expression[i];
-                if (c == GENERAL_START_WRAPPER)
+                if (expression[index] == ASSIGNMENT_TOKEN && levels.AreAllZero())
                 {
-                    int newI = GetBracketEndIndex(expression, i, GENERAL_START_WRAPPER, GENERAL_END_WRAPPER);
-                    if (newI < 0)
-                    {
-                        return -1;
-                    }
-                    i = newI;
+                    equalsIndex.Set(index);
+                    return false;
                 }
-                if (c == SIMPLE_LAMBDA_START_WRAPPER)
-                {
-                    int newI = GetBracketEndIndex(expression, i, SIMPLE_LAMBDA_START_WRAPPER, 
-                        SIMPLE_LAMBDA_END_WRAPPER);
-                    if (newI < 0)
-                    {
-                        return -1;
-                    }
-                    i = newI;
-                }
-                if (c == LIST_START_WRAPPER)
-                {
-                    int newI = GetBracketEndIndex(expression, i, LIST_START_WRAPPER, LIST_END_WRAPPER);
-                    if (newI < 0)
-                    {
-                        return -1;
-                    }
-                    i = newI;
-                }
-                if (c == STRING_START_WRAPPER)
-                {
-                    int newI = GetBracketEndIndex(expression, i, STRING_START_WRAPPER, STRING_END_WRAPPER);
-                    if (newI < 0)
-                    {
-                        return -1;
-                    }
-                    i = newI;
-                }
-                if (c == ASSIGNMENT_TOKEN)
-                {
-                    return i;
-                }
-            }
-            return -1;
+                return true;
+            }, ALL_WRAPPERS);
+            return equalsIndex.Get();
         }
 
         /// <summary>
