@@ -1,8 +1,10 @@
 ﻿using IML.CoreDataTypes;
 using IML.Environments;
-using IML.Evaluation.AST.ValueAsts;
 using IML.Exceptions;
 using IML.Functions;
+using IML.Parsing.AST;
+using IML.Parsing.AST.ValueAsts;
+using IML.Parsing.Util;
 using IML.Util;
 using System;
 using System.Collections.Generic;
@@ -10,7 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace IML.Evaluation
+namespace IML.Parsing
 {
     /// <summary>
     /// Parses strings to ASTs. Capable of parsing many different types of strings, such as expressions and declarations.
@@ -37,16 +39,16 @@ namespace IML.Evaluation
         private static readonly Regex MEMBER_ACCESS_REGEX = new Regex(@$"^(.*)\{MEMBER_ACCESS_TOKEN}(" + SYMBOL_PATTERN + ")$");
 
         // Call parsing values
-        private const char CALL_END_WRAPPER = ')';
-        private const char CALL_START_WRAPPER = '('; 
-        private const char ARG_DELIMITER = ',';
+        public const char CALL_END_WRAPPER = ')';
+        public const char CALL_START_WRAPPER = '(';
+        public const char ARG_DELIMITER = ',';
 
-        private const string VAR_ARGS_SYMBOL = "...";
+        public const string VAR_ARGS_SYMBOL = "...";
 
         // Param parsing values
-        private const char GENERAL_END_WRAPPER = ')';
-        private const char GENERAL_START_WRAPPER = '(';
-        private static readonly string GENERAL_WRAPPERS = $"{GENERAL_START_WRAPPER}{GENERAL_END_WRAPPER}";
+        public const char GENERAL_END_WRAPPER = ')';
+        public const char GENERAL_START_WRAPPER = '(';
+        public static readonly string GENERAL_WRAPPERS = $"{GENERAL_START_WRAPPER}{GENERAL_END_WRAPPER}";
 
         // Simple lambda parsing values
         private const char SIMPLE_LAMBDA_START_WRAPPER = '[';
@@ -60,36 +62,36 @@ namespace IML.Evaluation
         private static readonly string LIST_WRAPPERS = $"{LIST_START_WRAPPER}{LIST_END_WRAPPER}";
 
         // String parsing values
-        private const char STRING_START_WRAPPER = '"';
-        private const char STRING_END_WRAPPER = '"';
-        private const char STRING_ESCAPE_STARTER = '\\';
+        public const char STRING_START_WRAPPER = '"';
+        public const char STRING_END_WRAPPER = '"';
+        public const char STRING_ESCAPE_STARTER = '\\';
 
         // Parameter parsing regexes
-        private const char PARAM_DELIMITER = ',';
-        private const string PARAM_NAME_TYPE_SEPARATOR = ":";
-        private const char TYPE_UNION_DELIMITER = '|';
-        private const char TYPE_GENERICS_DELIMITER = ',';
-        private const char TYPE_GENERIC_START_WRAPPER = '<';
-        private const char TYPE_GENERIC_END_WRAPPER = '>';
-        private static readonly string TYPE_GENERICS_WRAPPERS = $"{TYPE_GENERIC_START_WRAPPER}{TYPE_GENERIC_END_WRAPPER}";
+        public const char PARAM_DELIMITER = ',';
+        public const string PARAM_NAME_TYPE_SEPARATOR = ":";
+        public const char TYPE_UNION_DELIMITER = '|';
+        public const char TYPE_GENERICS_DELIMITER = ',';
+        public const char TYPE_GENERIC_START_WRAPPER = '<';
+        public const char TYPE_GENERIC_END_WRAPPER = '>';
+        public static readonly string TYPE_GENERICS_WRAPPERS = $"{TYPE_GENERIC_START_WRAPPER}{TYPE_GENERIC_END_WRAPPER}";
 
-        private const char CODE_LINE_DELIMITER = ';';
+        public const char CODE_LINE_DELIMITER = ';';
 
-        private static readonly string[] ALL_WRAPPERS = new string[]
+        public static readonly string[] ALL_WRAPPERS = new string[]
         {
             GENERAL_WRAPPERS, SIMPLE_LAMBDA_WRAPPERS, LIST_WRAPPERS, TYPE_GENERICS_WRAPPERS
         };
 
-        private const char LAMBDA_TYPE_NO_ENVIRONMENT_LINE = '~';
-        private const char LAMBDA_TYPE_CREATES_ENVIRONMENT_LINE = '=';
-        private const char LAMBDA_TYPE_ARROW_TIP = '>';
-        private const char LAMBDA_TYPE_REQ_ENV_CHARACTER = '!'; // Character for requiring lambda to create env
-        private const string LAMBDA_TYPE_PARAM_WRAPPERS = "()";
-        private const char LAMBDA_TYPE_PARAM_DELMITER = ',';
-        private const string LAMBDA_TYPE_VARARGS_SYMBOL = "...";
-        private readonly Regex LAMBDA_TYPE_REGEX = 
+        public const char LAMBDA_TYPE_NO_ENVIRONMENT_LINE = '~';
+        public const char LAMBDA_TYPE_CREATES_ENVIRONMENT_LINE = '=';
+        public const char LAMBDA_TYPE_ARROW_TIP = '>';
+        public const char LAMBDA_TYPE_REQ_ENV_CHARACTER = '!'; // Character for requiring lambda to create env
+        public const string LAMBDA_TYPE_PARAM_WRAPPERS = "()";
+        public const char LAMBDA_TYPE_PARAM_DELMITER = ',';
+        public const string LAMBDA_TYPE_VARARGS_SYMBOL = "...";
+        public static readonly Regex LAMBDA_TYPE_REGEX =
             new Regex($@"({TYPE_GENERICS_WRAPPERS[0]}(.*){TYPE_GENERICS_WRAPPERS[1]})?\s*" +
-                $@"{LAMBDA_TYPE_PARAM_WRAPPERS[0]}(.*){LAMBDA_TYPE_PARAM_WRAPPERS[1]}\s*" + 
+                $@"{LAMBDA_TYPE_PARAM_WRAPPERS[0]}(.*){LAMBDA_TYPE_PARAM_WRAPPERS[1]}\s*" +
                 $@"[{LAMBDA_TYPE_REQ_ENV_CHARACTER}]?[{LAMBDA_TYPE_NO_ENVIRONMENT_LINE}|{LAMBDA_TYPE_CREATES_ENVIRONMENT_LINE}]" +
                 $@"{LAMBDA_TYPE_ARROW_TIP}\s*(.*)");
 
@@ -97,8 +99,8 @@ namespace IML.Evaluation
         private const char ASSIGNMENT_TOKEN = '=';
         private const string DECLARATION_VAR_KEYWORD = "var";
         private const string DECLARATION_CONST_KEYWORD = "const";
-        private static readonly Regex DECLARATION_REGEX = 
-            new Regex($@"^({DECLARATION_VAR_KEYWORD}|{DECLARATION_CONST_KEYWORD})\s+({SYMBOL_PATTERN})" + 
+        private static readonly Regex DECLARATION_REGEX =
+            new Regex($@"^({DECLARATION_VAR_KEYWORD}|{DECLARATION_CONST_KEYWORD})\s+({SYMBOL_PATTERN})" +
                 $@"(?:\s*\:(.*))?\s*{ASSIGNMENT_TOKEN}\s*(.*)$");
 
         private const string RETURN_KEYWORD = "return";
@@ -108,7 +110,7 @@ namespace IML.Evaluation
         private const string DEREFERENCE_TOKEN = "*";
 
         // Other useful regexes
-        private static readonly Regex SYMBOL_NAME_REGEX = new Regex(@$"^{SYMBOL_PATTERN}$");
+        public static readonly Regex SYMBOL_NAME_REGEX = new Regex(@$"^{SYMBOL_PATTERN}$");
         private static readonly List<string> RESERVED_KEYWORDS = new List<string>()
         {
             DECLARATION_VAR_KEYWORD,
@@ -118,11 +120,13 @@ namespace IML.Evaluation
 
         private TypeDeterminer typeDeterminer;
         private VariableAstTypeMap defaultVariables;
+        private ParameterParser parameterParser;
 
         public Parser(VariableAstTypeMap defaultVariables)
         {
             typeDeterminer = new TypeDeterminer();
             this.defaultVariables = defaultVariables;
+            parameterParser = new ParameterParser();
         }
 
         public virtual Ast Parse(string expression)
@@ -150,7 +154,7 @@ namespace IML.Evaluation
 
                 // 'expression' is either a call, variable, or literal
                 // May be something that is wrapped entirely in parenthesis
-                CallMatch attempedCallMatch = MatchCall(expression);
+                CallMatch attempedCallMatch = CallMatcher.MatchCall(expression);
                 int attemptedAssignmentMatchIndex = TryMatchAssignment(expression);
 
                 if (attempedCallMatch.IsMatch)
@@ -172,7 +176,7 @@ namespace IML.Evaluation
                     var args = argStrings.Select(x => Parse(x, typeMap)).ToList();
 
                     string[] genericStrings = genericsString.Length > 0 ? SplitByDelimiter(genericsString, TYPE_GENERICS_DELIMITER) : new string[0];
-                    var generics = genericStrings.Select(x => ParseType(x)).ToList();
+                    var generics = genericStrings.Select(x => parameterParser.ParseType(x)).ToList();
 
                     return Ast.Call(caller, args, generics);
                 }
@@ -236,7 +240,7 @@ namespace IML.Evaluation
                                         splitParamsStrings[i].Length - VAR_ARGS_SYMBOL.Length);
                                 }
                             }
-                            parsedParamsList.Add(ParseParameter(splitParamsStrings[i]));
+                            parsedParamsList.Add(parameterParser.ParseParameter(splitParamsStrings[i]));
                         }
                         parsedParams = parsedParamsList.ToArray();
                     }
@@ -265,7 +269,7 @@ namespace IML.Evaluation
                     AstType returnType;
                     if (provideReturnType)
                     {
-                        returnType = ParseType(returnTypeString);
+                        returnType = parameterParser.ParseType(returnTypeString);
                         if (bodyReturnType != returnType)
                         {
                             throw new InvalidParseException("Function return type does not match returned value(s)", expression);
@@ -346,10 +350,10 @@ namespace IML.Evaluation
                     AstType bodyType = typeDeterminer.DetermineDataType(assigned, typeMap);
                     if (variableType.Length > 0)
                     {
-                        varValType = ParseType(variableType);
+                        varValType = parameterParser.ParseType(variableType);
                         if (varValType != bodyType)
                         {
-                            throw new InvalidParseException($"Variable {varName} is not assigned the type it is declared.", 
+                            throw new InvalidParseException($"Variable {varName} is not assigned the type it is declared.",
                                 expression);
                         }
                     }
@@ -410,8 +414,8 @@ namespace IML.Evaluation
                     // Single line, no semicolon after
                     // This is valid syntax
                     // Special case so the code below doesn't give invalid for missing a semicolon
-                    return new List<Ast>() 
-                    { 
+                    return new List<Ast>()
+                    {
                         Parse(line, typeMap)
                     };
                 }
@@ -443,326 +447,9 @@ namespace IML.Evaluation
             return bodyLines;
         }
 
-        #region Parsing Parameters
-        /// <summary>
-        /// Parses a single parameter into an AstParameter object
-        /// </summary>
-        /// <param name="parameter"></param>
-        /// <returns></returns>
-        public AstParameter ParseParameter(string parameter)
+        public static List<string> ParseGenericNames(string expression)
         {
-            parameter = parameter.Trim();
-            // Check if no type provided. If parameter simply matches valid variable name, then it is of the any type
-            if (SYMBOL_NAME_REGEX.IsMatch(parameter))
-            {
-                // Name is the parameter string, and type is of the any type
-                return new AstParameter(parameter, AstType.Any);
-            }
-            // Need to get the colon to find the name and type
-            int colonIndex = parameter.IndexOf(':');
-            string paramName = parameter.Substring(0, colonIndex);
-            string typeString = parameter.Substring(colonIndex + 1);
-            AstType type = ParseType(typeString.Trim());
-            return new AstParameter(paramName.Trim(), type);
-        }
-        public AstType ParseType(string typeStr)
-        {
-            try
-            {
-                if (IsParenWrapped(typeStr))
-                {
-                    return ParseType(typeStr.SubstringBetween(1, typeStr.Length - 1));
-                }
-                // typeStr can have unions and restrictions to process
-                // Split the type on pipe (excluding things in brackets [] to avoid types provided to restrictions)
-                string[] types = SplitByDelimiter(typeStr, TYPE_UNION_DELIMITER,
-                    new string[] { TYPE_GENERICS_WRAPPERS, LAMBDA_TYPE_PARAM_WRAPPERS });
-                if (types.Length <= 0)
-                {
-                    throw new InvalidParseException("Type has no entries", typeStr);
-                }
-                // Now for each of these, we need to parse out the datatype + restrictions
-                AstType type = AstType.UNION_BASE;
-                for (int i = 0; i < types.Length; i++)
-                {
-                    types[i] = types[i].Trim();
-                    AstTypeEntry entry = ParseTypeEntry(types[i]);
-                    type = type.Union(new AstType(entry));
-                }
-                return type;
-            }
-            catch
-            {
-                throw new InvalidParseException(typeStr);
-            }
-        }
-        private AstTypeEntry ParseTypeEntry(string entryStr)
-        {
-            entryStr = entryStr.Trim();
-            if (IsParenWrapped(entryStr))
-            {
-                return ParseTypeEntry(entryStr.SubstringBetween(1, entryStr.Length - 1));
-            }
-            // Check if this matches the lambda regex; if so, we need to parse it as a lambda type
-            if (LAMBDA_TYPE_REGEX.IsMatch(entryStr))
-            {
-                return ParseLambdaTypeEntry(entryStr);
-            }
-            // See if we even have restrictions
-            if (!entryStr.Contains(TYPE_GENERICS_WRAPPERS[0]))
-            {
-                // Simply stores a type. We should pass that up.
-                if (!SYMBOL_NAME_REGEX.IsMatch(entryStr))
-                {
-                    throw new InvalidParseException("Invalid type name", entryStr);
-                }
-                return AstTypeEntry.Simple(entryStr);
-            }
-            // Need to get everything between the first and last brackets
-            int bracketStart = entryStr.IndexOf(TYPE_GENERICS_WRAPPERS[0]);
-            int bracketEnd = entryStr.LastIndexOf(TYPE_GENERICS_WRAPPERS[1]);
-            string name = entryStr.Substring(0, bracketStart).Trim();
-            string genericsString = entryStr.SubstringBetween(bracketStart + 1, bracketEnd).Trim();
-            List<AstType> generics = new List<AstType>();
-            if (genericsString.Length > 0)
-            {
-                // Now need to split this up
-                string[] genericStrings = SplitByDelimiter(genericsString, TYPE_GENERICS_DELIMITER,
-                    new string[] { TYPE_GENERICS_WRAPPERS });
-
-                for (int i = 0; i < genericStrings.Length; i++)
-                {
-                    generics.Add(ParseType(genericStrings[i].Trim()));
-                }
-            }
-            return new AstTypeEntry(name, generics);
-        }
-        private LambdaAstTypeEntry ParseLambdaTypeEntry(string str)
-        {
-            // Check if the type starts with generic wrappers
-            // For example, we could have [T](x:T)=>T or something like (x:any)=>any
-            List<string> genericNames = new List<string>();
-            int startParen = 0;
-            if (str.StartsWith(TYPE_GENERICS_WRAPPERS[0]))
-            {
-                // Parse our generics first
-                int startBracket = 0;
-                int endBracket = GetBracketEndIndex(str, 0, TYPE_GENERICS_WRAPPERS[0], TYPE_GENERICS_WRAPPERS[1]);
-                string generics = str.SubstringBetween(startBracket + 1, endBracket);
-                genericNames = ParseGenericNames(generics);
-                // Now move the startParen to the proper place. We allow whitespace in between the brackets and paren
-                startParen = endBracket;
-                char c = str[startParen];
-                string inBetweenStuff = "";
-                while (c != LAMBDA_TYPE_PARAM_WRAPPERS[0])
-                {
-                    c = str[startParen];
-                    inBetweenStuff += c;
-                    startParen++;
-                    if (startParen > str.Length)
-                    {
-                        throw new InvalidParseException("No argument wrapper present in function type declaration", str);
-                    }
-                }
-                // Undo last iteration to keep it in the right spot
-                startParen--;
-                // Make sure everything in between is whitespace
-                Regex whitespaceRegex = new Regex(@"\s*");
-                if (!whitespaceRegex.IsMatch(inBetweenStuff))
-                {
-                    throw new InvalidParseException($"Unrecognized token(s): \"{inBetweenStuff}\"", str);
-                }
-            }
-
-            // Get the param types, return type, and any requirements on environments/purity
-            int endParen = GetBracketEndIndex(str, startParen, LAMBDA_TYPE_PARAM_WRAPPERS[0], LAMBDA_TYPE_PARAM_WRAPPERS[1]);
-            string args = str.SubstringBetween(startParen + 1, endParen);
-            string[] paramTypeStrings = SplitByDelimiter(args, LAMBDA_TYPE_PARAM_DELMITER,
-                new string[] { LAMBDA_TYPE_PARAM_WRAPPERS, TYPE_GENERICS_WRAPPERS });
-            List<AstType> parameterTypes = new List<AstType>();
-            bool isVarArgs = false;
-            for (int i = 0; i < paramTypeStrings.Length; i++)
-            {
-                paramTypeStrings[i] = paramTypeStrings[i].Trim();
-                if (paramTypeStrings[i].EndsWith(LAMBDA_TYPE_VARARGS_SYMBOL))
-                {
-                    // Better be the last parameter
-                    if (i + 1 < paramTypeStrings.Length)
-                    {
-                        // Trying to use varargs with the not-last argument; illegal
-                        // Prevent this by throwing an exception
-                        throw new InvalidParseException("Varargs can only be used with the last parameter", str);
-                    }
-                    // Ok, now parse the type and make sure it's a list of something
-                    string varArgsTypeString = paramTypeStrings[i]
-                        .SubstringBetween(0, paramTypeStrings[i].Length - LAMBDA_TYPE_VARARGS_SYMBOL.Length)
-                        .Trim();
-                    AstType type = ParseType(varArgsTypeString);
-                    if (!type.Entries.All(e => e.DataTypeName == MDataType.LIST_TYPE_NAME))
-                    {
-                        // We have an entry for the type of the varargs that is not a list
-                        throw new InvalidParseException("Varargs must be of type list or a union type of lists", str);
-                    }
-                    // Okay, if we're here then it was legal, so lets add the varargs
-                    parameterTypes.Add(type);
-                    isVarArgs = true;
-                }
-                else
-                {
-                    parameterTypes.Add(ParseType(paramTypeStrings[i]));
-                }
-            }
-            // Ok, now handle the "arrow" and cover any special behaviors here
-            // Start at end paren in case any lambdas in the params (can't use LastIndexOf either since there could
-            // be one in the return type)
-            int arrowTipIndex = str.IndexOf(LAMBDA_TYPE_ARROW_TIP, endParen);
-            string arrow = str.SubstringBetween(endParen + 1, arrowTipIndex).Trim();
-            bool forceEnv = false;
-            bool createsEnv;
-            if (arrow.StartsWith(LAMBDA_TYPE_REQ_ENV_CHARACTER))
-            {
-                forceEnv = true;
-                arrow = arrow.Substring(1); // Pop off first character
-            }
-            if (arrow.StartsWith(LAMBDA_TYPE_CREATES_ENVIRONMENT_LINE))
-            {
-                createsEnv = true;
-            }
-            else if (arrow.StartsWith(LAMBDA_TYPE_NO_ENVIRONMENT_LINE))
-            {
-                createsEnv = false;
-            }
-            else
-            {
-                // Should never get here since we regexed, but just in case...
-                throw new InvalidParseException($"'{str}' could not be parsed to a function type. {arrow[0]} is an invalid " +
-                    "environment specifier.");
-            }
-            LambdaEnvironmentType envType;
-            if (forceEnv)
-            {
-                if (createsEnv)
-                {
-                    envType = LambdaEnvironmentType.ForceEnvironment;
-                }
-                else
-                {
-                    envType = LambdaEnvironmentType.ForceNoEnvironment;
-                }
-            }
-            else if (!forceEnv && !createsEnv)
-            {
-                // Still force no environment, since user specified (like "()~>void")
-                envType = LambdaEnvironmentType.ForceNoEnvironment;
-            }
-            else
-            {
-                // No env forced at all
-                envType = LambdaEnvironmentType.AllowAny;
-            }
-
-            // Finally, we need the return type
-            string returnTypeString = str.Substring(arrowTipIndex + 1).Trim();
-            AstType returnType = ParseType(returnTypeString);
-            // Now we can construct this thing and return it
-            return new LambdaAstTypeEntry(returnType, parameterTypes, envType, false, isVarArgs, genericNames);
-        }
-        #endregion
-
-        #region Unparsing Parameters
-        public string UnparseParameter(AstParameter parameter)
-        {
-            return parameter.Name + PARAM_NAME_TYPE_SEPARATOR + UnparseType(parameter.Type);
-        }
-        public string UnparseType(AstType type)
-        {
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < type.Entries.Count; i++)
-            {
-                builder.Append(UnparseTypeEntry(type.Entries[i]));
-                if (i + 1 < type.Entries.Count)
-                {
-                    builder.Append(TYPE_UNION_DELIMITER);
-                }
-            }
-            return builder.ToString();
-        }
-        private string UnparseTypeEntry(AstTypeEntry entry)
-        {
-            if (entry is LambdaAstTypeEntry)
-            {
-                return UnparseLambdaTypeEntry(entry as LambdaAstTypeEntry);
-            }
-            StringBuilder builder = new StringBuilder();
-            builder.Append(entry.DataTypeName);
-            builder.Append(TYPE_GENERICS_WRAPPERS[0]);
-            for (int i = 0; i < entry.Generics.Count; i++)
-            {
-                builder.Append(UnparseType(entry.Generics[i]));
-                if (i + 1 < entry.Generics.Count)
-                {
-                    builder.Append(TYPE_GENERICS_DELIMITER);
-                }
-            }
-            builder.Append(TYPE_GENERICS_WRAPPERS[1]);
-            return builder.ToString();
-        }
-        private string UnparseLambdaTypeEntry(LambdaAstTypeEntry entry)
-        {
-            StringBuilder builder = new StringBuilder();
-            if (entry.GenericNames.Count > 0)
-            {
-                // Need to include generic names out in front
-                builder.Append(TYPE_GENERICS_WRAPPERS[0]);
-                for (int i = 0; i < entry.GenericNames.Count; i++)
-                {
-                    builder.Append(entry.GenericNames[i]);
-                    if (i + 1 < entry.GenericNames.Count)
-                    {
-                        builder.Append(TYPE_GENERICS_DELIMITER);
-                    }
-                }
-                builder.Append(TYPE_GENERICS_WRAPPERS[1]);
-            }
-            builder.Append(LAMBDA_TYPE_PARAM_WRAPPERS[0]);
-            for (int i = 0; i < entry.ParamTypes.Count; i++)
-            {
-                builder.Append(UnparseType(entry.ParamTypes[i]));
-                if (i + 1 < entry.ParamTypes.Count)
-                {
-                    builder.Append(LAMBDA_TYPE_PARAM_DELMITER);
-                }
-                else if (entry.IsLastVarArgs)
-                {
-                    builder.Append(LAMBDA_TYPE_VARARGS_SYMBOL);
-                }
-            }
-            builder.Append(LAMBDA_TYPE_PARAM_WRAPPERS[1]);
-            // Now build the arrow
-            switch (entry.EnvironmentType) 
-            {
-                case LambdaEnvironmentType.ForceEnvironment:
-                    builder.Append(LAMBDA_TYPE_REQ_ENV_CHARACTER);
-                    builder.Append(LAMBDA_TYPE_CREATES_ENVIRONMENT_LINE);
-                    break;
-                case LambdaEnvironmentType.ForceNoEnvironment:
-                    builder.Append(LAMBDA_TYPE_REQ_ENV_CHARACTER);
-                    builder.Append(LAMBDA_TYPE_NO_ENVIRONMENT_LINE);
-                    break;
-                case LambdaEnvironmentType.AllowAny:
-                    builder.Append(LAMBDA_TYPE_CREATES_ENVIRONMENT_LINE);
-                    break;
-            }
-            builder.Append(LAMBDA_TYPE_ARROW_TIP);
-            // Finally, the return type
-            builder.Append(UnparseType(entry.ReturnType));
-            return builder.ToString();
-        }
-        #endregion
-
-        public List<string> ParseGenericNames(string expression)
-        {
-            string[] genericNamesArray = SplitByDelimiter(expression, TYPE_GENERICS_DELIMITER, 
+            string[] genericNamesArray = SplitByDelimiter(expression, TYPE_GENERICS_DELIMITER,
                 new string[] { TYPE_GENERICS_WRAPPERS });
             List<string> genericNames = new List<string>(genericNamesArray);
             // Make sure all the names are valid, also trim out whitespace
@@ -804,7 +491,7 @@ namespace IML.Evaluation
                 Ast r = Parse(expression.Substring(DEREFERENCE_TOKEN.Length), typeMap);
                 return IdentifierAst.Dereference(r);
             }
-            
+
             // Try to do member access
             if (MEMBER_ACCESS_REGEX.IsMatch(expression))
             {
@@ -820,7 +507,7 @@ namespace IML.Evaluation
 
         // Passes over the expression, performing "operation" for each 
         // Returns the final wrapper levels
-        private static WrapperLevels PassOverExpression(string expression, CharacterProcessor operation, 
+        private static WrapperLevels PassOverExpression(string expression, CharacterProcessor operation,
             params string[] wrappers)
         {
             WrapperLevels levels = new WrapperLevels();
@@ -878,7 +565,7 @@ namespace IML.Evaluation
         }
 
         // Same as PassOverExpression, but WON'T call operation on wrapper characters
-        private static WrapperLevels PassOverExpressionIgnoreWrappers(string expression, 
+        private static WrapperLevels PassOverExpressionIgnoreWrappers(string expression,
             CharacterProcessor operation, params string[] wrappers)
         {
             string jointWrappers = string.Join("", wrappers);
@@ -901,7 +588,7 @@ namespace IML.Evaluation
                 return false;
             }
             WrapperLevels levels = PassOverExpression(expression, (a, b) => true, wrappers);
-            WrapperLevels innerLevels = PassOverExpression(expression.Substring(1, expression.Length - 2), 
+            WrapperLevels innerLevels = PassOverExpression(expression.Substring(1, expression.Length - 2),
                 (a, b) => true, wrappers);
             return levels.AtLevelZero() && innerLevels.AtLevelZero();
         }
@@ -926,17 +613,12 @@ namespace IML.Evaluation
             return IsWrappedBy(expression, start, end, ALL_WRAPPERS);
         }
 
-        /// <summary>
-        /// Returns true if the expression is wrapped in a pair of matching parentheses
-        /// </summary>
-        /// <param name="expression"></param>
-        /// <returns></returns>
-        private static bool IsParenWrapped(string expression)
+        public static bool IsParenWrapped(string expression)
         {
             return IsWrappedBy(expression, GENERAL_START_WRAPPER, GENERAL_END_WRAPPER);
         }
 
-        private static int GetBracketEndIndex(string str, int idx, char start, char end)
+        public static int GetBracketEndIndex(string str, int idx, char start, char end)
         {
             int level = 0;
             for (int i = idx; i < str.Length; i++)
@@ -956,7 +638,7 @@ namespace IML.Evaluation
             }
             return -1;
         }
-        
+
         private static bool MatchesList(string expression)
         {
             return IsWrappedBy(expression, LIST_START_WRAPPER, LIST_END_WRAPPER);
@@ -1015,165 +697,6 @@ namespace IML.Evaluation
             return equalsIndex.Get();
         }
 
-        /// <summary>
-        /// Attempts to match this expression to a "call", returning if the match succeeded, and the
-        /// caller/arguments
-        /// </summary>
-        /// <param name="expression"></param>
-        /// <returns></returns>
-        public CallMatch MatchCall(string expression)
-        {
-            if (expression.Length < 2)
-            {
-                return CallMatch.Failure;
-            }
-
-            // What makes a call a call?
-            // Well, it's simply some "thing" followed by parentheses, which may have arguments in them
-            // It's important to note that the "thing" must have balanced brackets: that is, balanced curly braces
-            // and balanced parentheses. That way, '((x)' doesn't count as a call, because it appears to really be
-            // the start of a lambda ex. ((x)=>{_add(x,7)})
-            // So, lets start from the back. The last character should be a parenthesis. Then, we simply find its
-            // matching balanced one. As long as the match is not the first character in the string, then
-            // there is something before the pair, and we've found what should be interpreted as a call!
-            if (expression[expression.Length - 1] != CALL_END_WRAPPER)
-            {
-                // Last character is not a closing parenthesis
-                return CallMatch.Failure;
-            }
-            // Now time to backtrack. We'll go character by character. Depending on parentheses we find, we'll keep a count
-            // Need to find the open wrapper when the counter is zero though
-            // Start at second-to-last char b/c we know the last one is a ')'
-            int wrapperCounter = 0;
-            int startWrapperIndex = -1;
-            for (int i = expression.Length - 2; i >= 0; i--)
-            {
-                if (expression[i] == CALL_END_WRAPPER)
-                {
-                    wrapperCounter++;
-                }
-                else if (expression[i] == CALL_START_WRAPPER)
-                {
-                    if (wrapperCounter == 0)
-                    {
-                        // We've found the corresponding location!
-                        startWrapperIndex = i;
-                        break;
-                    }
-                    else
-                    {
-                        wrapperCounter--;
-                    }
-                }
-            }
-            if (startWrapperIndex < 0 || startWrapperIndex == 0)
-            {
-                // Didn't find the matching start in the whole string, or the starting parenthesis was the first character,
-                // meaning this is just an expression wrapped in parentheses
-                return CallMatch.Failure;
-            }
-
-            string beforeParens = expression.Substring(0, startWrapperIndex);
-            string genericString = "";
-            string calledPart = "";
-            // We're not done yet; need to obtain the generics string from this beforeParens part
-            if (beforeParens.EndsWith(TYPE_GENERIC_END_WRAPPER))
-            {
-                // Need to extract
-                int level = 0;
-                int startIndex = -1;
-                for (int i = beforeParens.Length - 1; i >= 0;  i--)
-                {
-                    if (beforeParens[i] == TYPE_GENERIC_START_WRAPPER)
-                    {
-                        level--;
-                        if (level == 0)
-                        {
-                            startIndex = i;
-                            break;
-                        }
-                    }
-                    else if (beforeParens[i] == TYPE_GENERIC_END_WRAPPER)
-                    {
-                        level++;
-                    }
-                }
-                calledPart = beforeParens.Substring(0, startIndex);
-                genericString = beforeParens.SubstringBetween(startIndex + 1, beforeParens.Length - 1);
-            }
-            else
-            {
-                calledPart = beforeParens;
-            }
-
-            string argsString = expression.Substring(startWrapperIndex + 1, expression.Length - (startWrapperIndex + 1) - 1);
-
-            return new CallMatch(true, calledPart, genericString, argsString);
-        }
-        public struct CallMatch
-        {
-            public bool IsMatch;
-            public string Caller;
-            public string Generics;
-            public string Args;
-
-            public CallMatch(bool isMatch, string caller, string generics, string args)
-            {
-                IsMatch = isMatch;
-                Caller = caller;
-                Generics = generics;
-                Args = args;
-            }
-
-            public static readonly CallMatch Failure = new CallMatch(false, null, null, null);
-        }
-
-        private class WrapperLevels
-        {
-            Dictionary<string, int> levels;
-            bool inString;
-
-            public WrapperLevels()
-            {
-                levels = new Dictionary<string, int>();
-                inString = false;
-            }
-
-            public bool IsInString()
-            {
-                return inString;
-            }
-
-            public void SetInString(bool value)
-            {
-                inString = value;
-            }
-
-            public int GetLevel(string wrapper)
-            {
-                if (levels.ContainsKey(wrapper))
-                {
-                    return levels[wrapper];
-                }
-                return 0;
-            }
-
-            public void ChangeLevel(string wrapper, int amount)
-            {
-                if (levels.ContainsKey(wrapper))
-                {
-                    levels[wrapper] += amount;
-                }
-                else
-                {
-                    levels.Add(wrapper, amount);
-                }
-            }
-
-            public bool AtLevelZero()
-            {
-                return levels.Values.All(x => x == 0) && !inString;
-            }
-        }
+        
     }
 }

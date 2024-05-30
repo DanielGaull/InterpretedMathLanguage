@@ -2,6 +2,8 @@ using IML.CoreDataTypes;
 using IML.Environments;
 using IML.Evaluation;
 using IML.Functions;
+using IML.Parsing;
+using IML.Parsing.AST;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;

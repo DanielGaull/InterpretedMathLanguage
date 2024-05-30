@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace IML.Evaluation
+namespace IML.Parsing.AST
 {
     public class AstType : IEquatable<AstType>
     {
@@ -150,7 +150,7 @@ namespace IML.Evaluation
         {
             if (a1 is LambdaAstTypeEntry && a2 is LambdaAstTypeEntry)
             {
-                return ((LambdaAstTypeEntry)a1) == ((LambdaAstTypeEntry)a2);
+                return (LambdaAstTypeEntry)a1 == (LambdaAstTypeEntry)a2;
             }
 
             if (a1.DataTypeName != a2.DataTypeName)

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace IML.Evaluation
+namespace IML.Parsing.AST
 {
     public class AstParameter
     {

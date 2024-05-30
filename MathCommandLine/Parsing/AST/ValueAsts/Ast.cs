@@ -1,13 +1,13 @@
 ﻿using IML.CoreDataTypes;
 using IML.Environments;
-using IML.Evaluation.AST.ValueAsts;
 using IML.Functions;
+using IML.Parsing.AST;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace IML.Evaluation
+namespace IML.Parsing.AST.ValueAsts
 {
     public class Ast
     {
@@ -28,10 +28,10 @@ namespace IML.Evaluation
         {
             return new ListAst(new List<Ast>(elements));
         }
-        public static LambdaAst LambdaLiteral(AstParameter[] parameters, List<Ast> body, AstType returnType, 
+        public static LambdaAst LambdaLiteral(AstParameter[] parameters, List<Ast> body, AstType returnType,
             bool createsEnv, bool isPure, bool isLastVarArgs, List<string> generics)
         {
-            return new LambdaAst(new List<AstParameter>(parameters), body, returnType, isPure, createsEnv, 
+            return new LambdaAst(new List<AstParameter>(parameters), body, returnType, isPure, createsEnv,
                 isLastVarArgs, generics);
         }
         public static StringAst StringLiteral(string text)

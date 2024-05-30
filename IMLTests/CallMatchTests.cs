@@ -1,10 +1,13 @@
-﻿using IML.Evaluation.AST.ValueAsts;
+﻿using IML.Parsing.AST.ValueAsts;
 using IML.Evaluation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using IML.CoreDataTypes;
+using IML.Parsing;
+using IML.Parsing.AST;
+using IML.Parsing.Util;
 
 namespace IMLTests
 {
@@ -30,14 +33,14 @@ namespace IMLTests
         [TestMethod]
         public void TestCallMatch_Invalid()
         {
-            Parser.CallMatch callMatch = parser.MatchCall("((x)=>{_add(x,7)})");
+            CallMatch callMatch = CallMatcher.MatchCall("((x)=>{_add(x,7)})");
             Assert.IsFalse(callMatch.IsMatch);
         }
 
         [TestMethod]
         public void TestCallMatch_Simple()
         {
-            Parser.CallMatch callMatch = parser.MatchCall("x()");
+            CallMatch callMatch = CallMatcher.MatchCall("x()");
             Assert.IsTrue(callMatch.IsMatch);
             Assert.AreEqual("x", callMatch.Caller);
             Assert.AreEqual("", callMatch.Args);
@@ -47,7 +50,7 @@ namespace IMLTests
         [TestMethod]
         public void TestCallMatch_SimpleArgs()
         {
-            Parser.CallMatch callMatch = parser.MatchCall("x(5,2)");
+            CallMatch callMatch = CallMatcher.MatchCall("x(5,2)");
             Assert.IsTrue(callMatch.IsMatch);
             Assert.AreEqual("x", callMatch.Caller);
             Assert.AreEqual("5,2", callMatch.Args);
@@ -57,7 +60,7 @@ namespace IMLTests
         [TestMethod]
         public void TestCallMatch_ComplexCaller()
         {
-            Parser.CallMatch callMatch = parser.MatchCall("((x,y)=>{x})(5,2)");
+            CallMatch callMatch = CallMatcher.MatchCall("((x,y)=>{x})(5,2)");
             Assert.IsTrue(callMatch.IsMatch);
             Assert.AreEqual("((x,y)=>{x})", callMatch.Caller);
             Assert.AreEqual("5,2", callMatch.Args);
@@ -67,7 +70,7 @@ namespace IMLTests
         [TestMethod]
         public void TestCallMatch_ComplexCallerWithGenericsInCaller()
         {
-            Parser.CallMatch callMatch = parser.MatchCall("(call<number>(5))(5,2)");
+            CallMatch callMatch = CallMatcher.MatchCall("(call<number>(5))(5,2)");
             Assert.IsTrue(callMatch.IsMatch);
             Assert.AreEqual("(call<number>(5))", callMatch.Caller);
             Assert.AreEqual("5,2", callMatch.Args);
@@ -77,7 +80,7 @@ namespace IMLTests
         [TestMethod]
         public void TestCallMatch_WithGenerics()
         {
-            Parser.CallMatch callMatch = parser.MatchCall("x<number>(5,2)");
+            CallMatch callMatch = CallMatcher.MatchCall("x<number>(5,2)");
             Assert.IsTrue(callMatch.IsMatch);
             Assert.AreEqual("x", callMatch.Caller);
             Assert.AreEqual("5,2", callMatch.Args);
@@ -87,7 +90,7 @@ namespace IMLTests
         [TestMethod]
         public void TestCallMatch_WithComplexAndGenerics()
         {
-            Parser.CallMatch callMatch = parser.MatchCall("(call<number>(5))<number,string>(5,2)");
+            CallMatch callMatch = CallMatcher.MatchCall("(call<number>(5))<number,string>(5,2)");
             Assert.IsTrue(callMatch.IsMatch);
             Assert.AreEqual("(call<number>(5))", callMatch.Caller);
             Assert.AreEqual("5,2", callMatch.Args);

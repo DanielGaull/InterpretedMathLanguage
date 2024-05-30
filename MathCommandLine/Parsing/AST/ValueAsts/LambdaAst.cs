@@ -1,10 +1,11 @@
 ﻿using IML.CoreDataTypes;
 using IML.Functions;
+using IML.Parsing.AST;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace IML.Evaluation.AST.ValueAsts
+namespace IML.Parsing.AST.ValueAsts
 {
     public class LambdaAst : Ast
     {
@@ -15,7 +16,7 @@ namespace IML.Evaluation.AST.ValueAsts
         public bool CreatesEnv { get; private set; }
         public bool IsLastVarArgs { get; private set; }
         public List<string> GenericNames { get; private set; }
-        
+
         public LambdaAst(List<AstParameter> parameters, List<Ast> body, AstType returnType, bool pure, bool createsEnv,
             bool isLastVarArgs, List<string> generics)
             : base(AstTypes.LambdaLiteral)

@@ -3,6 +3,8 @@ using IML.Environments;
 using IML.Evaluation;
 using IML.Exceptions;
 using IML.Functions;
+using IML.Parsing;
+using IML.Parsing.AST;
 using IML.Syntax;
 using System;
 using System.Collections.Generic;
