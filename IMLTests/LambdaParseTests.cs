@@ -94,7 +94,7 @@ namespace IMLTests
         [TestMethod]
         public void TestSingleArgWithTypeGeneric()
         {
-            Ast ast = parser.Parse("(x:list[number])=>{5}");
+            Ast ast = parser.Parse("(x:list<number>)=>{5}");
             Assert.AreEqual(AstTypes.LambdaLiteral, ast.Type);
             LambdaAst last = (LambdaAst)ast;
             AstParameter p = last.Parameters[0];
@@ -120,7 +120,7 @@ namespace IMLTests
         [TestMethod]
         public void TestDoubleArgWithTypeGeneric()
         {
-            Ast ast = parser.Parse("(x:list[number],y:list[string])=>{5}");
+            Ast ast = parser.Parse("(x:list<number>,y:list<string>)=>{5}");
             Assert.AreEqual(AstTypes.LambdaLiteral, ast.Type);
             LambdaAst last = (LambdaAst)ast;
             Assert.AreEqual(true, last.CreatesEnv);
@@ -166,7 +166,7 @@ namespace IMLTests
         [TestMethod]
         public void TestFunctionGenericDoubleArgGenerics()
         {
-            Ast ast = parser.Parse("[T](x:list[T],y:list[string])=>{5}");
+            Ast ast = parser.Parse("<T>(x:list<T>,y:list<string>)=>{5}");
             Assert.AreEqual(AstTypes.LambdaLiteral, ast.Type);
             LambdaAst last = (LambdaAst)ast;
             Assert.AreEqual(true, last.CreatesEnv);
@@ -214,7 +214,7 @@ namespace IMLTests
         [TestMethod]
         public void TestFunctionDoubleGenericDoubleArgGenerics()
         {
-            Ast ast = parser.Parse("[T,S](x:list[T],y:list[S])=>{5}");
+            Ast ast = parser.Parse("<T,S>(x:list<T>,y:list<S>)=>{5}");
             Assert.AreEqual(AstTypes.LambdaLiteral, ast.Type);
             LambdaAst last = (LambdaAst)ast;
             Assert.AreEqual(true, last.CreatesEnv);
@@ -263,7 +263,7 @@ namespace IMLTests
         [TestMethod]
         public void TestFunctionDoubleGenericDoubleArgGenericsMaxWhitespace()
         {
-            Ast ast = parser.Parse("[ T , S ] ( x : list [ T ] , y : list [ S ] ) => { 5 }");
+            Ast ast = parser.Parse("< T , S > ( x : list < T > , y : list < S > ) => { 5 }");
             Assert.AreEqual(AstTypes.LambdaLiteral, ast.Type);
             LambdaAst last = (LambdaAst)ast;
             Assert.AreEqual(true, last.CreatesEnv);
@@ -331,7 +331,7 @@ namespace IMLTests
         [TestMethod]
         public void TestFunctionDoubleGenericDoubleArgGenericsWithReturnType()
         {
-            Ast ast = parser.Parse("[T,S](x:list[T],y:list[S]):number=>{5}");
+            Ast ast = parser.Parse("<T,S>(x:list<T>,y:list<S>):number=>{5}");
             Assert.AreEqual(AstTypes.LambdaLiteral, ast.Type);
             LambdaAst last = (LambdaAst)ast;
             Assert.AreEqual(true, last.CreatesEnv);
@@ -380,7 +380,7 @@ namespace IMLTests
         [TestMethod]
         public void TestFunctionDoubleGenericDoubleArgGenericsWithReturnTypeMaxWhitespace()
         {
-            Ast ast = parser.Parse("[ T , S ] ( x : list [ T ] , y : list [ S ] ) : number => { 5 }");
+            Ast ast = parser.Parse("< T , S > ( x : list < T > , y : list < S > ) : number => { 5 }");
             Assert.AreEqual(AstTypes.LambdaLiteral, ast.Type);
             LambdaAst last = (LambdaAst)ast;
             Assert.AreEqual(true, last.CreatesEnv);
@@ -436,14 +436,14 @@ namespace IMLTests
         [TestMethod]
         public void TestSimpleReturnTypeGenericFail()
         {
-            Ast ast = parser.Parse("():list[string]=>{{1,2,3}}");
+            Ast ast = parser.Parse("():list<string>=>{{1,2,3}}");
             Assert.AreEqual(AstTypes.Invalid, ast.Type);
         }
 
         [TestMethod]
         public void TestSimpleReturnTypeGeneric()
         {
-            Ast ast = parser.Parse("():list[number]=>{{1,2,3}}");
+            Ast ast = parser.Parse("():list<number>=>{{1,2,3}}");
             Assert.AreEqual(AstTypes.LambdaLiteral, ast.Type);
 
             LambdaAst last = (LambdaAst)ast;
@@ -459,7 +459,7 @@ namespace IMLTests
         [TestMethod]
         public void TestSimpleVarargs()
         {
-            Ast ast = parser.Parse("(x:list[number]...):number=>{5}");
+            Ast ast = parser.Parse("(x:list<number>...):number=>{5}");
             Assert.AreEqual(AstTypes.LambdaLiteral, ast.Type);
 
             LambdaAst last = (LambdaAst)ast;

@@ -74,7 +74,7 @@ namespace IML.Evaluation
         private const string PARAM_NAME_TYPE_SEPARATOR = ":";
         private const char TYPE_UNION_DELIMITER = '|';
         private const char TYPE_GENERICS_DELIMITER = ',';
-        private const string TYPE_GENERICS_WRAPPERS = "[]";
+        private const string TYPE_GENERICS_WRAPPERS = "<>";
 
         private const char CODE_LINE_DELIMITER = ';';
 
@@ -161,6 +161,7 @@ namespace IML.Evaluation
                     // Performing some sort of call
                     string callerString = attempedCallMatch.Caller;
                     string argsString = attempedCallMatch.Args;
+                    string genericsString = attempedCallMatch.Generics;
 
                     Ast caller = Parse(callerString, typeMap);
                     if (caller.Type == AstTypes.Invalid)
@@ -173,7 +174,10 @@ namespace IML.Evaluation
                     // Parse all the arguments
                     var args = argStrings.Select(x => Parse(x, typeMap)).ToList();
 
-                    return Ast.Call(caller, args, null);
+                    string[] genericStrings = genericsString.Length > 0 ? SplitByDelimiter(genericsString, TYPE_GENERICS_DELIMITER) : new string[0];
+                    var generics = genericStrings.Select(x => ParseType(x)).ToList();
+
+                    return Ast.Call(caller, args, generics);
                 }
                 else if (NUMBER_REGEX.IsMatch(expression))
                 {
