@@ -58,5 +58,7 @@ namespace IMLTests
             bool result = Parser.IsWrappedBy("(()=>{obj.eval<number>(\"tuple]\\\")\")})", '(', ')', "()", "[]", "<>", "{}");
             Assert.IsTrue(result);
         }
+
+
     }
 }

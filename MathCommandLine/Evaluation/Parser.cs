@@ -17,6 +17,8 @@ namespace IML.Evaluation
     /// </summary>
     public class Parser
     {
+        private delegate void CharacterProcessor(char c, WrapperLevels level);
+
         // Regexes for common necessities
         private const string NUMBER_REGEX_PATTERN = @"[+-]?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))";
         private const string SYMBOL_PATTERN = @"[a-zA-Z_][a-zA-Z0-9_]*";
@@ -435,55 +437,6 @@ namespace IML.Evaluation
             return bodyLines;
         }
 
-        //public string Unparse(Ast ast)
-        //{
-        //    StringBuilder builder = new StringBuilder();
-        //    switch (ast.Type)
-        //    {
-        //        case AstTypes.NumberLiteral:
-        //            return ast.NumberArg.ToString();
-        //        case AstTypes.ListLiteral:
-        //            builder.Append(LIST_START_WRAPPER);
-        //            for (int i = 0; i < ast.AstCollectionArg.Length; i++)
-        //            {
-        //                builder.Append(Unparse(ast.AstCollectionArg[i]));
-        //                if (i + 1 < ast.AstCollectionArg.Length)
-        //                {
-        //                    builder.Append(LIST_DELIMITER);
-        //                }
-        //            }
-        //            builder.Append(LIST_END_WRAPPER);
-        //            return builder.ToString();
-        //        case AstTypes.StringLiteral:
-        //            builder.Append(STRING_START_WRAPPER);
-        //            builder.Append(ast.Expression);
-        //            builder.Append(STRING_END_WRAPPER);
-        //            return builder.ToString();
-        //        case AstTypes.Variable:
-        //            return ast.Name;
-        //        case AstTypes.Call:
-        //            builder.Append(Unparse(ast.ParentAst));
-        //            builder.Append(CALL_START_WRAPPER);
-        //            for (int i = 0; i < ast.AstCollectionArg.Length; i++)
-        //            {
-        //                builder.Append(Unparse(ast.AstCollectionArg[i]));
-        //                if (i + 1 < ast.AstCollectionArg.Length)
-        //                {
-        //                    builder.Append(ARG_DELIMITER);
-        //                }
-        //            }
-        //            builder.Append(CALL_END_WRAPPER);
-        //            return builder.ToString();
-        //        case AstTypes.Invalid:
-        //            return ast.Expression;
-        //        case AstTypes.LambdaLiteral:
-        //            return "(" + string.Join(',', ast.Parameters.Select(x => UnparseParameter(x)).ToArray()) + ")" +
-        //                (ast.CreatesEnv ? "=>" : "~>") + "{" +
-        //                Unparse(ast.Body) + "}";
-        //    }
-        //    return "";
-        //}
-
         #region Parsing Parameters
         /// <summary>
         /// Parses a single parameter into an AstParameter object
@@ -858,20 +811,16 @@ namespace IML.Evaluation
             throw new InvalidParseException(expression);
         }
 
-        public static bool IsWrappedBy(string expression, char start, char end, params string[] wrappers)
+        // Passes over the expression, performing "operation" for each 
+        // Returns the final wrapper levels
+        private static WrapperLevels PassOverExpression(string expression, CharacterProcessor operation, 
+            params string[] wrappers)
         {
-            if (expression.Length <= 2 || expression[0] != start || expression[expression.Length - 1] != end)
-            {
-                return false;
-            }
-            Dictionary<string, int> levels = new Dictionary<string, int>();
-            foreach (string w in wrappers)
-            {
-                levels.Add(w, 0);
-            }
+            WrapperLevels levels = new WrapperLevels();
             for (int i = 0; i < expression.Length; i++)
             {
                 char c = expression[i];
+                bool isNonWrapper = true;
                 if (c == STRING_START_WRAPPER)
                 {
                     // Need to continue until we reach the end of the string
@@ -892,7 +841,7 @@ namespace IML.Evaluation
                     }
                     if (!stringTerminated)
                     {
-                        return false;
+                        throw new InvalidParseException("String is not terminated", expression);
                     }
                     // Go to next iteration since c = '"' (the closing quote)
                     continue;
@@ -901,16 +850,32 @@ namespace IML.Evaluation
                 {
                     if (wrapper[0] == c)
                     {
-                        levels[wrapper] = levels[wrapper] + 1;
+                        isNonWrapper = false;
+                        levels.ChangeLevel(wrapper, 1);
                     }
                     else if (wrapper[1] == c && !IsLambdaArrow(expression, i))
                     {
-                        levels[wrapper] = levels[wrapper] - 1;
+                        isNonWrapper = false;
+                        levels.ChangeLevel(wrapper, -1);
                     }
                 }
+                if (isNonWrapper)
+                {
+                    operation.Invoke(c, levels);
+                }
             }
-            // Now, we are only truly wrapped if all of the wrappers are at level 0
-            return levels.Values.All(x => x == 0);
+
+            return levels;
+        }
+
+        public static bool IsWrappedBy(string expression, char start, char end, params string[] wrappers)
+        {
+            if (expression.Length <= 2 || expression[0] != start || expression[expression.Length - 1] != end)
+            {
+                return false;
+            }
+            WrapperLevels levels = PassOverExpression(expression, (a, b) => { }, wrappers);
+            return levels.AreAllZero();
         }
 
         // Private helper method for the IsWrappedBy and other such methods
@@ -1243,6 +1208,42 @@ namespace IML.Evaluation
             }
 
             public static readonly CallMatch Failure = new CallMatch(false, null, null);
+        }
+
+        private class WrapperLevels
+        {
+            Dictionary<string, int> levels;
+
+            public WrapperLevels()
+            {
+                levels = new Dictionary<string, int>();
+            }
+
+            public int GetLevel(string wrapper)
+            {
+                if (levels.ContainsKey(wrapper))
+                {
+                    return levels[wrapper];
+                }
+                return 0;
+            }
+
+            public void ChangeLevel(string wrapper, int amount)
+            {
+                if (levels.ContainsKey(wrapper))
+                {
+                    levels[wrapper] += amount;
+                }
+                else
+                {
+                    levels.Add(wrapper, amount);
+                }
+            }
+
+            public bool AreAllZero()
+            {
+                return levels.Values.All(x => x == 0);
+            }
         }
     }
 }
