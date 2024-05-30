@@ -93,5 +93,32 @@ namespace IMLTests
             int result = Parser.TryMatchAssignment("{x=5}");
             Assert.AreEqual(-1, result);
         }
+
+        [TestMethod] 
+        public void TestSplitByDelimiter_WithArgsInGoodFormat_Success()
+        {
+            string[] result = Parser.SplitByDelimiter("x:list[number],y:list[string]",
+                ',');
+            Assert.AreEqual(2, result.Length);
+            Assert.AreEqual("x:list[number]", result[0]);
+            Assert.AreEqual("y:list[string]", result[1]);
+        }
+
+        [TestMethod]
+        public void TestSplitByDelimiter_WithArgsAndSpaces_Success()
+        {
+            string[] result = Parser.SplitByDelimiter(" x : list [ T ] , y : list [ S ] ",
+                ',');
+            Assert.AreEqual(2, result.Length);
+            Assert.AreEqual(" x : list [ T ] ", result[0]);
+            Assert.AreEqual(" y : list [ S ] ", result[1]);
+        }
+
+        [TestMethod]
+        public void TestSplitByDelimiter_WithEmpty_ReturnNothing()
+        {
+            string[] result = Parser.SplitByDelimiter("", ',');
+            Assert.AreEqual(0, result.Length);
+        }
     }
 }

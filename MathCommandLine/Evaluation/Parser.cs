@@ -244,7 +244,7 @@ namespace IML.Evaluation
                         parsedParams = new AstParameter[0];
                     }
 
-                    bool createsEnv = arrowBit == "=";
+                    bool createsEnv = arrowBit == LAMBDA_TYPE_CREATES_ENVIRONMENT_LINE.ToString();
 
                     VariableAstTypeMap mapToUseForBody = typeMap;
                     if (createsEnv)
@@ -914,138 +914,6 @@ namespace IML.Evaluation
             return IsWrappedBy(expression, GENERAL_START_WRAPPER, GENERAL_END_WRAPPER);
         }
 
-        /// <summary>
-        /// Splits "expr" into many strings delimited by "delimiter", but not if the delimiter is wrapped in parentheses or braces
-        /// </summary>
-        /// <param name="expr"></param>
-        /// <param name="delimiter"></param>
-        /// <returns></returns>
-        private static string[] SplitByDelimiter(string expr, char delimiter)
-        {
-            int parenCounter = 0;
-            int braceCounter = 0;
-            int bracketCounter = 0;
-            List<string> substrings = new List<string>();
-            StringBuilder currentString = new StringBuilder();
-            for (int i = 0; i < expr.Length; i++)
-            {
-                char c = expr[i];
-                if (c == delimiter)
-                {
-                    // If not in parentheses or braces, then we add this as a split string
-                    if (parenCounter == 0 && braceCounter == 0 && bracketCounter == 0)
-                    {
-                        substrings.Add(currentString.ToString());
-                        currentString.Clear();
-                    }
-                    else
-                    {
-                        // The delimiter is part of a currently-being-built string
-                        currentString.Append(c);
-                    }
-                }
-                else
-                {
-                    // Add the character to our current string, update the counts as necessary
-                    currentString.Append(c);
-                    if (c == GENERAL_START_WRAPPER)
-                    {
-                        parenCounter++;
-                    }
-                    else if (c == GENERAL_END_WRAPPER)
-                    {
-                        parenCounter--;
-                    }
-                    else if (c == LIST_START_WRAPPER)
-                    {
-                        braceCounter++;
-                    }
-                    else if (c == LIST_END_WRAPPER)
-                    {
-                        braceCounter--;
-                    }
-                    else if (c == SIMPLE_LAMBDA_START_WRAPPER)
-                    {
-                        bracketCounter++;
-                    }
-                    else if (c == SIMPLE_LAMBDA_END_WRAPPER)
-                    {
-                        bracketCounter--;
-                    }
-                }
-            }
-            // Remember to add the string that we are in the middle of building
-            substrings.Add(currentString.ToString());
-            return substrings.ToArray();
-        }
-
-        // Wrapper pairs in the form of "{}" or "()"
-        // Need to ignore strings as well - that's hard-coded into this function
-        private static string[] SplitByDelimiter(string expr, char delimiter, params string[] wrapperPairs)
-        {
-            if (expr.Length == 0)
-            {
-                return new string[0];
-            }
-
-            List<string> substrings = new List<string>();
-            StringBuilder current = new StringBuilder();
-            for (int i = 0; i < expr.Length; i++)
-            {
-                char c = expr[i];
-                if (c == delimiter)
-                {
-                    // Split here
-                    substrings.Add(current.ToString());
-                    current = new StringBuilder();
-                }
-                else if (c == STRING_START_WRAPPER)
-                {
-                    char prevChar = c;
-                    while (!(c == STRING_END_WRAPPER && prevChar != STRING_ESCAPE_STARTER))
-                    {
-                        prevChar = c;
-                        c = expr[i];
-                        current.Append(c);
-                        i++;
-                        if (i >= expr.Length)
-                        {
-                            throw new InvalidParseException("String does not terminate", expr);
-                        }
-                    }
-                    current.Append(c);
-                }
-                else
-                {
-                    bool foundWrapper = false;
-                    for (int j = 0; j < wrapperPairs.Length; j++)
-                    {
-                        if (c == wrapperPairs[j][0])
-                        {
-                            foundWrapper = true;
-                            int end = GetBracketEndIndex(expr, i, wrapperPairs[j][0], wrapperPairs[j][1]);
-                            while (i != end)
-                            {
-                                c = expr[i];
-                                current.Append(c);
-                                i++;
-                            }
-                            // Make sure we add the end wrapper, by adding one more character
-                            c = expr[i];
-                            current.Append(c);
-                            break;
-                        }
-                    }
-                    if (!foundWrapper)
-                    {
-                        current.Append(c);
-                    }
-                }
-            }
-            substrings.Add(current.ToString());
-            return substrings.ToArray();
-        }
-
         private static int GetBracketEndIndex(string str, int idx, char start, char end)
         {
             int level = 0;
@@ -1075,6 +943,37 @@ namespace IML.Evaluation
         private static bool MatchesSimpleLambda(string expression)
         {
             return IsWrappedBy(expression, SIMPLE_LAMBDA_START_WRAPPER, SIMPLE_LAMBDA_END_WRAPPER);
+        }
+
+        private static string[] SplitByDelimiter(string expr, char delimiter)
+        {
+            return SplitByDelimiter(expr, delimiter, ALL_WRAPPERS);
+        }
+
+        public static string[] SplitByDelimiter(string expr, char delimiter, params string[] wrappers)
+        {
+            if (expr.Length == 0)
+            {
+                return new string[0];
+            }
+            List<string> result = new List<string>();
+            StringBuilder current = new StringBuilder();
+            PassOverExpression(expr, (index, levels) =>
+            {
+                if (expr[index] == delimiter)
+                {
+                    result.Add(current.ToString());
+                    current = new StringBuilder("");
+                }
+                else
+                {
+                    current.Append(expr[index]);
+                }
+                return true;
+
+            }, wrappers);
+            result.Add(current.ToString());
+            return result.ToArray();
         }
 
         // Returns index of the '='
