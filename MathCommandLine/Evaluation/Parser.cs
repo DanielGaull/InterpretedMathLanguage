@@ -847,12 +847,11 @@ namespace IML.Evaluation
                             stringTerminated = true;
                         }
                     }
-                    if (!stringTerminated)
+                    if (stringTerminated)
                     {
-                        throw new InvalidParseException("String is not terminated", expression);
+                        levels.SetInString(false);
                     }
                     // Go to next iteration since c = '"' (the closing quote)
-                    levels.SetInString(false);
                     continue;
                 }
                 foreach (string wrapper in wrappers)
@@ -864,6 +863,11 @@ namespace IML.Evaluation
                     else if (wrapper[1] == c && !IsLambdaArrow(expression, i))
                     {
                         levels.ChangeLevel(wrapper, -1);
+                        // Fast return if levels are unbalanced
+                        if (levels.GetLevel(wrapper) < 0)
+                        {
+                            return levels;
+                        }
                     }
                 }
                 operation.Invoke(i, levels);
@@ -896,7 +900,9 @@ namespace IML.Evaluation
                 return false;
             }
             WrapperLevels levels = PassOverExpression(expression, (a, b) => true, wrappers);
-            return levels.AtLevelZero();
+            WrapperLevels innerLevels = PassOverExpression(expression.Substring(1, expression.Length - 2), 
+                (a, b) => true, wrappers);
+            return levels.AtLevelZero() && innerLevels.AtLevelZero();
         }
 
         // Private helper method for the IsWrappedBy and other such methods

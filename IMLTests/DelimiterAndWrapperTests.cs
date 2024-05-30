@@ -60,6 +60,13 @@ namespace IMLTests
         }
 
         [TestMethod]
+        public void TestWrappedByParen_DirectCall_ReturnFalse()
+        {
+            bool result = Parser.IsWrappedBy("()=>{var x = 5; return true;}()", '(', ')', "()", "[]", "<>", "{}");
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
         public void TestTryMatchAssignment_WithValid_ReturnProperIndex()
         {
             int result = Parser.TryMatchAssignment("x=2");
