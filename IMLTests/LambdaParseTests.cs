@@ -482,5 +482,26 @@ namespace IMLTests
             Assert.AreEqual("number", entry.DataTypeName);
             Assert.AreEqual(0, entry.Generics.Count);
         }
+
+        [TestMethod]
+        public void TestLambdaReturningLambda()
+        {
+            Ast ast = parser.Parse("()=>{()=>{5}}");
+            Assert.AreEqual(AstTypes.LambdaLiteral, ast.Type);
+            LambdaAst last = (LambdaAst)ast;
+            Assert.AreEqual(true, last.CreatesEnv);
+            Assert.AreEqual(0, last.Parameters.Count);
+
+            List<Ast> body = last.Body;
+            Assert.AreEqual(AstTypes.LambdaLiteral, body[0].Type);
+            LambdaAst bodyLast = (LambdaAst)body[0];
+            Assert.AreEqual(true, bodyLast.CreatesEnv);
+            Assert.AreEqual(0, bodyLast.Parameters.Count);
+
+            List<Ast> subBody = bodyLast.Body;
+            Assert.AreEqual(AstTypes.NumberLiteral, subBody[0].Type);
+            NumberAst number = (NumberAst)subBody[0];
+            Assert.AreEqual(5, number.Value);
+        }
     }
 }
