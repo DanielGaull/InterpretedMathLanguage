@@ -399,8 +399,7 @@ namespace IML.Evaluation
 
         private List<Ast> ParseBody(string bodyExpr, VariableAstTypeMap typeMap)
         {
-            string[] lines = SplitByDelimiter(bodyExpr, CODE_LINE_DELIMITER,
-                LAMBDA_BODY_WRAPPERS, LIST_WRAPPERS, SIMPLE_LAMBDA_WRAPPERS, GENERAL_WRAPPERS);
+            string[] lines = SplitByDelimiter(bodyExpr, CODE_LINE_DELIMITER);
 
             if (lines.Length == 1)
             {
@@ -476,7 +475,7 @@ namespace IML.Evaluation
                 // typeStr can have unions and restrictions to process
                 // Split the type on pipe (excluding things in brackets [] to avoid types provided to restrictions)
                 string[] types = SplitByDelimiter(typeStr, TYPE_UNION_DELIMITER,
-                    TYPE_GENERICS_WRAPPERS, LAMBDA_TYPE_PARAM_WRAPPERS);
+                    new string[] { TYPE_GENERICS_WRAPPERS, LAMBDA_TYPE_PARAM_WRAPPERS });
                 if (types.Length <= 0)
                 {
                     throw new InvalidParseException("Type has no entries", typeStr);
@@ -528,7 +527,7 @@ namespace IML.Evaluation
             {
                 // Now need to split this up
                 string[] genericStrings = SplitByDelimiter(genericsString, TYPE_GENERICS_DELIMITER,
-                    TYPE_GENERICS_WRAPPERS);
+                    new string[] { TYPE_GENERICS_WRAPPERS });
 
                 for (int i = 0; i < genericStrings.Length; i++)
                 {
@@ -578,7 +577,7 @@ namespace IML.Evaluation
             int endParen = GetBracketEndIndex(str, startParen, LAMBDA_TYPE_PARAM_WRAPPERS[0], LAMBDA_TYPE_PARAM_WRAPPERS[1]);
             string args = str.SubstringBetween(startParen + 1, endParen);
             string[] paramTypeStrings = SplitByDelimiter(args, LAMBDA_TYPE_PARAM_DELMITER,
-                LAMBDA_TYPE_PARAM_WRAPPERS, TYPE_GENERICS_WRAPPERS);
+                new string[] { LAMBDA_TYPE_PARAM_WRAPPERS, TYPE_GENERICS_WRAPPERS });
             List<AstType> parameterTypes = new List<AstType>();
             bool isVarArgs = false;
             for (int i = 0; i < paramTypeStrings.Length; i++)
@@ -762,7 +761,8 @@ namespace IML.Evaluation
 
         public List<string> ParseGenericNames(string expression)
         {
-            string[] genericNamesArray = SplitByDelimiter(expression, TYPE_GENERICS_DELIMITER, TYPE_GENERICS_WRAPPERS);
+            string[] genericNamesArray = SplitByDelimiter(expression, TYPE_GENERICS_DELIMITER, 
+                new string[] { TYPE_GENERICS_WRAPPERS });
             List<string> genericNames = new List<string>(genericNamesArray);
             // Make sure all the names are valid, also trim out whitespace
             for (int i = 0; i < genericNames.Count; i++)
@@ -826,9 +826,10 @@ namespace IML.Evaluation
             for (int i = 0; i < expression.Length; i++)
             {
                 char c = expression[i];
-                bool isNonWrapper = true;
                 if (c == STRING_START_WRAPPER)
                 {
+                    operation.Invoke(i, levels);
+                    levels.SetInString(true);
                     // Need to continue until we reach the end of the string
                     bool stringTerminated = false;
                     while (!stringTerminated)
@@ -839,6 +840,7 @@ namespace IML.Evaluation
                         {
                             break;
                         }
+                        operation.Invoke(i, levels);
                         c = expression[i];
                         if (c == STRING_END_WRAPPER && prev != STRING_ESCAPE_STARTER)
                         {
@@ -850,28 +852,41 @@ namespace IML.Evaluation
                         throw new InvalidParseException("String is not terminated", expression);
                     }
                     // Go to next iteration since c = '"' (the closing quote)
+                    levels.SetInString(false);
                     continue;
                 }
                 foreach (string wrapper in wrappers)
                 {
                     if (wrapper[0] == c)
                     {
-                        isNonWrapper = false;
                         levels.ChangeLevel(wrapper, 1);
                     }
                     else if (wrapper[1] == c && !IsLambdaArrow(expression, i))
                     {
-                        isNonWrapper = false;
                         levels.ChangeLevel(wrapper, -1);
                     }
                 }
-                if (isNonWrapper)
-                {
-                    operation.Invoke(i, levels);
-                }
+                operation.Invoke(i, levels);
             }
 
             return levels;
+        }
+
+        // Same as PassOverExpression, but WON'T call operation on wrapper characters
+        private static WrapperLevels PassOverExpressionIgnoreWrappers(string expression, 
+            CharacterProcessor operation, params string[] wrappers)
+        {
+            string jointWrappers = string.Join("", wrappers);
+            return PassOverExpression(expression, (i, l) =>
+            {
+                char c = expression[i];
+                if (!jointWrappers.Contains(c))
+                {
+                    return operation(i, l);
+                }
+                return true;
+
+            }, wrappers);
         }
 
         public static bool IsWrappedBy(string expression, char start, char end, params string[] wrappers)
@@ -881,7 +896,7 @@ namespace IML.Evaluation
                 return false;
             }
             WrapperLevels levels = PassOverExpression(expression, (a, b) => true, wrappers);
-            return levels.AreAllZero();
+            return levels.AtLevelZero();
         }
 
         // Private helper method for the IsWrappedBy and other such methods
@@ -945,12 +960,12 @@ namespace IML.Evaluation
             return IsWrappedBy(expression, SIMPLE_LAMBDA_START_WRAPPER, SIMPLE_LAMBDA_END_WRAPPER);
         }
 
-        private static string[] SplitByDelimiter(string expr, char delimiter)
+        public static string[] SplitByDelimiter(string expr, char delimiter)
         {
             return SplitByDelimiter(expr, delimiter, ALL_WRAPPERS);
         }
 
-        public static string[] SplitByDelimiter(string expr, char delimiter, params string[] wrappers)
+        public static string[] SplitByDelimiter(string expr, char delimiter, string[] wrappers)
         {
             if (expr.Length == 0)
             {
@@ -960,7 +975,8 @@ namespace IML.Evaluation
             StringBuilder current = new StringBuilder();
             PassOverExpression(expr, (index, levels) =>
             {
-                if (expr[index] == delimiter)
+                char debug_character = expr[index];
+                if (expr[index] == delimiter && levels.AtLevelZero())
                 {
                     result.Add(current.ToString());
                     current = new StringBuilder("");
@@ -980,9 +996,9 @@ namespace IML.Evaluation
         public static int TryMatchAssignment(string expression)
         {
             Container<int> equalsIndex = new Container<int>(-1);
-            PassOverExpression(expression, (index, levels) =>
+            PassOverExpressionIgnoreWrappers(expression, (index, levels) =>
             {
-                if (expression[index] == ASSIGNMENT_TOKEN && levels.AreAllZero())
+                if (expression[index] == ASSIGNMENT_TOKEN && levels.AtLevelZero())
                 {
                     equalsIndex.Set(index);
                     return false;
@@ -1076,10 +1092,22 @@ namespace IML.Evaluation
         private class WrapperLevels
         {
             Dictionary<string, int> levels;
+            bool inString;
 
             public WrapperLevels()
             {
                 levels = new Dictionary<string, int>();
+                inString = false;
+            }
+
+            public bool IsInString()
+            {
+                return inString;
+            }
+
+            public void SetInString(bool value)
+            {
+                inString = value;
             }
 
             public int GetLevel(string wrapper)
@@ -1103,9 +1131,9 @@ namespace IML.Evaluation
                 }
             }
 
-            public bool AreAllZero()
+            public bool AtLevelZero()
             {
-                return levels.Values.All(x => x == 0);
+                return levels.Values.All(x => x == 0) && !inString;
             }
         }
     }

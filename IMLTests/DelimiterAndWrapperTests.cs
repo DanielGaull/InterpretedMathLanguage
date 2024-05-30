@@ -120,5 +120,16 @@ namespace IMLTests
             string[] result = Parser.SplitByDelimiter("", ',');
             Assert.AreEqual(0, result.Length);
         }
+
+        [TestMethod]
+        public void TestSplitByDelimiter_WithComplex_Success()
+        {
+            string[] result = Parser.SplitByDelimiter("()=>{{5,2}},\"hello,\",7", 
+                ',');
+            Assert.AreEqual(3, result.Length);
+            Assert.AreEqual("()=>{{5,2}}", result[0]);
+            Assert.AreEqual("\"hello,\"", result[1]);
+            Assert.AreEqual("7", result[2]);
+        }
     }
 }
