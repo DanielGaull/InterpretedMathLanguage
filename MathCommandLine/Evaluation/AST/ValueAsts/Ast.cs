@@ -42,9 +42,9 @@ namespace IML.Evaluation
         {
             return new ReferenceAst(refName);
         }
-        public static CallAst Call(Ast calledAst, params Ast[] args)
+        public static CallAst Call(Ast calledAst, List<Ast> args, List<AstType> providedGenerics)
         {
-            return new CallAst(calledAst, new List<Ast>(args));
+            return new CallAst(calledAst, args, providedGenerics);
         }
         public static VariableAst Variable(string name)
         {

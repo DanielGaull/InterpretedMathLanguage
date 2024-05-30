@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("IML")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1db565b70998d6e7baf9e34167b71b6c891651bb")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+618c9ab89aa861a168b158af751164d5aca685a0")]
 [assembly: System.Reflection.AssemblyProductAttribute("IML")]
 [assembly: System.Reflection.AssemblyTitleAttribute("IML")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

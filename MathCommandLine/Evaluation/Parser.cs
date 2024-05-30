@@ -49,7 +49,9 @@ namespace IML.Evaluation
         private const char GENERAL_START_WRAPPER = '(';
         private static readonly string GENERAL_WRAPPERS = $"{GENERAL_START_WRAPPER}{GENERAL_END_WRAPPER}";
 
-        private const string GENERIC_WRAPPERS = "<>";
+        private const char GENERIC_START_WRAPPER = '<';
+        private const char GENERIC_END_WRAPPER = '>';
+        private static readonly string GENERIC_WRAPPERS = $"{GENERIC_START_WRAPPER}{GENERIC_END_WRAPPER}";
 
         // Simple lambda parsing values
         private const char SIMPLE_LAMBDA_START_WRAPPER = '[';
@@ -171,9 +173,9 @@ namespace IML.Evaluation
 
                     string[] argStrings = argsString.Length > 0 ? SplitByDelimiter(argsString, ARG_DELIMITER) : new string[0];
                     // Parse all the arguments
-                    Ast[] args = argStrings.Select(x => Parse(x, typeMap)).ToArray();
+                    var args = argStrings.Select(x => Parse(x, typeMap)).ToList();
 
-                    return Ast.Call(caller, args);
+                    return Ast.Call(caller, args, null);
                 }
                 else if (NUMBER_REGEX.IsMatch(expression))
                 {
@@ -1020,7 +1022,7 @@ namespace IML.Evaluation
         /// </summary>
         /// <param name="expression"></param>
         /// <returns></returns>
-        private CallMatch MatchCall(string expression)
+        public CallMatch MatchCall(string expression)
         {
             if (expression.Length < 2)
             {
@@ -1031,7 +1033,7 @@ namespace IML.Evaluation
             // Well, it's simply some "thing" followed by parentheses, which may have arguments in them
             // It's important to note that the "thing" must have balanced brackets: that is, balanced curly braces
             // and balanced parentheses. That way, '((x)' doesn't count as a call, because it appears to really be
-            // the start of a lambda ex. '((x)=>{_add(x,7)})
+            // the start of a lambda ex. ((x)=>{_add(x,7)})
             // So, lets start from the back. The last character should be a parenthesis. Then, we simply find its
             // matching balanced one. As long as the match is not the first character in the string, then
             // there is something before the pair, and we've found what should be interpreted as a call!
@@ -1072,27 +1074,59 @@ namespace IML.Evaluation
                 return CallMatch.Failure;
             }
 
-            // Everything before the start index is what was called (the callee/caller, terminology is not consistent here)
-            string calledPart = expression.Substring(0, startWrapperIndex);
+            string beforeParens = expression.Substring(0, startWrapperIndex);
+            string genericString = null;
+            string calledPart = null;
+            // We're not done yet; need to obtain the generics string from this beforeParens part
+            if (beforeParens.EndsWith(GENERIC_END_WRAPPER))
+            {
+                // Need to extract
+                int level = 0;
+                int startIndex = -1;
+                for (int i = beforeParens.Length - 1; i >= 0;  i--)
+                {
+                    if (beforeParens[i] == GENERIC_START_WRAPPER)
+                    {
+                        level--;
+                        if (level == 0)
+                        {
+                            startIndex = i;
+                            break;
+                        }
+                    }
+                    else if (beforeParens[i] == GENERIC_END_WRAPPER)
+                    {
+                        level++;
+                    }
+                }
+                calledPart = beforeParens.Substring(0, startIndex);
+                genericString = beforeParens.SubstringBetween(startIndex + 1, beforeParens.Length - 1);
+            }
+            else
+            {
+                calledPart = beforeParens;
+            }
 
             string argsString = expression.Substring(startWrapperIndex + 1, expression.Length - (startWrapperIndex + 1) - 1);
 
-            return new CallMatch(true, calledPart, argsString);
+            return new CallMatch(true, calledPart, genericString, argsString);
         }
-        private struct CallMatch
+        public struct CallMatch
         {
             public bool IsMatch;
             public string Caller;
+            public string Generics;
             public string Args;
 
-            public CallMatch(bool isMatch, string caller, string args)
+            public CallMatch(bool isMatch, string caller, string generics, string args)
             {
                 IsMatch = isMatch;
                 Caller = caller;
+                Generics = generics;
                 Args = args;
             }
 
-            public static readonly CallMatch Failure = new CallMatch(false, null, null);
+            public static readonly CallMatch Failure = new CallMatch(false, null, null, null);
         }
 
         private class WrapperLevels

@@ -8,12 +8,14 @@ namespace IML.Evaluation.AST.ValueAsts
     {
         public Ast CalledAst { get; private set; }
         public List<Ast> Arguments { get; private set; }
+        public List<AstType> ProvidedGenerics { get; private set; }
 
-        public CallAst(Ast called, List<Ast> args)
+        public CallAst(Ast called, List<Ast> args, List<AstType> providedGenerics)
             : base(AstTypes.Call)
         {
             CalledAst = called;
             Arguments = args;
+            ProvidedGenerics = providedGenerics;
         }
     }
 }
