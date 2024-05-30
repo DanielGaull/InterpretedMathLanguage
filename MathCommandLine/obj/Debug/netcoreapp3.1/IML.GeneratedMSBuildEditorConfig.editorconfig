@@ -1,3 +1,5 @@
 is_global = true
 build_property.RootNamespace = IML
 build_property.ProjectDir = C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\MathCommandLine\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 

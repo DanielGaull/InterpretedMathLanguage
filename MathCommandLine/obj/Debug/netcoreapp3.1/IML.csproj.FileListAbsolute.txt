@@ -12,3 +12,4 @@ C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLin
 C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\MathCommandLine\obj\Debug\netcoreapp3.1\IML.dll
 C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\MathCommandLine\obj\Debug\netcoreapp3.1\IML.pdb
 C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\MathCommandLine\obj\Debug\netcoreapp3.1\IML.genruntimeconfig.cache
+C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\MathCommandLine\obj\Debug\netcoreapp3.1\IML.sourcelink.json

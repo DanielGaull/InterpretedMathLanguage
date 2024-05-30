@@ -95,7 +95,8 @@ C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLin
 C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\IMLTests\obj\Debug\netcoreapp3.1\IMLTests.AssemblyInfoInputs.cache
 C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\IMLTests\obj\Debug\netcoreapp3.1\IMLTests.AssemblyInfo.cs
 C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\IMLTests\obj\Debug\netcoreapp3.1\IMLTests.csproj.CoreCompileInputs.cache
-C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\IMLTests\obj\Debug\netcoreapp3.1\IMLTests.csproj.CopyComplete
 C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\IMLTests\obj\Debug\netcoreapp3.1\IMLTests.dll
 C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\IMLTests\obj\Debug\netcoreapp3.1\IMLTests.pdb
 C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\IMLTests\obj\Debug\netcoreapp3.1\IMLTests.genruntimeconfig.cache
+C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\IMLTests\obj\Debug\netcoreapp3.1\IMLTests.sourcelink.json
+C:\Users\gaulldj\Documents\C# Projects\Revamped Math Command Line\MathCommandLine\InterpretedMathLanguage\IMLTests\obj\Debug\netcoreapp3.1\IMLTests.csproj.Up2Date

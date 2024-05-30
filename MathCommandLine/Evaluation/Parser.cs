@@ -42,9 +42,11 @@ namespace IML.Evaluation
         private const string VAR_ARGS_SYMBOL = "...";
 
         // Param parsing values
-        private const char GENERIC_END_WRAPPER = ')';
-        private const char GENERIC_START_WRAPPER = '(';
-        private readonly string GENERIC_WRAPPERS = $"{GENERIC_START_WRAPPER}{GENERIC_END_WRAPPER}";
+        private const char GENERAL_END_WRAPPER = ')';
+        private const char GENERAL_START_WRAPPER = '(';
+        private readonly string GENERAL_WRAPPERS = $"{GENERAL_START_WRAPPER}{GENERAL_END_WRAPPER}";
+
+        private readonly string GENERIC_WRAPPERS = "<>";
 
         // Simple lambda parsing values
         private const char SIMPLE_LAMBDA_START_WRAPPER = '[';
@@ -390,7 +392,7 @@ namespace IML.Evaluation
         private List<Ast> ParseBody(string bodyExpr, VariableAstTypeMap typeMap)
         {
             string[] lines = SplitByDelimiter(bodyExpr, CODE_LINE_DELIMITER,
-                LAMBDA_BODY_WRAPPERS, LIST_WRAPPERS, SIMPLE_LAMBDA_WRAPPERS, GENERIC_WRAPPERS);
+                LAMBDA_BODY_WRAPPERS, LIST_WRAPPERS, SIMPLE_LAMBDA_WRAPPERS, GENERAL_WRAPPERS);
 
             if (lines.Length == 1)
             {
@@ -856,6 +858,82 @@ namespace IML.Evaluation
             throw new InvalidParseException(expression);
         }
 
+        public static bool IsWrappedBy(string expression, char start, char end, params string[] wrappers)
+        {
+            if (expression.Length <= 2 || expression[0] != start || expression[expression.Length - 1] != end)
+            {
+                return false;
+            }
+            Dictionary<string, int> levels = new Dictionary<string, int>();
+            foreach (string w in wrappers)
+            {
+                levels.Add(w, 0);
+            }
+            for (int i = 0; i < expression.Length; i++)
+            {
+                char c = expression[i];
+                if (c == STRING_START_WRAPPER)
+                {
+                    // Need to continue until we reach the end of the string
+                    bool stringTerminated = false;
+                    while (!stringTerminated)
+                    {
+                        char prev = c;
+                        i++;
+                        if (i >= expression.Length)
+                        {
+                            break;
+                        }
+                        c = expression[i];
+                        if (c == STRING_END_WRAPPER && prev != STRING_ESCAPE_STARTER)
+                        {
+                            stringTerminated = true;
+                        }
+                    }
+                    if (!stringTerminated)
+                    {
+                        return false;
+                    }
+                    // Go to next iteration since c = '"' (the closing quote)
+                    continue;
+                }
+                foreach (string wrapper in wrappers)
+                {
+                    if (wrapper[0] == c)
+                    {
+                        levels[wrapper] = levels[wrapper] + 1;
+                    }
+                    else if (wrapper[1] == c && !IsLambdaArrow(expression, i))
+                    {
+                        levels[wrapper] = levels[wrapper] - 1;
+                    }
+                }
+            }
+            // Now, we are only truly wrapped if all of the wrappers are at level 0
+            return levels.Values.All(x => x == 0);
+        }
+
+        // Private helper method for the IsWrappedBy and other such methods
+        // Check if the two characters provide a valid lambda arrow, which would mean we ignore
+        // the <> bracket count
+        private static bool IsLambdaArrow(string exp, int currentIndex)
+        {
+            if (currentIndex <= 0)
+            {
+                return false;
+            }
+            char c1 = exp[currentIndex - 1];
+            char c2 = exp[currentIndex];
+            return (c1 == LAMBDA_TYPE_NO_ENVIRONMENT_LINE || c1 == LAMBDA_TYPE_CREATES_ENVIRONMENT_LINE) &&
+                c2 == LAMBDA_TYPE_ARROW_TIP;
+        }
+
+        private bool IsWrappedBy(string expression, char start, char end)
+        {
+            return IsWrappedBy(expression, start, end,
+                GENERAL_WRAPPERS, SIMPLE_LAMBDA_WRAPPERS, LIST_WRAPPERS, GENERIC_WRAPPERS);
+        }
+
         /// <summary>
         /// Returns true if the expression is wrapped in a pair of matching parentheses
         /// </summary>
@@ -863,44 +941,7 @@ namespace IML.Evaluation
         /// <returns></returns>
         private bool IsParenWrapped(string expression)
         {
-            if (expression.Length < 2)
-            {
-                return false;
-            }
-
-            if (expression[0] != GENERIC_START_WRAPPER || expression[expression.Length - 1] != GENERIC_END_WRAPPER)
-            {
-                return false;
-            }
-
-            int wrapperCounter = 0;
-            int startWrapperIndex = -1;
-            for (int i = expression.Length - 2; i >= 0; i--)
-            {
-                if (expression[i] == CALL_END_WRAPPER)
-                {
-                    wrapperCounter++;
-                }
-                else if (expression[i] == CALL_START_WRAPPER)
-                {
-                    if (wrapperCounter == 0)
-                    {
-                        // We've found the corresponding location!
-                        startWrapperIndex = i;
-                        break;
-                    }
-                    else
-                    {
-                        wrapperCounter--;
-                    }
-                }
-            }
-            if (startWrapperIndex == 0)
-            {
-                // Starting parenthesis was the first character, so this is an expression wrapped in parentheses
-                return true;
-            }
-            return false;
+            return IsWrappedBy(expression, GENERAL_START_WRAPPER, GENERAL_END_WRAPPER);
         }
 
         /// <summary>
@@ -937,11 +978,11 @@ namespace IML.Evaluation
                 {
                     // Add the character to our current string, update the counts as necessary
                     currentString.Append(c);
-                    if (c == GENERIC_START_WRAPPER)
+                    if (c == GENERAL_START_WRAPPER)
                     {
                         parenCounter++;
                     }
-                    else if (c == GENERIC_END_WRAPPER)
+                    else if (c == GENERAL_END_WRAPPER)
                     {
                         parenCounter--;
                     }
@@ -1035,87 +1076,6 @@ namespace IML.Evaluation
             return substrings.ToArray();
         }
 
-        private static bool IsWrappedBy(string expression, char start, char end)
-        {
-            if (expression.Length < 2)
-            {
-                return false;
-            }
-            if (expression[0] != start)
-            {
-                return false;
-            }
-            if (expression[expression.Length - 1] != end)
-            {
-                return false;
-            }
-            int levels = 0;
-            for (int i = 1; i < expression.Length - 1; i++)
-            {
-                char c = expression[i];
-                if (c == GENERIC_START_WRAPPER && start != GENERIC_START_WRAPPER)
-                {
-                    // We want to jump to the end of the parentheses
-                    int newI = GetBracketEndIndex(expression, i, GENERIC_START_WRAPPER, GENERIC_END_WRAPPER);
-                    if (newI < 0)
-                    {
-                        // If no end to the paren, we have bigger problems
-                        return false;
-                    }
-                    i = newI;
-                }
-                if (c == SIMPLE_LAMBDA_START_WRAPPER && start != SIMPLE_LAMBDA_START_WRAPPER)
-                {
-                    int newI = GetBracketEndIndex(expression, i, SIMPLE_LAMBDA_START_WRAPPER, 
-                        SIMPLE_LAMBDA_END_WRAPPER);
-                    // We want to jump to the end of the brackets
-                    if (newI < 0)
-                    {
-                        // If no end to the bracket, we have bigger problems
-                        return false;
-                    }
-                    i = newI;
-                }
-                if (c == LIST_START_WRAPPER && start != LIST_START_WRAPPER)
-                {
-                    int newI = GetBracketEndIndex(expression, i, LIST_START_WRAPPER, LIST_END_WRAPPER);
-                    // We want to jump to the end of the list
-                    if (newI < 0)
-                    {
-                        // If no end to the brace, we have bigger problems
-                        return false;
-                    }
-                    i = newI;
-                }
-                if (c == STRING_START_WRAPPER && start != STRING_START_WRAPPER)
-                {
-                    int newI = GetBracketEndIndex(expression, i, STRING_START_WRAPPER, STRING_END_WRAPPER);
-                    // We want to jump to the end of the string
-                    if (newI < 0)
-                    {
-                        // If no end to the string, we have bigger problems
-                        return false;
-                    }
-                    i = newI;
-                }
-                if (c == start)
-                {
-                    levels++;
-                }
-                if (c == end)
-                {
-                    // If we're closing the current "thing", then that's a problem
-                    if (levels == 0)
-                    {
-                        return false;
-                    }
-                    levels--;
-                }
-            }
-            // If we haven't failed yet, then just return
-            return true;
-        }
-
         private static int GetBracketEndIndex(string str, int idx, char start, char end)
         {
             int level = 0;
@@ -1159,9 +1119,9 @@ namespace IML.Evaluation
             for (int i = 0; i < expression.Length; i++)
             {
                 char c = expression[i];
-                if (c == GENERIC_START_WRAPPER)
+                if (c == GENERAL_START_WRAPPER)
                 {
-                    int newI = GetBracketEndIndex(expression, i, GENERIC_START_WRAPPER, GENERIC_END_WRAPPER);
+                    int newI = GetBracketEndIndex(expression, i, GENERAL_START_WRAPPER, GENERAL_END_WRAPPER);
                     if (newI < 0)
                     {
                         return -1;
