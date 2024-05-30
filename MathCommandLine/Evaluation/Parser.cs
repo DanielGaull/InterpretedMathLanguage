@@ -32,7 +32,7 @@ namespace IML.Evaluation
         private static readonly Regex SIMPLE_LAMBDA_REGEX = new Regex(@"^\[(.*)\]$");
         // Group for params. Non capturing to make the ':' optional, capturing for the type
         // Capturing for the arrow type and the return type
-        private static readonly Regex LAMBDA_REGEX = new Regex(@"^(?:\[(.*)\])?\s*\((.*)\)(?:\s*\:(.+))?\s*([=~])>\s*\{(.*)\}$");
+        private static readonly Regex LAMBDA_REGEX = new Regex(@"^(?:\<(.*)\>)?\s*\((.*)\)(?:\s*\:(.+))?\s*([=~])>\s*\{(.*)\}$");
         private static readonly Regex STRING_REGEX = new Regex("^\"([^\"]*)\"$");
         private static readonly Regex MEMBER_ACCESS_REGEX = new Regex(@$"^(.*)\{MEMBER_ACCESS_TOKEN}(" + SYMBOL_PATTERN + ")$");
 
@@ -41,17 +41,12 @@ namespace IML.Evaluation
         private const char CALL_START_WRAPPER = '('; 
         private const char ARG_DELIMITER = ',';
 
-        private static readonly string LAMBDA_BODY_WRAPPERS = "{}";
         private const string VAR_ARGS_SYMBOL = "...";
 
         // Param parsing values
         private const char GENERAL_END_WRAPPER = ')';
         private const char GENERAL_START_WRAPPER = '(';
         private static readonly string GENERAL_WRAPPERS = $"{GENERAL_START_WRAPPER}{GENERAL_END_WRAPPER}";
-
-        private const char GENERIC_START_WRAPPER = '<';
-        private const char GENERIC_END_WRAPPER = '>';
-        private static readonly string GENERIC_WRAPPERS = $"{GENERIC_START_WRAPPER}{GENERIC_END_WRAPPER}";
 
         // Simple lambda parsing values
         private const char SIMPLE_LAMBDA_START_WRAPPER = '[';
@@ -74,13 +69,15 @@ namespace IML.Evaluation
         private const string PARAM_NAME_TYPE_SEPARATOR = ":";
         private const char TYPE_UNION_DELIMITER = '|';
         private const char TYPE_GENERICS_DELIMITER = ',';
-        private const string TYPE_GENERICS_WRAPPERS = "<>";
+        private const char TYPE_GENERIC_START_WRAPPER = '<';
+        private const char TYPE_GENERIC_END_WRAPPER = '>';
+        private static readonly string TYPE_GENERICS_WRAPPERS = $"{TYPE_GENERIC_START_WRAPPER}{TYPE_GENERIC_END_WRAPPER}";
 
         private const char CODE_LINE_DELIMITER = ';';
 
         private static readonly string[] ALL_WRAPPERS = new string[]
         {
-            GENERAL_WRAPPERS, SIMPLE_LAMBDA_WRAPPERS, LIST_WRAPPERS, GENERIC_WRAPPERS
+            GENERAL_WRAPPERS, SIMPLE_LAMBDA_WRAPPERS, LIST_WRAPPERS, TYPE_GENERICS_WRAPPERS
         };
 
         private const char LAMBDA_TYPE_NO_ENVIRONMENT_LINE = '~';
@@ -1080,14 +1077,14 @@ namespace IML.Evaluation
             string genericString = null;
             string calledPart = null;
             // We're not done yet; need to obtain the generics string from this beforeParens part
-            if (beforeParens.EndsWith(GENERIC_END_WRAPPER))
+            if (beforeParens.EndsWith(TYPE_GENERIC_END_WRAPPER))
             {
                 // Need to extract
                 int level = 0;
                 int startIndex = -1;
                 for (int i = beforeParens.Length - 1; i >= 0;  i--)
                 {
-                    if (beforeParens[i] == GENERIC_START_WRAPPER)
+                    if (beforeParens[i] == TYPE_GENERIC_START_WRAPPER)
                     {
                         level--;
                         if (level == 0)
@@ -1096,7 +1093,7 @@ namespace IML.Evaluation
                             break;
                         }
                     }
-                    else if (beforeParens[i] == GENERIC_END_WRAPPER)
+                    else if (beforeParens[i] == TYPE_GENERIC_END_WRAPPER)
                     {
                         level++;
                     }

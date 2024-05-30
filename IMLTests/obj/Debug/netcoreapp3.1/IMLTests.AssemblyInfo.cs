@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("IMLTests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ea0410a644a289bcb5a87983c2c5bb55c702fbc4")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+88fdb24f2ad2e30e98b6ba94c0c2470c73e74eb1")]
 [assembly: System.Reflection.AssemblyProductAttribute("IMLTests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("IMLTests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
