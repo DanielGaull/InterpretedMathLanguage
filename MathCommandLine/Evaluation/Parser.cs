@@ -1074,8 +1074,8 @@ namespace IML.Evaluation
             }
 
             string beforeParens = expression.Substring(0, startWrapperIndex);
-            string genericString = null;
-            string calledPart = null;
+            string genericString = "";
+            string calledPart = "";
             // We're not done yet; need to obtain the generics string from this beforeParens part
             if (beforeParens.EndsWith(TYPE_GENERIC_END_WRAPPER))
             {

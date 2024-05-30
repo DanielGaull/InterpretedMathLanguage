@@ -41,7 +41,7 @@ namespace IMLTests
             Assert.IsTrue(callMatch.IsMatch);
             Assert.AreEqual("x", callMatch.Caller);
             Assert.AreEqual("", callMatch.Args);
-            Assert.IsNull(callMatch.Generics);
+            Assert.AreEqual("", callMatch.Generics);
         }
 
         [TestMethod]
@@ -51,7 +51,7 @@ namespace IMLTests
             Assert.IsTrue(callMatch.IsMatch);
             Assert.AreEqual("x", callMatch.Caller);
             Assert.AreEqual("5,2", callMatch.Args);
-            Assert.IsNull(callMatch.Generics);
+            Assert.AreEqual("", callMatch.Generics);
         }
 
         [TestMethod]
@@ -61,7 +61,7 @@ namespace IMLTests
             Assert.IsTrue(callMatch.IsMatch);
             Assert.AreEqual("((x,y)=>{x})", callMatch.Caller);
             Assert.AreEqual("5,2", callMatch.Args);
-            Assert.IsNull(callMatch.Generics);
+            Assert.AreEqual("", callMatch.Generics);
         }
 
         [TestMethod]
@@ -71,7 +71,7 @@ namespace IMLTests
             Assert.IsTrue(callMatch.IsMatch);
             Assert.AreEqual("(call<number>(5))", callMatch.Caller);
             Assert.AreEqual("5,2", callMatch.Args);
-            Assert.IsNull(callMatch.Generics);
+            Assert.AreEqual("", callMatch.Generics);
         }
 
         [TestMethod]
