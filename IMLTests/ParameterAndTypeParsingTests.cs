@@ -78,117 +78,117 @@ namespace IMLTests
         [TestMethod]
         public void TestSimpleNumberParam()
         {
-            AssertParsedParameter("value:number", "value:number[]");
+            AssertParsedParameter("value:number", "value:number<>");
         }
         [TestMethod]
         public void TestSimpleUnion()
         {
-            AssertParsedParameter("value:number|string", "value:number[]|string[]");
+            AssertParsedParameter("value:number|string", "value:number<>|string<>");
         }
         [TestMethod]
         public void TestSimpleSingleGeneric()
         {
-            AssertParsedParameter("value:list[number]", "value:list[number[]]");
+            AssertParsedParameter("value:list<number>", "value:list<number<>>");
         }
         [TestMethod]
         public void TestSimpleDoubleGeneric()
         {
-            AssertParsedParameter("value:tuple[number[],number[]]");
+            AssertParsedParameter("value:tuple<number<>,number<>>");
         }
         [TestMethod]
         public void TestUnionDoubleGeneric()
         {
-            AssertParsedParameter("value:tuple[number[],number[]]|list[string[]]");
+            AssertParsedParameter("value:tuple<number<>,number<>>|list<string<>>");
         }
         [TestMethod]
         public void TestNestedGeneric()
         {
-            AssertParsedParameter("value:list[list[boolean]]", "value:list[list[boolean[]]]");
+            AssertParsedParameter("value:list<list<boolean>>", "value:list<list<boolean<>>>");
         }
         [TestMethod]
         public void TestUnionNestedGeneric()
         {
-            AssertParsedParameter("value:list[list[boolean]]|list[list[string]]", 
-                "value:list[list[boolean[]]]|list[list[string[]]]");
+            AssertParsedParameter("value:list<list<boolean>>|list<list<string>>", 
+                "value:list<list<boolean<>>>|list<list<string<>>>");
         }
         [TestMethod]
         public void TestTriplyNestedGeneric()
         {
-            AssertParsedParameter("value:list[list[list[boolean[]]]]");
+            AssertParsedParameter("value:list<list<list<boolean<>>>>");
         }
         [TestMethod]
         public void TestQuadruplyNestedGeneric()
         {
-            AssertParsedParameter("value:list[list[list[list[boolean[]]]]]");
+            AssertParsedParameter("value:list<list<list<list<boolean<>>>>>");
         }
 
         [TestMethod]
         public void TestSimpleLambda()
         {
-            AssertParsedType("()=>void", "()=>void[]");
+            AssertParsedType("()=>void", "()=>void<>");
         }
         [TestMethod]
         public void TestLambdaOneArg()
         {
-            AssertParsedType("(number)=>void", "(number[])=>void[]");
+            AssertParsedType("(number)=>void", "(number<>)=>void<>");
         }
         [TestMethod]
         public void TestLambdaTwoArg()
         {
-            AssertParsedType("(number,string)=>void", "(number[],string[])=>void[]");
+            AssertParsedType("(number,string)=>void", "(number<>,string<>)=>void<>");
         }
         [TestMethod]
         public void TestLambdaUnionArgs()
         {
-            AssertParsedType("(number|list,string)=>void", "(number[]|list[],string[])=>void[]");
+            AssertParsedType("(number|list,string)=>void", "(number<>|list<>,string<>)=>void<>");
         }
         [TestMethod]
         public void TestLambdaUnionArgsGenerics()
         {
-            AssertParsedType("(number|list[string],string)=>void", 
-                "(number[]|list[string[]],string[])=>void[]");
+            AssertParsedType("(number|list<string>,string)=>void", 
+                "(number<>|list<string<>>,string<>)=>void<>");
         }
         [TestMethod]
         public void TestLambdaReturnType()
         {
-            AssertParsedType("()=>number[]");
+            AssertParsedType("()=>number<>");
         }
         [TestMethod]
         public void TestLambdaReturnTypeUnion()
         {
-            AssertParsedType("()=>number[]|list[]");
+            AssertParsedType("()=>number<>|list<>");
         }
         [TestMethod]
         public void TestLambdaReturnTypeGeneric()
         {
-            AssertParsedType("()=>number[]|list[string[]]");
+            AssertParsedType("()=>number<>|list<string<>>");
         }
         [TestMethod]
         public void TestLambdaReturnTypeGenericAndParameters()
         {
-            AssertParsedType("(number[]|list[string[]],string[])=>number[]|list[string[]]");
+            AssertParsedType("(number<>|list<string<>>,string<>)=>number<>|list<strin<>>");
         }
         [TestMethod]
         public void TestLambdaReturnTypeGenericAndParametersNoEnv()
         {
-            AssertParsedType("(number|list[string],string)~>number|list[string]",
-                "(number[]|list[string[]],string[])!~>number[]|list[string[]]");
+            AssertParsedType("(number|list<string>,string)~>number|list<string>",
+                "(number<>|list<string<>>,string<>)!~>number<>|list<string<>>");
         }
         [TestMethod]
         public void TestLambdaReturnTypeGenericAndParametersForceEnv()
         {
-            AssertParsedType("(number[]|list[string[]],string[])!=>number[]|list[string[]]");
+            AssertParsedType("(number<>|list<string<>>,string<>)!=>number<>|list<string<>>");
         }
 
         [TestMethod]
         public void TestParenWrappedType()
         {
-            AssertParsedType("(number|string)", "number[]|string[]");
+            AssertParsedType("(number|string)", "number<>|string<>");
         }
         [TestMethod]
         public void TestParenWrappedTypeEntry()
         {
-            AssertParsedType("(number)|string", "number[]|string[]");
+            AssertParsedType("(number)|string", "number<>|string<>");
         }
 
         [TestMethod]
@@ -204,34 +204,34 @@ namespace IMLTests
         [TestMethod]
         public void TestImbalancedBracketsException3()
         {
-            AssertParsedTypeException("list[list[list[number[]]]");
+            AssertParsedTypeException("list<list<list<number<>>>");
         }
 
         // Varargs tests
         [TestMethod]
         public void TestSimpleVarargs()
         {
-            AssertParsedType("(list[number[]]...)=>void[]");
+            AssertParsedType("(list<number<>>...)=>void<>");
         }
         [TestMethod]
         public void TestMultipleVarargs()
         {
-            AssertParsedType("(number[],string[],list[number[]]...)=>void[]");
+            AssertParsedType("(number<>,string<>,list<number<>>...)=>void<>");
         }
         [TestMethod]
         public void TestVarargsTooEarlyFails()
         {
-            AssertParsedTypeException("(number[],string[]...,list[number])=>void[]");
+            AssertParsedTypeException("(number<>,string<>...,list<number>)=>void<>");
         }
         [TestMethod]
         public void TestVarargsNotAListFail()
         {
-            AssertParsedTypeException("(number[],string[]...)=>void[]");
+            AssertParsedTypeException("(number<>,string<>...)=>void<>");
         }
         [TestMethod]
         public void TestMultipleVarargsMaxWhitespaceWrapped()
         {
-            string test = " ( ( [ T , R ] ( number [ ] , string [ ] , list[ number [ ] ] ... ) => void [ ] ) ) ";
+            string test = " ( ( < T , R > ( number < > , string < > , list < number < > > ... ) => void < > ) ) ";
             string noWhitespace = test.Replace(" ", "");
             string noParens = noWhitespace.SubstringBetween(2, noWhitespace.Length - 2);
             AssertParsedType(test, noParens);
@@ -240,27 +240,27 @@ namespace IMLTests
         [TestMethod]
         public void TestGenericNames()
         {
-            AssertParsedType("[T](T[])=>T[]");
+            AssertParsedType("<T>(T<>)=>T<>");
         }
         [TestMethod]
         public void TestGenericNamesMultiple()
         {
-            AssertParsedType("[T,R,S](T[],R[])=>S[]");
+            AssertParsedType("<T,R,S>(T<>,R<>)=>S<>");
         }
         [TestMethod]
         public void TestGenericNamesInvalidFail1()
         {
-            AssertParsedTypeException("[123](number[])=>void[]");
+            AssertParsedTypeException("<123>(number<>)=>void<>");
         }
         [TestMethod]
         public void TestGenericNamesInvalidFail2()
         {
-            AssertParsedTypeException("[,](number[])=>void[]");
+            AssertParsedTypeException("<,>(number<>)=>void<>");
         }
         [TestMethod]
         public void TestGenericNamesInvalidFail3()
         {
-            AssertParsedTypeException("[[]](number[])=>void[]");
+            AssertParsedTypeException("<<>>(number<>)=>void<>");
         }
     }
 }
