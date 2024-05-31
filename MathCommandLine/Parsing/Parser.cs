@@ -406,24 +406,25 @@ namespace IML.Parsing
         {
             string[] lines = SplitByDelimiter(bodyExpr, CODE_LINE_DELIMITER);
 
+            if (lines.Length == 0)
+            {
+                // Lambda has an empty body
+                // Returns void
+                return new List<Ast>()
+                {
+                    new VariableAst("void")
+                };
+            }
             if (lines.Length == 1)
             {
                 string line = lines[0].Trim();
-                if (line.Length > 0)
+                // Single line, no semicolon after
+                // This is valid syntax
+                // Special case so the code below doesn't give invalid for missing a semicolon
+                return new List<Ast>()
                 {
-                    // Single line, no semicolon after
-                    // This is valid syntax
-                    // Special case so the code below doesn't give invalid for missing a semicolon
-                    return new List<Ast>()
-                    {
-                        Parse(line, typeMap)
-                    };
-                }
-                else
-                {
-                    // Lambda has an empty body
-                    throw new InvalidOperationException("Lambda has an empty body; Currently UNIMPLEMENTED");
-                }
+                    Parse(line, typeMap)
+                };
             }
 
             // The last line should be empty, denoting that a semicolon was used after the last actual line of code

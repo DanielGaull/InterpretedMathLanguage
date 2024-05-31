@@ -161,7 +161,7 @@ namespace IMLTests
         [TestMethod]
         public void TestBlockingEnvironmentlessLambdasFromHavingParameters()
         {
-            AssertInterpreterValues("(x)~>{x}",
+            AssertInterpreterValues("(x)~>{}",
                     "(error) Error: #15 (ILLEGAL_LAMBDA) 'Lambdas that don't create environments (~>)" +
                     " cannot have parameters' Data: {  }");
         }
