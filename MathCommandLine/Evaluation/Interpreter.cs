@@ -237,7 +237,7 @@ namespace IML.Evaluation
                     {
                         VariableDeclarationAst ast = (VariableDeclarationAst)baseAst;
                         string newVarName = ast.Name;
-                        ValueOrReturn newVarVr = EvaluateAst(ast.Value, env); ;
+                        ValueOrReturn newVarVr = EvaluateAst(ast.Value, env);
                         if (newVarVr.IsReturn)
                         {
                             return newVarVr;

@@ -13,8 +13,8 @@ namespace IML.CoreDataTypes
         public static readonly MConcreteDataTypeEntry String = new MConcreteDataTypeEntry(MDataType.String);
         public static readonly MConcreteDataTypeEntry Type = new MConcreteDataTypeEntry(MDataType.Type);
         public static readonly MConcreteDataTypeEntry Error = new MConcreteDataTypeEntry(MDataType.Error);
-        public static readonly MConcreteDataTypeEntry Void = new MConcreteDataTypeEntry(MDataType.Null);
-        public static readonly MConcreteDataTypeEntry Null = new MConcreteDataTypeEntry(MDataType.Void);
+        public static readonly MConcreteDataTypeEntry Void = new MConcreteDataTypeEntry(MDataType.Void);
+        public static readonly MConcreteDataTypeEntry Null = new MConcreteDataTypeEntry(MDataType.Null);
         public static MConcreteDataTypeEntry List(MType of)
         {
             return new MConcreteDataTypeEntry(MDataType.List, of);
