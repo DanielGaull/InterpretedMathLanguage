@@ -168,12 +168,12 @@ namespace IMLTests
         [TestMethod]
         public void TestVarDeclarationReturnValue()
         {
-            AssertInterpreterValues("var x=7", "(number) 7");
+            AssertInterpreterValues("var x=7", "(void) void");
         }
         [TestMethod]
         public void TestVarAssignmentReturnValue()
         {
-            AssertInterpreterValues("_do({()~>{var y=3},()~>{y=4}})", "(number) 4");
+            AssertInterpreterValues("_do({()~>{var y=3},()~>{y=4}})", "(void) void");
         }
         [TestMethod]
         public void TestBlockAssignmentToConstant()
