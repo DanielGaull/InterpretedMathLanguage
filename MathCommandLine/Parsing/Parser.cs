@@ -34,9 +34,6 @@ namespace IML.Parsing
         private static readonly Regex REFERENCE_REGEX = new Regex(@"^\&(" + SYMBOL_PATTERN + ")$");
         private static readonly Regex LIST_REGEX = new Regex(@"^\{(.*)\}$");
         private static readonly Regex SIMPLE_LAMBDA_REGEX = new Regex(@"^\[(.*)\]$");
-        // Group for params. Non capturing to make the ':' optional, capturing for the type
-        // Capturing for the arrow type and the return type
-        private static readonly Regex LAMBDA_REGEX = new Regex(@"^(?:\<(.*)\>)?\s*\((.*)\)(?:\s*\:(.+))?\s*([=~])>\s*\{(.*)\}$");
         private static readonly Regex STRING_REGEX = new Regex("^\"([^\"]*)\"$");
         private static readonly Regex MEMBER_ACCESS_REGEX = new Regex(@$"^(.*)\{MEMBER_ACCESS_TOKEN}(" + SYMBOL_PATTERN + ")$");
 
