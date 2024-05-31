@@ -22,6 +22,8 @@ namespace IML.Parsing
         // Returns true if we should continue, false if we should break
         private delegate bool CharacterProcessor(int i, WrapperLevels level);
 
+        #region Definitions
+
         // Regexes for common necessities
         private const string NUMBER_REGEX_PATTERN = @"[+-]?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))";
         private const string SYMBOL_PATTERN = @"[a-zA-Z_][a-zA-Z0-9_]*";
@@ -117,6 +119,8 @@ namespace IML.Parsing
             DECLARATION_CONST_KEYWORD,
             RETURN_KEYWORD,
         };
+
+        #endregion
 
         private TypeDeterminer typeDeterminer;
         private VariableAstTypeMap defaultVariables;
@@ -505,6 +509,8 @@ namespace IML.Parsing
             throw new InvalidParseException(expression);
         }
 
+        #region Utilities
+
         // Passes over the expression, performing "operation" for each 
         // Returns the final wrapper levels
         private static WrapperLevels PassOverExpression(string expression, CharacterProcessor operation,
@@ -697,6 +703,6 @@ namespace IML.Parsing
             return equalsIndex.Get();
         }
 
-        
+        #endregion
     }
 }
