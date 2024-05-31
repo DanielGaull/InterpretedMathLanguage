@@ -328,6 +328,12 @@ namespace IML.Evaluation
         // Should make "func" return 5, not return 5 from the environmentless lambda
         private ValueOrReturn EvaluateBody(List<Ast> body, MEnvironment env, bool passReturnsToParent)
         {
+            // If single-line body, return what the body evaluates to
+            if (body.Count == 1)
+            {
+                return EvaluateAst(body.First(), env);
+            }
+
             for (int i = 0; i < body.Count; i++)
             {
                 // If we find a return, check if we pass returns to parent
