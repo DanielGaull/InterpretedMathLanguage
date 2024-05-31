@@ -89,8 +89,10 @@ namespace IML.Parsing
         public const char LAMBDA_TYPE_ARROW_TIP = '>';
         public const char LAMBDA_TYPE_REQ_ENV_CHARACTER = '!'; // Character for requiring lambda to create env
         public const string LAMBDA_TYPE_PARAM_WRAPPERS = "()";
+        public const string LAMBDA_BODY_WRAPPERS = "{}";
         public const char LAMBDA_TYPE_PARAM_DELMITER = ',';
         public const string LAMBDA_TYPE_VARARGS_SYMBOL = "...";
+        public const char RETURN_TYPE_DELIMITER = ':';
         public static readonly Regex LAMBDA_TYPE_REGEX =
             new Regex($@"({TYPE_GENERICS_WRAPPERS[0]}(.*){TYPE_GENERICS_WRAPPERS[1]})?\s*" +
                 $@"{LAMBDA_TYPE_PARAM_WRAPPERS[0]}(.*){LAMBDA_TYPE_PARAM_WRAPPERS[1]}\s*" +
@@ -156,9 +158,8 @@ namespace IML.Parsing
                     return Parse(expression, typeMap);
                 }
 
-                // 'expression' is either a call, variable, or literal
-                // May be something that is wrapped entirely in parenthesis
                 CallMatch attempedCallMatch = CallMatcher.MatchCall(expression);
+                LambdaMatch attemptedLambdaMatch = LambdaMatcher.MatchLambda(expression);
                 int attemptedAssignmentMatchIndex = TryMatchAssignment(expression);
 
                 if (attempedCallMatch.IsMatch)
@@ -213,15 +214,13 @@ namespace IML.Parsing
                     }
                     return Ast.ListLiteral(elementAsts.ToArray());
                 }
-                else if (LAMBDA_REGEX.IsMatch(expression))
+                else if (attemptedLambdaMatch.IsMatch)
                 {
-                    // 3-4 parts: parameters, return type (optional), type of lambda (environment/no environment), expression/body
-                    var groups = LAMBDA_REGEX.Match(expression).Groups;
-                    string genericsString = groups[1].Value;
-                    string paramsString = groups[2].Value;
-                    string returnTypeString = groups[3].Value;
-                    string arrowBit = groups[4].Value;
-                    string exprString = groups[5].Value;
+                    string genericsString = attemptedLambdaMatch.Generics;
+                    string paramsString = attemptedLambdaMatch.Params;
+                    string returnTypeString = attemptedLambdaMatch.ReturnType;
+                    string arrowBit = attemptedLambdaMatch.ArrowBit;
+                    string exprString = attemptedLambdaMatch.Body;
 
                     bool provideReturnType = returnTypeString.Length > 0;
 
