@@ -52,7 +52,7 @@ namespace IML.Functions
 
         public string DataTypeString()
         {
-            return "";// string.Join('|', GetDataTypes());
+            return Type.ToString();// string.Join('|', GetDataTypes());
         }
     }
 }

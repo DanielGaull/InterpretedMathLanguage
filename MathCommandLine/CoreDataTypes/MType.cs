@@ -3,6 +3,7 @@ using IML.Evaluation;
 using IML.Util;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace IML.CoreDataTypes
@@ -237,6 +238,12 @@ namespace IML.CoreDataTypes
         public override int GetHashCode()
         {
             return base.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            List<string> typeStrings = Entries.Select(x => x.ToString()).ToList();
+            return string.Join("|", typeStrings);
         }
     }
 }

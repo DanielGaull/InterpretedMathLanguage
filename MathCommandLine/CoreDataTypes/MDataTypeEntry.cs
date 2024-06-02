@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Text;
 
 namespace IML.CoreDataTypes
@@ -55,17 +56,17 @@ namespace IML.CoreDataTypes
 
         public static bool operator ==(MDataTypeEntry e1, MDataTypeEntry e2)
         {
-            if (e1 is MConcreteDataTypeEntry && e2 is MConcreteDataTypeEntry)
-            {
-                MConcreteDataTypeEntry ce1 = e1 as MConcreteDataTypeEntry;
-                MConcreteDataTypeEntry ce2 = e2 as MConcreteDataTypeEntry;
-                return ce1.Equals(ce2);
-            }
-            else if (e1 is MFunctionDataTypeEntry && e2 is MFunctionDataTypeEntry)
+            if (e1 is MFunctionDataTypeEntry && e2 is MFunctionDataTypeEntry)
             {
                 MFunctionDataTypeEntry fe1 = e1 as MFunctionDataTypeEntry;
                 MFunctionDataTypeEntry fe2 = e2 as MFunctionDataTypeEntry;
                 return fe1.Equals(fe2);
+            }
+            else if (e1 is MConcreteDataTypeEntry && e2 is MConcreteDataTypeEntry)
+            {
+                MConcreteDataTypeEntry ce1 = e1 as MConcreteDataTypeEntry;
+                MConcreteDataTypeEntry ce2 = e2 as MConcreteDataTypeEntry;
+                return ce1.Equals(ce2);
             }
             return false;
         }
@@ -141,10 +142,15 @@ namespace IML.CoreDataTypes
             }
             return new MConcreteDataTypeEntry(DataType, generics);
         }
+
+        public override string ToString()
+        {
+            List<string> genericNames = Generics.Select(x => x.ToString()).ToList();
+            return DataType.Name + "<" + string.Join(",", genericNames) + ">";
+        }
     }
     public class MFunctionDataTypeEntry : MConcreteDataTypeEntry
     {
-        // TODO: pure/impure, creating environment, ... syntax
         public MType ReturnType { get; private set; }
         public List<MType> ParameterTypes { get; private set; }
         public List<string> GenericNames { get; private set; }
@@ -162,6 +168,16 @@ namespace IML.CoreDataTypes
             IsPure = isPure;
             EnvironmentType = envType;
             IsLastVarArgs = isLastVarArgs;
+        }
+
+        public override string ToString()
+        {
+            string genericPart = "<" + string.Join(",", GenericNames) + ">";
+            string paramPart = "(" + string.Join(",", ParameterTypes.Select(x => x.ToString())) +
+                (IsLastVarArgs ? "..." : "") + ")";
+            string arrowPart = EnvironmentType == LambdaEnvironmentType.ForceNoEnvironment ? "~>" :
+                EnvironmentType == LambdaEnvironmentType.ForceEnvironment ? "!=>" : "=>";
+            return genericPart + paramPart + arrowPart + ":" + ReturnType.ToString();
         }
 
         public bool Equals(MFunctionDataTypeEntry other)
