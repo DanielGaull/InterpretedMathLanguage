@@ -39,14 +39,14 @@ namespace IML.Parsing
             {
                 AstType type = AstType.UNION_BASE;
                 string name = callee.GenericNames[i];
-                foreach (AstType param in parameters)
+                for (int j = 0; j < parameters.Count; j++)
                 {
-                    if (IsThisGeneric(param, name))
+                    if (IsThisGeneric(callee.ParamTypes[j], name))
                     {
-                        type = type.Union(param);
+                        type = type.Union(parameters[j]);
                     }
                 }
-                if (IsThisGeneric(returnType, name))
+                if (IsThisGeneric(callee.ReturnType, name))
                 {
                     type = type.Union(returnType);
                 }
