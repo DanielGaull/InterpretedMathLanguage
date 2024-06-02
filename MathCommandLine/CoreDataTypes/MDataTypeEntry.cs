@@ -146,7 +146,8 @@ namespace IML.CoreDataTypes
         public override string ToString()
         {
             List<string> genericNames = Generics.Select(x => x.ToString()).ToList();
-            return DataType.Name + "<" + string.Join(",", genericNames) + ">";
+            string genericString = "<" + string.Join(",", genericNames) + ">";
+            return DataType.Name + (Generics.Count > 0 ? genericString : "");
         }
     }
     public class MFunctionDataTypeEntry : MConcreteDataTypeEntry
@@ -172,12 +173,12 @@ namespace IML.CoreDataTypes
 
         public override string ToString()
         {
-            string genericPart = "<" + string.Join(",", GenericNames) + ">";
+            string genericPart = GenericNames.Count > 0 ? "<" + string.Join(",", GenericNames) + ">" : "";
             string paramPart = "(" + string.Join(",", ParameterTypes.Select(x => x.ToString())) +
                 (IsLastVarArgs ? "..." : "") + ")";
             string arrowPart = EnvironmentType == LambdaEnvironmentType.ForceNoEnvironment ? "~>" :
                 EnvironmentType == LambdaEnvironmentType.ForceEnvironment ? "!=>" : "=>";
-            return genericPart + paramPart + arrowPart + ":" + ReturnType.ToString();
+            return genericPart + paramPart + arrowPart + ReturnType.ToString();
         }
 
         public bool Equals(MFunctionDataTypeEntry other)
