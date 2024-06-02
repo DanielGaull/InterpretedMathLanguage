@@ -242,14 +242,14 @@ namespace IML.CoreDataTypes
             // If a generic was defined outside of the function, the scope must match
 
             // Verify the return types
-            if (myReturnType != otherReturnType)
+            if (myReturnType != otherReturnType && !myReturnType.IsAnyType())
             {
                 return false;
             }
             // Verify the parameters
             for (int i = 0; i < myParams.Count; i++)
             {
-                if (myParams[i] != otherParams[i])
+                if (myParams[i] != otherParams[i] && !myParams[i].IsAnyType())
                 {
                     return false;
                 }
