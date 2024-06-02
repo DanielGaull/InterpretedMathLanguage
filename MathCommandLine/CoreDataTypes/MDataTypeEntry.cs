@@ -322,5 +322,10 @@ namespace IML.CoreDataTypes
         {
             return new MGenericDataTypeEntry(Name);
         }
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }
