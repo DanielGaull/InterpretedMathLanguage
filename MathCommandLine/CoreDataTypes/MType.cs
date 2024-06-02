@@ -178,7 +178,7 @@ namespace IML.CoreDataTypes
         public static MType Function(MType returnType, List<MType> paramTypes, List<string> genericNames)
         {
             return new MType(MDataTypeEntry.Function(returnType, paramTypes, genericNames, false, false, 
-                LambdaEnvironmentType.AllowAny));
+                LambdaEnvironmentType.ForceEnvironment));
         }
         public static MType Function(MType returnType, params MType[] paramTypes)
         {
@@ -191,7 +191,7 @@ namespace IML.CoreDataTypes
         public static MType Function(MType returnType, List<MType> paramTypes, bool isPure, bool isLastVarArgs)
         {
             return new MType(MDataTypeEntry.Function(returnType, paramTypes, isPure, isLastVarArgs, 
-                LambdaEnvironmentType.AllowAny));
+                LambdaEnvironmentType.ForceEnvironment));
         }
 
         // Strict equals, have to completely match

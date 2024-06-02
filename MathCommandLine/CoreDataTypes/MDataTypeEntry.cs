@@ -184,10 +184,23 @@ namespace IML.CoreDataTypes
         public bool Equals(MFunctionDataTypeEntry other)
         {
             // Check all the small easy stuff
-            if (IsPure != other.IsPure || EnvironmentType != other.EnvironmentType || IsLastVarArgs != other.IsLastVarArgs)
+            if (IsPure != other.IsPure || IsLastVarArgs != other.IsLastVarArgs)
             {
                 return false;
             }
+            // For the environment type, if the first is AllowAny, then we're fine
+            // Otherwise, they must be equal
+            // If the first forces an environment, though, then we always require the second
+            // to follow that (order matters here!)
+            if (EnvironmentType != LambdaEnvironmentType.AllowAny)
+            {
+                if (EnvironmentType != other.EnvironmentType)
+                {
+                    return false;
+                }
+            }
+
+            // EnvironmentType != other.EnvironmentType
             // The generic names don't have to match, but should have the same count of them
             if (GenericNames.Count != other.GenericNames.Count)
             {
