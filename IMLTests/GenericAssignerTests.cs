@@ -113,6 +113,29 @@ namespace IMLTests
 
         // TODO: Tests where we have a data type with the generic INSIDE it
         // Like: list<T>
-        // This is NOT yet implemented, so we'll have to write code for it too
+        [TestMethod]
+        public void Assign_WithList_Success()
+        {
+            AstType number = new AstType(new AstTypeEntry("number"));
+            AstType listOfNumber = new AstType(new AstTypeEntry("list", number));
+
+            AstType genericT = new AstType(new AstTypeEntry("T"));
+            AstType listOfT = new AstType(new AstTypeEntry("list", genericT));
+            LambdaAstTypeEntry callee = new LambdaAstTypeEntry(number,
+                new List<AstType>() { listOfT }, LambdaEnvironmentType.AllowAny,
+                false, false, new List<string>() { "T", "R" });
+            List<AstType> args = new List<AstType>()
+            {
+                listOfNumber
+            };
+
+            AstType realReturnType = number;
+            List<AstType> result = assigner.AssignGenerics(callee, realReturnType, args);
+
+            Assert.AreEqual(1, result.Count);
+            AstType r1 = result[0];
+            Assert.AreEqual(1, r1.Entries.Count);
+            Assert.IsTrue(r1.Entries[0].DataTypeName == "number");
+        }
     }
 }
