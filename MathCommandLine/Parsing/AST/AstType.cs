@@ -16,6 +16,14 @@ namespace IML.Parsing.AST
         private bool isUnionBase = false;
         public static readonly AstType UNION_BASE = new AstType(true);
 
+        public bool IsUnionBase
+        {
+            get
+            {
+                return isUnionBase;
+            }
+        }
+
         private AstType(bool isUnionBase)
         {
             this.isUnionBase = isUnionBase;

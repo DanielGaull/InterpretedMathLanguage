@@ -14,5 +14,10 @@ namespace IML.Exceptions
         {
             Ast = ast;
         }
+
+        public TypeDeterminationException(string message)
+            : base("Type verification error: \"" + message + "\".")
+        {
+        }
     }
 }
