@@ -137,5 +137,32 @@ namespace IMLTests
             Assert.AreEqual(1, r1.Entries.Count);
             Assert.IsTrue(r1.Entries[0].DataTypeName == "number");
         }
+
+        [TestMethod]
+        public void Assign_WithDoublyNestedList_Success()
+        {
+            AstType number = new AstType(new AstTypeEntry("number"));
+            AstType listOfNumber = new AstType(new AstTypeEntry("list", number));
+            AstType doublyList = new AstType(new AstTypeEntry("list", listOfNumber));
+
+            AstType genericT = new AstType(new AstTypeEntry("T"));
+            AstType listOfT = new AstType(new AstTypeEntry("list", genericT));
+            AstType doublyListOfT = new AstType(new AstTypeEntry("list", listOfT));
+            LambdaAstTypeEntry callee = new LambdaAstTypeEntry(number,
+                new List<AstType>() { doublyListOfT }, LambdaEnvironmentType.AllowAny,
+                false, false, new List<string>() { "T", "R" });
+            List<AstType> args = new List<AstType>()
+            {
+                doublyList
+            };
+
+            AstType realReturnType = number;
+            List<AstType> result = assigner.AssignGenerics(callee, realReturnType, args);
+
+            Assert.AreEqual(1, result.Count);
+            AstType r1 = result[0];
+            Assert.AreEqual(1, r1.Entries.Count);
+            Assert.IsTrue(r1.Entries[0].DataTypeName == "number");
+        }
     }
 }
