@@ -111,8 +111,6 @@ namespace IMLTests
             Assert.IsTrue(r2.Entries[0].DataTypeName == "string");
         }
 
-        // TODO: Tests where we have a data type with the generic INSIDE it
-        // Like: list<T>
         [TestMethod]
         public void Assign_WithList_Success()
         {
