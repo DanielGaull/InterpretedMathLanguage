@@ -24,169 +24,127 @@ namespace IMLTests
         [TestMethod]
         public void Assign_WithSimpleSingle_Success()
         {
-            AstType number = new AstType(new AstTypeEntry("number"));
-            AstType str = new AstType(new AstTypeEntry("string"));
-            AstType genericT = new AstType(new AstTypeEntry("T"));
-            LambdaAstTypeEntry callee = new LambdaAstTypeEntry(number,
-                new List<AstType>() { genericT }, LambdaEnvironmentType.AllowAny,
-                false, false, new List<string>() { "T" });
+            MType genericT = new MType(new MGenericDataTypeEntry("T"));
+            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(MType.Number,
+                new List<MType> { genericT }, new List<string> { "T" }, false, LambdaEnvironmentType.AllowAny,
+                false);
 
-            AstType realReturnType = number;
-            AstType realArgumentType = str;
-            List<AstType> result = assigner.AssignGenerics(callee, realReturnType,
-                new List<AstType>() { realArgumentType });
+            List<MType> result = assigner.AssignGenerics(callee, MType.Number,
+                new List<MType>() { MType.String });
 
             Assert.AreEqual(1, result.Count);
-            AstType r = result[0];
+            MType r = result[0];
             Assert.AreEqual(1, r.Entries.Count);
-            Assert.AreEqual("string", r.Entries[0].DataTypeName);
+            Assert.AreEqual("string", ((MConcreteDataTypeEntry)r.Entries[0]).DataType.Name);
         }
 
         [TestMethod]
         public void Assign_WithSingleArgAndReturnSame_Success()
         {
-            AstType number = new AstType(new AstTypeEntry("number"));
-            AstType str = new AstType(new AstTypeEntry("string"));
-            AstType genericT = new AstType(new AstTypeEntry("T"));
-            LambdaAstTypeEntry callee = new LambdaAstTypeEntry(genericT,
-                new List<AstType>() { genericT }, LambdaEnvironmentType.AllowAny,
-                false, false, new List<string>() { "T" });
+            MType genericT = new MType(new MGenericDataTypeEntry("T"));
+            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(genericT,
+                new List<MType> { genericT }, new List<string> { "T" }, false, LambdaEnvironmentType.AllowAny,
+                false);
 
-            AstType realReturnType = number;
-            AstType realArgumentType = str;
-            List<AstType> result = assigner.AssignGenerics(callee, realReturnType,
-                new List<AstType>() { realArgumentType });
+            List<MType> result = assigner.AssignGenerics(callee, MType.Number,
+                new List<MType>() { MType.String });
 
             Assert.AreEqual(1, result.Count);
-            AstType r = result[0];
+            MType r = result[0];
             Assert.AreEqual(2, r.Entries.Count);
-            // Order is undefined, so must allow any order
-            Assert.IsTrue(r.Entries.Exists(x => x.DataTypeName == "number"));
-            Assert.IsTrue(r.Entries.Exists(x => x.DataTypeName == "string"));
+            Assert.IsTrue(r.Entries.Exists(e => ((MConcreteDataTypeEntry)e).DataType.Name == "number"));
+            Assert.IsTrue(r.Entries.Exists(e => ((MConcreteDataTypeEntry)e).DataType.Name == "string"));
         }
 
         [TestMethod]
         public void Assign_WithTwoArg_Success()
         {
-            AstType number = new AstType(new AstTypeEntry("number"));
-            AstType str = new AstType(new AstTypeEntry("string"));
+            MType genericT = new MType(new MGenericDataTypeEntry("T"));
+            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(MType.Number,
+                new List<MType> { genericT, genericT }, new List<string> { "T" }, false, 
+                LambdaEnvironmentType.AllowAny, false);
 
-            AstType genericT = new AstType(new AstTypeEntry("T"));
-            LambdaAstTypeEntry callee = new LambdaAstTypeEntry(number,
-                new List<AstType>() { genericT, genericT }, LambdaEnvironmentType.AllowAny,
-                false, false, new List<string>() { "T" });
-
-            AstType realReturnType = number;
-            List<AstType> result = assigner.AssignGenerics(callee, realReturnType,
-                new List<AstType>() { number, str });
+            List<MType> result = assigner.AssignGenerics(callee, MType.Number,
+                new List<MType>() { MType.Number, MType.String });
 
             Assert.AreEqual(1, result.Count);
-            AstType r = result[0];
+            MType r = result[0];
             Assert.AreEqual(2, r.Entries.Count);
-            // Order is undefined, so must allow any order
-            Assert.IsTrue(r.Entries.Exists(x => x.DataTypeName == "number"));
-            Assert.IsTrue(r.Entries.Exists(x => x.DataTypeName == "string"));
+            Assert.IsTrue(r.Entries.Exists(e => ((MConcreteDataTypeEntry)e).DataType.Name == "number"));
+            Assert.IsTrue(r.Entries.Exists(e => ((MConcreteDataTypeEntry)e).DataType.Name == "string"));
         }
 
         [TestMethod]
         public void Assign_WithTwoGenerics_Success()
         {
-            AstType number = new AstType(new AstTypeEntry("number"));
-            AstType str = new AstType(new AstTypeEntry("string"));
+            MType genericT = new MType(new MGenericDataTypeEntry("T"));
+            MType genericR = new MType(new MGenericDataTypeEntry("R"));
+            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(MType.Number,
+                new List<MType> { genericT, genericR }, new List<string> { "T", "R" }, false, 
+                LambdaEnvironmentType.AllowAny, false);
 
-            AstType genericT = new AstType(new AstTypeEntry("T"));
-            AstType genericR = new AstType(new AstTypeEntry("R"));
-            LambdaAstTypeEntry callee = new LambdaAstTypeEntry(number,
-                new List<AstType>() { genericT, genericR }, LambdaEnvironmentType.AllowAny,
-                false, false, new List<string>() { "T", "R" });
-
-            AstType realReturnType = number;
-            List<AstType> result = assigner.AssignGenerics(callee, realReturnType,
-                new List<AstType>() { number, str });
+            List<MType> result = assigner.AssignGenerics(callee, MType.Number,
+                new List<MType>() { MType.Number, MType.String });
 
             Assert.AreEqual(2, result.Count);
-            AstType r1 = result[0];
-            AstType r2 = result[1];
+            MType r1 = result[0];
             Assert.AreEqual(1, r1.Entries.Count);
-            Assert.IsTrue(r1.Entries[0].DataTypeName == "number");
+            Assert.AreEqual("number", ((MConcreteDataTypeEntry)r1.Entries[0]).DataType.Name);
+            MType r2 = result[1];
             Assert.AreEqual(1, r2.Entries.Count);
-            Assert.IsTrue(r2.Entries[0].DataTypeName == "string");
+            Assert.AreEqual("string", ((MConcreteDataTypeEntry)r2.Entries[0]).DataType.Name);
         }
 
         [TestMethod]
         public void Assign_WithList_Success()
         {
-            AstType number = new AstType(new AstTypeEntry("number"));
-            AstType listOfNumber = new AstType(new AstTypeEntry("list", number));
+            MType genericT = new MType(new MGenericDataTypeEntry("T"));
+            MType listOfT = MType.List(genericT);
+            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(MType.Number,
+                new List<MType> { listOfT }, new List<string> { "T" }, false,
+                LambdaEnvironmentType.AllowAny, false);
 
-            AstType genericT = new AstType(new AstTypeEntry("T"));
-            AstType listOfT = new AstType(new AstTypeEntry("list", genericT));
-            LambdaAstTypeEntry callee = new LambdaAstTypeEntry(number,
-                new List<AstType>() { listOfT }, LambdaEnvironmentType.AllowAny,
-                false, false, new List<string>() { "T" });
-            List<AstType> args = new List<AstType>()
-            {
-                listOfNumber
-            };
-
-            AstType realReturnType = number;
-            List<AstType> result = assigner.AssignGenerics(callee, realReturnType, args);
+            List<MType> result = assigner.AssignGenerics(callee, MType.Number,
+                new List<MType>() { MType.List(MType.Number) });
 
             Assert.AreEqual(1, result.Count);
-            AstType r1 = result[0];
+            MType r1 = result[0];
             Assert.AreEqual(1, r1.Entries.Count);
-            Assert.IsTrue(r1.Entries[0].DataTypeName == "number");
+            Assert.AreEqual("number", ((MConcreteDataTypeEntry)r1.Entries[0]).DataType.Name);
         }
 
         [TestMethod]
         public void Assign_WithDoublyNestedList_Success()
         {
-            AstType number = new AstType(new AstTypeEntry("number"));
-            AstType listOfNumber = new AstType(new AstTypeEntry("list", number));
-            AstType doublyList = new AstType(new AstTypeEntry("list", listOfNumber));
+            MType genericT = new MType(new MGenericDataTypeEntry("T"));
+            MType listOfT = MType.List(genericT);
+            MType listOfListOfT = MType.List(listOfT);
+            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(MType.Number,
+                new List<MType> { listOfListOfT }, new List<string> { "T" }, false,
+                LambdaEnvironmentType.AllowAny, false);
 
-            AstType genericT = new AstType(new AstTypeEntry("T"));
-            AstType listOfT = new AstType(new AstTypeEntry("list", genericT));
-            AstType doublyListOfT = new AstType(new AstTypeEntry("list", listOfT));
-            LambdaAstTypeEntry callee = new LambdaAstTypeEntry(number,
-                new List<AstType>() { doublyListOfT }, LambdaEnvironmentType.AllowAny,
-                false, false, new List<string>() { "T" });
-            List<AstType> args = new List<AstType>()
-            {
-                doublyList
-            };
-
-            AstType realReturnType = number;
-            List<AstType> result = assigner.AssignGenerics(callee, realReturnType, args);
+            List<MType> result = assigner.AssignGenerics(callee, MType.Number,
+                new List<MType>() { MType.List(MType.List(MType.Number)) });
 
             Assert.AreEqual(1, result.Count);
-            AstType r1 = result[0];
+            MType r1 = result[0];
             Assert.AreEqual(1, r1.Entries.Count);
-            Assert.IsTrue(r1.Entries[0].DataTypeName == "number");
+            Assert.AreEqual("number", ((MConcreteDataTypeEntry)r1.Entries[0]).DataType.Name);
         }
 
         [TestMethod]
         public void Assign_WithNestedUnionedGenerics_ThrowException()
         {
-            AstType number = new AstType(new AstTypeEntry("number"));
-            AstType listOfNumber = new AstType(new AstTypeEntry("list", number));
+            MType genericTOrString = new MType(new MGenericDataTypeEntry("T"), MDataTypeEntry.String);
+            MType listOfTOrString = MType.List(genericTOrString);
+            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(MType.Number,
+                new List<MType> { listOfTOrString }, new List<string> { "T" }, false,
+                LambdaEnvironmentType.AllowAny, false);
 
-            AstType genericTOrString = new AstType(new List<AstTypeEntry>() {
-                new AstTypeEntry("T"), new AstTypeEntry("string")
-            });
-            AstType listOfTOrString = new AstType(new AstTypeEntry("list", genericTOrString));
-            LambdaAstTypeEntry callee = new LambdaAstTypeEntry(number,
-                new List<AstType>() { listOfTOrString }, LambdaEnvironmentType.AllowAny,
-                false, false, new List<string>() { "T" });
-            List<AstType> args = new List<AstType>()
-            {
-                listOfNumber
-            };
-
-            AstType realReturnType = number;
             try
             {
-                assigner.AssignGenerics(callee, realReturnType, args);
+                assigner.AssignGenerics(callee, MType.Number, 
+                    new List<MType>() { MType.List(MType.Number) });
             }
             catch (TypeDeterminationException ex)
             {   

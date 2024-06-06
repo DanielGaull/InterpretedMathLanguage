@@ -1,4 +1,5 @@
-﻿using IML.Exceptions;
+﻿using IML.CoreDataTypes;
+using IML.Exceptions;
 using IML.Parsing.AST;
 using System;
 using System.Collections.Generic;
@@ -15,18 +16,18 @@ namespace IML.Parsing
         }
 
         // Will assign generics in order, returning a list in the order desired
-        public List<AstType> AssignGenerics(LambdaAstTypeEntry callee, AstType returnType, 
-            List<AstType> parameters)
+        public List<MType> AssignGenerics(MFunctionDataTypeEntry callee, MType returnType, 
+            List<MType> parameters)
         {
             if (callee.GenericNames.Count == 0)
             {
-                return new List<AstType>();
+                return new List<MType>();
             }
 
             // If either the return type or parameters have generics with multiple entries,
             // then we simply cannot determine the type
             if (HasUnionedGenerics(callee.ReturnType, callee.GenericNames) ||
-                callee.ParamTypes.Any(p => HasUnionedGenerics(p, callee.GenericNames)))
+                callee.ParameterTypes.Any(p => HasUnionedGenerics(p, callee.GenericNames)))
             {
                 throw new TypeDeterminationException("Cannot infer generics when they appear in a union. " +
                     "Please manually define generics.");
@@ -34,14 +35,14 @@ namespace IML.Parsing
 
             // Now, for each generic name, find the associated parameter or return type
             // If there are multiple, we just union them together
-            List<AstType> result = new List<AstType>();
+            List<MType> result = new List<MType>();
             for (int i = 0; i < callee.GenericNames.Count; i++)
             {
-                AstType type = AstType.UNION_BASE;
+                MType type = MType.UNION_BASE;
                 string name = callee.GenericNames[i];
                 for (int j = 0; j < parameters.Count; j++)
                 {
-                    type = type.Union(MatchGenerics(callee.ParamTypes[j], parameters[j], name));
+                    type = type.Union(MatchGenerics(callee.ParameterTypes[j], parameters[j], name));
                 }
                 type = type.Union(MatchGenerics(callee.ReturnType, returnType, name));
 
@@ -61,38 +62,98 @@ namespace IML.Parsing
             return result;
         }
 
-        private bool HasUnionedGenerics(AstType type, List<string> genericNames)
+        private bool HasUnionedGenerics(MType type, List<string> genericNames)
         {
             bool doesThisTypeHasUnionedGenerics = type.Entries.Count > 1 &&
-                type.Entries.Any(t => genericNames.Contains(t.DataTypeName));
+                type.Entries.Any(t =>
+                {
+                    if (t is MGenericDataTypeEntry gt)
+                    {
+                        return genericNames.Contains(gt.Name);
+                    }
+                    return false;
+                });
             bool doNestedTypesHaveUnionedGenerics =
-                type.Entries.Any(t => t.Generics.Any(g => HasUnionedGenerics(g, genericNames)));
+                type.Entries.Any(t => 
+                {
+                    if (t is MConcreteDataTypeEntry ct)
+                    {
+                        return ct.Generics.Any(g => HasUnionedGenerics(g, genericNames));
+                    }
+                    else if (t is MFunctionDataTypeEntry ft)
+                    {
+                        return ft.ParameterTypes.Any(p => HasUnionedGenerics(p, genericNames)) ||
+                            HasUnionedGenerics(ft.ReturnType, genericNames);
+                    }
+                    return false;
+                });
             return doesThisTypeHasUnionedGenerics || doNestedTypesHaveUnionedGenerics;
         }
 
-        private bool IsThisGeneric(AstType type, string name)
+        private bool IsThisGeneric(MType type, string name)
         {
-            return type.Entries.Count == 1 && type.Entries.Any(t => t.DataTypeName == name);
+            return type.Entries.Count == 1 && 
+                type.Entries.Any(t =>
+                {
+                    if (t is MGenericDataTypeEntry gt)
+                    {
+                        return gt.Name == name;
+                    }
+                    return false;
+                });
         }
 
-        private AstType MatchGenerics(AstType parameterizedType, AstType trueType, string name)
+        private MType MatchGenerics(MType parameterizedType, MType trueType, string name)
         {
-            AstType returnType = AstType.UNION_BASE;
+            MType resultType = MType.UNION_BASE;
             if (IsThisGeneric(parameterizedType, name))
             {
-                returnType = returnType.Union(trueType);
+                resultType = resultType.Union(trueType);
             }
             // Now need to traverse the generics (subtypes) of the parameterized types
             for (int i = 0; i < parameterizedType.Entries.Count; i++)
             {
-                for (int j = 0; j < parameterizedType.Entries[i].Generics.Count; j++)
+                MDataTypeEntry typeEntry = parameterizedType.Entries[i];
+                MDataTypeEntry trueTypeEntry = trueType.Entries[i];
+                // NOTE: the case above covers if this is a generic type
+                // Right now, generics can't have generics of their own
+                // (so can't have T<R> or something)
+                if (typeEntry is MConcreteDataTypeEntry ct)
                 {
-                    returnType = returnType.Union(MatchGenerics(parameterizedType.Entries[i].Generics[j],
-                        trueType.Entries[i].Generics[j], name));
+                    if (trueTypeEntry is MConcreteDataTypeEntry trueCt)
+                    {
+                        for (int j = 0; j < ct.Generics.Count; j++)
+                        {
+                            resultType = resultType.Union(MatchGenerics(ct.Generics[j], trueCt.Generics[j], name));
+                        }
+                    }
+                    else
+                    {
+                        throw new TypeDeterminationException($"Assigning generics: " + 
+                            "Found a parameterized concrete type with no true concrete type.");
+                    }
+                }
+                else if (typeEntry is MFunctionDataTypeEntry ft)
+                { 
+                    if (trueTypeEntry is MFunctionDataTypeEntry trueFt)
+                    {
+                        // Need to handle the return type AND parameter types
+                        resultType = resultType.Union(MatchGenerics(ft.ReturnType, trueFt.ReturnType, name));
+                        for (int k = 0; k < ft.ParameterTypes.Count; k++)
+                        {
+                            resultType = resultType.Union(MatchGenerics(ft.ParameterTypes[k],
+                                trueFt.ParameterTypes[k], name));
+                        }
+                    }
+                    else
+                    {
+                        throw new TypeDeterminationException($"Assigning generics: " +
+                            "Found a parameterized function type with no true function type.");
+                    }
                 }
             }
 
-            return returnType;
+            return resultType;
         }
     }
 }

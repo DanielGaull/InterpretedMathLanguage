@@ -125,14 +125,12 @@ namespace IML.Parsing
         private TypeDeterminer typeDeterminer;
         private VariableAstTypeMap defaultVariables;
         private ParameterParser parameterParser;
-        private GenericAssigner genericAssigner;
 
         public Parser(VariableAstTypeMap defaultVariables)
         {
             typeDeterminer = new TypeDeterminer();
             this.defaultVariables = defaultVariables;
             parameterParser = new ParameterParser();
-            genericAssigner = new GenericAssigner();
         }
 
         public virtual Ast Parse(string expression)

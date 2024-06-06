@@ -21,6 +21,14 @@ namespace IML.CoreDataTypes
         private bool isUnionBase = false;
         public static readonly MType UNION_BASE = new MType(true);
 
+        public bool IsUnionBase
+        {
+            get
+            {
+                return isUnionBase;
+            }
+        }
+
         public List<MDataTypeEntry> Entries
         {
             get
