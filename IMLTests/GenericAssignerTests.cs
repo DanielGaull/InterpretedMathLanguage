@@ -1,6 +1,8 @@
 ﻿using IML.CoreDataTypes;
+using IML.Exceptions;
 using IML.Parsing;
 using IML.Parsing.AST;
+using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -121,7 +123,7 @@ namespace IMLTests
             AstType listOfT = new AstType(new AstTypeEntry("list", genericT));
             LambdaAstTypeEntry callee = new LambdaAstTypeEntry(number,
                 new List<AstType>() { listOfT }, LambdaEnvironmentType.AllowAny,
-                false, false, new List<string>() { "T", "R" });
+                false, false, new List<string>() { "T" });
             List<AstType> args = new List<AstType>()
             {
                 listOfNumber
@@ -148,7 +150,7 @@ namespace IMLTests
             AstType doublyListOfT = new AstType(new AstTypeEntry("list", listOfT));
             LambdaAstTypeEntry callee = new LambdaAstTypeEntry(number,
                 new List<AstType>() { doublyListOfT }, LambdaEnvironmentType.AllowAny,
-                false, false, new List<string>() { "T", "R" });
+                false, false, new List<string>() { "T" });
             List<AstType> args = new List<AstType>()
             {
                 doublyList
@@ -161,6 +163,36 @@ namespace IMLTests
             AstType r1 = result[0];
             Assert.AreEqual(1, r1.Entries.Count);
             Assert.IsTrue(r1.Entries[0].DataTypeName == "number");
+        }
+
+        [TestMethod]
+        public void Assign_WithNestedUnionedGenerics_ThrowException()
+        {
+            AstType number = new AstType(new AstTypeEntry("number"));
+            AstType listOfNumber = new AstType(new AstTypeEntry("list", number));
+
+            AstType genericTOrString = new AstType(new List<AstTypeEntry>() {
+                new AstTypeEntry("T"), new AstTypeEntry("string")
+            });
+            AstType listOfTOrString = new AstType(new AstTypeEntry("list", genericTOrString));
+            LambdaAstTypeEntry callee = new LambdaAstTypeEntry(number,
+                new List<AstType>() { listOfTOrString }, LambdaEnvironmentType.AllowAny,
+                false, false, new List<string>() { "T" });
+            List<AstType> args = new List<AstType>()
+            {
+                listOfNumber
+            };
+
+            AstType realReturnType = number;
+            try
+            {
+                assigner.AssignGenerics(callee, realReturnType, args);
+            }
+            catch (TypeDeterminationException ex)
+            {   
+                Assert.AreEqual("Type verification error: \"Cannot infer generics when they appear in a union. " +
+                    "Please manually define generics.\".", ex.Message);
+            }
         }
     }
 }

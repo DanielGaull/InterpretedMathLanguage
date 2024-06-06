@@ -25,8 +25,8 @@ namespace IML.Parsing
 
             // If either the return type or parameters have generics with multiple entries,
             // then we simply cannot determine the type
-            if (HasUnionedGenerics(returnType, callee.GenericNames) ||
-                parameters.Any(p => HasUnionedGenerics(p, callee.GenericNames)))
+            if (HasUnionedGenerics(callee.ReturnType, callee.GenericNames) ||
+                callee.ParamTypes.Any(p => HasUnionedGenerics(p, callee.GenericNames)))
             {
                 throw new TypeDeterminationException("Cannot infer generics when they appear in a union. " +
                     "Please manually define generics.");
@@ -41,15 +41,9 @@ namespace IML.Parsing
                 string name = callee.GenericNames[i];
                 for (int j = 0; j < parameters.Count; j++)
                 {
-                    if (IsThisGeneric(callee.ParamTypes[j], name))
-                    {
-                        type = type.Union(parameters[j]);
-                    }
+                    type = type.Union(MatchGenerics(callee.ParamTypes[j], parameters[j], name));
                 }
-                if (IsThisGeneric(callee.ReturnType, name))
-                {
-                    type = type.Union(returnType);
-                }
+                type = type.Union(MatchGenerics(callee.ReturnType, returnType, name));
 
                 // Generic is not assigned; we throw an error
                 // For example, a user could declare a variable of this type, so we need an actual
@@ -69,13 +63,36 @@ namespace IML.Parsing
 
         private bool HasUnionedGenerics(AstType type, List<string> genericNames)
         {
-            return type.Entries.Count > 1 && 
+            bool doesThisTypeHasUnionedGenerics = type.Entries.Count > 1 &&
                 type.Entries.Any(t => genericNames.Contains(t.DataTypeName));
+            bool doNestedTypesHaveUnionedGenerics =
+                type.Entries.Any(t => t.Generics.Any(g => HasUnionedGenerics(g, genericNames)));
+            return doesThisTypeHasUnionedGenerics || doNestedTypesHaveUnionedGenerics;
         }
 
         private bool IsThisGeneric(AstType type, string name)
         {
             return type.Entries.Count == 1 && type.Entries.Any(t => t.DataTypeName == name);
+        }
+
+        private AstType MatchGenerics(AstType parameterizedType, AstType trueType, string name)
+        {
+            AstType returnType = AstType.UNION_BASE;
+            if (IsThisGeneric(parameterizedType, name))
+            {
+                returnType = returnType.Union(trueType);
+            }
+            // Now need to traverse the generics (subtypes) of the parameterized types
+            for (int i = 0; i < parameterizedType.Entries.Count; i++)
+            {
+                for (int j = 0; j < parameterizedType.Entries[i].Generics.Count; j++)
+                {
+                    returnType = returnType.Union(MatchGenerics(parameterizedType.Entries[i].Generics[j],
+                        trueType.Entries[i].Generics[j], name));
+                }
+            }
+
+            return returnType;
         }
     }
 }
