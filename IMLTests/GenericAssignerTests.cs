@@ -152,5 +152,59 @@ namespace IMLTests
                     "Please manually define generics.\".", ex.Message);
             }
         }
+
+        [TestMethod]
+        public void Assign_WithFunctionParam_Success()
+        {
+            MType predicateFuncType = new MType(new MFunctionDataTypeEntry(
+                MType.Boolean,
+                new List<MType>() { new MType(new MGenericDataTypeEntry("T")) },
+                new List<string>(),
+                false, LambdaEnvironmentType.AllowAny, false));
+            MType numberPredicateFuncType = new MType(new MFunctionDataTypeEntry(
+                MType.Boolean,
+                new List<MType>() { MType.Number },
+                new List<string>(),
+                false, LambdaEnvironmentType.AllowAny, false));
+
+            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(MType.Boolean,
+                new List<MType> { predicateFuncType }, new List<string> { "T" }, false,
+                LambdaEnvironmentType.AllowAny, false);
+
+            List<MType> result = assigner.AssignGenerics(callee, MType.Boolean,
+                new List<MType>() { numberPredicateFuncType });
+
+            Assert.AreEqual(1, result.Count);
+            MType r1 = result[0];
+            Assert.AreEqual(1, r1.Entries.Count);
+            Assert.AreEqual("number", ((MConcreteDataTypeEntry)r1.Entries[0]).DataType.Name);
+        }
+
+        [TestMethod]
+        public void Assign_WithFunctionReturnVal_Success()
+        {
+            MType factoryFuncType = new MType(new MFunctionDataTypeEntry(
+                new MType(new MGenericDataTypeEntry("T")),
+                new List<MType>(),
+                new List<string>(),
+                false, LambdaEnvironmentType.AllowAny, false));
+            MType stringFactoryFuncType = new MType(new MFunctionDataTypeEntry(
+                MType.String,
+                new List<MType>(),
+                new List<string>(),
+                false, LambdaEnvironmentType.AllowAny, false));
+
+            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(MType.Boolean,
+                new List<MType> { factoryFuncType }, new List<string> { "T" }, false,
+                LambdaEnvironmentType.AllowAny, false);
+
+            List<MType> result = assigner.AssignGenerics(callee, MType.Boolean,
+                new List<MType>() { stringFactoryFuncType });
+
+            Assert.AreEqual(1, result.Count);
+            MType r1 = result[0];
+            Assert.AreEqual(1, r1.Entries.Count);
+            Assert.AreEqual("string", ((MConcreteDataTypeEntry)r1.Entries[0]).DataType.Name);
+        }
     }
 }

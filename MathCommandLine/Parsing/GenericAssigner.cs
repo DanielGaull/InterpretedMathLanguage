@@ -118,23 +118,8 @@ namespace IML.Parsing
                 // NOTE: the case above covers if this is a generic type
                 // Right now, generics can't have generics of their own
                 // (so can't have T<R> or something)
-                if (typeEntry is MConcreteDataTypeEntry ct)
+                if (typeEntry is MFunctionDataTypeEntry ft)
                 {
-                    if (trueTypeEntry is MConcreteDataTypeEntry trueCt)
-                    {
-                        for (int j = 0; j < ct.Generics.Count; j++)
-                        {
-                            resultType = resultType.Union(MatchGenerics(ct.Generics[j], trueCt.Generics[j], name));
-                        }
-                    }
-                    else
-                    {
-                        throw new TypeDeterminationException($"Assigning generics: " + 
-                            "Found a parameterized concrete type with no true concrete type.");
-                    }
-                }
-                else if (typeEntry is MFunctionDataTypeEntry ft)
-                { 
                     if (trueTypeEntry is MFunctionDataTypeEntry trueFt)
                     {
                         // Need to handle the return type AND parameter types
@@ -149,6 +134,21 @@ namespace IML.Parsing
                     {
                         throw new TypeDeterminationException($"Assigning generics: " +
                             "Found a parameterized function type with no true function type.");
+                    }
+                }
+                else if (typeEntry is MConcreteDataTypeEntry ct)
+                {
+                    if (trueTypeEntry is MConcreteDataTypeEntry trueCt)
+                    {
+                        for (int j = 0; j < ct.Generics.Count; j++)
+                        {
+                            resultType = resultType.Union(MatchGenerics(ct.Generics[j], trueCt.Generics[j], name));
+                        }
+                    }
+                    else
+                    {
+                        throw new TypeDeterminationException($"Assigning generics: " + 
+                            "Found a parameterized concrete type with no true concrete type.");
                     }
                 }
             }
