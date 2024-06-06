@@ -9,6 +9,7 @@ using IML.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -124,12 +125,14 @@ namespace IML.Parsing
         private TypeDeterminer typeDeterminer;
         private VariableAstTypeMap defaultVariables;
         private ParameterParser parameterParser;
+        private GenericAssigner genericAssigner;
 
         public Parser(VariableAstTypeMap defaultVariables)
         {
             typeDeterminer = new TypeDeterminer();
             this.defaultVariables = defaultVariables;
             parameterParser = new ParameterParser();
+            genericAssigner = new GenericAssigner();
         }
 
         public virtual Ast Parse(string expression)
@@ -213,76 +216,7 @@ namespace IML.Parsing
                 }
                 else if (attemptedLambdaMatch.IsMatch)
                 {
-                    string genericsString = attemptedLambdaMatch.Generics;
-                    string paramsString = attemptedLambdaMatch.Params;
-                    string returnTypeString = attemptedLambdaMatch.ReturnType;
-                    string arrowBit = attemptedLambdaMatch.ArrowBit;
-                    string exprString = attemptedLambdaMatch.Body;
-
-                    bool provideReturnType = returnTypeString.Length > 0;
-
-                    // Parse Parameters
-                    List<AstParameter> parsedParamsList = new List<AstParameter>();
-                    AstParameter[] parsedParams;
-                    bool hasVarArgs = false;
-                    if (paramsString.Length > 0)
-                    {
-                        string[] splitParamsStrings = SplitByDelimiter(paramsString, PARAM_DELIMITER);
-                        for (int i = 0; i < splitParamsStrings.Length; i++)
-                        {
-                            if (i + 1 == splitParamsStrings.Length)
-                            {
-                                // This is the last parameter; check for varargs
-                                if (splitParamsStrings[i].EndsWith(VAR_ARGS_SYMBOL))
-                                {
-                                    hasVarArgs = true;
-                                    splitParamsStrings[i] = splitParamsStrings[i].SubstringBetween(0,
-                                        splitParamsStrings[i].Length - VAR_ARGS_SYMBOL.Length);
-                                }
-                            }
-                            parsedParamsList.Add(parameterParser.ParseParameter(splitParamsStrings[i]));
-                        }
-                        parsedParams = parsedParamsList.ToArray();
-                    }
-                    else
-                    {
-                        parsedParams = new AstParameter[0];
-                    }
-
-                    bool createsEnv = arrowBit == LAMBDA_TYPE_CREATES_ENVIRONMENT_LINE.ToString();
-
-                    VariableAstTypeMap mapToUseForBody = typeMap;
-                    if (createsEnv)
-                    {
-                        mapToUseForBody = typeMap.Clone();
-                        // Need to add all the params to it
-                        for (int i = 0; i < parsedParams.Length; i++)
-                        {
-                            mapToUseForBody.Add(parsedParams[i].Name, parsedParams[i].Type);
-                        }
-                    }
-
-                    // In the event that we don't create an env, the typeMap will be updated by parsing the body
-                    // We clone the map to use for body return type since we will always have our own type map updated by parsing
-                    List<Ast> body = ParseBody(exprString, mapToUseForBody);
-                    AstType bodyReturnType = typeDeterminer.DetermineDataType(body, mapToUseForBody.Clone());
-                    AstType returnType;
-                    if (provideReturnType)
-                    {
-                        returnType = parameterParser.ParseType(returnTypeString);
-                        if (bodyReturnType != returnType)
-                        {
-                            throw new InvalidParseException("Function return type does not match returned value(s)", expression);
-                        }
-                    }
-                    else
-                    {
-                        returnType = bodyReturnType;
-                    }
-
-                    List<string> generics = ParseGenericNames(genericsString);
-
-                    return Ast.LambdaLiteral(parsedParams, body, returnType, createsEnv, false, hasVarArgs, generics);
+                    return ParseLambda(attemptedLambdaMatch, typeMap, expression);
                 }
                 else if (MatchesSimpleLambda(expression))
                 {
@@ -504,6 +438,80 @@ namespace IML.Parsing
             }
 
             throw new InvalidParseException(expression);
+        }
+
+        private LambdaAst ParseLambda(LambdaMatch match, VariableAstTypeMap typeMap, string expression)
+        {
+            string genericsString = match.Generics;
+            string paramsString = match.Params;
+            string returnTypeString = match.ReturnType;
+            string arrowBit = match.ArrowBit;
+            string exprString = match.Body;
+
+            bool provideReturnType = returnTypeString.Length > 0;
+
+            // Parse Parameters
+            List<AstParameter> parsedParamsList = new List<AstParameter>();
+            AstParameter[] parsedParams;
+            bool hasVarArgs = false;
+            if (paramsString.Length > 0)
+            {
+                string[] splitParamsStrings = SplitByDelimiter(paramsString, PARAM_DELIMITER);
+                for (int i = 0; i < splitParamsStrings.Length; i++)
+                {
+                    if (i + 1 == splitParamsStrings.Length)
+                    {
+                        // This is the last parameter; check for varargs
+                        if (splitParamsStrings[i].EndsWith(VAR_ARGS_SYMBOL))
+                        {
+                            hasVarArgs = true;
+                            splitParamsStrings[i] = splitParamsStrings[i].SubstringBetween(0,
+                                splitParamsStrings[i].Length - VAR_ARGS_SYMBOL.Length);
+                        }
+                    }
+                    parsedParamsList.Add(parameterParser.ParseParameter(splitParamsStrings[i]));
+                }
+                parsedParams = parsedParamsList.ToArray();
+            }
+            else
+            {
+                parsedParams = new AstParameter[0];
+            }
+
+            bool createsEnv = arrowBit == LAMBDA_TYPE_CREATES_ENVIRONMENT_LINE.ToString();
+
+            VariableAstTypeMap mapToUseForBody = typeMap;
+            if (createsEnv)
+            {
+                mapToUseForBody = typeMap.Clone();
+                // Need to add all the params to it
+                for (int i = 0; i < parsedParams.Length; i++)
+                {
+                    mapToUseForBody.Add(parsedParams[i].Name, parsedParams[i].Type);
+                }
+            }
+
+            // In the event that we don't create an env, the typeMap will be updated by parsing the body
+            // We clone the map to use for body return type since we will always have our own type map updated by parsing
+            List<Ast> body = ParseBody(exprString, mapToUseForBody);
+            AstType bodyReturnType = typeDeterminer.DetermineDataType(body, mapToUseForBody.Clone());
+            AstType returnType;
+            if (provideReturnType)
+            {
+                returnType = parameterParser.ParseType(returnTypeString);
+                if (bodyReturnType != returnType)
+                {
+                    throw new InvalidParseException("Function return type does not match returned value(s)", expression);
+                }
+            }
+            else
+            {
+                returnType = bodyReturnType;
+            }
+
+            List<string> generics = ParseGenericNames(genericsString);
+
+            return Ast.LambdaLiteral(parsedParams, body, returnType, createsEnv, false, hasVarArgs, generics);
         }
 
         #region Utilities

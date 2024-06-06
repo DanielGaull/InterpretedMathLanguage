@@ -11,6 +11,8 @@ namespace IML.Parsing.AST.ValueAsts
         public List<Ast> Arguments { get; private set; }
         public List<AstType> ProvidedGenerics { get; private set; }
 
+        // NOTE: When a call happens, the generics are not always resolved
+        // This just stores the provided generics if there are any
         public CallAst(Ast called, List<Ast> args, List<AstType> providedGenerics)
             : base(AstTypes.Call)
         {
