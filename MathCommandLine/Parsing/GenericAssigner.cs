@@ -16,8 +16,7 @@ namespace IML.Parsing
         }
 
         // Will assign generics in order, returning a list in the order desired
-        public List<MType> AssignGenerics(MFunctionDataTypeEntry callee, MType returnType, 
-            List<MType> parameters)
+        public List<MType> AssignGenerics(MFunctionDataTypeEntry callee, List<MType> parameters)
         {
             if (callee.GenericNames.Count == 0)
             {
@@ -33,7 +32,7 @@ namespace IML.Parsing
                     "Please manually define generics.");
             }
 
-            // Now, for each generic name, find the associated parameter or return type
+            // Now, for each generic name, find the associated parameter
             // If there are multiple, we just union them together
             List<MType> result = new List<MType>();
             for (int i = 0; i < callee.GenericNames.Count; i++)
@@ -44,11 +43,10 @@ namespace IML.Parsing
                 {
                     type = type.Union(MatchGenerics(callee.ParameterTypes[j], parameters[j], name));
                 }
-                type = type.Union(MatchGenerics(callee.ReturnType, returnType, name));
 
                 // Generic is not assigned; we throw an error
-                // For example, a user could declare a variable of this type, so we need an actual
-                // value for it
+                // For example (on why this is a problem), a user could declare a variable of this type,
+                // so we need an actual value for it
                 if (type.IsUnionBase)
                 {
                     throw new TypeDeterminationException("Could infer generic for \"" + name + "\". " + 

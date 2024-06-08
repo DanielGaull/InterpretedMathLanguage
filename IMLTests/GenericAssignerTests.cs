@@ -29,8 +29,7 @@ namespace IMLTests
                 new List<MType> { genericT }, new List<string> { "T" }, false, LambdaEnvironmentType.AllowAny,
                 false);
 
-            List<MType> result = assigner.AssignGenerics(callee, MType.Number,
-                new List<MType>() { MType.String });
+            List<MType> result = assigner.AssignGenerics(callee, new List<MType>() { MType.String });
 
             Assert.AreEqual(1, result.Count);
             MType r = result[0];
@@ -46,13 +45,11 @@ namespace IMLTests
                 new List<MType> { genericT }, new List<string> { "T" }, false, LambdaEnvironmentType.AllowAny,
                 false);
 
-            List<MType> result = assigner.AssignGenerics(callee, MType.Number,
-                new List<MType>() { MType.String });
+            List<MType> result = assigner.AssignGenerics(callee, new List<MType>() { MType.String });
 
             Assert.AreEqual(1, result.Count);
             MType r = result[0];
-            Assert.AreEqual(2, r.Entries.Count);
-            Assert.IsTrue(r.Entries.Exists(e => ((MConcreteDataTypeEntry)e).DataType.Name == "number"));
+            Assert.AreEqual(1, r.Entries.Count);
             Assert.IsTrue(r.Entries.Exists(e => ((MConcreteDataTypeEntry)e).DataType.Name == "string"));
         }
 
@@ -64,8 +61,7 @@ namespace IMLTests
                 new List<MType> { genericT, genericT }, new List<string> { "T" }, false, 
                 LambdaEnvironmentType.AllowAny, false);
 
-            List<MType> result = assigner.AssignGenerics(callee, MType.Number,
-                new List<MType>() { MType.Number, MType.String });
+            List<MType> result = assigner.AssignGenerics(callee, new List<MType>() { MType.Number, MType.String });
 
             Assert.AreEqual(1, result.Count);
             MType r = result[0];
@@ -83,8 +79,7 @@ namespace IMLTests
                 new List<MType> { genericT, genericR }, new List<string> { "T", "R" }, false, 
                 LambdaEnvironmentType.AllowAny, false);
 
-            List<MType> result = assigner.AssignGenerics(callee, MType.Number,
-                new List<MType>() { MType.Number, MType.String });
+            List<MType> result = assigner.AssignGenerics(callee, new List<MType>() { MType.Number, MType.String });
 
             Assert.AreEqual(2, result.Count);
             MType r1 = result[0];
@@ -104,8 +99,7 @@ namespace IMLTests
                 new List<MType> { listOfT }, new List<string> { "T" }, false,
                 LambdaEnvironmentType.AllowAny, false);
 
-            List<MType> result = assigner.AssignGenerics(callee, MType.Number,
-                new List<MType>() { MType.List(MType.Number) });
+            List<MType> result = assigner.AssignGenerics(callee, new List<MType>() { MType.List(MType.Number) });
 
             Assert.AreEqual(1, result.Count);
             MType r1 = result[0];
@@ -123,7 +117,7 @@ namespace IMLTests
                 new List<MType> { listOfListOfT }, new List<string> { "T" }, false,
                 LambdaEnvironmentType.AllowAny, false);
 
-            List<MType> result = assigner.AssignGenerics(callee, MType.Number,
+            List<MType> result = assigner.AssignGenerics(callee, 
                 new List<MType>() { MType.List(MType.List(MType.Number)) });
 
             Assert.AreEqual(1, result.Count);
@@ -143,7 +137,7 @@ namespace IMLTests
 
             try
             {
-                assigner.AssignGenerics(callee, MType.Number, 
+                assigner.AssignGenerics(callee, 
                     new List<MType>() { MType.List(MType.Number) });
             }
             catch (TypeDeterminationException ex)
@@ -171,7 +165,7 @@ namespace IMLTests
                 new List<MType> { predicateFuncType }, new List<string> { "T" }, false,
                 LambdaEnvironmentType.AllowAny, false);
 
-            List<MType> result = assigner.AssignGenerics(callee, MType.Boolean,
+            List<MType> result = assigner.AssignGenerics(callee, 
                 new List<MType>() { numberPredicateFuncType });
 
             Assert.AreEqual(1, result.Count);
@@ -198,7 +192,7 @@ namespace IMLTests
                 new List<MType> { factoryFuncType }, new List<string> { "T" }, false,
                 LambdaEnvironmentType.AllowAny, false);
 
-            List<MType> result = assigner.AssignGenerics(callee, MType.Boolean,
+            List<MType> result = assigner.AssignGenerics(callee,
                 new List<MType>() { stringFactoryFuncType });
 
             Assert.AreEqual(1, result.Count);

@@ -92,7 +92,7 @@ namespace IML.CoreDataTypes
                     new MArgument(value), 
                     new MArgument(list.iList[i])
                 );
-                ValueOrReturn vr = evaluator.PerformCall(equalityEvaluator, args, env);
+                ValueOrReturn vr = evaluator.PerformCall(equalityEvaluator, args, env, new List<MType>());
                 if (vr.IsReturn)
                 {
                     throw new FatalRuntimeException("Should never get a return from value or return in List IndexOfCustom. " +
@@ -112,7 +112,8 @@ namespace IML.CoreDataTypes
             List<MValue> newList = new List<MValue>();
             for (int i = 0; i < list.iList.Count; i++)
             {
-                ValueOrReturn vr = evaluator.PerformCall(function, new MArguments(new MArgument(list.iList[i])), env);
+                ValueOrReturn vr = evaluator.PerformCall(function, 
+                    new MArguments(new MArgument(list.iList[i])), env, new List<MType>());
                 if (vr.IsReturn)
                 {
                     throw new FatalRuntimeException("Should never get a return from value or return in List Map. " +
@@ -129,7 +130,8 @@ namespace IML.CoreDataTypes
             for (int i = 0; i < list.iList.Count; i++)
             {
                 ValueOrReturn vr = evaluator.PerformCall(function,
-                    new MArguments(new MArgument(runningResult), new MArgument(list.iList[i])), env);
+                    new MArguments(new MArgument(runningResult), new MArgument(list.iList[i])), 
+                    env, new List<MType>());
                 if (vr.IsReturn)
                 {
                     throw new FatalRuntimeException("Should never get a return from value or return in List Reduce. " +

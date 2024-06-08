@@ -18,6 +18,7 @@ namespace IML.Evaluation
     {
         DataTypeDict dtDict;
         Parser parser;
+        GenericAssigner genericAssigner;
         Action exitAction;
 
         private static readonly Regex WHITESPACE_REGEX = new Regex(@"\s+");
@@ -150,7 +151,8 @@ namespace IML.Evaluation
                             }
                             argsList.Add(new MArgument(argVr.Value));
                         }
-                        return PerformCall(function, new MArguments(argsList), env);
+                        return PerformCall(function, new MArguments(argsList), env, 
+                            ast.ProvidedGenerics.Select(g => ResolveType(g, new List<string>())).ToList());
                     }
                 case AstTypes.Variable:
                     // Return the value of the variable with this name
@@ -367,6 +369,9 @@ namespace IML.Evaluation
             return new ValueOrReturn(MValue.Void());
         }
 
+        // anonymousGenerics is all of the generics that we don't have resolved yet
+        // For example, in a <T>(param: T)=>void, the "param" is of an anonymous generic
+        // We don't know the value of the generic until the generic is assigned later (when the function is called)
         private MType ResolveType(AstType astType, List<string> anonymousGenerics)
         {
             if (astType.Entries.Count <= 0)
@@ -432,7 +437,8 @@ namespace IML.Evaluation
             }
         }
 
-        public ValueOrReturn PerformCall(MFunction function, MArguments args, MEnvironment currentEnv)
+        public ValueOrReturn PerformCall(MFunction function, MArguments args, MEnvironment currentEnv,
+            List<MType> providedGenerics)
         {
             // We have a callable type!
             // Verify that everything is good to go before we actually call it
@@ -483,16 +489,29 @@ namespace IML.Evaluation
                 // Only add args if the function creates a new env; functions that don't create envs can't have params
                 if (function.CreatesEnv)
                 {
-                    // Add the params and defined generics to the new environment; get them from the param values
+                    // Add the parameters to the new environment
                     for (int i = 0; i < args.Length; i++)
                     {
                         envToUse.AddVariable(args[i].Name, args[i].Value);
-                        // TODO
-                        // CANNOT simply set every generic to a var's type, ex.
-                        // if we've got a (x:T|R, y:R)=>void called with (5, "hello")
-                        // we can't set T and R to number, because then y is invalid, even though
-                        // this is a valid call since T = number, R = string
-                        // Need an algorithm to match these up best
+                    }
+
+                    // Now add the generics
+                    if (providedGenerics.Count > 0)
+                    {
+                        // User provided some, so they have to provide all
+                        if (providedGenerics.Count != function.DefinedGenerics.Count)
+                        {
+                            return new ValueOrReturn(MValue.Error(ErrorCodes.WRONG_GENERIC_COUNT,
+                                "Expected " + function.DefinedGenerics.Count +
+                                " type arguments but received " + providedGenerics.Count + ".", MList.Empty));
+                        }
+                        // If we've gotten here, then can assign the generics for the environment
+
+                    }
+                    else
+                    {
+                        // Need to determine the generic values ourselves
+                        //genericAssigner.AssignGenerics(function.TypeEntry, )
                     }
                 }
 

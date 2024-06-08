@@ -22,5 +22,7 @@ namespace IML.Util
         CANNOT_DECLARE = 13,
         INVALID_ARGUMENT = 14,
         ILLEGAL_LAMBDA = 15,
+        WRONG_GENERIC_COUNT = 16,
+
     }
 }

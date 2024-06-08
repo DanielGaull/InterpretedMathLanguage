@@ -502,7 +502,8 @@ namespace IML.Functions
                                 "Expected list length of 2 but found " + pair.Count + "."));
                         }
                         MFunction cond = pair[0].FunctionValue;
-                        ValueOrReturn condVr = interpreter.PerformCall(cond, MArguments.Empty, env);
+                        ValueOrReturn condVr = interpreter.PerformCall(cond, MArguments.Empty, 
+                            env, new List<MType>());
                         if (condVr.IsReturn)
                         {
                             return condVr;
@@ -516,7 +517,8 @@ namespace IML.Functions
                         if (condValue.IsTruthy())
                         {
                             MFunction outputFunc = pair[1].FunctionValue;
-                            ValueOrReturn outVr = interpreter.PerformCall(outputFunc, MArguments.Empty, env);
+                            ValueOrReturn outVr = interpreter.PerformCall(outputFunc, MArguments.Empty, 
+                                env, new List<MType>());
                             if (outVr.IsReturn)
                             {
                                 return outVr;
@@ -579,7 +581,8 @@ namespace IML.Functions
                     for (int i = 0; i < funcs.Count; i++)
                     {
                         MFunction function = funcs[i].FunctionValue;
-                        returnValue = interpreter.PerformCall(function, MArguments.Empty, env).Value;
+                        returnValue = interpreter.PerformCall(function, MArguments.Empty, 
+                            env, new List<MType>()).Value;
                     }
                     return new ValueOrReturn(returnValue);
                 },
@@ -668,7 +671,8 @@ namespace IML.Functions
                 {
                     MFunction b1 = args[0].Value.FunctionValue;
                     MFunction b2 = args[1].Value.FunctionValue;
-                    ValueOrReturn vr1 = interpreter.PerformCall(b1, MArguments.Empty, env);
+                    ValueOrReturn vr1 = interpreter.PerformCall(b1, MArguments.Empty, 
+                        env, new List<MType>());
                     if (vr1.IsReturn)
                     {
                         return vr1;
@@ -681,7 +685,8 @@ namespace IML.Functions
                     if (result1.IsTruthy())
                     {
                         // Simply return the second value
-                        return interpreter.PerformCall(b2, MArguments.Empty, env);
+                        return interpreter.PerformCall(b2, MArguments.Empty, 
+                            env, new List<MType>());
                     }
                     return new ValueOrReturn(result1);
                 },
@@ -706,7 +711,8 @@ namespace IML.Functions
                 {
                     MFunction b1 = args[0].Value.FunctionValue;
                     MFunction b2 = args[1].Value.FunctionValue;
-                    ValueOrReturn vr1 = interpreter.PerformCall(b1, MArguments.Empty, env); ;
+                    ValueOrReturn vr1 = interpreter.PerformCall(b1, MArguments.Empty, 
+                        env, new List<MType>());
                     if (vr1.IsReturn)
                     {
                         return vr1;
@@ -719,7 +725,7 @@ namespace IML.Functions
                     if (!result1.IsTruthy())
                     {
                         // Simply return the second value
-                        return interpreter.PerformCall(b2, MArguments.Empty, env);
+                        return interpreter.PerformCall(b2, MArguments.Empty, env, new List<MType>());
                     }
                     return new ValueOrReturn(result1);
                 },
