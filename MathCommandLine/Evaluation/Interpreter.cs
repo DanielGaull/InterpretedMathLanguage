@@ -11,6 +11,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading;
 
 namespace IML.Evaluation
 {
@@ -32,6 +34,7 @@ namespace IML.Evaluation
             this.dtDict = dtDict;
             this.parser = parser;
             this.exitAction = exitAction;
+            genericAssigner = new GenericAssigner();
         }
 
         public void Exit()
@@ -449,27 +452,71 @@ namespace IML.Evaluation
                 return new ValueOrReturn(MValue.Error(ErrorCodes.WRONG_ARG_COUNT, "Expected " + parameters.Length +
                     " arguments but received " + args.Length + ".", MList.Empty));
             }
-            // Now check the types of the arguments to ensure they match. If any errors appear in the arguments, return that immediately
-            for (int i = 0; i < args.Length; i++)
+
+            // Add generics up here, so we can use them when checking parameter types
+            // (we'll just construct the new environment now)
+            MEnvironment envToUse = function.CreatesEnv ? new MEnvironment(function.Environment) : currentEnv;
+            if (function.CreatesEnv)
             {
-                if (!parameters[i].Type.ValueMatches(args[i].Value))
+                List<MType> argTypes = new List<MType>();
+                for (int i = 0; i < args.Length; i++)
                 {
-                    // Improper data type!
-                    return new ValueOrReturn(MValue.Error(ErrorCodes.INVALID_TYPE,
-                        "Expected argument \"" + parameters.Get(i).Name + "\" to be of type '" +
-                            parameters.Get(i).DataTypeString() + "' but received type '" + args[i].Value.DataType + "'.",
-                        MList.FromOne(MValue.Number(i))));
+                    argTypes.Add(new MType(args[i].Value.DataType));
                 }
-                else if (args[i].Value.DataType.DataType == MDataType.Error)
+                // Now add the generics
+                if (providedGenerics.Count > 0)
                 {
-                    // An error was passed as an argument, so simply need to return it
-                    return new ValueOrReturn(args[i].Value);
+                    // User provided some, so they have to provide all
+                    if (providedGenerics.Count != function.DefinedGenerics.Count)
+                    {
+                        return new ValueOrReturn(MValue.Error(ErrorCodes.WRONG_GENERIC_COUNT,
+                            "Expected " + function.DefinedGenerics.Count +
+                            " type arguments but received " + providedGenerics.Count + ".", MList.Empty));
+                    }
+                    // If we've gotten here, then can assign the generics for the environment
+                    envToUse.AddDefinedGenerics(function.DefinedGenerics, providedGenerics);
                 }
                 else
                 {
-                    // Arg passes! But we need to make sure it's properly named
-                    MArgument newArg = new MArgument(parameters[i].Name, args[i].Value);
-                    args[i] = newArg;
+                    // Need to determine the generic values ourselves
+                    try
+                    {
+                        List<MType> assignments = genericAssigner.AssignGenerics(function.TypeEntry, argTypes);
+                        envToUse.AddDefinedGenerics(function.DefinedGenerics, assignments);
+                    }
+                    catch (TypeDeterminationException ex)
+                    {
+                        return new ValueOrReturn(MValue.Error(ErrorCodes.CANNOT_ASSIGN_GENERICS,
+                            ex.Message));
+                    }
+                }
+
+                for (int i = 0; i < args.Length; i++)
+                {
+                    MType parameterType = GetTypeWithAssignedGenerics(parameters[i].Type, envToUse);
+                    if (!parameterType.ValueMatches(args[i].Value))
+                    {
+                        // Improper data type!
+                        return new ValueOrReturn(MValue.Error(ErrorCodes.INVALID_TYPE,
+                            "Expected argument \"" + parameters.Get(i).Name + "\" to be of type '" +
+                                parameterType.ToString() + "' but received type '" + args[i].Value.DataType + "'.",
+                            MList.FromOne(MValue.Number(i))));
+                    }
+                    else if (args[i].Value.DataType.DataType == MDataType.Error)
+                    {
+                        // An error was passed as an argument, so simply need to return it
+                        return new ValueOrReturn(args[i].Value);
+                    }
+                    else
+                    {
+                        // Arg passes! But we need to make sure it's properly named
+                        MArgument newArg = new MArgument(parameters[i].Name, args[i].Value);
+                        args[i] = newArg;
+                    }
+                }
+                for (int i = 0; i < args.Length; i++)
+                {
+                    envToUse.AddVariable(args[i].Name, args[i].Value);
                 }
             }
 
@@ -483,42 +530,72 @@ namespace IML.Evaluation
             }
             else
             {
-                // Step 1: Create the new environment (if the function creates a new one)
-                MEnvironment envToUse = function.CreatesEnv ? new MEnvironment(function.Environment) : currentEnv;
-                // Step 2: Evaluate the body with that new environment
-                // Only add args if the function creates a new env; functions that don't create envs can't have params
-                if (function.CreatesEnv)
-                {
-                    // Add the parameters to the new environment
-                    for (int i = 0; i < args.Length; i++)
-                    {
-                        envToUse.AddVariable(args[i].Name, args[i].Value);
-                    }
-
-                    // Now add the generics
-                    if (providedGenerics.Count > 0)
-                    {
-                        // User provided some, so they have to provide all
-                        if (providedGenerics.Count != function.DefinedGenerics.Count)
-                        {
-                            return new ValueOrReturn(MValue.Error(ErrorCodes.WRONG_GENERIC_COUNT,
-                                "Expected " + function.DefinedGenerics.Count +
-                                " type arguments but received " + providedGenerics.Count + ".", MList.Empty));
-                        }
-                        // If we've gotten here, then can assign the generics for the environment
-
-                    }
-                    else
-                    {
-                        // Need to determine the generic values ourselves
-                        //genericAssigner.AssignGenerics(function.TypeEntry, )
-                    }
-                }
-
                 return EvaluateBody(function.AstBody, envToUse, !function.CreatesEnv);
             }
         }
-        
+
+        private MType GetTypeWithAssignedGenerics(MType initType, MEnvironment env)
+        {
+            MType result = MType.UNION_BASE;
+            // Must recurse through the initial type, resolving all generics that exist
+            for (int i = 0; i < initType.Entries.Count; i++)
+            {
+                result = result.Union(GetTypeEntryWithAssignedGenerics(initType.Entries[i], env));
+            }
+            return result;
+        }
+        private MType GetTypeEntryWithAssignedGenerics(MDataTypeEntry initEntry, MEnvironment env)
+        {
+            if (initEntry is MFunctionDataTypeEntry fe)
+            {
+                return GetFuncTypeEntryWithAssignedGenerics(fe, env);
+            }
+            else if (initEntry is MConcreteDataTypeEntry ce)
+            {
+                return GetConcreteTypeEntryWithAssignedGenerics(ce, env);
+            }
+            else if (initEntry is MGenericDataTypeEntry ge)
+            {
+                return GetGenericTypeEntryWithAssignedGenerics(ge, env);
+            }
+            return null;
+        }
+        private MType GetFuncTypeEntryWithAssignedGenerics(MFunctionDataTypeEntry initEntry,
+            MEnvironment env)
+        {
+            // Need to handle the parameters and return type
+            MType newReturnType = GetTypeWithAssignedGenerics(initEntry.ReturnType, env);
+            List<MType> newParamTypes = new List<MType>();
+            for (int i = 0; i < initEntry.ParameterTypes.Count; i++)
+            {
+                newParamTypes.Add(GetTypeWithAssignedGenerics(initEntry.ParameterTypes[i], env));
+            }
+            return new MType(new MFunctionDataTypeEntry(newReturnType, newParamTypes,
+                initEntry.GenericNames, initEntry.IsPure, initEntry.EnvironmentType,
+                initEntry.IsLastVarArgs));
+        }
+        private MType GetConcreteTypeEntryWithAssignedGenerics(MConcreteDataTypeEntry initEntry,
+            MEnvironment env)
+        {
+            List<MType> newGenerics = new List<MType>();
+            // Need to handle all the generics of this type
+            for (int i = 0; i < initEntry.Generics.Count; i++)
+            {
+                MType newGenericType = GetTypeWithAssignedGenerics(initEntry.Generics[i], env);
+                newGenerics.Add(newGenericType);
+            }
+            return new MType(new MConcreteDataTypeEntry(initEntry.DataType, newGenerics));
+        }
+        private MType GetGenericTypeEntryWithAssignedGenerics(MGenericDataTypeEntry initEntry,
+            MEnvironment env)
+        {
+            if (env.HasDefinedGeneric(initEntry.Name))
+            {
+                return env.GetGeneric(initEntry.Name);
+            }
+            return new MType(initEntry);
+        }
+
         public MDataType GetDataType(string typeName)
         {
             if (dtDict.Contains(typeName))

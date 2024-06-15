@@ -142,8 +142,8 @@ namespace IMLTests
             }
             catch (TypeDeterminationException ex)
             {   
-                Assert.AreEqual("Type verification error: \"Cannot infer generics when they appear in a union. " +
-                    "Please manually define generics.\".", ex.Message);
+                Assert.AreEqual("Type verification error: \"Cannot infer generics when they exclusively appear in " +
+                    "type unions. Please manually define generics.\".", ex.Message);
             }
         }
 
@@ -199,6 +199,60 @@ namespace IMLTests
             MType r1 = result[0];
             Assert.AreEqual(1, r1.Entries.Count);
             Assert.AreEqual("string", ((MConcreteDataTypeEntry)r1.Entries[0]).DataType.Name);
+        }
+
+        [TestMethod]
+        public void Assign_WithSimpleValidUnion_Success()
+        {
+            MType returnType = MType.Union(new MType(new MGenericDataTypeEntry("T1")),
+                new MType(new MGenericDataTypeEntry("T2")));
+            MType p1Type = new MType(new MGenericDataTypeEntry("T1"));
+            MType p2Type = new MType(new MGenericDataTypeEntry("T2"));
+
+            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(returnType,
+                new List<MType> { p1Type, p2Type }, new List<string> { "T1", "T2" }, false,
+                LambdaEnvironmentType.AllowAny, false);
+
+            MType concreteP1Type = MType.String;
+            MType concreteP2Type = MType.Null;
+
+            List<MType> result = assigner.AssignGenerics(callee,
+                new List<MType>() { concreteP1Type, concreteP2Type });
+
+            Assert.AreEqual(2, result.Count);
+            MType r1 = result[0];
+            Assert.AreEqual(1, r1.Entries.Count);
+            Assert.AreEqual("string", ((MConcreteDataTypeEntry)r1.Entries[0]).DataType.Name);
+            MType r2 = result[1];
+            Assert.AreEqual(1, r2.Entries.Count);
+            Assert.AreEqual("null", ((MConcreteDataTypeEntry)r2.Entries[0]).DataType.Name);
+        }
+
+        [TestMethod]
+        public void Assign_WithFunctionValidUnion_Success()
+        {
+            MType returnType = MType.Union(new MType(new MGenericDataTypeEntry("T1")),
+                new MType(new MGenericDataTypeEntry("T2")));
+            MType p1Type = MType.Function(new MType(new MGenericDataTypeEntry("T1")));
+            MType p2Type = MType.Function(new MType(new MGenericDataTypeEntry("T2")));
+
+            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(returnType,
+                new List<MType> { p1Type, p2Type }, new List<string> { "T1", "T2" }, false,
+                LambdaEnvironmentType.AllowAny, false);
+
+            MType concreteP1Type = MType.Function(MType.String);
+            MType concreteP2Type = MType.Function(MType.Null);
+
+            List<MType> result = assigner.AssignGenerics(callee,
+                new List<MType>() { concreteP1Type, concreteP2Type });
+
+            Assert.AreEqual(2, result.Count);
+            MType r1 = result[0];
+            Assert.AreEqual(1, r1.Entries.Count);
+            Assert.AreEqual("string", ((MConcreteDataTypeEntry)r1.Entries[0]).DataType.Name);
+            MType r2 = result[1];
+            Assert.AreEqual(1, r2.Entries.Count);
+            Assert.AreEqual("null", ((MConcreteDataTypeEntry)r2.Entries[0]).DataType.Name);
         }
     }
 }

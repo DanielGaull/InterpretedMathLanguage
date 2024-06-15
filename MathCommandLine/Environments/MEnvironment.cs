@@ -183,6 +183,13 @@ namespace IML.Environments
                 genericMap.Add(name, type);
             }
         }
+        public void AddDefinedGenerics(List<string> names, List<MType> types)
+        {
+            for (int i = 0; i < names.Count; i++)
+            {
+                AddDefinedGeneric(names[i], types[i]);
+            }
+        }
 
         public MValue GetHidden(string name)
         {

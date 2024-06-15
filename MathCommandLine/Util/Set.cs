@@ -14,6 +14,14 @@ namespace IML.Util
             set = new List<T>();
         }
 
+        public int Count 
+        { 
+            get 
+            {
+                return set.Count;
+            } 
+        }
+
         public void Add(T item)
         {
             if (!Contains(item))
@@ -31,7 +39,15 @@ namespace IML.Util
                     return true;
                 }
             }
-            return false;// set.Contains(item);
+            return false;
+        }
+
+        public void AddRange(IEnumerable<T> other)
+        {
+            foreach (T i in other)
+            {
+                Add(i);
+            }
         }
 
         public IEnumerator<T> GetEnumerator()

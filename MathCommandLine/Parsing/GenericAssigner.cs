@@ -1,6 +1,7 @@
 ﻿using IML.CoreDataTypes;
 using IML.Exceptions;
 using IML.Parsing.AST;
+using IML.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,11 +26,19 @@ namespace IML.Parsing
 
             // If either the return type or parameters have generics with multiple entries,
             // then we simply cannot determine the type
-            if (HasUnionedGenerics(callee.ReturnType, callee.GenericNames) ||
-                callee.ParameterTypes.Any(p => HasUnionedGenerics(p, callee.GenericNames)))
+            // This is true only if a generic exclusively appears in unions
+            // If it appears alone at any point, then we can assign it
+            // So, need to check each generic to see if it is non-unioned anywhere
+            Set<string> isolatedGenerics = new Set<string>();
+            isolatedGenerics.AddRange(GetIsolatedGenerics(callee.ReturnType, callee.GenericNames));
+            for (int i = 0; i < callee.ParameterTypes.Count; i++)
             {
-                throw new TypeDeterminationException("Cannot infer generics when they appear in a union. " +
-                    "Please manually define generics.");
+                isolatedGenerics.AddRange(GetIsolatedGenerics(callee.ParameterTypes[i], callee.GenericNames));
+            }
+            if (isolatedGenerics.Count != callee.GenericNames.Count)
+            {
+                throw new TypeDeterminationException("Cannot infer generics when they exclusively appear in " +
+                    "type unions. Please manually define generics.");
             }
 
             // Now, for each generic name, find the associated parameter
@@ -60,32 +69,40 @@ namespace IML.Parsing
             return result;
         }
 
-        private bool HasUnionedGenerics(MType type, List<string> genericNames)
+        private List<string> GetIsolatedGenerics(MType type, List<string> genericNames)
         {
-            bool doesThisTypeHasUnionedGenerics = type.Entries.Count > 1 &&
-                type.Entries.Any(t =>
+            List<string> result = new List<string>();
+            // ONLY consider single-entry case
+            // For example, we could have list<T>|list<R>
+            // We don't want to consider T and R to be isolated; only if
+            // there is no type-union at all
+            if (type.Entries.Count == 1)
+            {
+                // Check if this entry is one of the generics
+                if (type.Entries[0] is MGenericDataTypeEntry gt)
                 {
-                    if (t is MGenericDataTypeEntry gt)
+                    if (genericNames.Contains(gt.Name))
                     {
-                        return genericNames.Contains(gt.Name);
+                        result.Add(gt.Name);
                     }
-                    return false;
-                });
-            bool doNestedTypesHaveUnionedGenerics =
-                type.Entries.Any(t => 
+                }
+                else if (type.Entries[0] is MFunctionDataTypeEntry ft)
                 {
-                    if (t is MConcreteDataTypeEntry ct)
+                    result.AddRange(GetIsolatedGenerics(ft.ReturnType, genericNames));
+                    for (int j = 0; j < ft.ParameterTypes.Count; j++)
                     {
-                        return ct.Generics.Any(g => HasUnionedGenerics(g, genericNames));
+                        result.AddRange(GetIsolatedGenerics(ft.ParameterTypes[j], genericNames));
                     }
-                    else if (t is MFunctionDataTypeEntry ft)
+                }
+                else if (type.Entries[0] is MConcreteDataTypeEntry ct)
+                {
+                    for (int j = 0; j < ct.Generics.Count; j++)
                     {
-                        return ft.ParameterTypes.Any(p => HasUnionedGenerics(p, genericNames)) ||
-                            HasUnionedGenerics(ft.ReturnType, genericNames);
+                        result.AddRange(GetIsolatedGenerics(ct.Generics[j], genericNames));
                     }
-                    return false;
-                });
-            return doesThisTypeHasUnionedGenerics || doNestedTypesHaveUnionedGenerics;
+                }
+            }
+            return result;
         }
 
         private bool IsThisGeneric(MType type, string name)

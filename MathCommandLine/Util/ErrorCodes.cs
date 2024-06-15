@@ -23,6 +23,6 @@ namespace IML.Util
         INVALID_ARGUMENT = 14,
         ILLEGAL_LAMBDA = 15,
         WRONG_GENERIC_COUNT = 16,
-
+        CANNOT_ASSIGN_GENERICS = 17,
     }
 }
