@@ -20,35 +20,18 @@ namespace IMLTests
         [ClassInitialize]
         public static void Setup(TestContext context)
         {
-            VariableAstTypeMap baseTypeMap = new VariableAstTypeMap();
-            baseTypeMap.Add("true", new AstType(MDataType.BOOLEAN_TYPE_NAME));
-            baseTypeMap.Add("false", new AstType(MDataType.BOOLEAN_TYPE_NAME));
-            baseTypeMap.Add("void", new AstType(MDataType.VOID_TYPE_NAME));
-            baseTypeMap.Add("null", new AstType(MDataType.NULL_TYPE_NAME));
+            VariableAstTypeMap baseTypeMap = InterpreterHelper.CreateBaseTypeMap();
 
             Parser parser = new Parser(baseTypeMap);
 
             Interpreter evaluator = new Interpreter();
 
-            DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List,
-                MDataType.Function, MDataType.Type, MDataType.Error, MDataType.Reference,
-                MDataType.String, MDataType.Void, MDataType.Boolean, MDataType.Null,
-                MDataType.Any);
+            DataTypeDict dtDict = InterpreterHelper.CreateBaseDtDict();
             evaluator.Initialize(dtDict, parser, () => { });
 
             interpreter = evaluator;
-
-            List<MNativeFunction> coreFuncs = CoreFunctions.GenerateCoreFunctions();
-            baseEnv = new MEnvironment(MEnvironment.Empty);
-            baseEnv.AddConstant("null", MValue.Null());
-            baseEnv.AddConstant("void", MValue.Void());
-            baseEnv.AddConstant("true", MValue.Bool(true));
-            baseEnv.AddConstant("false", MValue.Bool(false));
-            for (int i = 0; i < coreFuncs.Count; i++)
-            {
-                MValue function = MValue.Function(coreFuncs[i].ToFunction());
-                baseEnv.AddConstant(coreFuncs[i].Name, function, coreFuncs[i].Description);
-            }
+            
+            baseEnv = InterpreterHelper.CreateBaseEnv();
         }
 
         private void AssertTypes(MType type, MValue value)
@@ -98,6 +81,17 @@ namespace IMLTests
             MType type = new MType(MDataTypeEntry.String, MDataTypeEntry.Number);
             MValue value = MValue.Bool(true);
             AssertTypesFail(type, value);
+        }
+
+        [TestMethod]
+        public void TestComplexLambda()
+        {
+            MType type = MType.Function(MType.Any, MType.Number, MType.Number);
+            MValue value = MValue.Function(new MFunction(
+                new MFunctionDataTypeEntry(MType.Boolean, new List<MType>() { MType.Any, MType.Any },
+                    new List<string>(), false, LambdaEnvironmentType.ForceEnvironment, false),
+                new List<string>() { "p1", "p2" }, baseEnv, new List<IML.Parsing.AST.ValueAsts.Ast>()));
+            AssertTypes(type, value);
         }
     }
 }

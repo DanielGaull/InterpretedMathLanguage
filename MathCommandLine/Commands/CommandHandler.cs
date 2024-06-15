@@ -98,51 +98,21 @@ namespace IML.Commands
         {
             Interpreter evaluator = new Interpreter();
 
-            DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List, 
-                MDataType.Function, MDataType.Type, MDataType.Error, MDataType.Reference, 
-                MDataType.String, MDataType.Void, MDataType.Boolean, MDataType.Null, 
-                MDataType.Any);
+            DataTypeDict dtDict = InterpreterHelper.CreateBaseDtDict();
             evaluator.Initialize(dtDict, parser, exitAction);
             return evaluator;
-        }
-        private MEnvironment CreateBaseEnv()
-        {
-            // Add core constants
-            List<MNativeFunction> coreFuncs = CoreFunctions.GenerateCoreFunctions();
-            MEnvironment baseEnv = new MEnvironment(MEnvironment.Empty);
-            baseEnv.AddConstant("null", MValue.Null());
-            baseEnv.AddConstant("void", MValue.Void());
-            baseEnv.AddConstant("true", MValue.Bool(true));
-            baseEnv.AddConstant("false", MValue.Bool(false));
-            for (int i = 0; i < coreFuncs.Count; i++)
-            {
-                MValue function = MValue.Function(coreFuncs[i].ToFunction());
-                baseEnv.AddConstant(coreFuncs[i].Name, function, coreFuncs[i].Description);
-            }
-            return baseEnv;
-        }
-        private VariableAstTypeMap CreateBaseTypeMap()
-        {
-            VariableAstTypeMap baseTypeMap = new VariableAstTypeMap();
-            baseTypeMap.Add("true", new AstType(MDataType.BOOLEAN_TYPE_NAME));
-            baseTypeMap.Add("false", new AstType(MDataType.BOOLEAN_TYPE_NAME));
-            baseTypeMap.Add("void", new AstType(MDataType.VOID_TYPE_NAME));
-            baseTypeMap.Add("null", new AstType(MDataType.NULL_TYPE_NAME));
-            return baseTypeMap;
         }
 
         private MValue RunLine(MEnvironment env, SyntaxParser sp, Interpreter evaluator, string line)
         {
-            // TODO: Re-add syntax handling. For now, we're just going to remove it to focus on core features
-            // When syntax is re-added (if ever), it should be added under the name of "transformations"
-            string syntaxHandled = line;//sp.Unparse(sp.Parse(line));
+            string syntaxHandled = line;
             MValue result = evaluator.Evaluate(syntaxHandled, env);
             return result;
         }
 
         private void RunFile(string filePath)
         {
-            VariableAstTypeMap typeMap = CreateBaseTypeMap();
+            VariableAstTypeMap typeMap = InterpreterHelper.CreateBaseTypeMap();
             string text = File.ReadAllText(filePath);
 
             Parser parser = new Parser(typeMap);
@@ -153,7 +123,7 @@ namespace IML.Commands
                 running = false;
             });
 
-            MEnvironment baseEnv = CreateBaseEnv();
+            MEnvironment baseEnv = InterpreterHelper.CreateBaseEnv();
 
             // Syntax loading; go to the syntax files path, and load in all the files it lists
             SyntaxHandler sh = new SyntaxHandler(parser, "{}(),".ToCharArray().ToList());
@@ -178,7 +148,7 @@ namespace IML.Commands
 
         private void RunInterpreter()
         {
-            VariableAstTypeMap typeMap = CreateBaseTypeMap();
+            VariableAstTypeMap typeMap = InterpreterHelper.CreateBaseTypeMap();
             Parser parser = new Parser(typeMap);
 
             bool running = true;
@@ -187,7 +157,7 @@ namespace IML.Commands
                 running = false;
             });
 
-            MEnvironment baseEnv = CreateBaseEnv();
+            MEnvironment baseEnv = InterpreterHelper.CreateBaseEnv();
 
             // Syntax loading; go to the syntax files path, and load in all the files it lists
             SyntaxHandler sh = new SyntaxHandler(parser, "{}(),".ToCharArray().ToList());

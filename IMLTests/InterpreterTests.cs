@@ -18,45 +18,24 @@ namespace IMLTests
         [ClassInitialize]
         public static void Setup(TestContext context)
         {
-            VariableAstTypeMap baseTypeMap = new VariableAstTypeMap();
-            baseTypeMap.Add("true", new AstType(MDataType.BOOLEAN_TYPE_NAME));
-            baseTypeMap.Add("false", new AstType(MDataType.BOOLEAN_TYPE_NAME));
-            baseTypeMap.Add("void", new AstType(MDataType.VOID_TYPE_NAME));
-            baseTypeMap.Add("null", new AstType(MDataType.NULL_TYPE_NAME));
+            VariableAstTypeMap baseTypeMap = InterpreterHelper.CreateBaseTypeMap();
 
             Parser parser = new Parser(baseTypeMap);
 
             Interpreter evaluator = new Interpreter();
 
-            DataTypeDict dtDict = new DataTypeDict(MDataType.Number, MDataType.List,
-                MDataType.Function, MDataType.Type, MDataType.Error, MDataType.Reference,
-                MDataType.String, MDataType.Void, MDataType.Boolean, MDataType.Null,
-                MDataType.Any);
+            DataTypeDict dtDict = InterpreterHelper.CreateBaseDtDict();
             evaluator.Initialize(dtDict, parser, () => {});
 
-            InterpreterTests.interpreter = evaluator;
+            interpreter = evaluator;
         }
-        private MEnvironment CreateBaseEnv()
-        {
-            List<MNativeFunction> coreFuncs = CoreFunctions.GenerateCoreFunctions();
-            MEnvironment baseEnv = new MEnvironment(MEnvironment.Empty);
-            baseEnv.AddConstant("null", MValue.Null());
-            baseEnv.AddConstant("void", MValue.Void());
-            baseEnv.AddConstant("true", MValue.Bool(true));
-            baseEnv.AddConstant("false", MValue.Bool(false));
-            for (int i = 0; i < coreFuncs.Count; i++)
-            {
-                MValue function = MValue.Function(coreFuncs[i].ToFunction());
-                baseEnv.AddConstant(coreFuncs[i].Name, function, coreFuncs[i].Description);
-            }
-            return baseEnv;
-        }
+        
         private void AssertInterpreterValues(string input, string expected)
         {
             string output = "";
             try
             {
-                MEnvironment env = CreateBaseEnv();
+                MEnvironment env = InterpreterHelper.CreateBaseEnv();
                 MValue result = interpreter.Evaluate(input, env);
                 output = result.ToLongString();
             }
