@@ -41,6 +41,19 @@ namespace IML.Util
             }
             return false;
         }
+        public bool Remove(T item)
+        {
+            for (int i = 0; i < set.Count; i++)
+            {
+                IEquatable<T> ie = set[i];
+                if (ie.Equals(item))
+                {
+                    set.RemoveAt(i);
+                    return true;
+                }
+            }
+            return false;
+        }
 
         public void AddRange(IEnumerable<T> other)
         {
@@ -74,7 +87,7 @@ namespace IML.Util
         public SetIterator(Set<T> set)
         {
             setList = set.ToList();
-            index = 0;
+            index = -1; // MoveNext is called once before starting, so want that to move index to 0
         }
 
         public T Current

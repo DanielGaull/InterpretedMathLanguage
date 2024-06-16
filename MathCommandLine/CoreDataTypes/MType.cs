@@ -79,6 +79,8 @@ namespace IML.CoreDataTypes
         // Ex. list[string] UNION list[number] => list[string|number]
         // Ex. tuple[number,number] UNION tuple[string,string] => tuple[number,number]|tuple[string,string]
         // Ex. string|number UNION number => string|number
+        // Ex. ()=>string UNION ()=>number => ()=>string|number
+        // Ex. (number)=>string UNION ()=>boolean => (number)=>string|()=>boolean
         // Notable properties:
         // (Order doesn't matter for the type '|' operator)
         // A UNION B => A|B
@@ -88,6 +90,8 @@ namespace IML.CoreDataTypes
         // If there are multiple generics, then unions the types separately
         // ex A[T] UNION A[R] = A[T|R], but B[T,R] UNION B[C,D] = B[T,R]|B[C,D]
         // This is because A[T|R] = A[T]|A[R]
+        // If there is a function and the parameters are the same, then union the return types
+        // (A...)=>T|(A...)=>R = (A...)=>T|R
         public MType Union(MType other)
         {
             // If either are the union base, return the other
@@ -103,35 +107,75 @@ namespace IML.CoreDataTypes
 
             // Now create a SET of the types that appear in each subtype
             // Compare each to see if they're equal
+            List<MDataTypeEntry> rawCombinedEntries = Entries.Concat(other.Entries).ToList();
             Set<MDataTypeEntry> entries = new Set<MDataTypeEntry>();
-            for (int i = 0; i < Entries.Count; i++)
+            for (int i = 0; i < rawCombinedEntries.Count; i++)
             {
-                // Check if there is already an entry in the set that is of the same type, with a single generic,
-                // allowing us to union the generics together
-                // Only if the current entry is a concrete type
-                // This code is currently unfinished; feels like it might cause more problems than it solves if
-                // not implemented perfectly
-                //if (Entries[i] is MConcreteDataTypeEntry)
-                //{
-                //    foreach (MDataTypeEntry e in entries)
-                //    {
-                //        if (e is MConcreteDataTypeEntry)
-                //        {
-                //            MConcreteDataTypeEntry e1 = (MConcreteDataTypeEntry)e;
-                //            MConcreteDataTypeEntry e2 = (MConcreteDataTypeEntry)Entries[i];
-                //            if (e1.DataType == e2.DataType && e1.DataType.NumberOfGenerics == 1)
-                //            {
-                //                MType newGeneric = e1.Generics[0].Union(e2.Generics[0]);
-
-                //            }
-                //        }
-                //    }
-                //}
-                entries.Add(Entries[i]);
-            }
-            for (int i = 0; i < other.Entries.Count; i++)
-            {
-                entries.Add(other.Entries[i]);
+                if (rawCombinedEntries[i] is MFunctionDataTypeEntry ft)
+                {
+                    bool unioningFunctionTypes = false;
+                    MFunctionDataTypeEntry entryToRemove = null;
+                    MFunctionDataTypeEntry entryToAdd = null;
+                    foreach (var existingEntry in entries)
+                    {
+                        if (existingEntry is MFunctionDataTypeEntry existingFt)
+                        {
+                            // Check if equal (ignoring return type
+                            if (existingFt.Equals(ft, true))
+                            {
+                                MType unionedReturnType = existingFt.ReturnType.Union(ft.ReturnType);
+                                entryToAdd = new MFunctionDataTypeEntry(
+                                    unionedReturnType, ft.ParameterTypes, existingFt.GenericNames,
+                                    ft.IsPure, existingFt.EnvironmentType, ft.IsLastVarArgs);
+                                entryToRemove = existingFt;
+                                unioningFunctionTypes = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (unioningFunctionTypes)
+                    {
+                        entries.Remove(entryToRemove);
+                        entries.Add(entryToAdd);
+                    }
+                    else
+                    {
+                        entries.Add(ft);
+                    }
+                }
+                else if (rawCombinedEntries[i] is MConcreteDataTypeEntry ct)
+                {
+                    bool unioningGenerics = false;
+                    MConcreteDataTypeEntry entryToRemove = null;
+                    MConcreteDataTypeEntry entryToAdd = null;
+                    foreach (MDataTypeEntry e in entries)
+                    {
+                        if (e is MConcreteDataTypeEntry existingCt)
+                        {
+                            if (ct.DataType == existingCt.DataType &&
+                                ct.DataType.NumberOfGenerics == 1)
+                            {
+                                MType unionedGeneric = existingCt.Generics[0].Union(ct.Generics[0]);
+                                entryToAdd = new MConcreteDataTypeEntry(ct.DataType, unionedGeneric);
+                                entryToRemove = existingCt;
+                                unioningGenerics = true;
+                            }
+                        }
+                    }
+                    if (unioningGenerics)
+                    {
+                        entries.Remove(entryToRemove);
+                        entries.Add(entryToAdd);
+                    }
+                    else
+                    {
+                        entries.Add(ct);
+                    }
+                }
+                else
+                {
+                    entries.Add(rawCombinedEntries[i]);
+                }
             }
             // Now we have a set of entries
             return new MType(entries.ToList());

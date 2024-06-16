@@ -183,6 +183,11 @@ namespace IML.CoreDataTypes
 
         public bool Equals(MFunctionDataTypeEntry other)
         {
+            return Equals(other, false);
+        }
+
+        public bool Equals(MFunctionDataTypeEntry other, bool ignoreReturnType)
+        {
             // Check all the small easy stuff
             if (IsPure != other.IsPure || IsLastVarArgs != other.IsLastVarArgs)
             {
@@ -242,7 +247,7 @@ namespace IML.CoreDataTypes
             // If a generic was defined outside of the function, the scope must match
 
             // Verify the return types
-            if (myReturnType != otherReturnType && !myReturnType.IsAnyType())
+            if (!ignoreReturnType && myReturnType != otherReturnType && !myReturnType.IsAnyType())
             {
                 return false;
             }
