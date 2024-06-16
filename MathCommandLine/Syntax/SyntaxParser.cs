@@ -23,11 +23,6 @@ namespace IML.Syntax
         public override Ast Parse(string expression)
         {
             Ast result = base.Parse(expression);
-            // If result is not valid, then we want to do our syntax evaluation stuff on it
-            if (result.Type == AstTypes.Invalid)
-            {
-                return ParseSyntax(expression);
-            }
             return result;
         }
 

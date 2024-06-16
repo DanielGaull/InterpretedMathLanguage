@@ -66,10 +66,6 @@ namespace IML.Parsing.AST.ValueAsts
         {
             return new ReturnAst(body, returnVoid);
         }
-        public static InvalidAst Invalid(string expr)
-        {
-            return new InvalidAst(expr);
-        }
 
         #endregion
     }
