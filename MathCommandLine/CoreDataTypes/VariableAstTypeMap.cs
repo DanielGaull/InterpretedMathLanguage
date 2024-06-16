@@ -8,21 +8,67 @@ namespace IML.CoreDataTypes
     public class VariableAstTypeMap
     {
         private Dictionary<string, AstType> dict;
+        private Dictionary<string, Dictionary<string, AstType>> dtMemberTypes;
 
         public VariableAstTypeMap()
         {
             dict = new Dictionary<string, AstType>();
+            dtMemberTypes = new Dictionary<string, Dictionary<string, AstType>>();
         }
 
         public void Add(string name, AstType type)
         {
-            dict.Add(name, type);
+            if (dict.ContainsKey(name))
+            {
+                dict[name] = type;
+            }
+            else
+            {
+                dict.Add(name, type);
+            }
         }
         public AstTypeOrEmpty Get(string name)
         {
             if (dict.ContainsKey(name))
             {
                 return AstTypeOrEmpty.AstType(dict[name]);
+            }
+            return AstTypeOrEmpty.Empty;
+        }
+
+        public void AddMemberType(string dataTypeName, string memberName, AstType memberType)
+        {
+            if (dtMemberTypes.ContainsKey(dataTypeName))
+            {
+                AddMemberTypeToDict(dtMemberTypes[dataTypeName], memberName, memberType);
+            }
+            else
+            {
+                Dictionary<string, AstType> newDict = new Dictionary<string, AstType>();
+                dtMemberTypes.Add(dataTypeName, newDict);
+                AddMemberTypeToDict(newDict, memberName, memberType);
+            }
+        }
+        private void AddMemberTypeToDict(Dictionary<string, AstType> dict, string memberName, 
+            AstType memberType)
+        {
+            if (dict.ContainsKey(memberName))
+            {
+                dict[memberName] = memberType;
+            }
+            else
+            {
+                dict.Add(memberName, memberType);
+            }
+        }
+        public AstTypeOrEmpty GetMemberType(string dataTypeName, string memberName)
+        {
+            if (dtMemberTypes.ContainsKey(dataTypeName))
+            {
+                if (dtMemberTypes[dataTypeName].ContainsKey(memberName))
+                {
+                    return AstTypeOrEmpty.AstType(dtMemberTypes[dataTypeName][memberName]);
+                }
             }
             return AstTypeOrEmpty.Empty;
         }

@@ -130,7 +130,7 @@ namespace IMLTests
         [TestMethod]
         public void TestVarAssignments()
         {
-            AssertInterpreterValues("_do({()~>{var x = 5},()~>{var y = &x},()~>{_set(y,3)},()~>{x}})", "(number) 3");
+            AssertInterpreterValues("_do({()=>{var x = 5; var y = &x; _set(y,3); return x;}})", "(number) 3");
         }
         [TestMethod]
         public void TestMapToFunction()
@@ -152,12 +152,12 @@ namespace IMLTests
         [TestMethod]
         public void TestVarAssignmentReturnValue()
         {
-            AssertInterpreterValues("_do({()~>{var y=3},()~>{y=4}})", "(void) void");
+            AssertInterpreterValues("_do({()=>{var y=3; y=4;}})", "(void) void");
         }
         [TestMethod]
         public void TestBlockAssignmentToConstant()
         {
-            AssertInterpreterValues("_do({()~>{const z=3},()~>{z=4}})",
+            AssertInterpreterValues("_do({()=>{const z=3; z=4;}})",
                     "(error) Error: #12 (CANNOT_ASSIGN) 'Cannot assign value to constant \"z\"' Data: {  }");
         }
         [TestMethod]
@@ -168,7 +168,7 @@ namespace IMLTests
         [TestMethod]
         public void TestComplextShortenedLambda()
         {
-            AssertInterpreterValues("_do({[var x=false],[x]})", "(boolean) false");
+            AssertInterpreterValues("_do({()=>{var x=false; return x;}})", "(boolean) false");
         }
         [TestMethod]
         public void TestStringMemberAccess()
@@ -178,46 +178,50 @@ namespace IMLTests
         [TestMethod]
         public void TestIndexC()
         {
-            AssertInterpreterValues("_do({[var list={1,2,3}],[list.indexc(2,(a,b)=>{_eq(a,b)})]})",
+            AssertInterpreterValues("_do({()=>{var list={1,2,3}; return list.indexc(2,(a,b)=>{_eq(a,b)});}})",
                     "(number) 1");
         }
         [TestMethod]
         public void TestIndexSimple()
         {
-            AssertInterpreterValues("_do({[var list={1,2,3}],[list.index(2)]})", "(number) 1");
+            AssertInterpreterValues("_do({()=>{var list={1,2,3}; list.index(2);}})", "(number) 1");
         }
         [TestMethod]
         public void TestListAdd()
         {
-            AssertInterpreterValues("_do({[var list={1,2}],[list.add(3)],[list]})", "(list) { 1, 2, 3 }");
-            AssertInterpreterValues("_do({[var list={1,2}],[list.add(3)],[list.length()]})", "(number) 3");
+            AssertInterpreterValues("_do({()=>{var list={1,2}; list.add(3); return list;}})", 
+                "(list) { 1, 2, 3 }");
+            AssertInterpreterValues("_do({()=>{var list={1,2}; list.add(3); return list.length();}})", 
+                "(number) 3");
         }
         [TestMethod]
         public void TestListRemoveAt()
         {
-            AssertInterpreterValues("_do({[var list={1,2,3}],[list.removeAt(0)],[list]})", "(list) { 2, 3 }");
+            AssertInterpreterValues("_do({()=>{var list={1,2,3}; list.removeAt(0); return list;}})", 
+                "(list) { 2, 3 }");
         }
         [TestMethod]
         public void TestListRemoveFail()
         {
-            AssertInterpreterValues("_do({[var list={1,2,3}],[list.remove(0)]})", "(boolean) false");
+            AssertInterpreterValues("_do({()=>{var list={1,2,3}; return list.remove(0);}})", "(boolean) false");
         }
         [TestMethod]
         public void TestListRemoveSucceed()
         {
-            AssertInterpreterValues("_do({[var list={1,2,3}],[list.remove(2)]})", "(boolean) true");
-            AssertInterpreterValues("_do({[var list={1,2,3}],[list.remove(2)],[list]})", "(list) { 1, 3 }");
+            AssertInterpreterValues("_do({()=>{var list={1,2,3}; list.remove(2);}})", "(boolean) true");
+            AssertInterpreterValues("_do({()=>{var list={1,2,3}; list.remove(2); return list;}})", 
+                "(list) { 1, 3 }");
         }
         [TestMethod]
         public void TestListRemoveC()
         {
-            AssertInterpreterValues("_do({[var list={1,2,3}],[list.removec(2,(a,b)=>{_eq(a,b)})],[list]})",
+            AssertInterpreterValues("_do({()=>{var list={1,2,3}; list.removec(2,(a,b)=>{_eq(a,b)}); return list;}})",
                     "(list) { 1, 3 }");
         }
         [TestMethod]
         public void TestListAddAll()
         {
-            AssertInterpreterValues("_do({[var list1={1,2,3}],[var list2={4,5,6}],[list1.addAll(list2)],[list1]})",
+            AssertInterpreterValues("_do({()=>{var list1={1,2,3};var list2={4,5,6};list1.addAll(list2); return list1;}})",
                     "(list) { 1, 2, 3, 4, 5, 6 }");
         }
         [TestMethod]

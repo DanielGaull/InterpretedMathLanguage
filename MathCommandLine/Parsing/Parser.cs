@@ -364,7 +364,9 @@ namespace IML.Parsing
                 // Don't add the last (empty) line
                 if (i + 1 < lines.Length)
                 {
-                    bodyLines.Add(Parse(line, typeMap, environmentlessContext));
+                    Ast lineAst = Parse(line, typeMap, environmentlessContext);
+                    bodyLines.Add(lineAst);
+                    typeDeterminer.DetermineDataType(lineAst, typeMap);
                 }
             }
             return bodyLines;

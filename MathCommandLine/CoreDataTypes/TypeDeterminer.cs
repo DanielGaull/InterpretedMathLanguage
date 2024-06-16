@@ -114,6 +114,24 @@ namespace IML.CoreDataTypes
                             return new AstType(MDataType.REF_TYPE_NAME, aOrE.Type);
                         }
                     }
+                case AstTypes.MemberAccess:
+                    {
+                        MemberAccessAst mast = (MemberAccessAst)expression;
+                        AstType parentType = DetermineDataType(mast.Parent, currentMap);
+                        string dtName = parentType.Entries[0].DataTypeName;
+                        AstTypeOrEmpty aOrE = currentMap.GetMemberType(dtName,
+                            mast.Name);
+                        if (aOrE.IsEmpty)
+                        {
+                            throw new TypeDeterminationException(
+                                $"Member {mast.Name} is not defined on type {dtName}.", expression);
+                        }
+                        else
+                        {
+                            // Return the type directly
+                            return aOrE.Type;
+                        }
+                    }
             }
             return null;
         }
