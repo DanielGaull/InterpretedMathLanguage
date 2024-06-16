@@ -158,7 +158,23 @@ namespace IML.Parsing
             LambdaMatch attemptedLambdaMatch = LambdaMatcher.MatchLambda(expression);
             int attemptedAssignmentMatchIndex = TryMatchAssignment(expression);
 
-            if (attempedCallMatch.IsMatch)
+            if (RETURN_REGEX.IsMatch(expression))
+            {
+                var groups = RETURN_REGEX.Match(expression).Groups;
+                string body = groups[1].Value.Trim();
+                bool returnsVoid = false;
+                Ast bodyAst = null;
+                if (body.Length <= 0)
+                {
+                    returnsVoid = true;
+                }
+                else
+                {
+                    bodyAst = Parse(body, typeMap, environmentlessContext);
+                }
+                return Ast.Return(bodyAst, returnsVoid);
+            }
+            else if (attempedCallMatch.IsMatch)
             {
                 // Performing some sort of call
                 string callerString = attempedCallMatch.Caller;
@@ -223,22 +239,6 @@ namespace IML.Parsing
                 string name = groups[2].Value;
                 Ast parent = Parse(parentStr, typeMap, environmentlessContext);
                 return Ast.MemberAccess(parent, name);
-            }
-            else if (RETURN_REGEX.IsMatch(expression))
-            {
-                var groups = RETURN_REGEX.Match(expression).Groups;
-                string body = groups[1].Value.Trim();
-                bool returnsVoid = false;
-                Ast bodyAst = null;
-                if (body.Length <= 0)
-                {
-                    returnsVoid = true;
-                }
-                else
-                {
-                    bodyAst = Parse(body, typeMap, environmentlessContext);
-                }
-                return Ast.Return(bodyAst, returnsVoid);
             }
             else if (DECLARATION_REGEX.IsMatch(expression))
             {
