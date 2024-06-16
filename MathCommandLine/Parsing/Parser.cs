@@ -135,7 +135,7 @@ namespace IML.Parsing
 
         public virtual Ast Parse(string expression)
         {
-            return Parse(expression, defaultVariables);
+            return Parse(expression, defaultVariables, false);
         }
 
         /// <summary>
@@ -144,197 +144,189 @@ namespace IML.Parsing
         /// </summary>
         /// <param name="expression"></param>
         /// <returns></returns>
-        public Ast Parse(string expression, VariableAstTypeMap typeMap)
+        public Ast Parse(string expression, VariableAstTypeMap typeMap, bool environmentlessContext)
         {
-            try
+            // Initially, attempt to extract an expression from parentheses
+            while (IsParenWrapped(expression))
             {
-                // Initially, attempt to extract an expression from parentheses
-                while (IsParenWrapped(expression))
-                {
-                    // Pull out the expression without the first and last characters
-                    expression = expression.Substring(1, expression.Length - 2);
-                    return Parse(expression, typeMap);
-                }
+                // Pull out the expression without the first and last characters
+                expression = expression.Substring(1, expression.Length - 2);
+                return Parse(expression, typeMap, environmentlessContext);
+            }
 
-                CallMatch attempedCallMatch = CallMatcher.MatchCall(expression);
-                LambdaMatch attemptedLambdaMatch = LambdaMatcher.MatchLambda(expression);
-                int attemptedAssignmentMatchIndex = TryMatchAssignment(expression);
+            CallMatch attempedCallMatch = CallMatcher.MatchCall(expression);
+            LambdaMatch attemptedLambdaMatch = LambdaMatcher.MatchLambda(expression);
+            int attemptedAssignmentMatchIndex = TryMatchAssignment(expression);
 
-                if (attempedCallMatch.IsMatch)
-                {
-                    // Performing some sort of call
-                    string callerString = attempedCallMatch.Caller;
-                    string argsString = attempedCallMatch.Args;
-                    string genericsString = attempedCallMatch.Generics;
+            if (attempedCallMatch.IsMatch)
+            {
+                // Performing some sort of call
+                string callerString = attempedCallMatch.Caller;
+                string argsString = attempedCallMatch.Args;
+                string genericsString = attempedCallMatch.Generics;
 
-                    Ast caller = Parse(callerString, typeMap);
-                    if (caller.Type == AstTypes.Invalid)
-                    {
-                        // Invalid caller means we need to return an invalid overall, instead of a valid call
-                        return Ast.Invalid(expression);
-                    }
+                Ast caller = Parse(callerString, typeMap, environmentlessContext);
+                string[] argStrings = argsString.Length > 0 ? SplitByDelimiter(argsString, ARG_DELIMITER) : new string[0];
+                // Parse all the arguments
+                var args = argStrings.Select(x => Parse(x, typeMap, environmentlessContext)).ToList();
 
-                    string[] argStrings = argsString.Length > 0 ? SplitByDelimiter(argsString, ARG_DELIMITER) : new string[0];
-                    // Parse all the arguments
-                    var args = argStrings.Select(x => Parse(x, typeMap)).ToList();
+                string[] genericStrings = genericsString.Length > 0 ? SplitByDelimiter(genericsString, TYPE_GENERICS_DELIMITER) : new string[0];
+                var generics = genericStrings.Select(x => parameterParser.ParseType(x)).ToList();
 
-                    string[] genericStrings = genericsString.Length > 0 ? SplitByDelimiter(genericsString, TYPE_GENERICS_DELIMITER) : new string[0];
-                    var generics = genericStrings.Select(x => parameterParser.ParseType(x)).ToList();
-
-                    return Ast.Call(caller, args, generics);
-                }
-                else if (NUMBER_REGEX.IsMatch(expression))
+                return Ast.Call(caller, args, generics);
+            }
+            else if (NUMBER_REGEX.IsMatch(expression))
+            {
+                // Parse the double and throw it into the AST
+                double number = double.Parse(expression);
+                return Ast.NumberLiteral(number);
+            }
+            else if (STRING_REGEX.IsMatch(expression))
+            {
+                string str = STRING_REGEX.Match(expression).Groups[1].Value;
+                return Ast.StringLiteral(str);
+            }
+            else if (REFERENCE_REGEX.IsMatch(expression))
+            {
+                string varName = REFERENCE_REGEX.Match(expression).Groups[1].Value;
+                return Ast.ReferenceLiteral(varName);
+            }
+            else if (MatchesList(expression)) //LIST_REGEX.IsMatch(expression))
+            {
+                // Extract the elements of the list
+                string elements = LIST_REGEX.Match(expression).Groups[1].Value;
+                // Separate by the list delimiter
+                string[] elementStrings = elements.Length > 0 ? SplitByDelimiter(elements, LIST_DELIMITER) : new string[0];
+                List<Ast> elementAsts = new List<Ast>();
+                foreach (string str in elementStrings)
                 {
-                    // Parse the double and throw it into the AST
-                    double number = double.Parse(expression);
-                    return Ast.NumberLiteral(number);
+                    elementAsts.Add(Parse(str.Trim(), typeMap, environmentlessContext));
                 }
-                else if (STRING_REGEX.IsMatch(expression))
+                return Ast.ListLiteral(elementAsts.ToArray());
+            }
+            else if (attemptedLambdaMatch.IsMatch)
+            {
+                return ParseLambda(attemptedLambdaMatch, typeMap, expression, environmentlessContext);
+            }
+            else if (MatchesSimpleLambda(expression))
+            {
+                // Simple lambda; no params, does not create body
+                string contents = SIMPLE_LAMBDA_REGEX.Match(expression).Groups[1].Value;
+                Ast body = Parse(contents, typeMap, true); // Don't clone the type map since we don't create env
+                return Ast.LambdaLiteral(new AstParameter[0], new List<Ast>() { body }, AstType.Any, false, false, false,
+                    new List<string>());
+            }
+            else if (MEMBER_ACCESS_REGEX.IsMatch(expression))
+            {
+                var groups = MEMBER_ACCESS_REGEX.Match(expression).Groups;
+                string parentStr = groups[1].Value;
+                string name = groups[2].Value;
+                Ast parent = Parse(parentStr, typeMap, environmentlessContext);
+                return Ast.MemberAccess(parent, name);
+            }
+            else if (RETURN_REGEX.IsMatch(expression))
+            {
+                var groups = RETURN_REGEX.Match(expression).Groups;
+                string body = groups[1].Value.Trim();
+                bool returnsVoid = false;
+                Ast bodyAst = null;
+                if (body.Length <= 0)
                 {
-                    string str = STRING_REGEX.Match(expression).Groups[1].Value;
-                    return Ast.StringLiteral(str);
-                }
-                else if (REFERENCE_REGEX.IsMatch(expression))
-                {
-                    string varName = REFERENCE_REGEX.Match(expression).Groups[1].Value;
-                    return Ast.ReferenceLiteral(varName);
-                }
-                else if (MatchesList(expression)) //LIST_REGEX.IsMatch(expression))
-                {
-                    // Extract the elements of the list
-                    string elements = LIST_REGEX.Match(expression).Groups[1].Value;
-                    // Separate by the list delimiter
-                    string[] elementStrings = elements.Length > 0 ? SplitByDelimiter(elements, LIST_DELIMITER) : new string[0];
-                    List<Ast> elementAsts = new List<Ast>();
-                    foreach (string str in elementStrings)
-                    {
-                        elementAsts.Add(Parse(str.Trim(), typeMap));
-                    }
-                    return Ast.ListLiteral(elementAsts.ToArray());
-                }
-                else if (attemptedLambdaMatch.IsMatch)
-                {
-                    return ParseLambda(attemptedLambdaMatch, typeMap, expression);
-                }
-                else if (MatchesSimpleLambda(expression))
-                {
-                    // Simple lambda; no params, does not create body
-                    string contents = SIMPLE_LAMBDA_REGEX.Match(expression).Groups[1].Value;
-                    Ast body = Parse(contents, typeMap); // Don't clone the type map since we don't create env
-                    return Ast.LambdaLiteral(new AstParameter[0], new List<Ast>() { body }, AstType.Any, false, false, false,
-                        new List<string>());
-                }
-                else if (MEMBER_ACCESS_REGEX.IsMatch(expression))
-                {
-                    var groups = MEMBER_ACCESS_REGEX.Match(expression).Groups;
-                    string parentStr = groups[1].Value;
-                    string name = groups[2].Value;
-                    Ast parent = Parse(parentStr, typeMap);
-                    return Ast.MemberAccess(parent, name);
-                }
-                else if (RETURN_REGEX.IsMatch(expression))
-                {
-                    var groups = RETURN_REGEX.Match(expression).Groups;
-                    string body = groups[1].Value.Trim();
-                    bool returnsVoid = false;
-                    Ast bodyAst = null;
-                    if (body.Length <= 0)
-                    {
-                        returnsVoid = true;
-                    }
-                    else
-                    {
-                        bodyAst = Parse(body, typeMap);
-                    }
-                    return Ast.Return(bodyAst, returnsVoid);
-                }
-                else if (DECLARATION_REGEX.IsMatch(expression))
-                {
-                    var groups = DECLARATION_REGEX.Match(expression).Groups;
-                    string varName = groups[2].Value;
-                    // Make sure the variable name isn't reserved
-                    if (RESERVED_KEYWORDS.Contains(varName))
-                    {
-                        // Attempting to use a reserved keyword as a variable
-                        throw new InvalidParseException(expression);
-                    }
-                    string declarationType = groups[1].Value;
-                    VariableType varType = 0;
-                    if (declarationType == DECLARATION_VAR_KEYWORD)
-                    {
-                        varType = VariableType.Variable;
-                    }
-                    else if (declarationType == DECLARATION_CONST_KEYWORD)
-                    {
-                        varType = VariableType.Constant;
-                    }
-                    else
-                    {
-                        // Should never get here, we'd have not matched the regex
-                        throw new InvalidParseException(expression);
-                    }
-                    string assignedExpr = groups[4].Value;
-                    Ast assigned = Parse(assignedExpr, typeMap);
-
-                    // See if we've been given a type; if so, verify that it matches; if not, infer the type
-                    string variableType = groups[3].Value;
-                    AstType varValType;
-                    AstType bodyType = typeDeterminer.DetermineDataType(assigned, typeMap);
-                    if (variableType.Length > 0)
-                    {
-                        varValType = parameterParser.ParseType(variableType);
-                        if (varValType != bodyType)
-                        {
-                            throw new InvalidParseException($"Variable {varName} is not assigned the type it is declared.",
-                                expression);
-                        }
-                    }
-                    else
-                    {
-                        varValType = bodyType;
-                    }
-
-                    return Ast.VariableDeclaration(varName, assigned, varType, varValType);
-                }
-                else if (attemptedAssignmentMatchIndex >= 0)
-                {
-                    string identifierExpr = expression.Substring(0, attemptedAssignmentMatchIndex).Trim();
-                    string assignedExpr = expression.Substring(attemptedAssignmentMatchIndex + 1,
-                        expression.Length - attemptedAssignmentMatchIndex - 1).Trim();
-                    // Parse the assigned expression
-                    Ast assigned = Parse(assignedExpr, typeMap);
-                    // Parse the identifier
-                    IdentifierAst identifier = ParseIdentifier(identifierExpr, typeMap);
-                    // TODO: Add operator-assignments, ex. +=, &&=, etc.
-                    // Should be valid for ANY binary operator; even doing something like !== or === should work,
-                    // though they'd be pretty rare to want to do
-                    return Ast.VariableAssignment(identifier, assigned);
-                }
-                else if (SYMBOL_NAME_REGEX.IsMatch(expression))
-                {
-                    // We've got a variable, or an attempt at one
-                    if (RESERVED_KEYWORDS.Contains(expression))
-                    {
-                        // Attempting to use a reserved keyword as a variable
-                        throw new InvalidParseException(expression);
-                    }
-                    // Valid variable
-                    return Ast.Variable(expression);
+                    returnsVoid = true;
                 }
                 else
                 {
-                    // We don't recognize this, so call it "invalid" and chuck it in here
-                    // Someone else will either handle it or throw an error
-                    return Ast.Invalid(expression);
+                    bodyAst = Parse(body, typeMap, environmentlessContext);
                 }
+                return Ast.Return(bodyAst, returnsVoid);
             }
-            catch (InvalidParseException)
+            else if (DECLARATION_REGEX.IsMatch(expression))
             {
+                if (environmentlessContext)
+                {
+                    throw new InvalidParseException("Cannot declare variables in an " +
+                        "environmentless context", expression);
+                }
+                var groups = DECLARATION_REGEX.Match(expression).Groups;
+                string varName = groups[2].Value;
+                // Make sure the variable name isn't reserved
+                if (RESERVED_KEYWORDS.Contains(varName))
+                {
+                    // Attempting to use a reserved keyword as a variable
+                    throw new InvalidParseException(expression);
+                }
+                string declarationType = groups[1].Value;
+                VariableType varType = 0;
+                if (declarationType == DECLARATION_VAR_KEYWORD)
+                {
+                    varType = VariableType.Variable;
+                }
+                else if (declarationType == DECLARATION_CONST_KEYWORD)
+                {
+                    varType = VariableType.Constant;
+                }
+                else
+                {
+                    // Should never get here, we'd have not matched the regex
+                    throw new InvalidParseException(expression);
+                }
+                string assignedExpr = groups[4].Value;
+                Ast assigned = Parse(assignedExpr, typeMap, environmentlessContext);
+
+                // See if we've been given a type; if so, verify that it matches; if not, infer the type
+                string variableType = groups[3].Value;
+                AstType varValType;
+                AstType bodyType = typeDeterminer.DetermineDataType(assigned, typeMap);
+                if (variableType.Length > 0)
+                {
+                    varValType = parameterParser.ParseType(variableType);
+                    if (varValType != bodyType)
+                    {
+                        throw new InvalidParseException($"Variable {varName} is not assigned the type it is declared.",
+                            expression);
+                    }
+                }
+                else
+                {
+                    varValType = bodyType;
+                }
+
+                return Ast.VariableDeclaration(varName, assigned, varType, varValType);
+            }
+            else if (attemptedAssignmentMatchIndex >= 0)
+            {
+                string identifierExpr = expression.Substring(0, attemptedAssignmentMatchIndex).Trim();
+                string assignedExpr = expression.Substring(attemptedAssignmentMatchIndex + 1,
+                    expression.Length - attemptedAssignmentMatchIndex - 1).Trim();
+                // Parse the assigned expression
+                Ast assigned = Parse(assignedExpr, typeMap, environmentlessContext);
+                // Parse the identifier
+                IdentifierAst identifier = ParseIdentifier(identifierExpr, typeMap, environmentlessContext);
+                // TODO: Add operator-assignments, ex. +=, &&=, etc.
+                // Should be valid for ANY binary operator; even doing something like !== or === should work,
+                // though they'd be pretty rare to want to do
+                return Ast.VariableAssignment(identifier, assigned);
+            }
+            else if (SYMBOL_NAME_REGEX.IsMatch(expression))
+            {
+                // We've got a variable, or an attempt at one
+                if (RESERVED_KEYWORDS.Contains(expression))
+                {
+                    // Attempting to use a reserved keyword as a variable
+                    throw new InvalidParseException(expression);
+                }
+                // Valid variable
+                return Ast.Variable(expression);
+            }
+            else
+            {
+                // We don't recognize this, so call it "invalid" and chuck it in here
+                // Someone else will either handle it or throw an error
                 return Ast.Invalid(expression);
             }
         }
 
-        private List<Ast> ParseBody(string bodyExpr, VariableAstTypeMap typeMap)
+        private List<Ast> ParseBody(string bodyExpr, VariableAstTypeMap typeMap, bool environmentlessContext)
         {
             string[] lines = SplitByDelimiter(bodyExpr, CODE_LINE_DELIMITER);
 
@@ -355,7 +347,7 @@ namespace IML.Parsing
                 // Special case so the code below doesn't give invalid for missing a semicolon
                 return new List<Ast>()
                 {
-                    Parse(line, typeMap)
+                    Parse(line, typeMap, environmentlessContext)
                 };
             }
 
@@ -374,7 +366,7 @@ namespace IML.Parsing
                 // Don't add the last (empty) line
                 if (i + 1 < lines.Length)
                 {
-                    bodyLines.Add(Parse(line, typeMap));
+                    bodyLines.Add(Parse(line, typeMap, environmentlessContext));
                 }
             }
             return bodyLines;
@@ -397,13 +389,14 @@ namespace IML.Parsing
             return genericNames;
         }
 
-        public IdentifierAst ParseIdentifier(string expression, VariableAstTypeMap typeMap)
+        public IdentifierAst ParseIdentifier(string expression, VariableAstTypeMap typeMap, 
+            bool environmentlessContext)
         {
             if (IsParenWrapped(expression))
             {
                 // Pull out the expression without the first and last characters
                 expression = expression.Substring(1, expression.Length - 2);
-                return ParseIdentifier(expression, typeMap);
+                return ParseIdentifier(expression, typeMap, environmentlessContext);
             }
 
             // Check if this is just a symbol string
@@ -421,7 +414,7 @@ namespace IML.Parsing
             if (expression.StartsWith(DEREFERENCE_TOKEN))
             {
                 // Everything else gets turned into the AST
-                Ast r = Parse(expression.Substring(DEREFERENCE_TOKEN.Length), typeMap);
+                Ast r = Parse(expression.Substring(DEREFERENCE_TOKEN.Length), typeMap, environmentlessContext);
                 return IdentifierAst.Dereference(r);
             }
 
@@ -431,14 +424,15 @@ namespace IML.Parsing
                 var groups = MEMBER_ACCESS_REGEX.Match(expression).Groups;
                 string parentExpr = groups[1].Value;
                 string varName = groups[2].Value;
-                Ast parent = Parse(parentExpr, typeMap);
+                Ast parent = Parse(parentExpr, typeMap, environmentlessContext);
                 return IdentifierAst.MemberAccess(parent, varName);
             }
 
             throw new InvalidParseException(expression);
         }
 
-        private LambdaAst ParseLambda(LambdaMatch match, VariableAstTypeMap typeMap, string expression)
+        private LambdaAst ParseLambda(LambdaMatch match, VariableAstTypeMap typeMap, string expression,
+            bool environmentlessContext)
         {
             string genericsString = match.Generics;
             string paramsString = match.Params;
@@ -491,7 +485,7 @@ namespace IML.Parsing
 
             // In the event that we don't create an env, the typeMap will be updated by parsing the body
             // We clone the map to use for body return type since we will always have our own type map updated by parsing
-            List<Ast> body = ParseBody(exprString, mapToUseForBody);
+            List<Ast> body = ParseBody(exprString, mapToUseForBody, environmentlessContext || !createsEnv);
             AstType bodyReturnType = typeDeterminer.DetermineDataType(body, mapToUseForBody.Clone());
             AstType returnType;
             if (provideReturnType)

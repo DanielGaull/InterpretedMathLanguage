@@ -430,15 +430,13 @@ namespace IMLTests
         [TestMethod]
         public void TestSimpleReturnTypeFail()
         {
-            Ast ast = parser.Parse("():string=>{5}");
-            Assert.AreEqual(AstTypes.Invalid, ast.Type);
+            Assert.ThrowsException<InvalidParseException>(() => parser.Parse("():string=>{5}"));
         }
 
         [TestMethod]
         public void TestSimpleReturnTypeGenericFail()
         {
-            Ast ast = parser.Parse("():list<string>=>{{1,2,3}}");
-            Assert.AreEqual(AstTypes.Invalid, ast.Type);
+            Assert.ThrowsException<InvalidParseException>(() => parser.Parse("():list<string>=>{{1,2,3}}"));
         }
 
         [TestMethod]

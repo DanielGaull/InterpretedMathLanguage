@@ -36,9 +36,5 @@ namespace IML.Parsing.AST.ValueAsts
         // A "return" statement for use within functions
         // Example: return 7+2;
         Return,
-        // Anything that doesn't fit into the above definitions
-        // Used in syntax handling, but if it appears when parsing some final expression,
-        // then there's an error
-        Invalid,
     }
 }

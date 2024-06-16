@@ -114,9 +114,6 @@ namespace IML.CoreDataTypes
                             return new AstType(MDataType.REF_TYPE_NAME, aOrE.Type);
                         }
                     }
-                case AstTypes.Invalid:
-                    throw new TypeDeterminationException("Expression given was Invalid " + 
-                        $"\"{((InvalidAst)expression).Expression}\"", expression);
             }
             return null;
         }

@@ -78,8 +78,6 @@ namespace IML.Evaluation
                         }
                     }
                     break;
-                case AstTypes.Invalid:
-                    throw new InvalidParseException(((InvalidAst)baseAst).Expression);
                 case AstTypes.NumberLiteral:
                 case AstTypes.StringLiteral:
                 case AstTypes.ReferenceLiteral:
@@ -208,11 +206,6 @@ namespace IML.Evaluation
                             return new ValueOrReturn(MValue.Error(ErrorCodes.ILLEGAL_LAMBDA,
                                 "Lambdas that don't create environments (~>) cannot have parameters", MList.Empty));
                         }
-                        int indexOfInvalidBody = ast.Body.FindIndex(x => x.Type == AstTypes.Invalid);
-                        if (indexOfInvalidBody >= 0)
-                        {
-                            throw new InvalidParseException(((InvalidAst)ast.Body[indexOfInvalidBody]).Expression);
-                        }
 
                         List<string> anonymousGenerics = new List<string>(ast.GenericNames);
 
@@ -319,8 +312,6 @@ namespace IML.Evaluation
                         string key = ast.Name;
                         return new ValueOrReturn(original.GetValueByName(key, false));
                     }
-                case AstTypes.Invalid:
-                    throw new InvalidParseException(((InvalidAst)baseAst).Expression);
             }
             return null;
         }
