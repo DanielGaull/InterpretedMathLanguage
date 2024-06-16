@@ -102,7 +102,7 @@ namespace IML.CoreDataTypes
             // If so, then just return "any"
             if (IsAnyType() || other.IsAnyType())
             {
-                return Any;
+                return Any();
             }
 
             // Now create a SET of the types that appear in each subtype
@@ -206,14 +206,14 @@ namespace IML.CoreDataTypes
             return new MType(entries);
         }
 
-        public static readonly MType Any = new MType(MDataTypeEntry.Any);
-        public static readonly MType Number = new MType(MDataTypeEntry.Number);
-        public static readonly MType Boolean = new MType(MDataTypeEntry.Boolean);
-        public static readonly MType Type = new MType(MDataTypeEntry.Type);
-        public static readonly MType String = new MType(MDataTypeEntry.String);
-        public static readonly MType Error = new MType(MDataTypeEntry.Error);
-        public static readonly MType Null = new MType(MDataTypeEntry.Null);
-        public static readonly MType Void = new MType(MDataTypeEntry.Void);
+        public static MType Any() => new MType(MDataTypeEntry.Any);
+        public static MType Number() => new MType(MDataTypeEntry.Number);
+        public static MType Boolean() => new MType(MDataTypeEntry.Boolean);
+        public static MType Type() => new MType(MDataTypeEntry.Type);
+        public static MType String() => new MType(MDataTypeEntry.String);
+        public static MType Error() => new MType(MDataTypeEntry.Error);
+        public static MType Null() => new MType(MDataTypeEntry.Null);
+        public static MType Void() => new MType(MDataTypeEntry.Void);
         public static MType List(MType of)
         {
             return new MType(MDataTypeEntry.List(of));
@@ -244,6 +244,10 @@ namespace IML.CoreDataTypes
         {
             return new MType(MDataTypeEntry.Function(returnType, paramTypes, isPure, isLastVarArgs, 
                 LambdaEnvironmentType.ForceEnvironment));
+        }
+        public static MType Generic(string name)
+        {
+            return new MType(new MGenericDataTypeEntry(name));
         }
 
         // Strict equals, have to completely match

@@ -25,11 +25,11 @@ namespace IMLTests
         public void Assign_WithSimpleSingle_Success()
         {
             MType genericT = new MType(new MGenericDataTypeEntry("T"));
-            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(MType.Number,
+            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(MType.Number(),
                 new List<MType> { genericT }, new List<string> { "T" }, false, LambdaEnvironmentType.AllowAny,
                 false);
 
-            List<MType> result = assigner.AssignGenerics(callee, new List<MType>() { MType.String });
+            List<MType> result = assigner.AssignGenerics(callee, new List<MType>() { MType.String() });
 
             Assert.AreEqual(1, result.Count);
             MType r = result[0];
@@ -45,7 +45,7 @@ namespace IMLTests
                 new List<MType> { genericT }, new List<string> { "T" }, false, LambdaEnvironmentType.AllowAny,
                 false);
 
-            List<MType> result = assigner.AssignGenerics(callee, new List<MType>() { MType.String });
+            List<MType> result = assigner.AssignGenerics(callee, new List<MType>() { MType.String() });
 
             Assert.AreEqual(1, result.Count);
             MType r = result[0];
@@ -57,11 +57,11 @@ namespace IMLTests
         public void Assign_WithTwoArg_Success()
         {
             MType genericT = new MType(new MGenericDataTypeEntry("T"));
-            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(MType.Number,
+            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(MType.Number(),
                 new List<MType> { genericT, genericT }, new List<string> { "T" }, false, 
                 LambdaEnvironmentType.AllowAny, false);
 
-            List<MType> result = assigner.AssignGenerics(callee, new List<MType>() { MType.Number, MType.String });
+            List<MType> result = assigner.AssignGenerics(callee, new List<MType>() { MType.Number(), MType.String() });
 
             Assert.AreEqual(1, result.Count);
             MType r = result[0];
@@ -75,11 +75,11 @@ namespace IMLTests
         {
             MType genericT = new MType(new MGenericDataTypeEntry("T"));
             MType genericR = new MType(new MGenericDataTypeEntry("R"));
-            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(MType.Number,
+            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(MType.Number(),
                 new List<MType> { genericT, genericR }, new List<string> { "T", "R" }, false, 
                 LambdaEnvironmentType.AllowAny, false);
 
-            List<MType> result = assigner.AssignGenerics(callee, new List<MType>() { MType.Number, MType.String });
+            List<MType> result = assigner.AssignGenerics(callee, new List<MType>() { MType.Number(), MType.String() });
 
             Assert.AreEqual(2, result.Count);
             MType r1 = result[0];
@@ -95,11 +95,11 @@ namespace IMLTests
         {
             MType genericT = new MType(new MGenericDataTypeEntry("T"));
             MType listOfT = MType.List(genericT);
-            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(MType.Number,
+            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(MType.Number(),
                 new List<MType> { listOfT }, new List<string> { "T" }, false,
                 LambdaEnvironmentType.AllowAny, false);
 
-            List<MType> result = assigner.AssignGenerics(callee, new List<MType>() { MType.List(MType.Number) });
+            List<MType> result = assigner.AssignGenerics(callee, new List<MType>() { MType.List(MType.Number()) });
 
             Assert.AreEqual(1, result.Count);
             MType r1 = result[0];
@@ -113,12 +113,12 @@ namespace IMLTests
             MType genericT = new MType(new MGenericDataTypeEntry("T"));
             MType listOfT = MType.List(genericT);
             MType listOfListOfT = MType.List(listOfT);
-            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(MType.Number,
+            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(MType.Number(),
                 new List<MType> { listOfListOfT }, new List<string> { "T" }, false,
                 LambdaEnvironmentType.AllowAny, false);
 
             List<MType> result = assigner.AssignGenerics(callee, 
-                new List<MType>() { MType.List(MType.List(MType.Number)) });
+                new List<MType>() { MType.List(MType.List(MType.Number())) });
 
             Assert.AreEqual(1, result.Count);
             MType r1 = result[0];
@@ -131,14 +131,14 @@ namespace IMLTests
         {
             MType genericTOrString = new MType(new MGenericDataTypeEntry("T"), MDataTypeEntry.String);
             MType listOfTOrString = MType.List(genericTOrString);
-            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(MType.Number,
+            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(MType.Number(),
                 new List<MType> { listOfTOrString }, new List<string> { "T" }, false,
                 LambdaEnvironmentType.AllowAny, false);
 
             try
             {
                 assigner.AssignGenerics(callee, 
-                    new List<MType>() { MType.List(MType.Number) });
+                    new List<MType>() { MType.List(MType.Number()) });
             }
             catch (TypeDeterminationException ex)
             {   
@@ -151,17 +151,17 @@ namespace IMLTests
         public void Assign_WithFunctionParam_Success()
         {
             MType predicateFuncType = new MType(new MFunctionDataTypeEntry(
-                MType.Boolean,
+                MType.Boolean(),
                 new List<MType>() { new MType(new MGenericDataTypeEntry("T")) },
                 new List<string>(),
                 false, LambdaEnvironmentType.AllowAny, false));
             MType numberPredicateFuncType = new MType(new MFunctionDataTypeEntry(
-                MType.Boolean,
-                new List<MType>() { MType.Number },
+                MType.Boolean(),
+                new List<MType>() { MType.Number() },
                 new List<string>(),
                 false, LambdaEnvironmentType.AllowAny, false));
 
-            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(MType.Boolean,
+            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(MType.Boolean(),
                 new List<MType> { predicateFuncType }, new List<string> { "T" }, false,
                 LambdaEnvironmentType.AllowAny, false);
 
@@ -183,12 +183,12 @@ namespace IMLTests
                 new List<string>(),
                 false, LambdaEnvironmentType.AllowAny, false));
             MType stringFactoryFuncType = new MType(new MFunctionDataTypeEntry(
-                MType.String,
+                MType.String(),
                 new List<MType>(),
                 new List<string>(),
                 false, LambdaEnvironmentType.AllowAny, false));
 
-            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(MType.Boolean,
+            MFunctionDataTypeEntry callee = new MFunctionDataTypeEntry(MType.Boolean(),
                 new List<MType> { factoryFuncType }, new List<string> { "T" }, false,
                 LambdaEnvironmentType.AllowAny, false);
 
@@ -213,8 +213,8 @@ namespace IMLTests
                 new List<MType> { p1Type, p2Type }, new List<string> { "T1", "T2" }, false,
                 LambdaEnvironmentType.AllowAny, false);
 
-            MType concreteP1Type = MType.String;
-            MType concreteP2Type = MType.Null;
+            MType concreteP1Type = MType.String();
+            MType concreteP2Type = MType.Null();
 
             List<MType> result = assigner.AssignGenerics(callee,
                 new List<MType>() { concreteP1Type, concreteP2Type });
@@ -240,8 +240,8 @@ namespace IMLTests
                 new List<MType> { p1Type, p2Type }, new List<string> { "T1", "T2" }, false,
                 LambdaEnvironmentType.AllowAny, false);
 
-            MType concreteP1Type = MType.Function(MType.String);
-            MType concreteP2Type = MType.Function(MType.Null);
+            MType concreteP1Type = MType.Function(MType.String());
+            MType concreteP2Type = MType.Function(MType.Null());
 
             List<MType> result = assigner.AssignGenerics(callee,
                 new List<MType>() { concreteP1Type, concreteP2Type });

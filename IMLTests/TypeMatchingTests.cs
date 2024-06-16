@@ -86,9 +86,9 @@ namespace IMLTests
         [TestMethod]
         public void TestComplexLambda()
         {
-            MType type = MType.Function(MType.Any, MType.Number, MType.Number);
+            MType type = MType.Function(MType.Any(), MType.Number(), MType.Number());
             MValue value = MValue.Function(new MFunction(
-                new MFunctionDataTypeEntry(MType.Boolean, new List<MType>() { MType.Any, MType.Any },
+                new MFunctionDataTypeEntry(MType.Boolean(), new List<MType>() { MType.Any(), MType.Any() },
                     new List<string>(), false, LambdaEnvironmentType.ForceEnvironment, false),
                 new List<string>() { "p1", "p2" }, baseEnv, new List<IML.Parsing.AST.ValueAsts.Ast>()));
             AssertTypes(type, value);

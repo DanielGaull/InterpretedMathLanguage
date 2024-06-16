@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace IML.CoreDataTypes
@@ -7,6 +8,14 @@ namespace IML.CoreDataTypes
     public class DataTypeDict
     {
         private Dictionary<string, MDataType> internalDict;
+
+        public List<string> TypeNames
+        {
+            get
+            {
+                return internalDict.Keys.ToList();
+            }
+        }
 
         public DataTypeDict(params MDataType[] types)
         {

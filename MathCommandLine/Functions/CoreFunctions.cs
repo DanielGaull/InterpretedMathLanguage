@@ -64,10 +64,10 @@ namespace IML.Functions
                 {
                     return new ValueOrReturn(MValue.Number(args.Get(0).Value.NumberValue + args.Get(1).Value.NumberValue));
                 },
-                MType.Number,
+                MType.Number(),
                 new MParameters(
-                    new MParameter(MType.Number, "a"),
-                    new MParameter(MType.Number, "b")
+                    new MParameter(MType.Number(), "a"),
+                    new MParameter(MType.Number(), "b")
                 ),
                 "Returns the sum of 'a' and 'b' (a + b)."
             );
@@ -80,10 +80,10 @@ namespace IML.Functions
                 {
                     return new ValueOrReturn(MValue.Number(args.Get(0).Value.NumberValue * args.Get(1).Value.NumberValue));
                 },
-                MType.Number,
+                MType.Number(),
                 new MParameters(
-                    new MParameter(MType.Number, "a"),
-                    new MParameter(MType.Number, "b")
+                    new MParameter(MType.Number(), "a"),
+                    new MParameter(MType.Number(), "b")
                 ),
                 "Returns the product of 'a' and 'b' (a * b)."
             );
@@ -96,9 +96,9 @@ namespace IML.Functions
                 {
                     return new ValueOrReturn(MValue.Number(-args.Get(0).Value.NumberValue));
                 },
-                MType.Number,
+                MType.Number(),
                 new MParameters(
-                    new MParameter(MType.Number, "a")
+                    new MParameter(MType.Number(), "a")
                 ),
                 "Returns the additive inverse of 'a'."
             );
@@ -116,9 +116,9 @@ namespace IML.Functions
                     }
                     return new ValueOrReturn(MValue.Number(1 / arg));
                 },
-                MType.Number,
+                MType.Number(),
                 new MParameters(
-                    new MParameter(MType.Number, "a")
+                    new MParameter(MType.Number(), "a")
                 ),
                 "Returns the multiplicative inverse of 'a'."
             );
@@ -131,10 +131,10 @@ namespace IML.Functions
                 {
                     return new ValueOrReturn(MValue.Number(Math.Pow(args.Get(0).Value.NumberValue, args.Get(1).Value.NumberValue)));
                 },
-                MType.Number,
+                MType.Number(),
                 new MParameters(
-                    new MParameter(MType.Number, "base"),
-                    new MParameter(MType.Number, "exponent")
+                    new MParameter(MType.Number(), "base"),
+                    new MParameter(MType.Number(), "exponent")
 
                 ),
                 "Returns the value of 'base' raised to the power of 'exponent'."
@@ -148,9 +148,9 @@ namespace IML.Functions
                 {
                     return new ValueOrReturn(MValue.Number(Math.Floor(args.Get(0).Value.NumberValue)));
                 },
-                MType.Number,
+                MType.Number(),
                 new MParameters(
-                    new MParameter(MType.Number, "a")
+                    new MParameter(MType.Number(), "a")
                 ),
                 "Returns the floor of 'a'."
             );
@@ -209,10 +209,10 @@ namespace IML.Functions
                     }
                     return new ValueOrReturn(MValue.Number(result));
                 },
-                MType.Number,
+                MType.Number(),
                 new MParameters(
-                    new MParameter(MType.Number, "arg"),
-                    new MParameter(MType.Number, "op")
+                    new MParameter(MType.Number(), "arg"),
+                    new MParameter(MType.Number(), "op")
                 ),
                 "Performs a trigonometric function. (Op Codes: 0-sin, 1-cos, 2-tan, 3-arcsin, 4-arccos, 5-arctan, " + 
                     "6-sinh, 7-cosh, 8-tanh, 9-asinh, 10-acosh, 11-atanh)"
@@ -226,9 +226,9 @@ namespace IML.Functions
                 {
                     return new ValueOrReturn(MValue.Number(Math.Log(args.Get(0).Value.NumberValue)));
                 },
-                MType.Number,
+                MType.Number(),
                 new MParameters(
-                    new MParameter(MType.Number, "arg")
+                    new MParameter(MType.Number(), "arg")
                 ),
                 "Returns the natural logarithm of 'arg'."
             );
@@ -243,9 +243,9 @@ namespace IML.Functions
                 {
                     return new ValueOrReturn(MValue.List(MList.CreateRange((int) args.Get(0).Value.NumberValue)));
                 },
-                MType.List(MType.Number),
+                MType.List(MType.Number()),
                 new MParameters(
-                    new MParameter(MType.Number, "max")
+                    new MParameter(MType.Number(), "max")
                 ),
                 "Creates a list of integers from 0 to 'max', exclusive (i.e. 'max' is not included in the result list)."
             );
@@ -282,7 +282,7 @@ namespace IML.Functions
                     MValue value = args[1].Value;
                     return new ValueOrReturn(refAddr.SetValue(value));
                 },
-                MType.Void,
+                MType.Void(),
                 new MParameters(
                     new MParameter(MType.Reference(new MType(new MGenericDataTypeEntry("T"))), "ref"),
                     new MParameter(new MType(new MGenericDataTypeEntry("T")), "value")
@@ -310,9 +310,9 @@ namespace IML.Functions
                         return new ValueOrReturn(MValue.String(refAddr.Description));
                     }
                 },
-                MType.String,
+                MType.String(),
                 new MParameters(
-                    new MParameter(MType.Reference(MType.Any), "ref")
+                    new MParameter(MType.Reference(MType.Any()), "ref")
                 ),
                 "Gets and returns the description for 'ref'. If there is no description, returns null."
             );
@@ -328,10 +328,10 @@ namespace IML.Functions
                     refAddr.Description = newDesc;
                     return new ValueOrReturn(MValue.Void());
                 },
-                MType.Void,
+                MType.Void(),
                 new MParameters(
-                    new MParameter(MType.Reference(MType.Any), "ref"),
-                    new MParameter(MType.String, "desc")
+                    new MParameter(MType.Reference(MType.Any()), "ref"),
+                    new MParameter(MType.String(), "desc")
                 ),
                 "Assigns a new description to 'ref'."
             );
@@ -349,9 +349,9 @@ namespace IML.Functions
                 {
                     return new ValueOrReturn(MValue.Type(new MType(args[0].Value.DataType)));
                 },
-                MType.Type,
+                MType.Type(),
                 new MParameters(
-                    new MParameter(MType.Any, "value")
+                    new MParameter(MType.Any(), "value")
                 ),
                 "Returns the type of 'value'."
             );
@@ -366,10 +366,10 @@ namespace IML.Functions
                     double second = args.Get(0).Value.NumberValue;
                     return new ValueOrReturn(MValue.Number((first < second) ? -1 : (first == second ? 0 : 1)));
                 },
-                MType.Number,
+                MType.Number(),
                 new MParameters(
-                    new MParameter(MType.Number, "first"),
-                    new MParameter(MType.Number, "second")
+                    new MParameter(MType.Number(), "first"),
+                    new MParameter(MType.Number(), "second")
                 ),
                 "If 'first' is less than 'second', returns -1. If 'first' == 'second', returns 0. " +
                 "If 'first' > 'second', returns 1."
@@ -426,11 +426,11 @@ namespace IML.Functions
                     MList info = args[2].Value.ListValue;
                     return new ValueOrReturn(MValue.Error((ErrorCodes)code, msg, info));
                 },
-                MType.Error,
+                MType.Error(),
                 new MParameters(
-                    new MParameter(MType.Number, "code"),
-                    new MParameter(MType.String, "message"),
-                    new MParameter(MType.List(MType.Number), "info")
+                    new MParameter(MType.Number(), "code"),
+                    new MParameter(MType.String(), "message"),
+                    new MParameter(MType.List(MType.Number()), "info")
                 ),
                 "Creates and returns an error with the specified code, message, and info list."
             );
@@ -444,9 +444,9 @@ namespace IML.Functions
                 {
                     return new ValueOrReturn(MValue.String(args[0].Value.ListValue));
                 },
-                MType.String,
+                MType.String(),
                 new MParameters(
-                    new MParameter(MType.List(MType.Number), "chars")
+                    new MParameter(MType.List(MType.Number()), "chars")
                 ),
                 "Creates a string with the specified character stream."
             );
@@ -461,9 +461,9 @@ namespace IML.Functions
                     Console.WriteLine(args[0].Value.GetStringValue());
                     return new ValueOrReturn(MValue.Void());
                 },
-                MType.Void,
+                MType.Void(),
                 new MParameters(
-                    new MParameter(MType.String, "str")
+                    new MParameter(MType.String(), "str")
                 ),
                 "Prints the specified string to the standard output stream"
             );
@@ -480,7 +480,7 @@ namespace IML.Functions
                     long unixTimeMilliseconds = now.ToUnixTimeMilliseconds();
                     return new ValueOrReturn(MValue.Number((double)unixTimeMilliseconds));
                 },
-                MType.Number,
+                MType.Number(),
                 new MParameters(),
                 "Returns the number of milliseconds since the Unix epoch"
             );
@@ -530,9 +530,9 @@ namespace IML.Functions
                     // Return void if we didn't evaluate any of the conditions
                     return new ValueOrReturn(MValue.Void());
                 },
-                MType.Any,
+                MType.Any(),
                 new MParameters(
-                    new MParameter(MType.List(MType.List(MType.Function(MType.Any))), "pairs")
+                    new MParameter(MType.List(MType.List(MType.Function(MType.Any()))), "pairs")
                 ),
                 "Takes in a list of 2-lists of functions with no arguments, evaluating the each element. " +
                 "Once an element returns true, then the corresponding code is run and returned, " +
@@ -548,7 +548,7 @@ namespace IML.Functions
                     interpreter.Exit();
                     return new ValueOrReturn(MValue.Void());
                 },
-                MType.Void,
+                MType.Void(),
                 new MParameters(),
                 "Exits the program immediately (returns null)"
             );
@@ -564,8 +564,8 @@ namespace IML.Functions
                     string input = Console.ReadLine();
                     return new ValueOrReturn(MValue.String(input));
                 },
-                MType.String,
-                new MParameters(new MParameter(MType.String, "prompt")),
+                MType.String(),
+                new MParameters(new MParameter(MType.String(), "prompt")),
                 "Reads in and returns a single string line from the user using the standard input stream"
             );
         }
@@ -586,9 +586,9 @@ namespace IML.Functions
                     }
                     return new ValueOrReturn(returnValue);
                 },
-                MType.Any,
+                MType.Any(),
                 new MParameters(
-                    new MParameter(MType.List(MType.Function(MType.Any)), "code")
+                    new MParameter(MType.List(MType.Function(MType.Any())), "code")
                 ),
                 "Executes the series of functions in 'code'. These functions should take no parameters. " +
                 "Functions are executed in order. Returns the return value of the last function."
@@ -656,9 +656,9 @@ namespace IML.Functions
                     bool b = args[0].Value.IsTruthy();
                     return new ValueOrReturn(MValue.Bool(!b));
                 },
-                MType.Boolean,
+                MType.Boolean(),
                 new MParameters(
-                    new MParameter(MType.Any, "input")
+                    new MParameter(MType.Any(), "input")
                 ),
                 "Inverts the input"
             );
@@ -753,10 +753,10 @@ namespace IML.Functions
                     MValue item2 = args[1].Value;
                     return new ValueOrReturn(MValue.Bool(item1 == item2));
                 },
-                MType.Boolean,
+                MType.Boolean(),
                 new MParameters(
-                    new MParameter(MType.Any, "item1"),
-                    new MParameter(MType.Any, "item2")
+                    new MParameter(MType.Any(), "item1"),
+                    new MParameter(MType.Any(), "item2")
                 ),
                 "Returns whether or not both items are equal"
             );
@@ -772,10 +772,10 @@ namespace IML.Functions
                     double item2 = args[1].Value.NumberValue;
                     return new ValueOrReturn(MValue.Bool(item1 < item2));
                 },
-                MType.Boolean,
+                MType.Boolean(),
                 new MParameters(
-                    new MParameter(MType.Number, "num1"),
-                    new MParameter(MType.Number, "num2")
+                    new MParameter(MType.Number(), "num1"),
+                    new MParameter(MType.Number(), "num2")
                 ),
                 "Returns true if num1 is less than num2"
             );

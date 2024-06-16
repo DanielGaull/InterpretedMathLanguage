@@ -14,6 +14,7 @@ namespace IML.CoreDataTypes
         private int internalId;
         private static int internalIdTracker = 0;
 
+        public Dictionary<string, MType> FieldTypes;
         public string Name { get; private set; }
         public int NumberOfGenerics { get; private set; }
 
@@ -22,10 +23,16 @@ namespace IML.CoreDataTypes
             internalId = id;
             Name = name;
             NumberOfGenerics = numberOfGenerics;
+            FieldTypes = new Dictionary<string, MType>();
         }
         public MDataType(string name, int numberOfGenerics)
             : this(internalIdTracker++, name, numberOfGenerics)
         {
+        }
+
+        private void SetFieldTypes(Dictionary<string, MType> fieldTypes)
+        {
+            FieldTypes = fieldTypes;
         }
 
         public const string ANY_TYPE_NAME = "any";
@@ -40,7 +47,77 @@ namespace IML.CoreDataTypes
         public const string VOID_TYPE_NAME = "void";
         public const string NULL_TYPE_NAME = "null";
 
-        public static readonly MDataType Any = 
+        public bool MatchesType(MDataType other)
+        {
+            return other.internalId == internalId || 
+                internalId == ANY_TYPE_ID || 
+                other.internalId == ANY_TYPE_ID;
+        }
+        public bool MatchesTypeExactly(MDataType other)
+        {
+            return other.internalId == internalId;
+        }
+
+        private static Dictionary<string, MType> ListMemberTypes() => new Dictionary<string, MType>()
+        {
+            { "get", MType.Function(MType.Generic("T"), MType.Number()) },
+            { "index", MType.Function(MType.Number(), MType.Generic("T")) },
+            { "indexc", MType.Function(MType.Number(), new List<MType>()
+                        {
+                            MType.Generic("T"),
+                            MType.Function(MType.Any(), MType.Generic("T"), MType.Generic("T"))
+                        })
+            },
+            { "length", MType.Function(MType.Number()) },
+            { "map", MType.Function(MType.List(new MType(new MGenericDataTypeEntry("R"))),
+                            new List<MType>()
+                            {
+                                MType.Function(new MType(new MGenericDataTypeEntry("R")), MType.Generic("T"))
+                            },
+                            new List<string>()
+                            {
+                                "R"
+                            })
+            },
+            { "reduce", MType.Function(new MType(new MGenericDataTypeEntry("R")),
+                            new List<MType>()
+                            {
+                                MType.Function(new MType(new MGenericDataTypeEntry("R")),
+                                    new MType(new MGenericDataTypeEntry("R")), MType.Generic("T")),
+                                new MType(new MGenericDataTypeEntry("R"))
+                            },
+                            new List<string>() // Generics
+                            {
+                                "R"
+                            })
+            },
+            { "add", MType.Function(MType.Void(), MType.Generic("T")) },
+            { "insert", MType.Function(MType.Void(), MType.Generic("T"), MType.Number()) },
+            { "removeAt", MType.Function(MType.Void(), MType.Number()) },
+            { "remove", MType.Function(MType.Boolean(), MType.Generic("T")) },
+            { "removec", MType.Function(MType.Boolean(),
+                            new List<MType>()
+                            {
+                                MType.Generic("T"),
+                                MType.Function(MType.Any(), MType.Generic("T"), MType.Generic("T"))
+                            })
+            },
+            { "addAll", MType.Function(MType.Void(), MType.List(MType.Generic("T"))) },
+        };
+        private static Dictionary<string, MType> StringMemberTypes() => new Dictionary<string, MType>()
+        {
+            { "chars", MType.List(MType.Number()) }
+        };
+        private static Dictionary<string, MType> ErrorMemberTypes() => new Dictionary<string, MType>()
+        {
+            { "code", MType.Number() },
+            { "message", MType.String() },
+            { "data", MType.List(MType.Any()) },
+        };
+
+
+
+        public static readonly MDataType Any =
             new MDataType(ANY_TYPE_ID, ANY_TYPE_NAME, 0);
         public static readonly MDataType Number =
             new MDataType(NUMBER_TYPE_NAME, 0);
@@ -63,15 +140,11 @@ namespace IML.CoreDataTypes
         public static readonly MDataType Void =
             new MDataType(VOID_TYPE_NAME, 0);
 
-        public bool MatchesType(MDataType other)
+        static MDataType()
         {
-            return other.internalId == internalId || 
-                internalId == ANY_TYPE_ID || 
-                other.internalId == ANY_TYPE_ID;
-        }
-        public bool MatchesTypeExactly(MDataType other)
-        {
-            return other.internalId == internalId;
+            List.SetFieldTypes(ListMemberTypes());
+            String.SetFieldTypes(StringMemberTypes());
+            Error.SetFieldTypes(ErrorMemberTypes());
         }
     }
 }

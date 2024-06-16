@@ -365,7 +365,7 @@ namespace IML.CoreDataTypes
                     new MField(Function(new MFunction(
                         MDataTypeEntry.Function(list.Type, new List<MType>()
                         {
-                            MType.Number
+                            MType.Number()
                         }, true, false), 
                         new List<string>(){"index"},
                         MEnvironment.Empty,
@@ -383,7 +383,7 @@ namespace IML.CoreDataTypes
                 {
                     "index",
                     new MField(Function(new MFunction(
-                        MDataTypeEntry.Function(MType.Number, new List<MType>()
+                        MDataTypeEntry.Function(MType.Number(), new List<MType>()
                         {
                             list.Type
                         }, true, false),
@@ -398,10 +398,10 @@ namespace IML.CoreDataTypes
                 {
                     "indexc",
                     new MField(Function(new MFunction(
-                        MDataTypeEntry.Function(MType.Number, new List<MType>()
+                        MDataTypeEntry.Function(MType.Number(), new List<MType>()
                         {
                             list.Type,
-                            MType.Function(MType.Any, list.Type, list.Type)
+                            MType.Function(MType.Any(), list.Type, list.Type)
                         }, true, false),
                         new List<string>(){"element", "equality_evaluator"},
                         MEnvironment.Empty,
@@ -413,7 +413,7 @@ namespace IML.CoreDataTypes
                 {
                     "length",
                     new MField(Function(new MFunction(
-                        MDataTypeEntry.Function(MType.Number, new List<MType>(), true, false),
+                        MDataTypeEntry.Function(MType.Number(), new List<MType>(), true, false),
                         new List<string>(),
                         MEnvironment.Empty,
                         (args, env, interpreter) => {
@@ -469,7 +469,7 @@ namespace IML.CoreDataTypes
                 {
                     "add",
                     new MField(Function(new MFunction(
-                        MDataTypeEntry.Function(MType.Void,
+                        MDataTypeEntry.Function(MType.Void(),
                             new List<MType>()
                             {
                                 list.Type
@@ -486,11 +486,11 @@ namespace IML.CoreDataTypes
                 {
                     "insert",
                     new MField(Function(new MFunction(
-                        MDataTypeEntry.Function(MType.Void,
+                        MDataTypeEntry.Function(MType.Void(),
                             new List<MType>()
                             {
                                 list.Type,
-                                MType.Number
+                                MType.Number()
                             },
                             true, false),
                         new List<string>(){"item", "index"},
@@ -511,10 +511,10 @@ namespace IML.CoreDataTypes
                 {
                     "removeAt",
                     new MField(Function(new MFunction(
-                         MDataTypeEntry.Function(MType.Void,
+                         MDataTypeEntry.Function(MType.Void(),
                             new List<MType>()
                             {
-                                MType.Number
+                                MType.Number()
                             },
                             true, false),
                         new List<string>(){"index"},
@@ -535,7 +535,7 @@ namespace IML.CoreDataTypes
                 {
                     "remove",
                     new MField(Function(new MFunction(
-                         MDataTypeEntry.Function(MType.Boolean,
+                         MDataTypeEntry.Function(MType.Boolean(),
                             new List<MType>()
                             {
                                 list.Type
@@ -557,11 +557,11 @@ namespace IML.CoreDataTypes
                 {
                     "removec",
                     new MField(Function(new MFunction(
-                         MDataTypeEntry.Function(MType.Boolean,
+                         MDataTypeEntry.Function(MType.Boolean(),
                             new List<MType>()
                             {
                                 list.Type,
-                                MType.Function(MType.Any, list.Type, list.Type)
+                                MType.Function(MType.Any(), list.Type, list.Type)
                             },
                             true, false),
                         new List<string>(){"item", "equality_evaluator"},
@@ -581,7 +581,7 @@ namespace IML.CoreDataTypes
                 {
                     "addAll",
                     new MField(Function(new MFunction(
-                        MDataTypeEntry.Function(MType.Void,
+                        MDataTypeEntry.Function(MType.Void(),
                             new List<MType>()
                             {
                                 MType.List(list.Type)

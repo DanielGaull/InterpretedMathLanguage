@@ -40,6 +40,18 @@ namespace IML.Evaluation
                 MType type = new MType(coreFuncs[i].ToFunction().TypeEntry);
                 baseTypeMap.Add(coreFuncs[i].Name, MTypeToAstType(type));
             }
+
+            // Need to add all member types
+            DataTypeDict dtDict = CreateBaseDtDict();
+            foreach (string name in dtDict.TypeNames)
+            {
+                MDataType type = dtDict.GetType(name);
+                foreach (var fieldType in type.FieldTypes)
+                {
+                    baseTypeMap.AddMemberType(name, fieldType.Key, MTypeToAstType(fieldType.Value));
+                }
+            }
+
             return baseTypeMap;
         }
         public static DataTypeDict CreateBaseDtDict()
@@ -61,6 +73,10 @@ namespace IML.Evaluation
                 }
                 else if (entry is MFunctionDataTypeEntry ft)
                 {
+                    if (ft.ParameterTypes.Any(x => x is null))
+                    {
+                        Console.WriteLine("hi");
+                    }
                     entries.Add(new LambdaAstTypeEntry(
                         MTypeToAstType(ft.ReturnType),
                         ft.ParameterTypes.Select(p => MTypeToAstType(p)).ToList(),

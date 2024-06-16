@@ -32,7 +32,7 @@ namespace IML.CoreDataTypes
             type = of;
         }
 
-        public static MList Empty = new MList(MType.Any);
+        public static MList Empty = new MList(MType.Any());
 
         public List<MValue> InternalList
         {
