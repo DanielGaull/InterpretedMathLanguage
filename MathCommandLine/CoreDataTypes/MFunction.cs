@@ -132,7 +132,20 @@ namespace IML.CoreDataTypes
 
         public override string ToString()
         {
-            return "<function>";
+            if (this == Empty)
+            {
+                return "<empty>";
+            }
+            StringBuilder paramString = new StringBuilder();
+            for (int i = 0; i < Parameters.Length; i++)
+            {
+                paramString.Append(Parameters[i].DataTypeString());
+                if (i + 1 < Parameters.Length)
+                {
+                    paramString.Append(",");
+                }
+            }
+            return "(" + paramString.ToString() + ")" + (CreatesEnv ? "=" : "~") + ">{<function>}";
         }
     }
 }

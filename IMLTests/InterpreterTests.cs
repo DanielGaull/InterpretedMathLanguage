@@ -135,7 +135,7 @@ namespace IMLTests
         [TestMethod]
         public void TestMapToFunction()
         {
-            AssertInterpreterValues("{1,2}.map((x)=>{_exit})", "(list) { ()~>{ <function> }, ()~>{ <function> } }");
+            AssertInterpreterValues("{1,2}.map((x)=>{_exit})", "(list) { ()=>{<function>}, ()=>{<function>} }");
         }
         [TestMethod]
         public void TestBlockingEnvironmentlessLambdasFromHavingParameters()
