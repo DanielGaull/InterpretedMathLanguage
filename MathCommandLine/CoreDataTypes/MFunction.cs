@@ -129,5 +129,10 @@ namespace IML.CoreDataTypes
                 return new MFunction(TypeEntry, paramNames, env, AstBody);
             }
         }
+
+        public override string ToString()
+        {
+            return "<function>";
+        }
     }
 }

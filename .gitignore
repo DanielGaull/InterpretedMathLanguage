@@ -1,7 +1,7 @@
 .vs
 
-MathCommandLine\bin
+bin/
 
-MathCommandLine\obj
+obj/
 
 TestResults
