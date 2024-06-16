@@ -247,9 +247,16 @@ namespace IML.CoreDataTypes
                 return false;
             }
             // Verify the parameters
+            // We do the reverse here, allowing the other params to have the any type
+            // This is because, lets say "this" is (number)=>void and "other" is (any)=>void
+            // We want to say these match. Because if we call other(5), then that works.
+            // By allowing any type, the other's parameters match any param provided
+            // Opposite that, if "this" is (any)=>void and "other" is (number)=>void,
+            // then we're being restrictive by feeding "other" into "this" since "other"
+            // doesn't take in any type.
             for (int i = 0; i < myParams.Count; i++)
             {
-                if (myParams[i] != otherParams[i] && !myParams[i].IsAnyType())
+                if (myParams[i] != otherParams[i] && !otherParams[i].IsAnyType())
                 {
                     return false;
                 }
