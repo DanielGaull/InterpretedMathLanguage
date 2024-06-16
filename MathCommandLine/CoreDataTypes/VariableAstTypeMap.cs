@@ -80,7 +80,20 @@ namespace IML.CoreDataTypes
             {
                 dict2.Add(kv.Key, kv.Value);
             }
-            return new VariableAstTypeMap() { dict = dict2 };
+
+            Dictionary<string, Dictionary<string, AstType>> dtMemberTypes2 = 
+                new Dictionary<string, Dictionary<string, AstType>>();
+            foreach (var kv in dtMemberTypes)
+            {
+                Dictionary<string, AstType> members = new Dictionary<string, AstType>();
+                foreach (var kv2 in kv.Value)
+                {
+                    members.Add(kv2.Key, kv2.Value);
+                }
+                dtMemberTypes2.Add(kv.Key, members);
+            }
+
+            return new VariableAstTypeMap() { dict = dict2, dtMemberTypes = dtMemberTypes2 };
         }
     }
 

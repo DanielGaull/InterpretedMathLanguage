@@ -184,7 +184,7 @@ namespace IMLTests
         [TestMethod]
         public void TestIndexSimple()
         {
-            AssertInterpreterValues("_do({()=>{var list={1,2,3}; list.index(2);}})", "(number) 1");
+            AssertInterpreterValues("_do({()=>{var list={1,2,3}; return list.index(2);}})", "(number) 1");
         }
         [TestMethod]
         public void TestListAdd()
