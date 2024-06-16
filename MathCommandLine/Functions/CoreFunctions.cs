@@ -532,7 +532,7 @@ namespace IML.Functions
                 },
                 MType.Any,
                 new MParameters(
-                    new MParameter(MType.List(MType.Function(MType.Any)), "pairs")
+                    new MParameter(MType.List(MType.List(MType.Function(MType.Any))), "pairs")
                 ),
                 "Takes in a list of 2-lists of functions with no arguments, evaluating the each element. " +
                 "Once an element returns true, then the corresponding code is run and returned, " +

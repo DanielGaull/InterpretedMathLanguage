@@ -47,12 +47,12 @@ namespace IMLTests
         }
 
         [TestMethod]
-        public void TestSimpleCaseFunction()
+        public void TestSimpleCheckFunction()
         {
             AssertInterpreterValues("_c({{()=>{true},()=>{1}},{()=>{true},()=>{2}}})", "(number) 1");
         }
         [TestMethod]
-        public void TestCaseWithNull()
+        public void TestCheckWithNull()
         {
             AssertInterpreterValues("_c({{()=>{null},()=>{1}},{()=>{true},()=>{2}}})", "(number) 2");
         }
